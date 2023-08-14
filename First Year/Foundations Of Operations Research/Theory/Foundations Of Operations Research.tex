@@ -1,0 +1,197 @@
+\documentclass[12pt, a4paper]{report}
+\usepackage{graphicx}
+\usepackage[english]{babel}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{remark}
+\newtheorem*{remark}{Definition}
+
+\title{Foundation Of Operations Research \\ \textit{Theory}}
+\author{Christian Rossi}
+\date{Academic Year 2023-2024}
+
+\begin{document}
+
+\maketitle
+
+\newpage
+
+\begin{abstract}
+    Operations Research is the branch of applied mathematics dealing with quantitative methods to analyze and solve
+    complex real-world decision-making problems. 
+    
+    The course covers some of the fundamental concepts and methods of Operations Research pertaining to graph optimization, 
+    linear programming and integer linear programming. 
+    
+    The emphasis is on optimization models and efficient algorithms with a wide range of important applications in 
+    engineering and management.  
+\end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\chapter{Introduction}
+\section{Definition}
+The beginning of the activity called Operations Research has generally been attributed to the military services early in 
+World War II. As its name implies, it involves "research on operations". Thus, Operations Research is applied to problems that
+concern how to conduct and coordinate the operations within an organization. 
+
+Operations Research is used as a support in decision making in any complex systems using: mathematical models, quantitative methods
+and efficient algorithms. The decisions involving this field are at variuos level: strategic (design of a railroad),
+tactical (quantity of trains to use) and operational (schedule the train routes).
+
+The Operations Research expert needs the following abilities: 
+\begin{itemize}
+    \item Analyze the problem.
+    \item Knowledge of the Operations Research methods.
+    \item Ability in building mathematical models. 
+    \item Interpret the results.
+\end{itemize}
+
+To define an Operations Research multiperiod problem we need the following elements:
+\begin{enumerate}
+    \item Sets (possible value for the time period).
+    \item Parameters (all the known parameters in the problem).
+    \item Variables (values that can vary in the variuos time periods).
+    \item Constraints (constraints on variables possible values).
+    \item Objective function (functions that indicates the reuqest with a maximum or minimum formula).
+\end{enumerate}
+\section{Variables}
+The variables can be of various types: 
+\begin{itemize}
+    \item Non-negative absolute ($0,1,2,\dots$).
+    \item Unrestricted absolute ($\dots,-1,0,1,\dots$): those values can be obtaining by subtracting two non-negative numbers.
+    \item Relative ($\%$).
+    \item Logical ($1$ (true) or $0$ (false)).
+    \item Discrete (finite set of values).
+\end{itemize}
+\section{Constraints}
+The constraints (that are the rules that the problem has to follow) can be of various types: 
+\begin{itemize}
+    \item Availability: the number of the used elements cannot exceed the available quantity.
+    \item Requirement: requires at least a fixed number of some elements.
+    \item Blending: requires a certain percentage presence of an element.
+    \item Logical: used for logical operators in propositional logic. It's solved as a SAT problem.
+    \item Flow: set a constraints on a graph.
+\end{itemize}
+\section{Objective functions}
+A problem can have from zero to multiple objective functions. They are used to maximize or minimize the overall cost of the problem.
+If the problem has multiple objective functions is called multicriteria analysis. 
+
+\newpage
+
+\chapter{Graph and network optimization}
+\section{The terminology of networks}
+A network consist of a set of points and a set of lines connecting certain pairs of the points.
+\begin{remark}
+    The points are called \emph{nodes}. 
+\end{remark}
+\begin{remark}
+    The lines are called \emph{arcs}. If flow through an arc is allowed in only in one direction the arc is said to be a 
+    \emph{directed arc}. The direction of a directed arc is indicated by adding an arrowhead at the end of the line representing the arc. 
+    If flow through an arc is allowed in either directions the arc is said to be an \emph{undirected arc}.
+    A network that has only directed arcs is called a \emph{directed networks}. Similarly, if all its arcs are undirected,
+    the network is said to be an \emph{undirected network}. 
+\end{remark}
+\begin{remark}
+    A \emph{path} between tho nodes is a sequence of distinct arcs connecting these nodes. A \emph{directed path} from node $i$ to
+    node $j$ is a sequence of connecting arcs whose direction is toward node $j$ along this path, so that flow from node $i$ to node
+    $j$ along this path is feasible. An \emph{undirected path} from node $i$ to node $j$ is a sequence of connecting arcs whose 
+    direction can be either toward or away from node $j$ along this path. A \emph{simple path} is a path with no repeated arcs. 
+    An \emph{elementary path} is a path without repeated nodes. A \emph{hemiltonian cycle} is a cycle where all the nodes of the graph 
+    are visited.
+\end{remark}
+\begin{remark}
+    A path that begins and ends at the same node is called a \emph{cycle}. In a directed network, a cycle is either a directed or an
+    undirected cycle, depending on wheather the path involved is a directed or an undirected path. A \emph{simple cycle} is a cycle with no repeated arcs.
+    An \emph{elementary cycle} is a cycle with no repeated nodes.
+\end{remark}
+\begin{remark}
+    Two nodes are said to be \emph{connected} if the network contains at least one undirected path between them. A \emph{connected network} 
+    is a network where every pair of nodes is connected.
+\end{remark}
+\begin{remark}
+    A \emph{spanning tree} is a connected network that contains no undirected cycles for every nodes.
+\end{remark}
+Other useful definitions are: 
+\begin{itemize}
+    \item Eulerian property: if the number of nodes in a graph is odd is impossible to return to a given node without using one of the 
+    arcs at least two times. 
+    \item Eulerian tour: is a path where all the arcs are visited once.
+\end{itemize}
+\section{The minimum spanning tree problem}
+The minimum spanning tree problem requires that the chosen links among all the possible ones must provide a path between each pair of nodes.
+This can be summarized as: 
+\begin{enumerate}
+    \item You are given the nodes of a network but not the links. Instead, you are given the potential links and the positive length
+    for each if it is inserted into the network. 
+    \item You wish to design the network by inserting enough links to satisfy the requirement that there be a path between every pair of nodes.
+    \item The objective is to satisfy this requirement ina a way that minimizes the total length of the links inserted into the network. 
+\end{enumerate}
+A network with $n$ nodes requires only $(n-1)$ links to provide a path between each pair of nodes. These links needs to be chosen in such 
+a way that the resulting network forms a spanning tree. Therefore, the problem is to find the spanning tree with a minimum total length of
+the links. This problem can be solved in a greedy way and the result is overall optimal. The algorithm that solves this problem is based on
+the following steps: 
+\begin{enumerate}
+    \item Select any node arbitrarily, and connect it to the nearest distinct node. 
+    \item Identify the unconnected node that is closest to a connected node, and then connect these two nodes. Repeat this step until all
+    nodes have been connected.
+    \item Tie breaking: ties for the nearest distinct node or the closest unconnected node may be broken arbitrarily, and the algorithm
+    must still yield an optimal solution. However, such ties are a signal that there may be multiple optimal solutions.
+\end{enumerate}
+It is important to note that the choice of the initial node will not affect the resulting final solution. 
+Another possible approach is given by the Kruskal algorithm. The problem can be formulated matematically in the following way: given an 
+undirected graph $G=(N,A)$ with weights on the arcs $w_{ij} \geq 0 \: \forall (i,j) \in A$ find a connected subgraph 
+$G^{'}=(N,A^{'}),A^{'} \subseteq A$ minimizing $\sum_{(i,j) \in A^{'}}w_{ij}$.  
+\begin{algorithm}
+    \caption{Kruskal algorithm for minimum spanning tree problem}
+        \begin{algorithmic}[1]
+            \State sort arcs in increasing order of $w_{ij}$
+            \State $A^{'}=\varnothing$
+            \While {$\left\lvert A^{'} \right\rvert != (n-1)$}
+                \State consider the next arc $(1,j)$ in the order
+                \If {$A^{'} \cup (i,j)$ does not induce a cycle}
+                \State $A^{'} \leftarrow A^{'} \cup (i,j)$
+                \EndIf
+            \EndWhile
+            \State \Return
+        \end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+\newpage
+
+\chapter{Linear programming}
+
+
+
+\newpage
+
+\chapter{Integer linear programming}
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+\end{document}
