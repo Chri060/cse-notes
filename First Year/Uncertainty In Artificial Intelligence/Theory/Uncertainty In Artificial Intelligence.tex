@@ -1,39 +1,15 @@
 \documentclass[12pt, a4paper]{report}
-\usepackage{graphicx}
-\usepackage{array}
+\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox}
 \usepackage[english]{babel}
-\usepackage{amsthm}
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usepackage{float}
-\usepackage{xcolor}
-\usepackage{thmtools}
+\makeatletter
+\renewcommand\thmbox@headstyle[2]{\bfseries #1}
+\makeatother
 
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{corollary}{Corollary}[theorem]
-\newtheorem{lemma}[theorem]{Lemma}
-\theoremstyle{remark}
-\newtheorem*{remark}{Definition}
-\declaretheoremstyle[
-spaceabove=\topsep, spacebelow=\topsep,
-headfont=\bfseries\color{black},
-notefont=\mdseries\color{black}, notebraces={(}{)},
-bodyfont=\normalfont,
-postheadspace=\newline,
-headpunct=,
-numbered=no,
-postheadhook=\leavevmode%
-  \interlinepenalty 10000%
-  \vskip-1.3\baselineskip%
-  \noindent{\color{black}\rule{\textwidth}{1pt}}%
-  \interlinepenalty 10000%
-  \vskip0.3\baselineskip\noindent,
-qed=\textcolor{gray}{$\blacksquare$}
-]{mystyle}
-\declaretheorem[style=mystyle]{example}
-\renewcommand\theexample{\arabic{example}}
+\newtheorem[L]{theorem}{Theorem}
+\newtheorem[M]{corollary}{Corollary}
+\newtheorem[M]{lemma}{Lemma}
+\newtheorem[style=S,bodystyle=\normalfont]{definition}{Definition}
+
 
 \title{Uncertainty In Artificial Intelligence \\ \textit{Theory}}
 \author{Christian Rossi}
@@ -67,10 +43,10 @@ qed=\textcolor{gray}{$\blacksquare$}
 
 \chapter{Introduction}
     \section{Definition}
-    \begin{remark}
+    \begin{definition}[Uncertainty]
         \emph{Uncertainty} refers to epistemic situations involving imperfect or unknown information. It applies to predictions 
         of future events, to physical measurements that are already made, or to the unknown. 
-    \end{remark}
+    \end{definition}
     Uncertainty arises in partially observable or stochastic environments, as well as due to ignorance, indolence, or both. It arises 
     in any number of fields, including insurance, philosophy, physics, statistics, economics, finance, medicine, psychology, sociology, 
     engineering, metrology, meteorology, ecology and information science.
@@ -82,11 +58,11 @@ qed=\textcolor{gray}{$\blacksquare$}
     Modelling is at the base of our life: the way we interact with the world is through models that interpret data coming from sensors
     and generate knowledge and actions. Modelling is also the way we may represent entities in a computer and possibly making it reasoning
     on them.
-    \begin{remark}
+    \begin{definition}[Model]
         A \emph{model} is a representation of some entity, defined for a specific purpose. A model captures only the aspects of the entity
         modelled that are relevant for the purpose. A model is necessarily different from the modelled entity. So, intrinsic to modelling
         are all sort of uncertainties.
-    \end{remark}
+    \end{definition}
     All Artificial Intelligence applications are based on models, either defined by somebody or learned. These models are represented In
     different ways, but share uncertainty issue mainly on inputs. 
 
@@ -213,11 +189,11 @@ qed=\textcolor{gray}{$\blacksquare$}
     \section{Fuzzy membership function}
     A "crisp" set is defined by a boolean membership function on some property on the considered elements. Instead, a "fuzzy" set is
     a set whose membership function that ranges in the values between zero and one.
-    \begin{remark}
+    \begin{definition}[Membership function]
         A \emph{membership function} defines a set, by defining the degree of membership of an element of the universe of discourse 
         to the set. A name is given to the set to make it possible to refer to it: this is usually called \emph{label}. Fuzzy sets can 
         also be defined with a variable with discrete values. 
-    \end{remark}
+    \end{definition}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.50\linewidth]{images/function.png}
@@ -239,51 +215,51 @@ qed=\textcolor{gray}{$\blacksquare$}
         \includegraphics[width=0.75\linewidth]{images/shape.png}
         \caption{Possible shapes for a membership function}
     \end{figure}
-    \begin{remark}
+    \begin{definition}
         A set of fuzzy sets fully covering the universe of discourse is called \emph{frame of cognition}. The properties of this set are:
         \begin{itemize}
             \item Coverage: each element of the universe of discourse us assigned to at least one granule with membership greater or equal 
                 than zero.
             \item Uni-modality of fuzzy sets: there is a unique set of values for each granule with maximum membership. 
         \end{itemize}
-    \end{remark}
-    \begin{remark}
+    \end{definition}
+    \begin{definition}
         A frame of cognition for which the sum  of the membership values of each value of the base variable is equal to one is called 
         a \emph{fuzzy partition}. 
-    \end{remark}
-    \begin{remark}
+    \end{definition}
+    \begin{definition}
         The \emph{$\alpha$-cut} of a fuzzy set is the "crisp" set of the values of $x$ such that $\mu(x) \geq \alpha$:
         \[\alpha_\mu(x)=\{x \mid \mu(x) \geq \alpha\}\]
-    \end{remark}
+    \end{definition}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\linewidth]{images/alpha.png}
         \caption{Alpha-cut of a membership function}
     \end{figure}
-    \begin{remark}[H]
+    \begin{definition}[H]
         The \emph{support} of a fuzzy set is the "crisp" set of values $x$ such that $\mu_f(x)>0$ is the \emph{support} of the fuzzy set
         $f$ on the universe $X$.
-    \end{remark}
+    \end{definition}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\linewidth]{images/support.png}
         \caption{Support of a membership function}
     \end{figure}
-    \begin{remark}
+    \begin{definition}
         The height $h_f$ of a fuzzy set $f$ on the universe $X$ is the highest membership degree of an element of $X$ to the fuzzy set:
         \[h_f(X)=\max_{x \in X}\mu_f(x)\]
         A fuzzy set is normal if, and only if, $h_f(X)=1$.
-    \end{remark}
+    \end{definition}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\linewidth]{images/height.png}
         \caption{Height of a membership function}
     \end{figure}
-    \begin{remark}
+    \begin{definition}
         A fuzzy set is \emph{convex} if and only if 
         \[\mu[\lambda x_1+(1-\lambda)x_2] \geq \min [\mu(x_1),\mu(x_2)]\]
         for any $(x_1,x_2) \in \mathbb{R}$ and any $\lambda \in [0,1]$.
-    \end{remark}
+    \end{definition}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.75\linewidth]{images/convex.png}
@@ -313,11 +289,11 @@ qed=\textcolor{gray}{$\blacksquare$}
     \section{Propositional logic}
     Propositional logics are concerned with propositional operators which may be applied to one or more propositions giving new propositions.
     The accent is on the truth value of propositions and on how these truth values are composed.
-    \begin{remark}
+    \begin{definition}
         A logic is \emph{truth functional} if the truth value of a compound sentence depends only on the truth values of the consistent atomic 
         sentences, not on their meaning or structure. For such a logic the only important question about propositions is what truth values may
         have.
-    \end{remark}
+    \end{definition}
     In a classical, boolean or two-valued logic every proposition is either true or false and no other feature of the proposition is relevant.
 
     The main operators in the propositional logics are: conjunction ($\land$), disjunction ($\lor$) and negation ($\lnot$).
@@ -331,9 +307,9 @@ qed=\textcolor{gray}{$\blacksquare$}
     \end{example}
     Inference is used to model a mechanism that we have in our minds to store a reduced amount of information and set a mechanism that can be 
     applied to derive from information other information, to face everyday situations.
-    \begin{remark}
+    \begin{definition}
         Information and potential relationship together compose what we call \emph{knowledge}.
-    \end{remark}
+    \end{definition}
     
     \section{Many-valued logics}
     Aristotle already had put in evidence problems about the validity of classical logic as a knowledge representation tool. For instance, it is
@@ -470,10 +446,10 @@ qed=\textcolor{gray}{$\blacksquare$}
     \end{example}
 
     \section{Inference rules}
-    \begin{remark}
+    \begin{definition}
         An \emph{inference rule} is a model. In other words it is a way to define a mapping from input to output. 
         Rules are used to represent inferential relationships among pieces of knowledge.
-    \end{remark}
+    \end{definition}
     We consider forward chaining rules, having the shape:
     \[IF \: antecedent \: THEN \: consequent\]
     where:
@@ -515,11 +491,11 @@ qed=\textcolor{gray}{$\blacksquare$}
     \end{example}
 
     \section{Fuzzy rules}
-    \begin{remark}
+    \begin{definition}
         A \emph{fuzzy rule} is a rule whose clauses have the shape
         \[(V \: is \: L)\]
         where $V$ is a linguistic variable and $L$ is a label, a value for $V$ associated to a fuzzy set. This is a \emph{linguistic clause}.
-    \end{remark}
+    \end{definition}
     Often, clauses in the antecedent are only related by the AND operator which is not explicitly written. 
     The antecedent is usually matched against facts that are represented as values of the base variables corresponding to the linguistic variables.
     The consequent may be one of two types:
@@ -746,7 +722,7 @@ qed=\textcolor{gray}{$\blacksquare$}
     to represent approximation.
 
     \section{Fuzzy measure and probability assignment}
-    \begin{remark}
+    \begin{definition}
         If a field has the property that, if the sets $A_1, \dots ,A_n$ belong to the fields, then also the union and the intersection of the sets
         belong to the field, this is named a \emph{Borel field}. A function $g$ defined on a Borel field $B$ of the universe of discourse $X$ is 
         a \emph{fuzzy measure} if it has the following properties: 
@@ -755,9 +731,9 @@ qed=\textcolor{gray}{$\blacksquare$}
             \item If $A,B \in B$ and $A \subseteq B$, then $g(A) \leq g(B)$.
             \item If $A_n \in B$ and $A_1 \subseteq A_2 \subseteq \dots$ then $\lim_{n \to \infty}g(A_n)=g(\lim_{n \to \infty}A_n)$.
         \end{enumerate}
-    \end{remark}
+    \end{definition}
     The fuzzy measure is different from classical measure, since the additivity property is relaxed.
-    \begin{remark}
+    \begin{definition}
         The \emph{basic probabilistic assignment} is defined as:
         \begin{itemize}
             \item $m:\mathcal{P}(X) \rightarrow [0,1]$.
@@ -766,14 +742,14 @@ qed=\textcolor{gray}{$\blacksquare$}
         \end{itemize}
         Where $m$ gives, for any set $A$ belonging to the power set of $X(\mathcal{P}(X))$, how much the available and relevant evidence
         supports the fact that a given element belongs to $A$.
-    \end{remark}
+    \end{definition}
     Note that: it is not needed that $m(X)=1$, it is not needed that $m(A) \leq m(B)$ when $A\subseteq B$ and no relationship holds between 
     $m(A)$ and $m(\lnot A)$. 
 
     \section{Evidence theory}
     We would like to define a measure of evidence for or against a proposition. To do that we will use two fuzzy measures: Belief and Plausibility.
 
-    \begin{remark}
+    \begin{definition}
         \emph{Belief} is an estimation of the minimum probability that can be assigned to an element, given the collected evidence. The 
         \emph{Belief} has the following definition:
         \begin{itemize}
@@ -782,8 +758,8 @@ qed=\textcolor{gray}{$\blacksquare$}
             \item $Bel(A_1 \cup A_2 \cup \dots \cup A_n) \geq \sum_{j}Bel(A_j)-\sum_{j<k}Bel(A_j \cap A_k)+\dots+(-1)^{n+1}Bel(A_1 \cap A_2 \cap \dots \cap A_n)$
             \item $Bel(A)+Bel(\lnot A) \leq 1$.
         \end{itemize}
-    \end{remark}
-    \begin{remark}
+    \end{definition}
+    \begin{definition}
         \emph{Plausibility} is an estimation of the maximum probability that can be assigned to an element, given the collected evidence.
         The \emph{Plausibility} has the following definition:
         \begin{itemize}
@@ -792,7 +768,7 @@ qed=\textcolor{gray}{$\blacksquare$}
             \item $Pl(A_1 \cap A_2 \cap \dots \cap A_n) \geq \sum_{j}Pl(A_j)-\sum_{j<k}Pl(A_j \cup A_k)+\dots+(-1)^{n+1}Pl(A_1 \cup A_2 \cup \dots \cup A_n)$
             \item $Pl(A)+Pl(\lnot A) \geq 1$.
         \end{itemize}
-    \end{remark}
+    \end{definition}
     The evidence theory can be used when we have multiple sources of knowledge and when the basic probability assignment is distributed on 
     different sets of statements, or intervals. In these cases, we may exploit the features of evidence theory to collect the basic probability
     assignments and to combine them to evaluate upper and lower bounds for probability of a single statement. Evidence theory has the following 
@@ -854,7 +830,7 @@ qed=\textcolor{gray}{$\blacksquare$}
     \end{example}
 
     \section{Possibility and necessity}
-    \begin{remark}
+    \begin{definition}
         \emph{Possibility} is another fuzzy measure working on sets. A \emph{possibility measure} is given by the equation $\Pi : \mathcal{P}(X) \rightarrow [0,1]$,
         for which the following properties hols: 
         \begin{enumerate}
@@ -862,7 +838,7 @@ qed=\textcolor{gray}{$\blacksquare$}
             \item $A \subseteq B \implies \Pi(A) \leq \Pi(B)$. 
             \item $\Pi(A)=\sup_{x \in A} f(x)$ where $A \subset X$. 
         \end{enumerate}
-    \end{remark}
+    \end{definition}
     It can be uniquely defined by a possibility relationship $f:X \rightarrow [0,1]$ so that:
     \[\Pi\left(\bigcup_{i \in I}A_i\right)=\sup_{i \in I}\Pi\left(A_i\right)\]
     Therefore, $f$ is defined as $\Pi\left(\{X\}\right) \: \forall x \in X$.
@@ -882,12 +858,12 @@ qed=\textcolor{gray}{$\blacksquare$}
         \[\Pi(A)=\sup \left[\Pi\left(\{2\}\right), \Pi\left(\{5\}\right), \Pi\left(\{9\}\right)\right]=\sup\left[0,0.1,0.8\right]=0.8\]
     \end{example}
 
-    \begin{remark}
+    \begin{definition}
         \emph{Necessity} is the dual of possibility, and it is defined as: 
         \[\Pi(A)=\-N(\lnot A)\]
         \emph{Necessity} also satisfy the condition: 
         \[\min\left[N(A),N(\lnot A)\right]=0\]
-    \end{remark}
+    \end{definition}
     
     Those two parameters are connected by the following relations: 
     \begin{itemize}
@@ -895,11 +871,11 @@ qed=\textcolor{gray}{$\blacksquare$}
         \item $N(A) > 0 \implies \Pi(A)=1$.
         \item $\Pi(A) < 1 \implies N(A)=0$.
     \end{itemize}
-    \begin{remark}
+    \begin{definition}
         The \emph{confirmation degree} is a value that puts together possibility and necessity:
         \[C(A)=N(A)+\Pi(A)-1\]
         Negatives values of $C(A)$ correspond to a disconfirmation degree. 
-    \end{remark}
+    \end{definition}
 
     It is possible to demonstrate that if the focal set of elements of possibility (the one with values of $m$ different from $0$) is composed of sets with a single element,
     then $Bel$ and $Pl$ have the same value and this is equal to the sum of the probabilities of the elements of the set $A$ to which they are applied, given by $m$.
@@ -918,12 +894,12 @@ qed=\textcolor{gray}{$\blacksquare$}
 
     \section{Fuzzyness measure}
     The fuzzyness measures provide the fuzzyness degree of a fuzzy set. A fuzzyness measure is the entropy of a fuzzy set. 
-    \begin{remark}
+    \begin{definition}
         Given a fuzzy set $A=\{x,\mu_A(x)\}$ the fuzzyness measure (entropy) is defined as:
         \[d(A)=K \sum_{i=1}^{n}S(\mu_A(x_i))\]
         where $S(x)$ is the Shannon's function: 
         \[S(x)=-x \ln(x)-(1-x)\ln(1-x)\]
-    \end{remark}
+    \end{definition}
     \begin{example}
         Let's define $A$ as "the set of integer close to ten" we have that:
         \begin{center}
