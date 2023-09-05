@@ -22,9 +22,26 @@
 \newpage
 
 \begin{abstract}
-
-
-
+The topics of the course are:
+\begin{itemize}
+    \item Floating-point arithmetic: different sources of the computational error; absolute vs relative errors; the floating point representation 
+        of real numbers; the round-off unit; the machine epsilon; floating-point operations; over- and under-flow; numerical cancellation.
+    \item Numerical approximation of nonlinear equations: the bisection and the Newton methods; the fixed-point iteration; convergence analysis 
+        (global and local results); order of convergence; stopping criteria and corresponding reliability; generalization to the system of 
+        nonlinear equations (hints).
+    \item Numerical approximation of systems of linear equations: direct methods (Gaussian elimination method; LU and Cholesky factorizations; 
+        pivoting; sparse systems: Thomas algorithm for tridiagonal systems); iterative methods (the stationary and the dynamic Richardson scheme; 
+        Jacobi, Gauss-Seidel, gradient, conjugate gradient methods (hints); choice of the preconditioner; stopping criteria and corresponding 
+        reliability); accuracy and stability of the approximation; the condition number of a matrix; over- and under-determined systems: the 
+        singular value decomposition (hints).
+    \item Numerical approximation of functions and data: Polynomial interpolation (Lagrange form); piecewise interpolation; cubic interpolating 
+        splines; least-squares approximation of clouds of data.
+    \item Numerical approximation of derivatives: finite difference schemes of the first and second order; the undetermined coefficient method.
+    \item Numerical approximation of definite integrals: simple and composite formulas; midpoint, trapezoidal, Cavalieri-Simpson quadrature rules; 
+        Gaussian formulas; degree of exactness and order of accuracy of a quadrature rule. 
+    \item Numerical approximation of ODEs: the Cauchy problem; one-step methods (forward and backward Euler and Crank-Nicolson schemes); 
+        consistency, stability, and convergence (hints).
+\end{itemize}
 \end{abstract}
 
 \newpage
@@ -152,17 +169,37 @@
     \[ \lim_{n \rightarrow \infty}e^n = 0\]
     That implies that the error can be also written as: 
     \[e^n=\alpha-x^{(n)}\]
+    \begin{definition}[order of convergence]
+        An iterative method for the approximation of the zero $\alpha$ of the function $f(x)$ is convergent with order $p$ if and only if:
+        \[\lim_{k \rightarrow + \infty}\dfrac{\left\lvert x^{(k+1)}-\alpha \right\rvert}{\left\lvert x^{(k)}-\alpha \right\rvert^p}=\mu\]
+        where $\mu > 0$ is a real number independent of $k$, that is called asymptotic convergence factor. In the case of linear convergence 
+        ($p=1$) it is necessary that $0<\mu<1$.
+    \end{definition}
 
     \section{Bisection method}
-    \begin{theorem}[Theorem of zeros of continuous functions]
+    \begin{theorem}[zeros of continuous functions]
         Let $f(x)$ be a continuous function on the interval $I=(a,b)$, that is $f \in C^0([a,b])$. 
         If $f(a)f(b)<0$, then there exists at least one zero $\alpha \in I$ of $f(x)$. 
     \end{theorem}
     Let us assume that exist a unique zero, and let us call it $\alpha$. 
-
     The strategy of the bisection method is to have the given interval and select a sub-interval where $f$ features a sign change. Following 
     such procedure it is guaranteed that every interval selected this way will contain $\alpha$. The sequence $\{x^{(k)}\}$ of the midpoints of 
     these sub-intervals will inevitably tend to $\alpha$ since the length of the sub-intervals tends to zero as $k$ tends to infinity.
+
+    The dimension of the $k$ interval is given from the formula: 
+    \[\left\lvert I^{(k)} \right\rvert = \dfrac{b-a}{2^k}\]
+    where $k>0$. We said that the error is equal to $e^{(k)}:=\left\lvert x^{(k)} - \alpha \right\rvert$. So, it is also possible to estimate 
+    the error with an upper bound, that is an error estimator. We have that. 
+    \[e^{(k)} = \left\lvert x^{(k)} - \alpha \right\rvert < \dfrac{1}{2} \left\lvert I^{(k)} \right\rvert = (b-a)\left( \dfrac{1}{2} \right)^{(k+1)}\]
+    This result implies that this method is convergent, in fact the error is monotonic descending. 
+
+    Given the tolerance $TOL>0$ it is possible to calculate the minimum number of iterations of the bisection method, defined as $k_{min}$, such
+    that $e^{(k_{min})}<TOL$. In fact, from the previous equation we obtain that: 
+    \[k_{min}>\log_2\left( \dfrac{b-a}{TOL}\right) -1\]
+
+
+    STOPPING criterion
+
     \begin{algorithm}[H]
         \caption{Algorithm for the bisection method}
             \begin{algorithmic}[1]
@@ -186,18 +223,8 @@
                 \State \Return
             \end{algorithmic}
     \end{algorithm}
-    The dimension of the $k$ interval is given from the formula: 
-    \[\left\lvert I^{(k)} \right\rvert = \dfrac{b-a}{2^k}\]
-    where $k>0$. We said that the error is equal to $e^{(k)}:=\left\lvert x^{(k)} - \alpha \right\rvert$. So, it is also possible to estimate 
-    the error with an upper bound, that is an error estimator. We have that. 
-    \[e^{(k)} = \left\lvert x^{(k)} - \alpha \right\rvert < \dfrac{1}{2} \left\lvert I^{(k)} \right\rvert = (b-a)\left( \dfrac{1}{2} \right)^{(k+1)}\]
-    This result implies that this method is convergent, in fact the error is monotonic descending. 
 
-    Given the tolerance $TOL>0$ it is possible to calculate the minimum number of iterations of the bisection method, defined as $k_{min}$, such
-    that $e^{(k_{min})}<TOL$. In fact, from the previous equation we obtain that: 
-    \[k_{min}>\log_2\left( \dfrac{b-a}{TOL}\right) -1\]
 
-    STOPPING criterion
 
 
     \section{Newton method}
