@@ -313,7 +313,25 @@ end
         \]
     \end{Exercise}
     \begin{Answer}[ref=3]
-
+        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
+A = zeros(k);
+B = vector(k);
+b = 1;
+for i=1:1:(k+1)
+    A(i,i) = nthroot(2,i);
+    a = mod(i,2);
+    % Odd
+    if a == 1
+        A(k + 1,i) = B(b);
+    end
+    % Even 
+    if a == 0
+        A(k + 1,i) = B(b);
+        A(i, k + 1) = B(b);
+        b = b + 1;
+    end
+end
+        \end{lstlisting}
     \end{Answer}
 
     \newpage
@@ -337,19 +355,26 @@ end
     \begin{Answer}[ref=4]
         Code A work as expected: the while loop is repeated $16$ times, and the final value of $x$ is $1$. Instead, code B does not work as expected, and results in an infinite loop.
     \end{Answer}
-    
+
     \newpage
 
     \begin{Exercise}[label=5]
         Find the machine epsilon by implementing an ad hoc procedure. Comment and justify the obtained results.
     \end{Exercise}
     \begin{Answer}[ref=5]
-        b
+        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
+macheps = 1;
+while 1.0 + (macheps/2) > 1.0
+    macheps = macheps / 2;
+end            
+        \end{lstlisting}
+        The machine epsilon is the nearest number to one. With this algorithm the $macheps$ is the same found by the command $eps$. 
     \end{Answer}
-    
+
     \newpage
 
     \begin{Exercise}[label=6]
+        Given the following code:
         \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
 realmax
 a = 1.0e+308;
@@ -358,9 +383,10 @@ c = 1.1e+308;
 (a + b) + c
 (a + c) + b  
         \end{lstlisting}
+        Explain why the second result is $Inf$.
     \end{Exercise}
     \begin{Answer}[ref=6]
-        b
+        The result is $Inf$ due to the error between the real numbers and floating points numbers.
     \end{Answer}
 
     \newpage
@@ -375,7 +401,13 @@ c = 1.1e+308;
         \end{enumerate}
     \end{Exercise}
     \begin{Answer}[ref=7]
-        b
+        \begin{enumerate}
+            \item The function in $0$ return a value of $NaN$ because it results in an undetermined fraction ($\frac{0}{0}$). 
+                With $k=1$ we obtain the value $1.0517$, and with $k=20$ we obtain the value $0$. This means that the function tends to 
+                $0$ with $x$ small, but the function is not defined. 
+            \item TODO
+            \item TODO
+        \end{enumerate}
     \end{Answer}
 
     \newpage
