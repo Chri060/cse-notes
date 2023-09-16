@@ -1,5 +1,5 @@
 \documentclass[12pt, a4paper]{report}
-\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox}
+\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox, matlab-prettifier, exercise}
 \usepackage[english]{babel}
 
 \makeatletter
@@ -42,7 +42,7 @@
         \item Numerical approximation of ODEs: the Cauchy problem; one-step methods (forward and backward Euler and Crank-Nicolson schemes); 
             consistency, stability, and convergence (hints).
     \end{itemize}
-    \end{abstract}
+\end{abstract}
 
 \newpage
 
@@ -50,6 +50,438 @@
 
 \newpage
 
+\chapter{Introduction to MATLAB}
+    \section{Main MATLAB operators}
+    Assignment operator: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Print output
+a = 1 
+% Does not print output
+b = 2;
+    \end{lstlisting}
+    The active variables can be found in the workspace and the value can be checked on the command window with: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Value of all variables
+whos
+% Value of a
+whos a
+    \end{lstlisting}
+    If you want to save the file: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Save the command history
+diary file_name.txt 
+% Save the whole workspace
+save file_name 
+% Save only the variable a
+save file_name_only_a a 
+% Load only the variable a
+load file_name_only_a 
+% Load the whole workspace
+load file_name 
+    \end{lstlisting}
+    It is possible to clear variables with the following commands: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Clear only the variable a
+clear a 
+% Clear the whole workspace
+clear all 
+    \end{lstlisting}
 
+    \section{Vector and matrices}
+    Most of the entities in MATLAB are matrices, even real numbers. The matrices can be defined in the following ways: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Row vector definition
+c = [1 2 3]
+% Column vector definition
+c = [1; 2; 3]
+% Vectorn transposition
+c = [1 2 3]'
+% 2D matrix definition
+D = [ 1 2 3; 
+        4 5 6; 
+        7 8 9 ]
+    \end{lstlisting}
+    It is also possible to define various types of matrices: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Zeros vector/matrix
+A = zeros(row_length,column_length)	
+% Ones vector/matrix
+A = ones(row_length,column_length)	
+% Identity matrix
+A = eye(row_length,column_length)   
+% Diagonal matrix
+d = [1:4]
+D = diag(d)
+% Set a not principal diagonal 
+D = diag(d, diagonal_index)
+% Select only upper o lower trinagular
+Ml = tril(M)
+Mu = triu(M)
+% Access an element in vector
+C(1)
+% Access an element in matrix
+C([2,3]);
+% Access a part of the matrix
+Q(rows,columns)    
+% Access the element in position (n,m)
+Q(end, end)   
+% Dimension of a matrix
+length(a);
+numel(b);
+size(a);
+    \end{lstlisting}  
+    The operations on vectors are done in the following way: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Given two row vectors a and b
+% Vector sum
+a + b    
+% Vector difference
+a - b   
+% Scalar product
+a * b'      
+dot(a,b)   
+% Tensor product
+a' * b      
+% Elementwise product
+a .* b  
+% Elementwise division    
+a ./ b  
+% Elementwise exponentiation    
+a .^ 2      
+    \end{lstlisting}  
+    The operations on matrices are done in the following way: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Givcen two matrices A and B (both 3x2)
+% Matrix sum
+A + B
+% Matrix difference
+A - B
+% Matrix product
+K * L'
+% Elementwise product
+A .* B
+% Elementwise division
+A ./ B      
+% Elementwise exponentiation
+A .^ 2      
+% Power matrix (useful only square)
+A ^ 2         
+% Other useful values of the matrices
+% Determinant
+det(A)
+% Trace
+trace(A)  
+% Inverse of small matrix      
+inv(A)          
+% Given a column vector b ths olutio of Ax=b
+A \ b       
+    \end{lstlisting}  
+    The function used to plot a graph are the following: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% To plot y=f(x) in [a,b]
+x = a:step_length:b;
+y = f(x);   
+figure         
+plot(x,y,color)
+% To add y2=f2(x) in [c,d]
+hold on 
+x2 = c:step_length:d;
+y2 = f2(x);
+plot(x2,y2,color)     
+% Show graph's grid
+grid on 
+% Set the axis limit
+axis([xmin xmax ymin ymax]) 
+% Set the same scaling for both axis
+axis equal 
+    \end{lstlisting} 
+    To handle functions the commands are: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Define a function handle to g(x)
+f = @g(x);
+% Evaluation of f in a
+f(a) 
+% Define an anonymous function
+% It is useful to modify other functions
+f = @(argument-list) expression
+    \end{lstlisting} 
+    The operators that u logical values are:  
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Smaller than
+a < b     
+% Greater than
+a > b
+% Smaller or equal than
+a <= b   
+% Equal to
+a == b    
+% Different from
+a ~= b  
+% And
+(a < b) & (b > c)  
+% Or   
+(a < b) | (b > c)     
+    \end{lstlisting} 
+    The control-flow statement are: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% if-then-else statements
+if (condition1)
+    block1
+elseif (condition2)
+    block2
+else
+    block3
+end
+% for loops
+for (index=start:step:end)
+    instruction block
+end
+% while loops
+while (condition)
+    instruction block
+end
+    \end{lstlisting}    
+    There are two categories of m-files: 
+    \begin{itemize}
+        \item Scripts: these files contain instructions that are executed in sequence in the command line if the script file is called. 
+            The variables are saved in the current workspace.
+        \item Functions: they take some input arguments and return some outputs after a series of instructions are performed. 
+            The variables defined in the function are local to the scope of the function itself.
+    \end{itemize}
+
+\newpage
+
+\chapter{Laboratory I}
+    \begin{Exercise}[label=1]
+        Define the row vector: 
+        \[ \bar{v_k} = [1,9,25,\dots,\left( 2k+1 \right)^2] \in \mathbb{R} \]
+        with $k=8$ using the following strategies:
+        \begin{enumerate}
+            \item A for loop to define one by one each element of the vector.
+            \item The vector syntax to build it in just one shot.
+        \end{enumerate}
+    \end{Exercise}
+    \begin{Answer}[ref=1]
+        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
+% Point one
+k = 8;
+A = 0:k;
+for i=1:1:(k + 1)
+    A(i) = (2 * (i - 1) + 1).^2;
+end
+
+% Point two
+k = 8;
+A = 0:k;
+B = 2 * A + 1;
+C = B.^2;
+        \end{lstlisting}  
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=2]
+        Define a function which, for an input value $k$, returns the corresponding vector $v_k$ as defined in the previous exercise.
+    \end{Exercise}
+    \begin{Answer}[ref=2]
+        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
+function A = vector(k)
+    A = 0:k;
+    B = 2 * A + 1;
+    A = B.^2;
+end
+        \end{lstlisting}
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=3]
+        Using the function of the previous exercise write another function that returns, for a generic value $k$, the $2(k + 1) \times 2(k + 1)$ matrix.
+        \[
+            m_k=
+            \begin{bmatrix}
+                2 & 0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0 \\
+                0 & \sqrt[2]{2} & 0 & 0 & 0 & 0 & \cdots & 0 & 1 \\
+                0 & 0 & \sqrt[3]{2} & 0 & 0 & 0 & \cdots & 0 & 0 \\
+                0 & 0 & 0 & \sqrt[4]{2} & 0 & 0 & \cdots & 0 & 9 \\
+                0 & 0 & 0 & 0 & \sqrt[5]{2} & 0 & \cdots & 0 & 0 \\
+                0 & 0 & 0 & 0 & 0 & \sqrt[6]{2} & \cdots & 0 & 25 \\
+                \vdots  & \vdots  & \vdots  & \vdots  & \vdots  & \vdots  & \ddots & \vdots  & \vdots  \\
+                0 & 0 & 0 & 0 & 0 & 0 & \cdots & \sqrt[(2k+1)]{2} & 0 \\
+                1 & 1 & 9 & 9 & 25 & 25 & \cdots & (2k+1)^2 & (2k+1)^2 
+            \end{bmatrix} 
+        \]
+    \end{Exercise}
+    \begin{Answer}[ref=3]
+
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=4]
+        Compare the results of the following code segments:
+        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
+% Code A
+x = 0;
+while (x ~= 1)
+    x = x + 1/16
+end
+
+% Code B
+x = 0;
+while (x ~= 1)
+    x = x + 0.1
+end
+        \end{lstlisting}
+    \end{Exercise}
+    \begin{Answer}[ref=4]
+        Code A work as expected: the while loop is repeated $16$ times, and the final value of $x$ is $1$. Instead, code B does not work as expected, and results in an infinite loop.
+    \end{Answer}
     
+    \newpage
+
+    \begin{Exercise}[label=5]
+        Find the machine epsilon by implementing an ad hoc procedure. Comment and justify the obtained results.
+    \end{Exercise}
+    \begin{Answer}[ref=5]
+        b
+    \end{Answer}
+    
+    \newpage
+
+    \begin{Exercise}[label=6]
+        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
+realmax
+a = 1.0e+308;
+b = -a;
+c = 1.1e+308;
+(a + b) + c
+(a + c) + b  
+        \end{lstlisting}
+    \end{Exercise}
+    \begin{Answer}[ref=6]
+        b
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=7]
+        Consider the following function:
+        \[f(x)=\dfrac{e^x-1}{x}\]
+        \begin{enumerate}
+            \item Evaluate $f(x)$ for values of $x$ around zero (try with $x_k = 10^{-k}$, $k \in [1, 20]$). What do you obtain? Explain the results.
+            \item Propose an approach for fixing the problem. (Hint: Use Taylor expansions to get an approximation of $f(x)$ around $x = 0$). 
+            \item How many terms in the Taylor expansion are needed to get double precision accuracy (16 decimal digits) $\forall x \in \left[0, \dfrac{1}{2}\right]$?
+        \end{enumerate}
+    \end{Exercise}
+    \begin{Answer}[ref=7]
+        b
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=8]
+        The sequence: 
+        \[1, \dfrac{1}{3}, \dfrac{1}{9}, \dots, \dfrac{1}{3^n},\dots\]
+        can be generated with the following recursive relations: 
+        \[
+        \begin{cases}
+            p_n=\dfrac{10}{3}p_{n-1}=p_{n-2}  \\
+            p_1 = \dfrac{1}{3}, \: p_0=1
+        \end{cases}
+        \]
+        \[
+        \begin{cases}
+            q_n=\dfrac{1}{3}q_{n-1}  \\
+            q_0=1
+        \end{cases}
+        \]
+        \begin{enumerate}
+            \item Implement the two relations in order to generate the first $100$ terms of the sequence.
+            \item Study the stability of the two algorithms and justify the obtained results. 
+        \end{enumerate}
+    \end{Exercise}
+    \begin{Answer}[ref=8]
+        
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=9]
+        Find the minimum positive number representable in MATLAB/Octave by implementing an ad hoc procedure. Compare with $realmin$.
+    \end{Exercise}
+    \begin{Answer}[ref=9]
+        
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=10]
+        \begin{enumerate}
+            \item Use Taylor polynomial approximation to avoid the loss of significance errors in the following function when $x$ approaches $0$:
+                \[f(x)=\dfrac{1-\cos(x)}{x^2}\]
+            \item Reformulate the following function $g(x)$ to avoid the loss of significance error in its evaluation for increasing values of $x$ towards $+ \infty$:
+                \[g(x)=x \left( \sqrt{x+1} - \sqrt{x} \right)\]
+        \end{enumerate}
+    \end{Exercise}
+    \begin{Answer}[ref=10]
+        
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=11]
+        We can compute $e^{-x}$ around $x=0$ using Taylor polynomials in two ways, either using:
+        \[e^{-x} \approx 1-x-\dfrac{1}{2}x^2+\dfrac{1}{6}x^3+\dots\]
+        or using 
+        \[e^{-x}=\dfrac{1}{e^x} \approx \dfrac{1}{1-x-\dfrac{1}{2}x^2+\dfrac{1}{6}x^3+\dots}\]
+        Which approach is the most accurate?
+    \end{Exercise}
+    \begin{Answer}[ref=11]
+        
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=12]
+        Consider the following integral: 
+        \[I_n(\alpha)=\int_{0}^{1} \dfrac{x^n}{x+\alpha} \,dx \:\:\:\:\:\: \forall n \in \mathbb{N},\alpha>0\]
+        \begin{enumerate}
+            \item Give an upper bound for $I_n(\alpha)$, $\forall n \in \mathbb{N}, \alpha > 0$.
+            \item Prove the following recursive relation between $In(\alpha)$ and $I_{n-1}(\alpha)$:
+            \[
+                \begin{cases}
+                    I_n(\alpha)=-\alpha I_{n-1}(\alpha)+\dfrac{1}{n} \\
+                    I_o(\alpha)=\ln{\left( \dfrac{\alpha + 1}{\alpha} \right)}
+                \end{cases}
+            \]
+            \item Employing the previous relation, compute $I_40(\alpha = 8)$ and comment the obtained results. 
+            \item Write a numerically stable recursive relation for $I_40(\alpha = 8)$.
+        \end{enumerate}
+    \end{Exercise}
+    \begin{Answer}[ref=12]
+        
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=13]
+        Given the following sequence:
+        \[
+          \begin{cases}
+                x_{n+1}=2^{n+1}\left[ \sqrt{1+\dfrac{x_n}{2^n}}-1 \right] \\
+                x_0>-1
+          \end{cases}  
+        \]
+        for which $\lim_{n \rightarrow + \infty}x_n=\ln\left({1+x_0}\right)$
+        \begin{enumerate}
+            \item Set $x_0 = 1$, compute $x_1, x_2, \dots , x_{71}$ and explain the obtained results.
+            \item Transform the sequence in an equivalent one that converges to the theoretical limit.
+        \end{enumerate}
+
+
+    \end{Exercise}
+    \begin{Answer}[ref=13]
+        
+    \end{Answer}
 \end{document}
