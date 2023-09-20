@@ -51,102 +51,136 @@ The topics of the course are:
 \newpage
 
 \chapter{Introduction}
-\section{Numerical analysis and errors}
-Numerical analysis is the field of mathematics dealing with methods to find the solutions of certain mathematical problems with an electronic 
-calculator. It is the intersection between math and computer science. 
+    \section{Numerical analysis and errors}
+    Numerical analysis is the field of mathematics dealing with methods to find the solutions of certain mathematical problems with an electronic 
+    calculator. It is the intersection between math and computer science. 
 
-On the other hand, scientific computing also deals with the model formalization and so it needs also engineering knowledge. 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{images/difference.png}
-    \caption{Difference between numerical analysis and scientific computing}
-\end{figure}
-As it is possible to see from the diagram every step of the computation have to deal with errors. The possible types of errors are: 
-\begin{itemize}
-    \item Absolute: $\left\lvert x - \tilde{x} \right\rvert$
-    \item Relative: $\dfrac{\left\lvert x - \tilde{x} \right\rvert}{\left\lvert x \right\rvert}$, where $x \neq 0$
-\end{itemize}
-The relative error is more precise because it compares the error with the measure quantity. 
-\begin{example}
-    Let us consider $x=100$ and $\tilde{x}=100.1$. The errors in this case are: 
-    \[e_{abs}=\left\lvert x - \tilde{x} \right\rvert=\left\lvert 100 - 100.1 \right\rvert=0.1\]
-    \[e_{rel}=\dfrac{\left\lvert x - \tilde{x} \right\rvert}{\left\lvert x \right\rvert}=\dfrac{\left\lvert 100 - 100.1 \right\rvert}{\left\lvert 100 \right\rvert}=0.001\]
-    Let us consider $x=0.2$ and $\tilde{x}=0.1$. The errors in this case are: 
-    \[e_{abs}=\left\lvert x - \tilde{x} \right\rvert=\left\lvert 0.2 - 0.1 \right\rvert=0.1\]
-    \[e_{rel}=\dfrac{\left\lvert x - \tilde{x} \right\rvert}{\left\lvert x \right\rvert}=\dfrac{\left\lvert 0.2 - 0.1 \right\rvert}{\left\lvert 0.2 \right\rvert}=0.5\]
-    The result are that the measures have the same absolute error ($10\%$), but the relative error is much grater in the second example ($50\%$ vs $0.1\%$).
-    This result proves that the relative error is the most precise.
-\end{example}
-
-\section{Floating point}
-A calculator can only handle a finite quantity of numbers and compute a finite number of operations. For those reason the set of the real numbers 
-$\mathbb{R}$ is indeed represented by a finite set of machine numbers $\mathbb{F}=\{-\tilde{a}_{min}, \dots , \tilde{a}_{max} \}$ called
-floating points numbers. The function used to find the corresponding value in $\mathbb{F}$ to a number in $\mathbb{R}$ is $fl(x)$ that does an 
-operation called truncation and rounding.
-
-The set $\mathbb{F}=\mathbb{F}(\beta,t,L,U)$ is characterized by four parameters $\beta,t,L$ and $U$ such that every real number $fl(x) \in \mathbb{F}$ 
-can be written as:
-\[fl(x)=(-1)^sm\beta^{e-t}=(-1)^s(a_1a_2\dots a_t)_{\beta}\beta^{e-t}\]
-where:
-\begin{itemize}
-    \item $\beta \geq 2$ is the basics, an integer that determines the numeric system. 
-    \item $m=(a_1a_2\dots a_t)_{\beta}$ is the mantissa, $(0<m<\beta^t-1)$ where $t$ is the number of digits such that $0<a_1 \leq \beta - 1$
-        and $0 \leq a_i \leq \beta - 1$ for $i=2, \dots, t$. 
-    \item $e=\mathbb{Z}$ is the exponent such that $L<e<U$, with $L<0$ and $U>0$. 
-    \item $s=\{0,1\}$ is the sign. 
-\end{itemize}
-In the definition of the numbers in the mantissa set we have to set the constraint $a_1 \neq 0$ to ensure the uniqueness of the representation. 
-
-The set of floating points has the following characteristic values:
-\begin{itemize}
-    \item Machine epsilon, that is the distance between one and the smallest floating point number greater than one, and it is equal to: 
-        \[\epsilon_M=\beta^{1-t}\]
-    \item Round-off error, that is the relative error that is committed when substituting $x \in \mathbb{R}-\{0\}$ with his corresponding 
-        $fl(x) \in \mathbb{F}$. It is limited by: 
-        \[\dfrac{\left\lvert x-fl(x) \right\rvert}{\left\lvert x \right\rvert }\leq \dfrac{1}{2}\epsilon_M\]
-        where $x \neq 0$.
-    \item Cardinality of the floating point set:
-        \[\#\mathbb{F}=2 \beta^{t-1}(\beta -1)(U-L+1)+1\]
-        where: 
-        \begin{itemize}
-            \item $2$ is needed to consider both positive and negative numbers. 
-            \item $\beta^{t-1}$ is the cardinality of values that can be taken by all digits.
-            \item $(\beta -1)$ is the cardinality of values that can be taken by $a_1$.
-            \item $(U-L+1)$ considers all the possible variations for the exponent.
-            \item $1$ is needed to consider also the zero. 
-        \end{itemize}
-    \item The biggest and the smallest numbers in the set are found with the formula:
-        \[x_{min}=\beta^{L-1}\]
-        \[x_{max}=\beta^U(1-\beta^{-t})\]
-\end{itemize}
-\begin{example}
-    In MATLAB the floating point set is defined with the following variables:
-    \[(\beta=2,t=53,L=-1021,U=1024)\] 
-    With the command $eps$ we can find the machine epsilon, that in MATLAB case is:
-    \[\epsilon_M=2.22 \cdot 10^{-16}\]
-    With the command $realmin$ and $realmax$ we can find the smallest and the largest numbers representable that are equal to:
-    \[x_{min}=2.225073858507201 \cdot 10^{-308}\]
-    \[x_{max}=1.797693134862316 \cdot 10^{308}\]
-\end{example}
-Since not all the numbers in the $\mathbb{R}$ set are also in the $\mathbb{F}$ set, in the second one there is no continuity. It is possible to 
-demonstrate that while we are increasing the values of the numbers we are also increasing the distance between two consecutive numbers in $\mathbb{F}$.
-\begin{example}
-    Let us consider the floating number set $\mathbb{F}(2,2,-1,2)$. The characteristic values of this set are: 
-    \begin{itemize}
-        \item $\epsilon_M=\beta^{1-t}=0.5$.
-        \item $x_{min}=\beta^{L-1}=0.25$.
-        \item $x_{max}=\beta^U(1-\beta^t)=3$.
-        \item $\#\mathbb{F}=2 \beta^{t-1}(\beta -1)(U-L+1)+1=16$. 
-    \end{itemize}
-    The exponent can have the values $-1,0,1$ and $2$. The mantissa will be like $(a_1a_2)_{\beta}$ because $t=2$. The possible positive values are
-    reported in the figure. 
+    On the other hand, scientific computing also deals with the model formalization and so it needs also engineering knowledge. 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.9\linewidth]{images/numbers.png}
+        \includegraphics[width=0.75\linewidth]{images/difference.png}
+        \caption{Difference between numerical analysis and scientific computing}
     \end{figure}
-\end{example}
-The other important aspect is that the passage between the two sets causes the loss of two important properties such as associativity end the 
-neutral number for the sum. 
+    As it is possible to see from the diagram every step of the computation have to deal with errors. The possible types of errors are: 
+    \begin{itemize}
+        \item Absolute: $\left\lvert x - \tilde{x} \right\rvert$
+        \item Relative: $\dfrac{\left\lvert x - \tilde{x} \right\rvert}{\left\lvert x \right\rvert}$, where $x \neq 0$
+    \end{itemize}
+    The relative error is more precise because it compares the error with the measure quantity. 
+    \begin{example}
+        Let us consider $x=100$ and $\tilde{x}=100.1$. The errors in this case are: 
+        \[e_{abs}=\left\lvert x - \tilde{x} \right\rvert=\left\lvert 100 - 100.1 \right\rvert=0.1\]
+        \[e_{rel}=\dfrac{\left\lvert x - \tilde{x} \right\rvert}{\left\lvert x \right\rvert}=\dfrac{\left\lvert 100 - 100.1 \right\rvert}{\left\lvert 100 \right\rvert}=0.001\]
+        Let us consider $x=0.2$ and $\tilde{x}=0.1$. The errors in this case are: 
+        \[e_{abs}=\left\lvert x - \tilde{x} \right\rvert=\left\lvert 0.2 - 0.1 \right\rvert=0.1\]
+        \[e_{rel}=\dfrac{\left\lvert x - \tilde{x} \right\rvert}{\left\lvert x \right\rvert}=\dfrac{\left\lvert 0.2 - 0.1 \right\rvert}{\left\lvert 0.2 \right\rvert}=0.5\]
+        The result are that the measures have the same absolute error ($10\%$), but the relative error is much grater in the second example ($50\%$ vs $0.1\%$).
+        This result proves that the relative error is the most precise.
+    \end{example}
+
+    \section{Floating point}
+    A calculator can only handle a finite quantity of numbers and compute a finite number of operations. For those reason the set of the real numbers 
+    $\mathbb{R}$ is indeed represented by a finite set of machine numbers $\mathbb{F}=\{-\tilde{a}_{min}, \dots , \tilde{a}_{max} \}$ called
+    floating points numbers. The function used to find the corresponding value in $\mathbb{F}$ to a number in $\mathbb{R}$ is $fl(x)$ that does an 
+    operation called truncation and rounding.
+
+    The set $\mathbb{F}=\mathbb{F}(\beta,t,L,U)$ is characterized by four parameters $\beta,t,L$ and $U$ such that every real number $fl(x) \in \mathbb{F}$ 
+    can be written as:
+    \[fl(x)=(-1)^s(0.a_1a_2\dots a_t)\beta^e\]
+    where:
+    \begin{itemize}
+        \item $\beta \geq 2$ is the basics, an integer that determines the numeric system. 
+        \item $m=(0.a_1a_2\dots a_t)$ is the mantissa.
+        \item $e \in \mathbb{Z}$ is the exponent such that $L<e<U$, with $L<0$ and $U>0$. 
+        \item $s=\{0,1\}$ is the sign. 
+    \end{itemize}
+    In the definition of the numbers in the mantissa set we have to set the constraint $a_1 \neq 0$ to ensure the uniqueness of the representation. In this case we say that the number
+    is normalized. 
+
+    The set of floating points has the following characteristic values are:
+    \begin{itemize}
+        \item Machine epsilon, that is the distance between one and the smallest floating point number greater than one, and it is equal to: 
+            \[\epsilon_M=\beta^{1-t}\]
+        \item Round-off error, that is the relative error that is committed when substituting $x \in \mathbb{R}-\{0\}$ with his corresponding 
+            $fl(x) \in \mathbb{F}$. It is limited by: 
+            \[\dfrac{\left\lvert x-fl(x) \right\rvert}{\left\lvert x \right\rvert }\leq \dfrac{1}{2}\epsilon_M\]
+            where $x \neq 0$.
+        \item The biggest and the smallest numbers in the set are found with the formula:
+            \[x_{min}=\beta^{L-1}\]
+            \[x_{max}=\beta^U(1-\beta^{-t})\]
+    \end{itemize}
+    \begin{example}
+        In MATLAB the floating point set is defined with the following variables:
+        \[(\beta=2,t=53,L=-1021,U=1024)\] 
+        With the command $eps$ we can find the machine epsilon, that in MATLAB case is:
+        \[\epsilon_M=2.22 \cdot 10^{-16}\]
+        With the command $realmin$ and $realmax$ we can find the smallest and the largest numbers representable that are equal to:
+        \[x_{min}=2.225073858507201 \cdot 10^{-308}\]
+        \[x_{max}=1.797693134862316 \cdot 10^{308}\]
+    \end{example}
+    Since not all the numbers in the $\mathbb{R}$ set are also in the $\mathbb{F}$ set, in the second one there is no continuity. It is possible to 
+    demonstrate that while we are increasing the values of the numbers we are also increasing the distance between two consecutive numbers in $\mathbb{F}$.
+    \begin{example}
+        Let us consider the floating number set $\mathbb{F}(2,2,-1,2)$. The characteristic values of this set are: 
+        \begin{itemize}
+            \item $\epsilon_M=\beta^{1-t}=0.5$.
+            \item $x_{min}=\beta^{L-1}=0.25$.
+            \item $x_{max}=\beta^U(1-\beta^t)=3$.
+            \item $\#\mathbb{F}=2 \beta^{t-1}(\beta -1)(U-L+1)+1=16$. 
+        \end{itemize}
+        The exponent can have the values $-1,0,1$ and $2$. The mantissa will be like $(a_1a_2)_{\beta}$ because $t=2$. The possible positive values are
+        reported in the figure. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/numbers.png}
+        \end{figure}
+    \end{example}
+    The other important aspect is that the passage between the two sets causes the loss of two important properties such as associativity end the 
+    neutral number for the sum. 
+
+\newpage 
+\chapter{Nonlinear equations}
+    \section{Introduction}
+    To solve a nonlinear equation $f(x)$ we have to find $\alpha \in \mathbb{R}$ that is a zero of $f$ such that $f(\alpha)=0$.
+    \begin{definition}
+        The point $\alpha$ is said to be a \emph{zero with multiplicity $m$} if:
+        \begin{itemize}
+            \item $f(\alpha)=f^{'}(\alpha)=\dots=f^{\left(m-1\right)}(\alpha)=0$.
+            \item $f^{\left(m\right)}(\alpha) \neq 0$.
+        \end{itemize}
+    \end{definition}
+    If $m$ is odd the function changes sign across the zero. It does not change the sign if $n$ is even. 
+
+    \section{Iterative methods}
+    The set of all the polynomials of degree $n$ is denoted by the symbol $\mathbb{P}_n$ that contains all the polynomial that have a grade less or equal to $n$.
+    \begin{theorem}[Abel-Ruffini theorem]
+        There is no solution in radicals to general polynomial equations of degree five or higher with arbitrary coefficients. 
+    \end{theorem}
+    So, to solve polynomials with a degree higher than four we need to use the iterative methods. The general idea of those methods is the following:
+    \begin{enumerate}
+        \item Select an arbitrary initial value $x^{(0)}$ called initial guess, that is a hypothetical value for $\alpha$.
+        \item Use the selected value as an input for a black-box function.
+        \item Use the output of the black-box function as the new $x^{(0)}$ and return to point one. 
+    \end{enumerate}
+    After some iterations (that depends on the chosen method) we will have a set of values $\{ x^{(n)} \}$ convergent such that:
+    \[ \lim_{n \rightarrow \infty} = \alpha\]
+    and the error related to the value found for $\alpha$ is equal to: 
+    \[ \lim_{n \rightarrow \infty}e^n = 0\]
+    That implies that the error can be also written as: 
+    \[e^n=\alpha-x^{(n)}\]
+    All the methods we are going to see constructs a sequence $x^{(1)},x^{(2)},\dots,x^{(n)}$ of numbers that hopefully converges to $\alpha$:
+    \[ \lim_{k \rightarrow + \infty} \left\lvert x^{(k)}-\alpha \right\rvert =0\]
+    \begin{definition}[order of convergence]
+        An iterative method for the approximation of the zero $\alpha$ of the function $f(x)$ is convergent with order $q$ if and only if for $k > k_0$:
+        \[\left\lvert x^{(k)} - \alpha \right\rvert \leq c {\left\lvert x^{(k+1)} - \alpha \right\rvert}^q  \]
+        We can have two cases:
+        \begin{itemize}
+            \item If $q=1$ it is called linear convergence and there are the constraint $0<c<1$.
+            \item If $q>1$, $c$ can be any positive number grater than zero. 
+        \end{itemize}
+    \end{definition}
+
+
 
 
 
