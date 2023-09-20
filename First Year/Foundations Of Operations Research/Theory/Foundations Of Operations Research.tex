@@ -25,7 +25,7 @@
     Operations Research is the branch of applied mathematics dealing with quantitative methods to analyze and solve
     complex real-world decision-making problems. 
     
-    The course covers some of the fundamental concepts and methods of Operations Research pertaining to graph optimization, 
+    The course covers some fundamental concepts and methods of Operations Research pertaining to graph optimization, 
     linear programming and integer linear programming. 
     
     The emphasis is on optimization models and efficient algorithms with a wide range of important applications in 
@@ -175,5 +175,223 @@
         \[\dfrac{x_3+x_4}{2} \leq x_7+x_8\]
         It is divided by two because if both ICT are selected at least one treasury bound must be selected and not two. 
     \end{example}
+    \begin{example}
+        Consider three oil pits, located in positions $A=(0,0)$, $B=(300,0)$, and $C=(240,300)$, from which oil is extracted. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/example3.png}
+        \end{figure}
+        Connect them to a refinery with pipelines whose cost is proportional to the square of their length. The refinery must be at least 100 km away from point $D=(100,200)$, but 
+        the oil pipelines can cross the corresponding forbidden zone. Give a mathematical model to decide where to locate the refinery to minimize the total pipeline cost. 
+        \begin{itemize}
+            \item Decision variables: the coordinates of the refinery $x_1,x_2$. 
+            \item Objective function: we need to minimize the cost, so we have: 
+            \begin{align*}
+                \min{z} &=\left[ (x_1-0)^2+(x_2-0)^2 \right] \\
+                        &+ \left[ (x_1-300)^2+(x_2-0)^2 \right] \\
+                        &+ \left[ (x_1-240)^2+(x_2-300)^2 \right] 
+            \end{align*}
+            \item Constraints: there is a constraint on the location that is
+                \[\sqrt{{\left( x_1-100 \right)}^2+{\left( x_2-100 \right)}^2} \geq 100\]
+            \item Variable type: $x_1,x_2 \in \mathbb{R}$
+        \end{itemize}
+    \end{example}
+
+    \section{Mathematical programming problem}
+    The decision-making problems can be classified as: 
+    \begin{itemize}
+        \item Mathematical programming: one decision maker and one objective. 
+        \item Multi-objective programming: one decision maker and several objectives.
+        \item Stochastic programming: uncertainty level greater than zero. 
+        \item Game theory: several decision makers. 
+    \end{itemize}
+    We will analyze the mathematical programming problems, so we have a single decision maker and a single objective.
+    The optimization usually requires to minimizing or maximizing a given function. 
+    Note that maximizing $f(x)$ is the same problem of minimizing $-f(x)$. The problems are characterized by: 
+    \begin{itemize}
+        \item Decision variables $x \in \mathbb{R}^n$: numerical variables whose values identify a solution of the problem. 
+        \item Feasible region $X \subseteq \mathbb{R}^n$: distinguish between feasible and infeasible solutions.
+        \item Objective function $f:X \rightarrow\mathbb{R}$: expresses in quantitative terms the value of each feasible solution. 
+    \end{itemize}
+    Solving a mathematical programming problem consists in finding a feasible solution which is globally optimum. It may happen that: the problem is infeasible, unbounded, has a single 
+    optimal solution or has numerous optimal solutions. 
+    When the problem is very hard we must settle for a feasible solution that is a local optimum. AN optimization problem can have many local optima. 
+    Mathematical programming can be classified in three main categories:
+    \begin{enumerate}
+        \item Linear Programming.
+        \item Integer Linear Programming.
+        \item Nonlinear Programming. 
+    \end{enumerate}
+    Multi-objective programming can be taken into account in different ways. Suppose we wish to minimize $f_1(x)$ and maximize $f_2(x)$, we can: 
+    \begin{enumerate}
+        \item Turn it into a single objective problem by expressing the two objectives in terms of the same unit: 
+            \[\min{\lambda_1f_1(x)-\lambda_2f_2(x)}\]
+            for appropriate scalars $\lambda_1$ and $\lambda_2$.
+        \item Optimize the primary objective function and turn the other objective into a constraint: 
+            \[\max_{x \in X}f_2(x) \:\:\:\: f_1(x)\leq \epsilon\]
+            for an appropriate constant $\epsilon$. 
+    \end{enumerate}
+
+\newpage
+
+\chapter{Network optimization models}
+    \section{Definitions}
+    Many decision-making problems can be formulated in terms of graphs and networks.
+    \begin{definition}
+        A \emph{graph} is a pair $G=(N,E)$, with a set of nodes $N$ and a set of edges or arcs $E \subseteq N \times N$ connecting them pairwise. 
+        An edge connecting the nodes $i$ and $j$ is represented by $\{i,j\}$ or $(i,j)$ if the graph is \emph{undirected} or \emph{directed} respectively. 
+    \end{definition}
+    \begin{example}
+        A road network which connects $n$ cities can be modelled, by a graph where a city corresponds to a node, and a connection corresponds to an edge. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/graph.png}
+        \end{figure}
+        The graph on the left is undirected and defined as: 
+        \begin{itemize}
+            \item $N=\{1,2,3,4,5\}$
+            \item $E=\{\{1,2\},\{1,4\},\{2,3\},\{2,4\},\{3,4\},\{3,5\},\{4,5\}\}$
+        \end{itemize}
+        The graph on the right is directed and defined as: 
+        \begin{itemize}
+            \item $N=\{1,2,3,4,5\}$
+            \item $E^{'}=\{(1,2),(1,4),(2,3),(2,4),(3,4),(3,5),(4,5)\}$
+        \end{itemize}
+    \end{example}
+    \begin{definition}
+        Two nodes are \emph{adjacent} if they are connected by an edge. An edge $e$ is \emph{incident} in a node $v$ if $v$ is an endpoint of $e$. In undirected graphs, 
+        the \emph{degree} of a node is the number of incident edges in a given node. In directed graph, the \emph{id-degree} (\emph{out-degree}) of a node is the number of arcs
+        that ave it as successor (predecessor).
+    \end{definition}
+    \begin{example}
+
+        In the undirected graph, we have that nodes $1$ and $2$ are adjacent and $1$ and $3$ are not. The edge $\{1,2\}$ is incident in nodes $1$ and $2$. Node $1$ has a degree $2$,
+        and node $4$ has a degree of $4$. 
+
+        In the directed graph, the node $1$ has an in-degree equal to $0$, and an out-degree equal to $2$.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/graph.png}
+        \end{figure}
+    \end{example}
+    \begin{definition}
+        A \emph{directed path from $i \in N$ to $j \in N$} is a sequence of arcs $p=\langle \{v_1,v_2\},\{v_2,v_3\},\dots,\{v_{k-1},v_k\}\rangle $ connecting nodes $v_1$ and $v_k$. 
+        Nodes $u$ and $v$ are \emph{connected} if there is a path connecting them. A graph $(N,E)$ is connected if $u,v$ are connected for any $u,v \in N$. A graph is \emph{strongly
+        connected} if $u,v$ are connected by a directed path for any $u,v \in N$. A \emph{cycle} or circuit is a path with $v_1=v_k$.
+    \end{definition}
+    \begin{example}
+        The undirected graph has a path $\langle \{2,3\},\{3,4\},\{4,5\}\rangle$ from node $2$ to node $5$. So we say those nodes are connected. 
+        
+        The directed graph has a directed path $\langle (3,5),(5,4),(4,2),(2,3),(3,4) \rangle$ from node $3$ to node $4$. So we say those nodes are not strongly connected. 
+        
+        In the undirected graph $\langle \{2,3\},\{3,5\},\{5,4\},\{4,2\}\rangle$ is a cycle. 
+        In the directed graph $\langle (2,3),(3,4),(4,2) \rangle$ is a circuit. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/graph.png}
+        \end{figure}
+    \end{example}
+    \begin{definition}
+        A graph is \emph{bipartite} if there is a partition $N=N_1 \cup N_2$ with $N_1 \cap N_1 = \varnothing$ such that no edge connects nodes in the same subset. 
+        A graph is \emph{complete} if $E=\{ \{v_i,v_j\} | v_i,v_j \in N \land i \leq j \}$
+    \end{definition}
+    \begin{example}
+        The graphic on the left is bipartite because we can find two subsets of nodes such that $N=N_1 \cup N_2$ with $N_1 \cap N_1 = \varnothing$ that are: $N_1=\{1,2,3\}$ and 
+        $N_2=\{4,5\}$. The graph on the right is a complete graph because all the nodes are connected with each other. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/bipcomp.png}
+        \end{figure}
+    \end{example}
+    \begin{definition}
+        Given a directed graph $G=(N,A)$ and $S \subset NM$, the \emph{outgoing cut} induced by $S$ is:
+        \[ \delta^{+}(S)=\{(u,v) \in A | u \in S \land v \in N-S \} \]
+        while the \emph{incoming cut} induced by $S$ is:
+        \[ \delta^{-}(S)=\{(u,v) \in A | v \in S \land u \in N-S \} \]
+    \end{definition}
+    \begin{example}
+        In the following graph we can note that: 
+        \begin{itemize}
+            \item $\delta^{+}(\{1,4\})=\{(1,2),(4,2),(4,5)\}$
+            \item $\delta^{-}(\{1,4\})=\{(3,4),(5,4)\}$
+        \end{itemize}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/cuts.png}
+        \end{figure}
+    \end{example}
+    An undirected graph with $n$ nodes has at most $m=n(n-1)$ arcs. 
+    A directed graph with $n$ nodes has at most $m=\dfrac{n(n-1)}{2}$ arcs.
+    \begin{definition}
+        A graph is said to be \emph{dense} if: 
+        \[m \approx n^2\]
+        and \emph{sparse} if: 
+        \[m \ll n^2\]
+    \end{definition}
+    The best way to represent a dense graph is by using an $n \times n$ adjacency matrix, that is defined in the following way: 
+    \[
+    \begin{cases}
+        a_{ij}=1 \:\:\:\:\:\: \textnormal{if}\:(i,j) \in A \\
+        a_{ij}=0 \:\:\:\:\:\: \textnormal{otherwise}    
+    \end{cases}    
+    \]
+    The best way to represent a sparse graph is by using lists of successors for each node. 
+    \begin{example}
+        The adjacency matrix for the following graph is: 
+        \[A=
+        \begin{bmatrix}
+            0 & 1 & 0 & 1 & 0 \\
+            0 & 0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 & 1 \\
+            0 & 1 & 0 & 0 & 1 \\
+            0 & 0 & 0 & 1 & 0 
+            \end{bmatrix}
+        \]
+        And the list of successor is: 
+        \[S(1)=\{2,4\} \:\:\: S(2)=\{3\} \:\:\:S(3)=\{4,5\} \:\:\: S(4)=\{2,5\} \:\:\: S(5)=\{4\} \:\:\:\]
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.3\linewidth]{images/graphs.png}
+        \end{figure}
+    \end{example}
+
+    \section{Graph reachability problem}
+    Given the directed graph $G=(N,A)$ and a node $s$, determine all the nodes that are reachable from $s$. 
+    \begin{algorithm}[H]
+        \caption{Graph reachability problem}
+            \begin{algorithmic}[1]
+                \State $Q \leftarrow \{s\}$
+                \State $M \leftarrow \{\varnothing\}$
+                \While {$Q \neq 0$}
+                    \State $u \leftarrow \textnormal{node in } Q$
+                    \State $Q \leftarrow Q-\{u\}$
+                    \State $M \leftarrow M \cup \{u\}$
+                    \For {$(u,v) \in \delta^{+}(u)$}
+                        \If {$v \notin M$ and $v \notin Q$}
+                            \State $Q \leftarrow Q \cup \{v\}$
+                        \EndIf
+                    \EndFor
+                \EndWhile
+            \end{algorithmic}
+    \end{algorithm}
+    The worst case complexity of the previous algorithm is $O(n^2)$.
+    \begin{example}
+        Given the following graph and $s=2$ the algorithm makes the following steps: 
+        \begin{enumerate}
+            \item $Q=\{2\} \:\:\:\:\:\: M=\varnothing$
+            \item $Q=\{3\} \:\:\:\:\:\: M=\{2\}$
+            \item $Q=\{4,5\} \:\:\:\:\:\: M=\{2,3\}$
+            \item $Q=\{5\} \:\:\:\:\:\: M=\{2,3,4\}$
+            \item $Q=\varnothing \:\:\:\:\:\: M=\{2,3,4,5\}$
+        \end{enumerate}
+        So the nodes $\{2,3,4,5\}$ are reachable from node $2$. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.3\linewidth]{images/graphs.png}
+        \end{figure}
+    \end{example}
+
+
+
 
 \end{document}
