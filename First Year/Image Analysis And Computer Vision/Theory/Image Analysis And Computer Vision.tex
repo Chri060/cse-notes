@@ -79,7 +79,7 @@
     Since we have a simplified lens, it is possible to say that:
     \[y_1=y_2=y\]
     
-    \section{Deviation of a light ray crossing a thin lens}
+    \section{Light rays deviation}
     \begin{figure}[H]
         \centering
        \includegraphics[width=0.5\linewidth]{images/ray.png}
@@ -101,7 +101,7 @@
     \section{Focalization of parallel light rays}
     \begin{figure}[H]
         \centering
-       \includegraphics[width=0.5\linewidth]{images/focalization.png}
+        \includegraphics[width=0.5\linewidth]{images/focalization.png}
     \end{figure}
     In the image we have one ray that passes trough the centre of the lens and the other that passes in another point but it is parallel to the first one. So we have that: 
     \begin{itemize}
@@ -111,5 +111,140 @@
     This means that all the rays that proceed in parallel meets in one common point on the focal point $Z$, with a distance from the $Y$ axis equal to: 
     \[Z=-f\]
 
+    \section{Path of a light ray}
+    To find the projection of a light ray crossing a lens in any position we need to:
+    \begin{enumerate}
+        \item Draw a line parallel to the selected ray and that passes through the center of the lens. 
+        \item Intersect the line with the focal plane.
+        \item The ray will go from the point in which it crosses the lens to the point found on the focal plane. 
+    \end{enumerate}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/path.png}
+        \caption{Path of a light ray through a lens}
+    \end{figure}
+
+    \section{Pin-hole camera}
+    To have a focussed image we need that every ray hits the focal plane of the camera in exactly one pixel. To obtain this we need that the distance between the lens and
+    the source of the ray $Z(P)$ must be much greater than the lens aperture $a$ (at least $1000\times$). In this way we can place the screen at distance $Z$ from the lens. If all they rays
+    respect this constraint they will be all parallel for the lens and the image will be on focus. The camera that we have defined so far is called pin-hole camera and needs:
+    \begin{enumerate}
+        \item Thin spherical lens. 
+        \item Small angles.
+        \item $Z(P) \gg a$.
+        \item $Z=f$.
+    \end{enumerate}
+
+    \section{From real world to 2D images}
+    The images are in a 2D plane while the real world is in three dimensions. So, a picture have less information than the original subject in the real world. In fact, the space 
+    projection of space in a 2D image is a perspective projection, that is: 
+    \begin{itemize}
+        \item Nonlinear.
+        \item Not shape-preserving.
+        \item Not length-ratio preserving. 
+    \end{itemize}
+    Due to the triangle equality we have that:
+    \[x=f \dfrac{X}{Z} \:\:\:\:\:\: y=f \dfrac{Y}{Z}\]
+    The only way to avoid this information loss is to take a picture of a planar scene on plane parallel to image plane, so we need to have 
+    \[Z=Z_0=\textnormal{constant}\]
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/Z0.png}
+    \end{figure}
+    In this case the only difference between reality and projection will be the down scaling, while the other dimensions are preserved: 
+    \[x=f \dfrac{X}{Z_0}=kX \:\:\:\:\:\: y=f \dfrac{Y}{Z_0}=kY \]
+    
+    \section{Perspective and vanishing point}
+
+\newpage
+
+\chapter{Planar Projective Geometry}
+    \section{Introduction}
+    The elements needed to define a planar geometry are: point, lines, conics and dual conics. The possible transformations in this type of geometry are: projectivities, 
+    affinities, similarities and isometries. 
+
+    \section{Points}
+    The points can be defined in cartesian coordinates by defining a euclidean plane with his origin. In this way every point is defined unambiguously with two cartesian 
+    coordinates $(x,y)$. 
+
+    To analyze images it is better to use homogeneous coordinates. To define this type of coordinates we need to construct a 3D space with $x,y,w$ axis. So, now to define a point
+    we have to assign three values. This means that every number can be represented in infinite ways by changing the value of $w$. The correlation between cartesian
+    and homogeneous coordinates is the following: 
+    \[
+    \overline{x} =
+    \begin{bmatrix}
+        x \\
+        y \\
+        w 
+    \end{bmatrix}
+    =w
+    \begin{bmatrix}
+        X \\
+        Y \\
+        1 
+    \end{bmatrix}
+    \]
+    So we have that a vector $\overline{x} = \begin{bmatrix} x \\ y \\ w \end{bmatrix}$ and all its nonzero multiples $\lambda \begin{bmatrix} x \\ y \\ w \end{bmatrix}$, including
+    $\begin{bmatrix} x/w \\ y/w \\ 1 \end{bmatrix}$, represent the point of cartesian coordinates $\begin{bmatrix} X \\ Y \end{bmatrix}=\begin{bmatrix} x/w \\ y/w\end{bmatrix}$
+    on the euclidean plane. This type of representation has the homogeneity property:  any vector $\overline{x}$ is equivalent to all its nonzero multiples $\lambda \overline{x}, 
+    \lambda \neq 0$, since they represent the same point. Since the null vector does not represent any point we have that: 
+    \begin{definition}
+        The \emph{projective plane} is defined as:
+        \[\mathbb{P}^2=\{{\begin{bmatrix} x & y & w \end{bmatrix}}^T \in \mathbb{R}^3\}-\{{\begin{bmatrix} 0 & 0 & 0 \end{bmatrix}}^T\}\]
+    \end{definition}
+    \begin{example}
+        The origin of the plane is defined as:
+        \[{\begin{bmatrix} 0 & 0 & 1 \end{bmatrix}}^T\]
+        A generic point in heterogeneous coordinates can be transformed into a couple of cartesian coordinate with a simple division. The point:
+        \[{\begin{bmatrix} 0 & 8 & 4 \end{bmatrix}}^T\]
+        in cartesian coordinate is equal to: 
+        \[{\begin{bmatrix} x/w & y/w  \end{bmatrix}}^T={\begin{bmatrix} 0/4 & 8/4 \end{bmatrix}}^T=\begin{bmatrix} 0 & 4 \end{bmatrix}\]
+    \end{example}
+    Consider the point $\overline{x}=\begin{bmatrix} x \\ y \\ w \end{bmatrix}$ and let $w$ slowly drop to $0$ starting from $w=1$. As $w$ decreases, the point will move along a 
+    constant direction $\begin{bmatrix} x & y \end{bmatrix}$, with increasing distance from the origin. As $w$ tends to $0$, this points tends to the infinity along the direction 
+    $\begin{bmatrix} x & y \end{bmatrix}$. 
+    \begin{definition}
+        The point \[\overline{x} = \begin{bmatrix} x \\ y \\ w \end{bmatrix}\] is called the \emph{point at the infinity along the direction} $\begin{bmatrix} x & y \end{bmatrix}$. 
+    \end{definition}
+    Points at the infinity, who represent directions, are not part of the euclidean plane: they are extra points, well-defined within the projective plane. So, in general we have
+    that the projective plane is the euclidean plane with also the points at the infinity. 
+
+    \section{Lines}
+    In the euclidean plane a line is defined as: 
+    \[aX+bY+c=0\]
+    In the heterogeneous plane the lines are defined as: 
+    \[a\dfrac{x}{w}+b \dfrac{y}{w}+c=0 \Longrightarrow ax+by+cw=0\]
+    This equation can be also represented using two vectors called respectively $\overline{l}^T$ and $\overline{x}$:
+    \[\begin{bmatrix} a & b & c \end{bmatrix} \begin{bmatrix} x \\ y \\ w \end{bmatrix}=0\]
+    where the vector $\overline{l}={\begin{bmatrix} a & b & c \end{bmatrix}}^T$ and all its nonzero multiples represent a line. This type of representation has the homogeneity
+    property: any vector $\overline{l}$ is equivalent to all its nonzero multiples $\lambda \overline{l}, \lambda \neq 0$, since they represent the same line. $a,b,c$ are called 
+    homogeneous parameters of the line. 
+
+    As for numbers, there is an infinite number of equivalent representations for a single line, namely all nonzero multiples of the unit normal vector. The null vector does not
+    represent any lines.
+    \begin{definition}
+        The \emph{projective dual plane} is defined as: 
+        \[\mathbb{P}^2=\{{\begin{bmatrix} a & b & c \end{bmatrix}}^T \in \mathbb{R}^3\}-\{{\begin{bmatrix} 0 & 0 & 0 \end{bmatrix}}^T\}\]
+    \end{definition}
+
+    There are three important remarks: 
+    \begin{enumerate}
+        \item If the third parameter is null, ${\overline{l}=\begin{bmatrix} a & b & 0 \end{bmatrix}}^T$, then the line goes through point $\begin{bmatrix} 0 & 0 \end{bmatrix}$. 
+        \item Within the euclidean plane, direction $\begin{bmatrix} a & b \end{bmatrix}$ is normal to the line \\ ${\overline{l}=\begin{bmatrix} a & b & c \end{bmatrix}}^T$. 
+        \item Two lines ${\overline{l}=\begin{bmatrix} a & b & c \end{bmatrix}}^T$ and ${\overline{l}=\begin{bmatrix} a & b & c^{'} \end{bmatrix}}^T$ are parallel: their common 
+            direction is $[b,-a]$. 
+    \end{enumerate}
+    \begin{example}
+        The cartesian axes are defined as: 
+        \[\overline{l}_x=\begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix} \:\:\:\:\:\: \overline{l}_y=\begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}\]
+    \end{example}
+    The incidence relation of a line $\overline{l}^T\overline{x}=0$ is defined when: 
+    \begin{itemize}
+        \item The point $\overline{x}$ is on the line $\overline{l}$ or
+        \item The line $\overline{l}$ goes through the point $\overline{x}$. 
+    \end{itemize}
+    \begin{definition}
+        The line \[\begin{bmatrix} 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} x \\ y \\ w \end{bmatrix}=\overline{w}=0\] is called the \emph{point at the infinity} $\overline{l}_{\infty}={\begin{bmatrix} 0 & 0 & 1 \end{bmatrix}}^T$. 
+    \end{definition}
 
 \end{document}
