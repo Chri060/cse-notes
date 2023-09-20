@@ -198,15 +198,158 @@
     \begin{example}
         Given two transaction $T_1$ and $T_2$ we have six possible different schedules, where only two are serial:
         \begin{enumerate}
-            \item $r_1(x) \rightarrow w_1(x) \rightarrow r_2(z) \rightarrow w2(z)$
-            \item $r_2(z) \rightarrow w_2(z) \rightarrow r_1(x) \rightarrow w_1(x)$
-            \item $r_1(x) \rightarrow r_2(z) \rightarrow w_1(x) \rightarrow w_2(z)$
-            \item $r_2(z) \rightarrow r_1(x) \rightarrow w_2(z) \rightarrow w_1(x)$
-            \item $r_1(x) \rightarrow r_2(z) \rightarrow w_2(z) \rightarrow w_1(x)$
-            \item $r_2(z) \rightarrow r_1(x) \rightarrow w_1(x) \rightarrow w_2(z)$
+            \item $r_1(x) w_1(x) r_2(z) w2(z)$
+            \item $r_2(z) w_2(z) r_1(x) w_1(x)$
+            \item $r_1(x) r_2(z) w_1(x) w_2(z)$
+            \item $r_2(z) r_1(x) w_2(z) w_1(x)$
+            \item $r_1(x) r_2(z) w_2(z) w_1(x)$
+            \item $r_2(z) r_1(x) w_1(x) w_2(z)$
         \end{enumerate}
         The first two are serial, the third and the fourth are nested, and the last two interleaved.
     \end{example}
+
+    The concurrency control has to reject all the schedules that causes anomalies. 
+    \begin{definition}
+        The \emph{scheduler} is a component that accepts or rejects operations requested by the transactions. 
+        The \emph{serial schedule} is a schedule in which the actions of each transaction occur in a contiguous sequence.
+    \end{definition}
+    A serializable schedule leaves the database in the same state as some serial schedule of the same transactions. This type of schedule is commonly accepted as a notion of schedule 
+    correctness. To introduce the classes we have to initially make two assumptions: 
+    \begin{itemize}
+        \item The transactions are observed a posteriori. 
+        \item The transactions limited to those that have been committed (commit-projection).
+    \end{itemize}
+    With the full schedule we can decide whether a schedule is admissible or not. In practice, the scheduler must take decisions while transaction are running because they cannot 
+    know the sequence a priori.
+    \section{View-serializability}
+    \begin{definition}
+        We say that:
+        \begin{itemize}
+            \item $r_i(x)$ \emph{reads-from} $w_j(x)$ when  $w_j(x)$  precedes  $r_i(x)$ and there is no  $w_k(x)$ in $S$ between  $r_i(x)$  and  $w_j(x)$. 
+            \item  $w_i(x)$ in a schedule $S$ is a \emph{final write} if it is the last write on $x$ that occurs in $S$. 
+        \end{itemize}
+        Two schedules are said to be \emph{view-equivalent} ($S_i \approx_V S_j$) if they have:
+        \begin{enumerate}
+            \item The same operations. 
+            \item The same reads-from relationships.
+            \item The same final writes. 
+        \end{enumerate}
+    \end{definition}
+
+    A schedule is view-serializable (VSR) if it is view-equivalent to a serial schedule of the same transactions.
+    The reads-from relationship $r_i(x)$ reads-from $w_j(x)$ in a schedule $S$ assumes that $r_i(x)$ reads the value written by $w_j(x)$ independently of the time at which the 
+    commit of $T_j$ occurs. In other words the value written by $w_j(x)$ could be uncommitted when $r_i(x)$ reads it, but we are sure (by definition of commit-projection) that it 
+    will be committed.
+    \begin{example}
+        The following schedules are given:
+        \begin{itemize}
+            \item $S_1: w_0(x) r_2(x) r_1(x) w_2(x) w_2(z)$
+            \item $S_2: w_0(x) r_1(x) r_2(x) w_2(x) w_2(z)$
+            \item $S_3: w_0(x) r_1(x) w_1(x) r_2(x) w_1(z)$
+            \item $S_4: w_0(x) r_1(x) w_1(x) w_1(z) r_2(x)$
+            \item $S_5: r_1(x) r_2(x) w_1(x) w_2(x)$
+            \item $S_6: r_1(x) r_2(x) w_2(x) r_1(x)$
+            \item $S_7: r_1(x) r_1(y) r_2(z) r_2(y) w_2(y) w_2(z) r_1(z)$
+        \end{itemize}
+        We have that only $S_2$ and $S_3$ are serial. $S_1$ is view-equivalent to serial schedule $S_2$ (so it is view-serializable). 
+        $S_3$ is not view-equivalent to $S_2$ (different operations) but is view-equivalent to serial schedule $S_4$, so it is also view-serializable. 
+
+        $S_5$ corresponds to a lost update, $S_6$ corresponds to a non-repeatable read, and $S_7$ corresponds to a phantom update. All these schedules are non view-serializable. 
+        
+        The following schedules are given:
+        \begin{itemize}
+            \item $S_a: w_0(x) r_1(x) w_0(z) r_1(z) r_2(x) w_0(y) r_3(z) w_3(z) w_2(y) w_1(x) w_3(y)$
+            \item $S_b: w_0(x) w_0(z) w_0(y) r_2(x) w_2(y) r_1(x) r_1(z) w_1(x) r_3(z) w_3(z) w_3(y)$
+            \item $S_c: w_0(x) w_0(z) w_0(y) r_2(x) w_2(y) r_3(z) w_3(z) w_3(y) r_1(x) r_1(z) w_1(x)$
+        \end{itemize}
+        $S_a$ and $S_b$ are view-equivalent because all the reads-from relationship and final writes are the same. In fact, we have: 
+        \begin{itemize}
+            \item Reads-from: $r_1(x)$ from $w_0(x)$, $r_1(z)$ from $w_0(z)$, $r_2(x)$ from $w_0(x)$, $r_3(z)$ from $w_0(z)$.
+            \item Final writes: $w_1(x)$, $w_3(y)$, $w_3(z)$.
+        \end{itemize}
+        $S_a$ and $S_c$ are not view-equivalent because not all the reads-from relationship are the same. 
+    \end{example}
+    Deciding view-equivalence of two given schedules is done in polynomial time and space. Deciding if a generic schedule is in VSR is an NP-complete problem. Therefore, we need to 
+    find a stricter definition that is easier to check. The new definition may lead to rejecting some schedule that would be acceptable under view-serializability but not under the 
+    stricter/faster criterion.
+    
+    \section{Conflict-serializability}
+    \begin{definition}
+        Two operations $o_i$ and $o_j$ ($i \neq j$) are in \emph{conflict} if they address the same resource and at least one of them is a write. There are tho possible cases:
+    \end{definition}
+    \begin{enumerate}
+        \item Read-write conflicts ($r-w$ or $w-r$).
+        \item Write-write conflicts ($w-w$).
+    \end{enumerate}
+    \begin{definition}
+        Two schedules are \emph{conflict-equivalent} (($S_i \approx_C S_j$)) if $S_i$ and $S_j$ contain the same operations and in all the conflicting pairs the transactions occur in the same order. 
+        A schedule is \emph{conflict-serializable} (CSR) if and only if it is conflict equivalent to a serial schedule of the same transactions. 
+    \end{definition}
+    We have that $VSR \subset CSR$: all conflict-serializable schedules are also view- serializable, but the inverse is not necessarily true.
+    So, we have that conflict-equivalence implies view-equivalence. 
+    \begin{proof}[VSR is a subset of CSR]
+        Schedule $S = r_1(x) w_2(x) w_1(x) w_3(x)$ is: 
+        \begin{itemize}
+            \item View-serializable.
+            \item Not conflict-serializable
+        \end{itemize}
+        It is possible to check that there is no conflict-equivalent serial schedule.
+    \end{proof}
+    \begin{proof}[CSR implies VSR]
+        We assume $S_1 \approx_C S_2$ and prove that $S_1 \approx_V S_2$. $S_1$ and $S_2$ must have: 
+        \begin{itemize}
+            \item The same final writes: if they didn't, there would be at least two writes in a different order, and since two
+                writes are conflicting operations, the schedules would not be $\approx_C$. 
+            \item The same reads-from relations: if not, there would be at least one pair of conflicting operations in a different
+                order, and therefore, again, $\approx_C$ would be violated. 
+        \end{itemize}
+    \end{proof}
+    The testing of view-serializability is done with a conflict graph that has one node for each transaction $T_i$, and one arc from $T_i$ to $T_j$ if there exists at least one conflict between an operation $o_i$ of $T_i$ and an operation $o_j$ of $T_j$ such that $o_i$ precedes $o_j$.
+    \begin{theorem}
+        A schedule is in CSR if and only if its conflict graph is acyclic.
+    \end{theorem}
+    \begin{example}
+        We are given the schedule \[S: w_0(x) r_1(x) w_0(z) r_1(z) r_2(x) w_0(y) r_3(z) w_3(z) w_2(y) w_1(x) w_3(y)\]
+        To test the conflict serializability we have to do the following steps: 
+        \begin{enumerate}
+            \item Create all the nodes based on the number of transactions of the schedule. 
+            \item Divide the operation based on resource requested.
+            \item Check all the write-write and read-write relationships in each subset, and add the arcs based on these. 
+        \end{enumerate}
+        In the given example we obtain: 
+        \begin{itemize}
+            \item $x: w_0 r_1 r_2 w_1$
+            \item $y: w_0 w_2 w_3$
+            \item $z: w_0 r_1 r_3 w_3$
+        \end{itemize}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/conflict.png}
+        \end{figure}
+    \end{example}
+    \begin{proof}[CSR implies acyclicity of the conflict graph]
+        Consider a schedule $S$ in $CSR$. As such, it is $\approx_C$ to a serial schedule. 
+        Without loss of generality we can label the transactions of $S$ to say that their order in the serial schedule is: $T_1 T_2 \dots T_n$.
+        Since the serial schedule has all conflicting pairs in the same order as schedule $S$, in the conflict graph there can only be arcs $(i,j)$, with $i<j$. 
+        Then the graph is acyclic, as a cycle requires at least an arc $(i,j)$ with $i>j$.
+    \end{proof}
+    \begin{proof}[Acyclicity of the conflict graph implies CSR]
+        If $S$'s graph is acyclic then it induces a topological (partial) ordering on its nodes. The same partial order exists on the transactions of $S$. 
+        Any serial schedule whose transactions are ordered according to the partial order is conflict-equivalent to $S$, because for all conflicting pairs $(i,j)$ it is always $i<j$. 
+    \end{proof}
+        
+    \section{Concurrency control in practice}
+    CSR checking would be efficient if we knew the graph from the beginning, but usually we don't. Therefore, a scheduler must rather work online. So, it is not feasible to maintain the conflict graph, update it, and check its acyclicity at each operation request. At the same time, the assumption that concurrency control can work only with the commit-projection of the schedule is unrealistic because aborts do occur. We need some simple on-line decision criterion for the scheduler, which must avoid as many anomalies as possible, and have negligible overhead. 
+        
+    When dealing with online concurrency control, it is important also to consider arrival sequences. The CC system maps an arrival sequence into an effective a posteriori schedule. To implement this on-line scheduling we use two main families of techniques:
+    \begin{itemize}
+        \item Pessimistic (locks): if a resource is taken, make the requester wait or pre-empt the holder.
+        \item Optimistic (timestamps and versions): serve as many requests as possible, possibly using out-of-date versions of the data. 
+    \end{itemize}
+    Usually, commercial systems take the best of both worlds. 
+
+    
+    \section{Locking}
 
 
 
