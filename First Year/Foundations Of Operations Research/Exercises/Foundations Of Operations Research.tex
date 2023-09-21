@@ -1,5 +1,5 @@
 \documentclass[12pt, a4paper]{report}
-\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox}
+\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox, exercise}
 \usepackage[english]{babel}
 
 \makeatletter
@@ -38,6 +38,110 @@
 
 \newpage
 
-
+\chapter{Exercise session I}
+\begin{Exercise}[label=1]
+    A bank has a capital of $C$ billions of Euro and two available stocks:
+    \begin{enumerate}
+        \item With an annual revenue of $15\%$ and risk factor of $\dfrac{1}{3}$. 
+        \item With an annual revenue of $25\%$ and risk factor of $1$.
+    \end{enumerate}
+    The risk factor represents the maximum fraction of the stock value that can be lost. A risk factor of $25\%$ implies that, if stocks are bought for $100$ euro up to $25$ euro 
+    can be lost. It is required that at least half of $C$ is risk-free. The amount of money used to buy stocks of two must not be larger than two times that used to buy stocks of one. 
+    At least $\dfrac{1}{6}$ of C must be invested into one. 
     
+    Give a Linear Programming formulation for the problem of determining an optimal portfolio for which the profit is maximized. 
+    Solve the problem graphically.
+\end{Exercise}
+\begin{Answer}[ref=1]
+    \begin{itemize}
+        \item The decision variable $x_i$ that is the capital invested in each stock ($i=1,2$).
+        \item The objective function requires to maximize the expected income, so we have: 
+            \[\max{\left(0.15x_1+0.25x_2\right)}\]
+        \item The constraints are:
+            \begin{itemize}
+                \item Maximum capital: 
+                    \[x_1+x_2 \leq C\]
+                \item Half of the invested capital is risk-free:
+                    \[\dfrac{1}{3}x_1+1x_2 \leq \dfrac{C}{2}\]
+                \item The amount of money used to buy stocks of two must not be larger than two times that used to buy stocks of one:
+                    \[x_2 \leq 2x_1\]
+                \item At least $\dfrac{1}{6}$ of $C$ must be invested into one: 
+                    \[x_1 \geq \dfrac{1}{6}C\]
+            \end{itemize}
+    \end{itemize}
+    The region with feasible solutions is the one where all the planes intersects. To find the feasible point where the objective function attains its maximal value, we draw the 
+    level curves: 
+    \[f(x_1,x_2)=0.15x_1+0.25x_2=z\]
+    that is the set of points whose objective function values is equal to $z$, for any $z$. When $z$ increases, we obtain parallel lines that move towards the direction of
+    $\nabla f(x_1,x_2)$. The last feasible points having a nonempty intersection are the maximizers of $f$ over the feasible set. In this case, there is a single maximizer, $x^{*}$, 
+    at the intersection of lines one and two. So, with the linear system: 
+    \[
+    \begin{cases}
+        x_1+x_2 = C \\
+        \dfrac{1}{3}x_1+1x_2 = \dfrac{C}{2}
+    \end{cases} 
+    \]
+    we obtain that $x^{*}=\left( \dfrac{3C}{4},\dfrac{C}{4} \right)$, where $f(x^{*})=\dfrac{7C}{40}$. 
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=2]
+    A refinery produces two types of gasoline, mixing three basic oils according to the following gasoline mixture rules:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|ccc|c|}
+        \cline{2-5}
+        \textbf{}                        & \textbf{Oil 1} & \textbf{Oil 2} & \textbf{Oil 3} & \textbf{Revenue} \\ \hline
+        \multicolumn{1}{|c|}{Gasoline A} & $\leq 30\%$    & $\geq 40\%$    & -              & 5.5              \\
+        \multicolumn{1}{|c|}{Gasoline B} & $\leq 40\%$    & $\geq 10\%$    & -              & 4.5              \\ \hline
+        \end{tabular}
+    \end{table}
+    The last column of the previous table indicates the profit (euro/barrel). The availability of each type of oil (in barrel) and the cost (euro/barrel) are as follows:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|c|c}
+        \textbf{Oil} & \textbf{Availability} & \textbf{Cost} \\ \hline
+        1            & 3 000                 & 3             \\
+        2            & 2 000                 & 6             \\
+        3            & 4 000                 & 4            
+        \end{tabular}
+    \end{table}
+    Give a Linear Programming formulation for the problem of determining a mixture that maximizes the profit (difference between revenues and costs).
+\end{Exercise}
+\begin{Answer}[ref=2]
+    \begin{itemize}
+        \item Decision variables:
+            \begin{itemize}
+                \item $x_{ij}$ is the amount of the $i$-th oil used to produce the $j$-th gasoline, $i \in \{1,2,3\}$ and $j \in \{A,B\}$. 
+                \item $y_j$ is the amount of gasoline of type $j$-th that is produced, $j \in \{A,B\}$. 
+            \end{itemize}
+        \item The objective function needs to maximize the profit that is equal to: 
+            \[\max{5.5y_A+4.5y_B+3(x_{1A}+x_{1B})-6(x_{2A}+x_{2B})-4(x_{3A}+x_{3B})}\]
+        \item The constraints are: 
+            \begin{itemize}
+                \item Availability of 1: 
+                    \[x_{1A}+x_{1B} \leq 3 000\]
+                \item Availability of 2:
+                    \[x_{2A}+x_{2B} \leq 2 000\]
+                \item Availability of 3:  
+                    \[x_{3A}+x_{3B} \leq 4 000\]
+                \item Conservation of A:
+                    \[y_A=x_{1A}+x_{2A}+x_{3A}\]
+                \item Conservation of B:
+                    \[y_B=x_{1B}+x_{2B}+x_{3B}\]
+                \item Minimum quantity of $A$: 
+                    \[x_{1A} \leq 0.3y_A\]
+                \item Minimum quantity of $B$: 
+                    \[x_{1B} \leq 0.5y_B\]
+                \item Maximum quantity of $A$: 
+                    \[x_{2A} \geq 0.4y_A\]
+                \item Maximum quantity of $B$: 
+                    \[x_{2B} \geq 0.1y_B\]
+            \end{itemize}
+        \item The variable must be non-negative:
+            \[x_{1A},x_{2A},x_{3A},x_{1B},x_{2B},x_{3B},y_A,y_B \geq 0\]  
+    \end{itemize}
+    It is possibly to substitute the variables $y_A$ and $y_B$ with the $x$ variables. 
+\end{Answer}
 \end{document}
