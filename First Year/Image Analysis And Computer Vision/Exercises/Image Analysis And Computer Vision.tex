@@ -1,5 +1,5 @@
 \documentclass[12pt, a4paper]{report}
-\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox}
+\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox, matlab-prettifier, exercise}
 \usepackage[english]{babel}
 
 \makeatletter
@@ -31,7 +31,7 @@
         \item Multi-view analysis: 3D shape reconstruction, self-calibration, 3D scene understanding.
         \item Linear filters and convolutions, space-invariant filters, Fourier Transform, sampling and aliasing. 
         \item Nonlinear filters: image morphology and morphology operators (dilate, erode, open, close), median filters.
-        \item Edge detection and feature detection techniques. feature matching and feature tracking along image sequences.
+        \item Edge detection and feature detection techniques. Feature matching and feature tracking along image sequences.
         \item Inferring parametric models from noisy data (including outliers), contour segmentation, clustering, Hough Transform, Ransac (random sample consensus). 
         \item Applications: object tracking, object recognition, classification.
     \end{itemize}
@@ -43,6 +43,126 @@
 
 \newpage
 
+\chapter{Introduction to MATLAB}
+    \section{Main MATLAB operators}
+    To print some string it is possible to use; 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Print the string
+disp('string');
+% Print the string with C-like syntax
+fprintf('string\n%s %d', 'string', number);
+    \end{lstlisting}
+    The variables are created as follows: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Variables are created by assignements
+v = 3
+c = 'k'
+size(v)
+% Data types are automatically defined
+whos v
+% Casting to 8-bit integers
+v = uint8(v)
+    \end{lstlisting}
+    The main data types used on MATLAB: double, uint8, and logical. The arrays are defined in the following ways: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% A row vector
+r=[1, 2, 3, 4]
+% A column vector
+c=[1; 2; 3; 4]
+% Vectors by regular increment operator
+% [start : step : end]
+a = [1 : 2 : 10];
+% A matrix
+v=[ 1 2; 
+    3 4 ]
+    \end{lstlisting}
+    It is possible to concatenate arrays: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+B = [v', v']
+C = [v ; v]        
+    \end{lstlisting}
+    The arrays can be divided in subarrays: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% First row and second column 
+v(1,2) 
+% The second column of v
+v(:,2)
+% The first row of v
+v(1,:) 
+% Some of the columns from 2 to 4
+B(:,2:4) 
+    \end{lstlisting}
+    Some useful mathematical operations are: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% . means elementwise operation
+[1 2 3].*[4 5 6]
+[1 2 3] + 5
+[1 2 3] * 2 
+[1 2 3] .* 2 
+[1 2 3] / 2
+[1 2 3] ./ 2 
+[1 2 3] .^ 2 
+% Inner product
+[1 2 3] * [4 5 6]' 
+% This is the matrix product, returns a matrix
+[1 2 3]' * [4 5 6] 
+% Functions for rounding functions
+ceil(10.56)
+floor(10.56)
+round(10.56)
+% Arithmetic functions
+sum([1 2 3 4])
+sum([1:4;5:8])
+sum([1:4;5:8],2)
+    \end{lstlisting}
 
-    
+    \section{Commands for images}
+    The images in MATLAB are treated as matrices:
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+im=imread('photo.png');
+% Show the image
+imshow(im);
+% Show two concatenated images orizontally
+imshow([im im]);
+% Show two concatenated images vertically
+imshow([im; im]);
+    \end{lstlisting}
+    To plot the histogram of the various pixels it is possible to write: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+h = hist(im(:), [0: im_length]);
+figure(2), stairs([0: im_length], h), title('Intensity histogram')
+axis tight
+    \end{lstlisting}
+    It is possible to modify the brightness and contrast with a simple operation:
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+figure(1), imshow(im + 50), title('50 graylevels')
+figure(1), imshow(im + 100), title('100 graylevels')
+% contrast modify
+eq = double(im - min(im(:)))/double(max(im(:)) - min(im(:))) * 255;
+    \end{lstlisting}
+    Image ranges (in the visualization) can be also controlled:
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+imshow(im,[-100 156]); title('more brighness');
+imshow(im,[0 156]); title('more brighness and contrast');
+imshow(im,[ 100 256]); title('less brighness, more contrast');
+imshow(im,[ 100 356]); title('less brighness');
+    \end{lstlisting}
+    The gamma correction is done in this way: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+for gamma = [.04 .1 .2 .4 .7 1 1.5 2.5 5 10 25]
+    y = x.^gamma;
+    plot(x,y,'DisplayName',sprintf('\\gamma = %.2f',gamma));
+    % display the text
+    text(x(round(end/2)),y(round(end / 2)), sprintf('\\gamma = %.2f',gamma));
+end
+    \end{lstlisting}
+    Color is represented by 3 channels (RGB). We can read each channel:
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+% Red channel
+imr=im(:,:,1);
+% Green channel
+imr=im(:,:,2);
+% Blue channel
+imr=im(:,:,3);
+    \end{lstlisting}
 \end{document}
