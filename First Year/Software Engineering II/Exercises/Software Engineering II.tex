@@ -2,6 +2,11 @@
 \usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox}
 \usepackage[english]{babel}
 
+
+
+
+
+
 \makeatletter
 \renewcommand\thmbox@headstyle[2]{\bfseries #1}
 \makeatother
@@ -23,7 +28,7 @@
 
 \begin{abstract}
     The objective of the course is to teach the principals methods and processes of software engineering needed to develop complex and qualitative software.
-    \par
+     
     The course covers the following arguments:
     \begin{itemize}
         \item Software process and its organization.
@@ -40,6 +45,150 @@
 
 \newpage
 
-
+\chapter{Alloy examples}
+    \section{Address book}
+    Imagine that we are asked to model a very simple address book. The books that contain a bunch of addresses linked to the corresponding names. 
     
+    In this example we have three entities, which are: $Name$, $Addr$ and $Book$.
+    $addr$ is linking $Name$ to $Addr$ within the context of $Book$. To indicate this relation we use the keyword $lone$ that indicates that each $Name$ can correspond at most one 
+    $Addr$. We can resume the previous statements as:
+    \begin{algorithmic}[H]
+        \State \textbf{sig} Name $\{\}$
+        \State \textbf{sig} Addr $\{\}$
+        \State \textbf{sig} Book $\{$ 
+        \State \:\:\:\:\:\: addr: Name -$>$ \textbf{lone} Addr 
+        \State $\}$
+    \end{algorithmic}
+    This specification creates the following relations: 
+    \begin{itemize}
+        \item Sets are unary relations.
+        \item Scalars are singleton sets.
+        \item The ternary relation involving the three predicates.
+    \end{itemize}
+    We can declare a new predicate with the keyword $pred$. 
+    \begin{algorithmic}[H]
+        \State \textbf{pred} show $\{\}$
+        \State \textbf{run} show \textbf{for} 3 \textbf{but exactly} 1 Book
+    \end{algorithmic}
+    Where the second line indicates that we need to find at most three elements for every $Book$. The predicate $show$ defined previously is empty and return always $true$. Now we 
+    can define a predicate with some argument, for example: 
+    \newpage
+    \begin{algorithmic}[h]
+        \State \textbf{pred} show [b:Book]$\{$
+        \State \:\:\:\:\:\: $\#$ b.addr $>$ 1
+        \State $\}$
+        \State \textbf{run} show \textbf{for} 3 \textbf{but exactly} 1 Book
+    \end{algorithmic} 
+    The predicate (consistent) in the previous example adds a constraint on the number of $Address$ relations in a given $Book$. 
+    The predicate (consistent) in the following example adds a constraint on the number of different $Address$ that appears in the $Book$.
+    \begin{algorithmic}[H]
+        \State \textbf{pred} show [b:Book]$\{$
+        \State \:\:\:\:\:\: $\#$ b.addr $>$ 1
+        \State \:\:\:\:\:\: $\#$ Name.(b.addr) $>$ 1
+        \State $\}$
+        \State \textbf{run} show \textbf{for} 3 \textbf{but exactly} 1 Book
+    \end{algorithmic}
+    The predicate (inconsistent) in the following example contains the keyword $some$ that indicates the existence of an element. In this case we have only one $Book$ so the tool 
+    will say that no instances can be found. 
+    \begin{algorithmic}[H]
+        \State \textbf{pred} add [b:Book]$\{$
+        \State \:\:\:\:\:\: $\#$ b.addr $>$ 1
+        \State \:\:\:\:\:\: \textbf{some} n:Name $\mid$ $\#$ n.(b.addr) $>$ 1
+        \State $\}$
+        \State \textbf{run} show \textbf{for} 3 \textbf{but exactly} 1 Book
+    \end{algorithmic} 
+    All the previous predicates are static because they doesn't change the signature. In Alloy there are also dynamic predicates for dynamic analysis. For example we can define a 
+    predicate that adds an $Address$ and $Name$ to a $Book$ in the following way: 
+    \begin{algorithmic}[H]
+        \State \textbf{pred} add [b,b':Book, n:Name,a:Addr]$\{$
+        \State \:\:\:\:\:\:\:\: b'.addr=b.addr + n -$>$ a
+        \State $\}$
+        \State \textbf{pred} showAdd [b,b':Book, n:Name,a:Addr]$\{$
+        \State \:\:\:\:\:\:\:\: add[b,b',n,a]
+        \State \:\:\:\:\:\:\:\: $\#$Name.(b'.addr) $>$ 1
+        \State $\}$
+        \State \textbf{run} showAdd
+    \end{algorithmic} 
+    We can now define a predicate for the $Book$ deletions.  
+    \begin{algorithmic}[H]
+        \State \textbf{pred} del [b,b':Book, n:Name]$\{$
+        \State \:\:\:\:\:\:\:\: b'.addr=b.addr - n -$>$ Addr
+        \State $\}$
+    \end{algorithmic} 
+    We can check if running a delete after an add returns us in the initial situation or not by using an $assertion$:
+    \begin{algorithmic}[H]
+        \State \textbf{assert} delRevertsAdd$\{$
+        \State \:\:\:\:\:\:\:\: \textbf{all} b1,b2,b3:Book,n:Name,a:Addr
+        \State \:\:\:\:\:\:\:\: add[b1,b2,n,a] \textbf{and} del[b2,b3,n] 
+        \State \:\:\:\:\:\:\:\: \textbf{implies} b1.addr=b3.addr
+        \State $\}$
+    \end{algorithmic} 
+    While checking an assertion, Alloy searches for counterexamples. In this case we will find a counterexample so the assert will result $false$. To correct the assert we need to 
+    modify it in the following way: 
+    \begin{algorithmic}[H]
+        \State \textbf{assert} delUndoesAdd$\{$
+        \State \:\:\:\:\:\:\:\: \textbf{all} b1,b2,b3:Book,n:Name,a:Addr $\mid$
+        \State \:\:\:\:\:\:\:\: \textbf{no} n.(b1.addr) \textbf{and} add[b1,b2,n,a] \textbf{and} del[b1,b2,n]
+        \State \:\:\:\:\:\:\:\: \textbf{implies} b1.addr=b3.addr
+        \State $\}$
+    \end{algorithmic} 
+    We can also need to get some signature. To do that we can use the Alloy functions. For example we can declare a function that search a certain $Book$ and return a set of $Address$:
+    \begin{algorithmic}[H]
+        \State \textbf{fun} lookup[b:Book,n:Name]: \textbf{set} Addr$\{$
+        \State \:\:\:\:\:\:\:\: n.(n.addr)
+        \State $\}$
+    \end{algorithmic} 
+
+    \section{Family relations}
+    We now consider a family relationship tree. First of all we have to define a generic person, that can be a men or a woman.
+    \begin{algorithmic}[H]
+        \State \textbf{abstract sig} Person $\{$
+        \State \:\:\:\:\:\:\:\: father: \textbf{lone} Man 
+        \State \:\:\:\:\:\:\:\: mother: \textbf{lone} Woman
+        \State $\}$
+        \State \textbf{sig} Man \textbf{extends} Person $\{$
+        \State \:\:\:\:\:\:\:\: wife: \textbf{lone} Woman 
+        \State $\}$
+        \State \textbf{sig} Woman \textbf{extends} Person $\{$
+        \State \:\:\:\:\:\:\:\: husband: \textbf{lone} Man 
+        \State $\}$
+    \end{algorithmic} 
+    We have set that each $Person$ has at most one father and one mother (keyword $lone$) because we need a root for the tree. The person at the root needs to have no parents 
+    (for example they are unknown). The signature $Person$ is $abstract$ because it needs to be specialized in one of the subsequent signatures, that are $Man$ or $Woman$.
+    Signatures by using keyword $sig$ represents a set of atoms. Before this keyword we can define the number of entities that we need ($lone$, $one$ or $some$).
+    \begin{definition}
+        The \emph{fields} of a signature are relations whose domain is a subset of the signature. The keyword \emph{extends} is used to declare a subset of signature. 
+    \end{definition}
+    To get the set of grandpas of a given person we can define a function like this: 
+    \begin{algorithmic}[H]
+        \State \textbf{fun} grandpas[p:Person]:set Person $\{$
+        \State \:\:\:\:\:\:\:\: p.(mother+father).father
+        \State $\}$
+        \State \textbf{pred} ownGrandpa[p:Person] $\{$
+        \State \:\:\:\:\:\:\:\: p \textbf{in} p.grandpas[p]
+        \State $\}$
+    \end{algorithmic} 
+    We have also defined a predicate that checks if the person is in the set of grandpas returned by the function $grandpas$. The problem now is that we have not set constraints 
+    on relations. To do that we need to define two new operators for binary relations:
+    \begin{itemize}
+        \item Transitive closure: \textasciicircum $r=r+r.r+r.r.r+\dots$
+        \item Reflex transitive closure: $*r=iden+$\textasciicircum$r$
+    \end{itemize}
+    We can now define that no one can be the father/mother of himself: 
+    \begin{algorithmic}[H]
+        \State \textbf{fact} $\{$
+        \State \:\:\:\:\:\:\:\: \textbf{no} p:Person $\mid$ p \textbf{in} p.\textasciicircum(mother+father)
+        \State $\}$
+    \end{algorithmic} 
+    We have also to set a constraint that if X is husband of Y, then Y is the wife of X:
+    \begin{algorithmic}[H]
+        \State \textbf{fact} $\{$
+        \State \:\:\:\:\:\:\:\: \textbf{all} m:Man,w:Woman $\mid$ m.wife=w \textbf{iff} w.husband=m
+        \State $\}$
+        \State \textbf{fact} $\{$
+        \State \:\:\:\:\:\:\:\: wife = \textasciitilde husband
+        \State $\}$
+    \end{algorithmic} 
+    The two facts are equivalent, but the second has been written using the transpose operator. The fact can contains multiple constraints. So the previous constraints can be written 
+    in one fact. The difference between $fact$ and $pred$ is that the first are global, while the second needs to be invoked.
 \end{document}
