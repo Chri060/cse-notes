@@ -1,5 +1,5 @@
 \documentclass[12pt, a4paper]{report}
-\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox, chronology}
+\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox, chronology,multirow,tikz}
 \usepackage[english]{babel}
 
 \makeatletter
@@ -9,6 +9,11 @@
 \newtheorem[style=M,bodystyle=\normalfont]{corollary}{Corollary}
 \newtheorem[style=M,bodystyle=\normalfont]{lemma}{Lemma}
 \newtheorem[style=M,bodystyle=\normalfont]{definition}{Definition}
+\newcommand{\tikzxmark}{%
+\tikz[scale=0.23] {
+    \draw[line width=0.7,line cap=round] (0,0) to [bend left=6] (1,1);
+    \draw[line width=0.7,line cap=round] (0.2,0.95) to [bend right=3] (0.8,0.05);
+}}
 
 
 \title{Data Bases II \\ \textit{Theory}}
@@ -48,7 +53,7 @@
     \begin{chronology}[5]{1990}{2020}{\textwidth}
         \event{1992}{SQL '92}
         \event{1999}{SQL '99}
-        \event{2001}{ranking in databases}
+        \event{2001}{Ranking in databases}
         \event{2003}{XML-related features}
         \event{2005}{NoSQL}
         \event{2006}{X-Query}
@@ -65,11 +70,7 @@
             \item End transaction.
         \end{itemize}
     \end{definition}
-    Within a transaction, one of the commands below is executed to signal the end of the transaction:
-    \begin{itemize}
-        \item Commit-work (commit). 
-        \item Rollback-work (abort). 
-    \end{itemize}
+    Within a transaction, one of the commands below is executed to signal the end of the transaction: commit and rollback. 
     \begin{definition}
         The \emph{On-Line Transaction Processing} (OLTP) is a system that supports the execution of transactions on behalf of concurrent applications. 
     \end{definition}
@@ -80,13 +81,10 @@
             The rollback of the work performed can be caused by a rollback statement or by the DBMS. In case of a rollback, the work performed must be undone, bringing the database to 
             the state it had before the start of the transaction. It is the application's responsibility to decide whether an aborted transaction must be redone or not. 
         \item Consistency: A transaction must satisfy the database integrity constraints: if the initial state $S_0$ is consistent, then the final state $S_f$ is also consistent. 
-            This is not necessarily true for the intermediate states $S_i$. For example, the sum of the worked hours per task should equal the planned work hours of the project. 
-            If the constraint holds before the transaction it must hold also after its execution. The constraint can be temporarily violated during the execution of the transaction 
-            (e.g., when shifting work from a task tom another one, but must be satisfied at the end). 
+            This is not necessarily true for the intermediate states $S_i$. 
         \item Isolation: the execution of a transaction must be independent of the concurrent execution of other transactions. In particular, the concurrent execution of a number 
-            of transactions must produce the same result as the execution of the same transactions in a sequence. Isolation impacts performance and trade-offs can be defined between 
-            isolation and performance. 
-        \item Durability: The effect of a transaction that has successfully committed will last forever, independently of any system fault. 
+            of transactions must produce the same result as the execution of the same transactions in a sequence.
+        \item Durability: the effect of a transaction that has successfully committed will last forever, independently of any system fault. 
     \end{enumerate}
     \begin{table}[H]
         \centering
@@ -113,7 +111,7 @@
     The concurrency control system schedules the order of the various transactions. 
     
     \section{Anomalies in concurrent transactions}
-    The typical types on anomalies in concurrency are: 
+    The anomalies caused by uncorrect scheduling are: 
     \begin{itemize}
         \item Lost update: an update is applied from a state that ignores a preceding update, which is lost.
             \begin{table}[H]
@@ -184,7 +182,7 @@
         A \emph{model} is an abstraction of a system, object or process, which purposely disregards details to simplify the investigation of relevant properties. 
     \end{definition}
     Concurrency theory builds upon a model of transaction and concurrency control principles that help understanding the real systems. Real systems exploit implementation level 
-    mechanisms (locks, snapshots) which help achieve some desirable properties postulated by the theory. 
+    mechanisms which help achieve some desirable properties postulated by the theory. 
     \begin{definition}
         An \emph{operation} consist in a reading or in a writing of a specific datum by a specific transaction. 
     \end{definition}
@@ -193,7 +191,7 @@
     \end{definition}
     The transactions can be: serial, interleaved or nested. The number of serial schedules for $n$ transaction is equal to 
     \[N_S=n!\]
-    while the total number of distinct schedules given the number of transaction $n$ is equal to: 
+    While the total number of distinct schedules given the number of transaction $n$ is equal to: 
     \[N_D=\dfrac{\left( \sum_{i=1}^nk_i \right)!}{\prod_{i=1}^n \left( k_i! \right)}\]
     \begin{example}
         Given two transaction $T_1$ and $T_2$ we have six possible different schedules, where only two are serial:
@@ -211,16 +209,16 @@
     The concurrency control has to reject all the schedules that causes anomalies. 
     \begin{definition}
         The \emph{scheduler} is a component that accepts or rejects operations requested by the transactions. 
+
         The \emph{serial schedule} is a schedule in which the actions of each transaction occur in a contiguous sequence.
     \end{definition}
-    A serializable schedule leaves the database in the same state as some serial schedule of the same transactions. This type of schedule is commonly accepted as a notion of schedule 
-    correctness. To introduce the classes we have to initially make two assumptions: 
+    A serializable schedule leaves the database in the same state as some serial schedule of the same transactions, so it is correct. To introduce other classes we have to initially
+    make two assumptions: 
     \begin{itemize}
         \item The transactions are observed a posteriori. 
         \item The transactions limited to those that have been committed (commit-projection).
     \end{itemize}
-    With the full schedule we can decide whether a schedule is admissible or not. In practice, the scheduler must take decisions while transaction are running because they cannot 
-    know the sequence a priori.
+
     \section{View-serializability}
     \begin{definition}
         We say that:
@@ -228,6 +226,7 @@
             \item $r_i(x)$ \emph{reads-from} $w_j(x)$ when  $w_j(x)$  precedes  $r_i(x)$ and there is no  $w_k(x)$ in $S$ between  $r_i(x)$  and  $w_j(x)$. 
             \item  $w_i(x)$ in a schedule $S$ is a \emph{final write} if it is the last write on $x$ that occurs in $S$. 
         \end{itemize}
+
         Two schedules are said to be \emph{view-equivalent} ($S_i \approx_V S_j$) if they have:
         \begin{enumerate}
             \item The same operations. 
@@ -269,24 +268,23 @@
         \end{itemize}
         $S_a$ and $S_c$ are not view-equivalent because not all the reads-from relationship are the same. 
     \end{example}
-    Deciding view-equivalence of two given schedules is done in polynomial time and space. Deciding if a generic schedule is in VSR is an NP-complete problem. Therefore, we need to 
-    find a stricter definition that is easier to check. The new definition may lead to rejecting some schedule that would be acceptable under view-serializability but not under the 
-    stricter/faster criterion.
+    Deciding if a generic schedule is in VSR is a NP-complete problem. Therefore, we need to find a stricter definition that is easier to check. The new definition may lead to 
+    rejecting some schedule that would be acceptable under view-serializability but not under the stricter/faster criterion.
     
     \section{Conflict-serializability}
     \begin{definition}
         Two operations $o_i$ and $o_j$ ($i \neq j$) are in \emph{conflict} if they address the same resource and at least one of them is a write. There are tho possible cases:
-    \end{definition}
-    \begin{enumerate}
-        \item Read-write conflicts ($r-w$ or $w-r$).
-        \item Write-write conflicts ($w-w$).
-    \end{enumerate}
-    \begin{definition}
-        Two schedules are \emph{conflict-equivalent} (($S_i \approx_C S_j$)) if $S_i$ and $S_j$ contain the same operations and in all the conflicting pairs the transactions occur in the same order. 
+        \begin{enumerate}
+            \item Read-write conflicts ($r-w$ or $w-r$).
+            \item Write-write conflicts ($w-w$).
+        \end{enumerate}
+
+        Two schedules are \emph{conflict-equivalent} (($S_i \approx_C S_j$)) if $S_i$ and $S_j$ contain the same operations and in all the conflicting pairs the transactions occur 
+        in the same order. 
+
         A schedule is \emph{conflict-serializable} (CSR) if and only if it is conflict equivalent to a serial schedule of the same transactions. 
     \end{definition}
-    We have that $VSR \subset CSR$: all conflict-serializable schedules are also view- serializable, but the inverse is not necessarily true.
-    So, we have that conflict-equivalence implies view-equivalence. 
+    We have that $VSR \subset CSR$ and that $CSR \implies VSR$. 
     \begin{proof}[VSR is a subset of CSR]
         Schedule $S = r_1(x) w_2(x) w_1(x) w_3(x)$ is: 
         \begin{itemize}
@@ -306,7 +304,7 @@
     \end{proof}
     The testing of view-serializability is done with a conflict graph that has one node for each transaction $T_i$, and one arc from $T_i$ to $T_j$ if there exists at least one conflict between an operation $o_i$ of $T_i$ and an operation $o_j$ of $T_j$ such that $o_i$ precedes $o_j$.
     \begin{theorem}
-        A schedule is in CSR if and only if its conflict graph is acyclic.
+        A schedule is in conflict-serializable if and only if its conflict graph is acyclic.
     \end{theorem}
     \begin{example}
         We are given the schedule \[S: w_0(x) r_1(x) w_0(z) r_1(z) r_2(x) w_0(y) r_3(z) w_3(z) w_2(y) w_1(x) w_3(y)\]
@@ -339,20 +337,184 @@
     \end{proof}
         
     \section{Concurrency control in practice}
-    CSR checking would be efficient if we knew the graph from the beginning, but usually we don't. Therefore, a scheduler must rather work online. So, it is not feasible to maintain the conflict graph, update it, and check its acyclicity at each operation request. At the same time, the assumption that concurrency control can work only with the commit-projection of the schedule is unrealistic because aborts do occur. We need some simple on-line decision criterion for the scheduler, which must avoid as many anomalies as possible, and have negligible overhead. 
+    Conflict-serializability checking would be efficient if we knew the graph from the beginning, but usually we don't. Therefore, a scheduler must rather work online. 
+    So, it is not feasible to maintain the conflict graph, update it, and check its acyclicity at each operation request. At the same time, the assumption that concurrency control 
+    can work only with the commit-projection of the schedule is unrealistic because aborts do occur. We need some simple on-line decision criterion for the scheduler, which must 
+    avoid as many anomalies as possible, and have negligible overhead. 
         
-    When dealing with online concurrency control, it is important also to consider arrival sequences. The CC system maps an arrival sequence into an effective a posteriori schedule. To implement this on-line scheduling we use two main families of techniques:
+    When dealing with online concurrency control, it is important also to consider arrival sequences. The concurrency control system maps an arrival sequence into an effective a 
+    posteriori schedule. To implement this on-line scheduling we use two main families of techniques:
     \begin{itemize}
         \item Pessimistic (locks): if a resource is taken, make the requester wait or pre-empt the holder.
         \item Optimistic (timestamps and versions): serve as many requests as possible, possibly using out-of-date versions of the data. 
     \end{itemize}
     Usually, commercial systems take the best of both worlds. 
 
-    
     \section{Locking}
+    The method called locking is the most used in commercial systems. A transaction is well formed with respect to locking if: 
+    \begin{itemize}
+        \item Read operations are preceded by $r\_lock$ (shared) and followed by $unlock$. 
+        \item Write operations are preceded by $w\_lock$ (exclusive) and followed by $unlock$. 
+    \end{itemize}
+    In both cases unlocking can be delayed with respect to the end of the read/write operation. So, every object can be: free, r-locked or w-locked. 
 
+    Transactions that first read and then write an object may: acquire a $w\_lock$ already when reading or acquire a $r\_lock$ first and then upgrade it into a $w\_lock$ (escalation).
 
+    The lock manager receives requests from the transactions and grants resources according to the conflict table: 
 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccc}
+        \textbf{}                              & \multicolumn{3}{c}{\textbf{Resource status}}                                                                                                                                                                                                   \\ \cline{2-4} 
+        \multicolumn{1}{c|}{\textbf{Request}}  & \multicolumn{1}{c|}{\textit{FREE}}                                          & \multicolumn{1}{c|}{\textit{R\_LOCKED}}                                            & \multicolumn{1}{c|}{\textit{W\_LOCKED}}                                     \\ \hline
+        \multicolumn{1}{|c|}{\textit{r\_lock}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ R\_LOCKED\end{tabular}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ R\_LOCKED($n++$)\end{tabular}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\tikzxmark\\ W\_LOCKED\end{tabular}} \\ \hline
+        \multicolumn{1}{|c|}{\textit{w\_lock}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ W\_LOCKED\end{tabular}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\tikzxmark\\ R\_LOCKED\end{tabular}}        & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\tikzxmark\\ W\_LOCKED\end{tabular}} \\ \hline
+        \multicolumn{1}{|c|}{\textit{unlock}}  & \multicolumn{1}{c|}{ERROR}                                                  & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ $n--$\end{tabular}}            & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ FREE\end{tabular}}      \\ \hline
+        \end{tabular}
+    \end{table}
 
-    
+    \begin{example}
+        Given a schedule with three transactions and the following operations: 
+        \[r_1(x)w_1(x)r_2(x)r_3(y)w_1(y)\]
+        We have the following locks: 
+        \begin{itemize}
+            \item $r_1(x)$: $r_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $r-locked$ with $n_x=1$. 
+            \item $w_1(x)$: $w_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $w-locked$. 
+            \item $r_2(x)$: $r_1\_lock(x)$ request $\rightarrow$ No because $x$ is $w-locked$ $\rightarrow$ $T_2$ waits. 
+            \item $r_3(y)$: $r_3\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $r-locked$ with $n_y=1$ and then $T_3$ unlocks $y$. 
+            \item $w_1(y)$: $w_1\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $w-locked$ and then $x$ and $y$ are freed. 
+        \end{itemize}
+        So, the schedule a posteriori will became: 
+        \[r_1(x)w_1(x)r_3(y)w_1(y)r_2(x)\]
+        and we have that the transaction two is delayed. 
+    \end{example}
+    The locking system is implemented via lock tables, which are hash tables indexing the lockable items via hashing and where each ocked item has a linked list associated with it. 
+    Every node in the linked list represents the transaction which requested for lock, lock mode and current status. Every new lock request for the data item is appended as a new 
+    node to the list.
+
+    \section{Two-phase locking}
+    With the locking showed before we do not eliminate the anomalies caused by non-repeatable reads. To avoid this problem we can use a two-phase rule which requires that a 
+    transaction cannot acquire any other lock after releasing a lock. So, we have a phase where the transaction acquires all the locks, a phase where it executes all operations and 
+    a fianl phase of unlocking. 
+    \begin{definition}
+        The class of \emph{two-phase locking} is the set of all schedules generated by a scheduler that: 
+        \begin{itemize}
+            \item Only processes well-formed transactions. 
+            \item Grants locks according to the conflict table. 
+            \item Checks that all transactions apply the two-phase rule.             
+        \end{itemize}
+    \end{definition}
+    We have that $2PL \subset CSR \subset VSR$. 
+    \begin{proof}[2PL implies CSR]
+        We assume that a schedule $S$ is $2PL$. Consider, for each transaction, the end of the plateau (the moment in which it holds all locks and is going to release the first one). 
+        We sort the transactions by this temporal value and consider the corresponding serial schedule $S^{'}$. In order to prove (by contradiction) that $S$ is
+        conflict-equivalent to $S^{'},S^{'}\approx_CS,\dots$. Consider a generic conflict $o_i \rightarrow o_j$ in $S^{'}$ with $o_i \in T_i$, $0_j \in T_j$, and $i<j$. 
+        By definition of conflict, $o_i$ and $o_j$ address the same resource $r$, and at least one of them is a write. The two operations cannot occur in reverse oreder of $S$. 
+        This proves that all 2PL schedules are view-serializable too and they can be checked with negligible overhead. 
+    \end{proof}
+    The anomalies that remains in this state are only the phantom insert (solvable with predicate locks) and the dirty read (requires dealing with abort). 
+
+    \section{Strict two-phase and predicate locking}
+    \begin{definition}
+        In \emph{strict two-phase locking} (or long duration locks) we also have that locks held by a transaction can be released only after commit or rollback.
+    \end{definition}
+    This version of locking is used in most commercial DBMS whenever a high level of isolation is required. 
+
+    To prevent phantom inserts a lock should be placed also on future data using the predicate locks. If the predicate lock is on a resource, other transactions cannot insert, delete, 
+    or update any tuple satisfying this predicate. 
+
+    \section{Isolation levels in SQL '99}
+    SQL defines transaction isolation levels (mainly for read operations) which specify the anomalies that should be prevented by running at that level:
+    \begin{itemize}
+        \item Read uncommited: allows dirty reads, non-repeatable reads and phantom updates and inserts. No read locks are used. 
+        \item Read committed: prevents dirty reads but allows non-repeatable reads and phantom updates/inserts. Normal read locks are used. 
+        \item Repeatable read: avoids dirty reads, non-repeatable reads and phantom updates, but allows phantom inserts.  Strict read locks are used. 
+        \item Serializable: avoids all anomalies. Strict 2PL with predicate locks are used. 
+    \end{itemize}
+
+    \begin{table}[H]
+        \centering
+        \resizebox{\textwidth}{!}{%
+        \begin{tabular}{c|ccc|}
+        \cline{2-4}
+                                                        & \textbf{Dirty read} & \textbf{Non-repeatable read} & \textbf{Phantoms}    \\ \hline
+        \multicolumn{1}{|c|}{\textbf{Read uncommitted}} & $\checkmark$        & $\checkmark$                 & $\checkmark$         \\
+        \multicolumn{1}{|c|}{\textbf{Read committed}}   & $\tikzxmark$        & $\checkmark$                 & $\checkmark$         \\
+        \multicolumn{1}{|c|}{\textbf{Repeatable reas}}  & $\tikzxmark$        & $\tikzxmark$                 & $\checkmark$(insert) \\
+        \multicolumn{1}{|c|}{\textbf{Serializable}}     & $\tikzxmark$        & $\tikzxmark$                 & $\tikzxmark$         \\ \hline
+        \end{tabular}%
+        }
+    \end{table}
+    The strictness of serializable level can lead to deadlocks. Therefore, it is not the default in most commercial systems. 
+    Transactions requesting locks are either granted the lock or suspended and queued. There is risk of: 
+    \begin{itemize}
+        \item Deadlock: two or more transactions in endless mutual wait. 
+        \item Starvation: a single transaction in endless wait. 
+    \end{itemize}
+
+    \section{Deadlocks}
+    A deadlock occurs because concurrent transactions hold and in turn request resources held by other transactions. 
+    \begin{definition}
+        A \emph{lock graph} is a bipartite graph in which nodes are resources or transactions and arcs are lock requests or lock assignments. 
+
+        A \emph{wait-for graph} is a graph in which nodes are transactions and arcs are waits for relationships. 
+    \end{definition}
+    A deadlock is represented by a cycle in the wait-for graph of transactions. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.35\linewidth]{images/waitgraph.png}
+        \caption{An example of deadlock in the wait-for graph}
+    \end{figure}
+    It is possible to solve deadlocks in three differemt ways: 
+    \begin{itemize}
+        \item Timeout: a transaction is killed and restarted after a given amount of waiting. The timeout value is system-determined. The problem is choosing a proper timeout value. 
+        \item Deadlock prevention: kills transactions that could cause cycles. It is implemented in two ways: 
+            \begin{enumerate}
+                \item Resource-based prevention puts restrictions on lock requests. The idea is that every transaction requests all resources at once, and only once. The main problem
+                    is that it's not easy for transactions to anticipate all requests. 
+                \item Transaction-based prevention puts restrictions on transactions' IDs. Assigning IDs to transactions incrementally allows to give an age to each one. It is 
+                    possible to choose to kill the holding transaction (preemptive) or the requesting one (non-preemptive). The main problem is the number of killings is too big. 
+            \end{enumerate}
+        \item Deadlock detection: it can be implemented with Obermarck's algorithm and used for distributed resources. 
+    \end{itemize}
+    \begin{definition}
+        The distributed dependency graph is a wait-for graph where external call nodes represent a sub-transaction activating another sub-transaction at a different node. 
+    \end{definition}
+    The arrow shows a wait-for relation among local transactions. If one term is an external call, either the source is waited for by a remote transaction or the sink waits for a 
+    remote transaction. 
+    The Obermarck's algorithm needs the following assumptions: 
+    \begin{itemize}
+        \item Transactions execute on a single main node. 
+        \item Transactions may be decomposed in sub-transactions running on other nodes. 
+        \item When a transaction spawns a sub-transaction it suspends work until the latter completes
+        \item Two wait-for relationships:
+            \begin{itemize}
+                \item $T_i$ waits for $T_j$ on the same node because $T_i$ needs a datum locked by $T_j$. 
+                \item A sub-transaction of $T_i$ waits for another sub-transaction of $T_i$ running on a different node. 
+            \end{itemize}
+    \end{itemize}
+    The goal of this algorithm is to detect a potential deadlock looking only at the local view of a node using a communication protocol whereby each node has a local projection 
+    of the global dependencies. Nodes exchange information and update their local graph based on the received information. Node $A$ sends its local info to a node $B$ only if:
+    it contains a transaction $T_i$ that is waited for from another remote transaction and waits for a transaction $T_j$ active on $B$ and $i>j$.
+    In other words, I send info to you if a distributed transaction listed at me waits for a distributed transaction listed at you with smaller index. 
+    \begin{example}
+        Give the following distributed dependency graph: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/distributedgraph.png}
+        \end{figure}
+        We can see that the potential deadlock is given by the cycle. In fact, we have that $T_{2a}$ waits for $T_{1a}$ (data lock) that waits for $T_{1b}$ (call) that waits for 
+        $T_{2b}$ (data locks) that waits for $T_{2a}$ (call). 
+        
+        In this case the node $A$ dispatches information to $B$, in fact we have $ E_b \rightarrow T_2 \rightarrow T_1 \rightarrow E_b$ and node $B$ cannot dispatch information to 
+        $A$, becasue the forwarding rule is not respected: $E_a \rightarrow T_1 \rightarrow T_2 \rightarrow E_a$. 
+    \end{example}
+    The Obermarck's algorithm runs periodically at each node and consists in four steps: 
+    \begin{enumerate}
+        \item Get graph info from the previous nodes.
+        \item Update the local graph by merging the received information. 
+        \item Check the existence of cycles among transactions denoting potential deadlocks: if found, select one transaction in the cycle and kill it. 
+        \item Send updated graph info to the next nodes. 
+    \end{enumerate}
+
 \end{document}
