@@ -178,4 +178,400 @@
     mechanism is needed to define how to combine labels. This is done by using fuzzy systems, that are a representation of truth  of a 
     statement in linguistic terms, as evaluation of its fuzzyness. 
     
+    \newpage
+
+    \chapter{Fuzzy sets}
+    \section{History}
+    Fuzzy sets have been defined by Lotfi Zadeh in 1965 as a tool to model approximate concepts. In 1972 the first linguistic fuzzy
+    controllers has been implemented. Around 1980 the fuzzy were used frequently worldwide. In the Nineties there were a massive 
+    diffusion of fuzzy controllers in various end-user goods. Today, fuzzy systems are the kernel of many intelligent devices. 
+
+    \section{Fuzzy membership function}
+    A "crisp" set is defined by a boolean membership function on some property on the considered elements. Instead, a "fuzzy" set is
+    a set whose membership function that ranges in the values between zero and one.
+    \begin{definition}[Membership function]
+        A \emph{membership function} defines a set, by defining the degree of membership of an element of the universe of discourse 
+        to the set. A name is given to the set to make it possible to refer to it: this is usually called \emph{label}. Fuzzy sets can 
+        also be defined with a variable with discrete values. 
+    \end{definition}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.50\linewidth]{images/function.png}
+        \caption{Example of a membership function}
+    \end{figure}
+    To define a membership function we have to (according to the purpose of the model and the available data):
+    \begin{enumerate}
+        \item Select a variable on which the membership function will be defined. 
+        \item Define the range of the variable.
+        \item Identify the fuzzy sets needed for the application and define the labels. 
+        \item For each fuzzy set identify characteristic points for the membership function.
+        \item Define the shape of the membership function.
+        \item Check if the membership function is correct.
+    \end{enumerate}
+    The shapes of the membership function can be chosen arbitrarily. The choice of the shape modify the smoothness of the transition 
+    between two labels (i.e., in intervals (horizontal shape) the transition is immediate). 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/shape.png}
+        \caption{Possible shapes for a membership function}
+    \end{figure}
+    \begin{definition}
+        A set of fuzzy sets fully covering the universe of discourse is called \emph{frame of cognition}. The properties of this set are:
+        \begin{itemize}
+            \item Coverage: each element of the universe of discourse us assigned to at least one granule with membership greater or equal 
+                than zero.
+            \item Uni-modality of fuzzy sets: there is a unique set of values for each granule with maximum membership. 
+        \end{itemize}
+    \end{definition}
+    \begin{definition}
+        A frame of cognition for which the sum  of the membership values of each value of the base variable is equal to one is called 
+        a \emph{fuzzy partition}. 
+    \end{definition}
+    \begin{definition}
+        The \emph{$\alpha$-cut} of a fuzzy set is the "crisp" set of the values of $x$ such that $\mu(x) \geq \alpha$:
+        \[\alpha_\mu(x)=\{x \mid \mu(x) \geq \alpha\}\]
+    \end{definition}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/alpha.png}
+        \caption{Alpha-cut of a membership function}
+    \end{figure}
+    \begin{definition}[H]
+        The \emph{support} of a fuzzy set is the "crisp" set of values $x$ such that $\mu_f(x)>0$ is the \emph{support} of the fuzzy set
+        $f$ on the universe $X$.
+    \end{definition}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/support.png}
+        \caption{Support of a membership function}
+    \end{figure}
+    \begin{definition}
+        The height $h_f$ of a fuzzy set $f$ on the universe $X$ is the highest membership degree of an element of $X$ to the fuzzy set:
+        \[h_f(X)=\max_{x \in X}\mu_f(x)\]
+        A fuzzy set is normal if, and only if, $h_f(X)=1$.
+    \end{definition}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/height.png}
+        \caption{Height of a membership function}
+    \end{figure}
+    \begin{definition}
+        A fuzzy set is \emph{convex} if and only if 
+        \[\mu[\lambda x_1+(1-\lambda)x_2] \geq \min [\mu(x_1),\mu(x_2)]\]
+        for any $(x_1,x_2) \in \mathbb{R}$ and any $\lambda \in [0,1]$.
+    \end{definition}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/convex.png}
+        \caption{Graphical difference between a convex and a not convex set}
+    \end{figure}
+    The particular fuzzy sets are: singleton (a fuzzy set with exactly one member) and interval (a fuzzy set whose members have all membership
+    equals to one). The possible operations on the fuzzy sets are: 
+    \begin{itemize}
+        \item Complement: $\mu_{\bar{f}}(x)=1-\mu_f(x)$.
+        \item Union: $\mu_{f_1 \cup f_2}(x)=\max [\mu_{f_1}(x),\mu_{f_2}(x)]$.
+        \item Intersection: $\mu_{f_1 \cap f_2}(x)=\min [\mu_{f_1}(x),\mu_{f_2}(x)]$.
+    \end{itemize}
+
+    \newpage
+
+    \chapter{Fuzzy logic}
+    \section{Introduction}
+    Logic is a tool that has been used since a thousand of years to formally represent knowledge. There are many types of logic: 
+    \begin{itemize}
+        \item Propositional: truth values for proposition.
+        \item First order: truth values for predicates (with variables and quantifiers).
+        \item Second order: predicates of predicates.
+    \end{itemize}
+    These types of logic are binary. We may notice that the meaning of the terms in these logics is not defined together with the formalism,
+    and this is not needed to make the logic work.
+
+    \section{Propositional logic}
+    Propositional logics are concerned with propositional operators which may be applied to one or more propositions giving new propositions.
+    The accent is on the truth value of propositions and on how these truth values are composed.
+    \begin{definition}
+        A logic is \emph{truth functional} if the truth value of a compound sentence depends only on the truth values of the consistent atomic 
+        sentences, not on their meaning or structure. For such a logic the only important question about propositions is what truth values may
+        have.
+    \end{definition}
+    In a classical, boolean or two-valued logic every proposition is either true or false and no other feature of the proposition is relevant.
+
+    The main operators in the propositional logics are: conjunction ($\land$), disjunction ($\lor$) and negation ($\lnot$).
+
+    \section{First order predicate logic}
+    The first order logic is the same as propositional logic augmented with the possibility to define predicates on variables. Furthermore, 
+    existential ($\exists$) and universal ($\forall$) quantifiers are defined. 
+    In predicate logics it is possible to infer the truth value of a proposition by inferential mechanisms, such as Modus Ponens. 
+    \begin{example}[Inference]
+        Given the sentences: "All man are mortal" and "Socrates is a man" we can infer that "Socrates is mortal".
+    \end{example}
+    Inference is used to model a mechanism that we have in our minds to store a reduced amount of information and set a mechanism that can be 
+    applied to derive from information other information, to face everyday situations.
+    \begin{definition}
+        Information and potential relationship together compose what we call \emph{knowledge}.
+    \end{definition}
+    
+    \section{Many-valued logics}
+    Aristotle already had put in evidence problems about the validity of classical logic as a knowledge representation tool. For instance, it is
+    difficult to state the truth value of a proposition in the future. To solve this problem, let's introduce a third value (i.e., 0.5) for the 
+    undefined situation and define a three-valued logic. From this to an infinite set of truth values there is just a small step.
+    
+    Infinite-value logics considers a continuum of truth values between zero and one for example. 
+
+    \begin{example}[Logic L1, Łukasiewicz(1930)]
+        The main rules in this type of infinite-value logic are: 
+        \begin{itemize}
+            \item $T(\lnot a)=1-T(a)$.
+            \item $T(a \land b)=\min (T(a),T(b))$.
+            \item $T(a \lor b)=\max (T(a),T(b))$.
+            \item $T(a \implies b)=\min (1, 1+T(b)-T(a))$.
+            \item $T(a \Leftrightarrow b)=1-\left\lvert T(a)-T(b) \right\rvert$.
+        \end{itemize}
+    \end{example}
+
+    This innovations bring a change in the society: things are no longer stated as true or false, probability (kolmogorov, 1929) and 
+    stochasticity (Markov, 1906) became the way to represent the new approach to science and life. 
+
+    The difference between classical logic L2 and many-valued logic L1 are the following: 
+    \begin{itemize}
+        \item L1 is isomorphic to the fuzzy set theory with standard operators as the classical logic L2 is isomorphic to the set theory.
+        \item Tautologies are true by definition, and are used to prove theorems, so to prove the truth of an inferential chain. 
+            Some tautologies valid in L2 are no longer valid in L1, for example:
+            \begin{itemize}
+                \item Third excluded law ($T(a \lor \lnot a)=1$)
+                \item Non-contradiction law ($T(a \land \lnot a)=0$).
+            \end{itemize}
+    \end{itemize}
+
+    The sentence "I'm a liar" would be a paradox in classical logic, if we give a meaning to the term "liar", since no formula can have the
+    same truth value of its negation. This may not be so in many-valued logics. In Łukasiewicz logic, for instance, it can be that the truth 
+    value of a sentence is 0.5, and that its negation is the same, so the proposition is consistent with the axioms, and it is not a paradox. 
+
+    \section{Fuzzy logic}
+    Fuzzy logic is an infinite-valued logic, with truth values in $[0 \dots 1]$ and prepositions are expressed as: 
+    \[A \: is \: L\]
+    where: 
+    \begin{itemize}
+        \item $A$ is a linguistic variable.
+        \item $L$ is a label denoting a fuzzy set.
+    \end{itemize}
+
+    Formally, a linguistic variable is defined by a 5-tuple $(X,T(X),U,G,M)$, where: 
+    \begin{itemize}
+        \item $X$ is the name of the variable.
+        \item $T(X)$ is the set of term for $X$, each corresponding to a fuzzy variable denoted by $T(X)$ and ranging on $U$.
+        \item $U$ is the universe of discourse defined on a base variable $u$.
+        \item $G$ is the syntactic rule used to generate the interpretation $X$ of each value $u$.
+        \item $M$ is the semantic rule used to associate to $X$ its meaning.
+    \end{itemize}
+    \begin{example}[Linguistic variable for age]
+        We can define a linguistic variable for the age in the following way:
+        \begin{itemize}
+            \item $X$ is a linguistic variable labelled "age".
+            \item $U=[0 \dots 100]$.
+            \item $T(X)={old, middle-aged, young, \dots}$.
+            \item $u=[0 \dots +\infty]$.
+            \item $M$ is the definition in terms of fuzzy sets of the values of $X$.
+            \item $G$ is the fuzzy matching interpretation of $u$.
+        \end{itemize}
+    \end{example}
+
+    Now that we have defined the linguistic variable it is possible to write a simple proposition in the following way: 
+    \[p\: : \: X \: is \: F\]
+    where:
+    \begin{itemize}
+        \item $X$ is a linguistic variable.
+        \item $F$ is the label of a fuzzy set, defined on $U$, which represent a fuzzy predicate.
+        \item $\mu_F(x)$ is the membership function defining $F$, and it is interpreted as truth value for the preposition $p$ ($T(p)=\mu_F(x)$).
+    \end{itemize}
+    Therefore, the truth value of the preposition $P$ is a fuzzy set defined on $[0 \dots 1]$.
+    \begin{example}
+        Given the simple proposition "p:temperature is high", where $X$ is temperature and $F$ is high we can find the truth value of this 
+        preposition using the graph of the membership function given:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/temperature.png}
+        \end{figure}
+        So, the truth value of the given proposition is $0.75$.
+    \end{example}
+
+    It is also possible to define qualified, non-conditional propositions with this syntax: 
+    \[p \: : \: (X \: is \: F) \: is \: S\]
+    where:
+    \begin{itemize}
+        \item $S$ is a fuzzy truth qualifier.
+        \item $F$ is a fuzzy set.
+        \item $p$ is truth qualified.
+    \end{itemize}
+    \begin{example}
+        Given the conditional proposition "p:age of Tina is young is very true", where $X$ is age, $F$ is young and $S$ is very true we can 
+        find the truth value of this preposition using the graph of the membership function given:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/age.png}
+        \end{figure}
+    \end{example}
+
+    In the fuzzy logic it is possible to use fuzzy modifiers to modify the truth values of the propositions.     
+    The modifiers can be of two main types: 
+    \begin{itemize}
+        \item Strong ($m(a) \leq a \: \forall a \in [0 \dots 1]$): they make the predicate stronger, so they reduce the truth of the preposition.
+        \item Weak($m(a) \geq a \: \forall a \in [0 \dots 1]$): they make the predicate weaker, so they increase the truth of the preposition.
+    \end{itemize}
+    The properties of the fuzzy modifiers are:
+    \begin{itemize}
+        \item $m(0)=0$ and $m(1)=1$.
+        \item $m$ is a continuous function. 
+        \item If $m$ is strong $m^{-1}$ is weak, and the other way around.
+        \item Given another modifier $g$, the composition of $g$ and $m$ and the other way round are modifiers, too, and, if both are strong
+            (or weak), so it's their composition.
+    \end{itemize}
+    \begin{example}
+        The sentence "x is young" actually means "(x is young) is true". This sentence can be modified in the following ways with fuzzy modifiers:
+        \begin{itemize}
+            \item "x is very young is true".
+            \item "x is young is very true".
+            \item "x is very young is very true". 
+        \end{itemize}
+        Graphically we can draw the modified membership function as: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/modifiers.png}
+        \end{figure}
+        where: 
+        \begin{itemize}
+            \item $\mu_{very \: a}(x)=\mu_a(x)^2$.
+            \item $\mu_{fairly \: a}(x)=\mu_a(x)^{\frac{1}{2}}$.
+        \end{itemize}
+    \end{example}
+
+    \section{Inference rules}
+    \begin{definition}
+        An \emph{inference rule} is a model. In other words it is a way to define a mapping from input to output. 
+        Rules are used to represent inferential relationships among pieces of knowledge.
+    \end{definition}
+    We consider forward chaining rules, having the shape:
+    \[IF \: antecedent \: THEN \: consequent\]
+    where:
+    \begin{itemize}
+        \item $antecedent$ is a set of clauses related by logical operators.
+        \item $consequent$ is a set of clauses related by logical operators.
+    \end{itemize}
+    The clauses used in the inference rules are either a proposition (sequence of symbols) or a pattern (sequence of symbols and variables). 
+
+    Inference rules are used to implement Knowledge-Based Systems, among which Expert Systems are mostly known as successful Artificial
+    Intelligence applications. An Expert System is designed upon the experience of somebody to replicate, or improve his performance in solving
+    a problem. Knowledge Acquisition is a complex process bringing to the definition of rule-based systems, implemented and running on computers.
+
+    A system can generate new information using rules and other related information using these steps:
+    \begin{enumerate}
+        \item Pattern matching: identify the rules whose antecedents match the known facts (saved in the fact base). These can be considered for
+            activation, given the corresponding assignment to variables.
+        \item Selection of the rules to be activated: among the rules identified with pattern matching (candidate rules), select the rules that
+            should be activated.
+        \item Activation of the selected rules: assert the consequent of the selected rules in the fact base. 
+    \end{enumerate}
+    \begin{example}
+        Suppose that the rule base contains the following four rules:
+        \begin{enumerate}
+            \item "If X croaks and X eats flies, then X is a frog".
+            \item "If X chirps and X sings, then X is a canary".
+            \item "If X is a frog, then X is green".
+            \item "If X is a canary, then X is yellow".
+        \end{enumerate}
+        Now suppose to observe the following facts (fact base):
+        \begin{itemize}
+            \item Fritz croaks.
+            \item Fritz eats flies.
+        \end{itemize}
+        From rule 1 and facts a and b we can add to the fact base the fact: 
+        \[Fritz \: is \: a \: frog\]
+        Given the new fact base, we can use rule 3 to deduce the fact: 
+        \[Fritz \: is \: green\]
+    \end{example}
+
+    \section{Fuzzy rules}
+    \begin{definition}
+        A \emph{fuzzy rule} is a rule whose clauses have the shape
+        \[(V \: is \: L)\]
+        where $V$ is a linguistic variable and $L$ is a label, a value for $V$ associated to a fuzzy set. This is a \emph{linguistic clause}.
+    \end{definition}
+    Often, clauses in the antecedent are only related by the AND operator which is not explicitly written. 
+    The antecedent is usually matched against facts that are represented as values of the base variables corresponding to the linguistic variables.
+    The consequent may be one of two types:
+    \begin{itemize}
+        \item Linguistic rules: the consequent is a conjunction of linguistic clauses. These rules can be considered as a mapping between
+            the interpretation of an input configuration and a symbolic description of the desired output. The general formula is:
+            \[IF \: (A \: is \: LA_i) \: AND \: (B \: is \: LB_k) \: AND \: \dots \: THEN \: (U \: is \: LU_m) \: AND \: \dots\]
+        \item Model rules: bind a model to the linguistic interpretation of its applicability conditions. This can be considered as a mapping 
+            between the interpretation of an input configuration and a model to be applied to the input real values to obtain the output. 
+            The general formula is:
+            \[IF \: (A \: is \: LAn) \: AND \: (B \: is \: LBk) \: AND \: \dots \: THEN \: U \: is \: f(A,B)\]
+    \end{itemize}
+    The steps to use the fuzzy rules are the following: 
+    \begin{enumerate}
+        \item Input matching.
+        \item Combination of matching degrees.
+        \item Combination with rule weight, if present.
+        \item Aggregation of output from different rules. 
+        \item Eventual defuzzyfication of output.
+    \end{enumerate}
+    To defuzzyficate the output it is possible to consider various operators other than the weighted mean, for example: centroid, bisector,
+    average of maxima, the lowest maximum, the highest maximum, center of the highest area, \dots Depending on the choice the system change the 
+    output and the level of optimization. 
+    \begin{example}[Linguistic rules]
+        Let's consider:
+        \begin{itemize}
+            \item Two input variables (fuzzy partition) $A$ and $B$ equally distributed from Negative Large to Positive Large. 
+            \item One output variable $U$ (equally distributed fuzzy set) from Negative Large to Positive Large. The fuzzy sets are all singletons.
+        \end{itemize} 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/rules.png}
+        \end{figure}
+        We now have to define the rules of the rule base (each one with a weight) as follows: 
+        \begin{enumerate}
+            \item IF $A$ is $PL$ AND $B$ is $PS$ THEN $X$ is $PM$ (weight 1).
+            \item IF $A$ is $PM$ AND $B$ is $PS$ THEN $X$ is $PS$ (weight 0.5).
+            \item IF $A$ is $PL$ AND $B$ is $PM$ THEN $X$ is $PM$ (weight 1).
+        \end{enumerate}
+
+        Let's now set $A=22$ and $B=140$. The steps used to calculate the output value are the following:
+        \begin{enumerate}
+            \item For the first step we have to check the corresponding value for each label. In this case we have:
+                \begin{itemize}
+                    \item ($A$ is $PL$) has a truth value of $0.2$.
+                    \item ($B$ is $PS$) has a truth value of $0.6$.
+                    \item ($A$ is $PM$) has a truth value of $0.8$.
+                    \item ($B$ is $PM$) has a truth value of $0.4$.
+                \end{itemize}
+            \item To consider the degree of truth of each predicate we simply take the minimum between the two values (because there is an AND 
+                operator). So, the result will be $0.2$ for the first rule, $0.6$ for the second and $0.4$ for the third one.
+            \item Now we have to consider the rule weight. To do so we simply select the minimum between the selected value and the weight value.
+                So the final value for the consequent are: $0.2$ for the first rule, $0.5$ for the second and $0.4$ for the third one. 
+            \item  Now we have to aggregate the output. If we have a repeated expression we take the maximum value between the possible ones. 
+                In this case we obtain that ($X$ is $PM$) has a truth value of $0.4$ (maximum between $0.2$ and $0.4$) and ($X$ is $PS$) has a 
+                truth value of $0.5$. This result can be visualized graphically by cutting the initial graph as follows.
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.5\linewidth]{images/cut.png}
+                \end{figure}
+            \item Now we can defuzzyficate the result by obtaining a number. We need to do this operation because the input is a number and the 
+            desired output needs to be a number. To calculate the exact value of the output it is possible to use a simple weighted mean: 
+            \[X=\frac{10 \cdot 0.5 + 20 \cdot 0.4}{0.5+0.4}=14.44\]
+        \end{enumerate}
+    \end{example}
+    \begin{example}[Model rules]
+        The variables are the same as the previous example. The rules we are going to consider are the following: 
+        \begin{enumerate}
+            \item IF $A$ is $PL$ and $B$ is $PS$ THEN $X$ is $A+2B$.
+            \item IF $A$ is $PM$ and $B$ is $PS$ THEN $X$ is $A+3$. 
+            \item IF $A$ is $PL$ and $B$ is $PM$ THEN $X$ is $A+B$.
+        \end{enumerate}
+        The models considered in these rules are all linear. Pattern matching is the same as the previous example, and so we have that the 
+        subsequent have the following degree of truth: the first one has a value of $0.2$, the second a value of $0.5$ and the third a value of
+        $0.4$. For the output aggregation we consider again the weighted mean and use the initial value of $A=22$ and $B=140$ in the resulting 
+        formula:
+        \[X=\frac{0.2 \cdot (A+2B)+0.5 \cdot (A+3)+ 0.4 \cdot (A+B)}{0.2+0.5+0.4}=125.18\]
+    \end{example}
 \end{document}
