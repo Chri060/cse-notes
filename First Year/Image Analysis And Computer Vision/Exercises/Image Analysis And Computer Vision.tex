@@ -165,4 +165,213 @@ imr=im(:,:,2);
 % Blue channel
 imr=im(:,:,3);
     \end{lstlisting}
+
+    \newpage
+
+\chapter{Laboratory session I}
+\begin{Exercise}[label=1]
+    Elaborate the following image called "checkerboard.png": 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/checkerboard.png}
+    \end{figure}
+\end{Exercise}
+\begin{Answer}[ref=1]
+    Initially, we have to load the image in a matrix: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+I=imread('checkerboard.png');
+FNT_SZ=28;
+    \end{lstlisting}
+    We now want to manually select four points and save them in homogeneous coordinates: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+figure(1), imshow(I);
+hold on;
+[x,y]=getpts();
+a=[x(1);y(1);1];
+b=[x(2);y(2);1];
+c=[x(3);y(3);1];
+d=[x(4);y(4);1];
+    \end{lstlisting}
+    And now we can show the points label on the picture with: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+text(a(1),a(2),'a','FontSize',FNT_SZ,'Color','b')
+text(b(1),b(2),'b','FontSize',FNT_SZ,'Color','b')
+text(c(1),c(2),'c','FontSize',FNT_SZ,'Color','b')
+text(d(1),d(2),'d','FontSize',FNT_SZ,'Color','b')
+    \end{lstlisting}
+    We now define the lines passing through these points: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+lab=cross(a,b); 
+lad=cross(a,d); 
+lac=cross(a,c); 
+lcd=cross(c,d);
+    \end{lstlisting}
+    Intersect these lines with the image borders
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+r1=[0;1;-1];       % Parameters of top-most row
+r500=[0;1;-500];   % Parameters of bottom row
+c1=[1;0;-1];       % Parameters of left-most column
+c500=[1;0;-500];   % Parameters of right-most column
+% Intersection between lab and the first column
+x1=cross(c1,lab); 
+x1=x1/x1(3); 
+text(x1(1),x1(2),'x1','FontSize',FNT_SZ,'Color','b')
+% Same with the right most column
+x500=cross(c500,lab);
+x500=x500/x500(3);
+text(x500(1),x500(2),'x500','FontSize',FNT_SZ,'Color','b')
+plot([x1(1),x500(1)],[x1(2),x500(2)],'LineWidth',3)
+        \end{lstlisting}
+    Compute the angles on these images:
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+computeEuclideanAngles(lab,lac) 
+computeEuclideanAngles(lab,lcd) 
+computeEuclideanAngles(lab,lad) 
+    \end{lstlisting}
+    Verify the proporty any linear combination of $a,b$ belongs to lab: 
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+lambda=rand(1);
+mu=1-lambda;
+p= lambda*a+mu*b;
+p'*lab
+p=p/p(3);
+text(p(1),p(2),'p','FontSize',FNT_SZ,'Color','b')
+    \end{lstlisting}
+    Intersect parallel lines
+    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+vac=cross(lab,lcd)
+vac=vac/vac(3) 
+vab=cross(r1,r500)
+vad=cross(c1,c500)
+    \end{lstlisting}
+
+\end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=2]
+        Elaborate the following image called "simplecube-letters.png": 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/simplecube-letters.png}
+        \end{figure}
+        And the following image called "buildingSmall.png": 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/buildingSmall.png}
+        \end{figure}
+    \end{Exercise}
+    \begin{Answer}[ref=2]
+        Initially, we have to load the image in a matrix: 
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+figure(1),imshow(imread('simplecube-letters.png'));
+        \end{lstlisting}
+        Data entering: 
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+figure(2),imshow(imread('buildingSmall.png'))
+hold on;
+[x y]=getpts
+plot(x,y,'.w','MarkerSize',12,'LineWidth',3);
+a=[x(1) y(1) 1]';
+text(a(1),a(2),'a','FontSize',FNT_SZ,'Color','w')
+b=[x(2) y(2) 1]';
+text(b(1),b(2),'b','FontSize',FNT_SZ,'Color','w')
+c=[x(3) y(3) 1]';
+text(c(1),c(2),'c','FontSize',FNT_SZ,'Color','w')
+e=[x(4) y(4) 1]';
+text(e(1),e(2),'e','FontSize',FNT_SZ,'Color','w')
+        \end{lstlisting}
+        Finding some lines: 
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+lab=cross(a,b)
+lac=cross(a,c)
+lae=cross(a,e)
+        \end{lstlisting}
+        The incidence equation is staisfied if one of the following operations are null: 
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+lab'*a
+lab'*b
+lac'*a
+lac'*c
+lae'*a
+lae'*e
+        \end{lstlisting}  
+        We now need to compute the line parallel to ab and passing through c. In order to do this, we create the line at infinity. 
+        Then, we find the directions of segments by ab, ac and ae intersecting their lines with the line at infinity. 
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+linf=[0 0 1]';
+dab=cross(lab,linf)
+dac=cross(lac,linf)
+dae=cross(lae,linf)
+        \end{lstlisting}
+        dab, dac and dae are points at the infinity, which represent directions. All lines with a given direction pass through the corresponding point at the infinity. 
+        We can then find the lines containing segments bd and cd.
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+lbd=cross(b,dac);
+lcd=cross(c,dab);
+        \end{lstlisting}
+        point d is now found by just intersecting lbd and lcd
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+d=cross(lbd,lcd);
+        \end{lstlisting}
+        We normalize d's coordinates so that we can read its cartesian coordinates in d(1) and d(2). We plot the point with a blue circle.
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+d=d/d(3);
+plot(d(1),d(2),'.b','MarkerSize',12);
+text(d(1),d(2),'d','FontSize',FNT_SZ,'Color','w')
+        \end{lstlisting}
+        The rest of the procedure is straightforward, and follows exactly the same technique.
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+lbf=cross(b,dae);
+lcg=cross(c,dae);
+ldh=cross(d,dae);
+lef=cross(e,dab);
+leg=cross(e,dac);
+
+f=cross(lbf,lef);
+g=cross(lcg,leg);
+
+lfh=cross(f,dac);
+h=cross(lfh,ldh);
+
+f=f/f(3);
+g=g/g(3);
+h=h/h(3);
+
+plot(f(1),f(2),'.w','MarkerSize',12,'LineWidth',3); % plots points clicked by user with red circles
+text(f(1), f(2), 'f', 'FontSize', FNT_SZ, 'Color', 'w')
+plot(g(1), g(2),'.w','MarkerSize',12, 'LineWidth', 3); % plots points clicked by user with red circles
+text(g(1), g(2), 'g', 'FontSize', FNT_SZ, 'Color', 'w')
+plot(h(1), h(2),'.w','MarkerSize',12, 'LineWidth', 3); % plots points clicked by user with red circles
+text(h(1), h(2), 'h', 'FontSize', FNT_SZ, 'Color', 'w')
+        \end{lstlisting}
+        We can now finally draw the cube: 
+        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+myline=[a';b';d';c';a'];
+line(myline(:,1),myline(:,2),'LineWidth',5);
+myline=[e';f';h';g';e'];
+line(myline(:,1),myline(:,2),'LineWidth',5);
+myline=[a';e'];
+line(myline(:,1),myline(:,2),'LineWidth',5);
+myline=[b';f'];
+line(myline(:,1),myline(:,2),'LineWidth',5);
+myline=[c';g'];
+line(myline(:,1),myline(:,2),'LineWidth',5);
+myline=[d';h'];
+line(myline(:,1),myline(:,2),'LineWidth',5);
+hold off
+        \end{lstlisting}
+    \end{Answer}
+
+
+
+
+
+
+
+
+
+
+
+
 \end{document}
