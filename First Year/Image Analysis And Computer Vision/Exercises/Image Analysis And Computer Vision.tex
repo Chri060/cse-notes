@@ -50,18 +50,17 @@
 % Print the string
 disp('string');
 % Print the string with C-like syntax
-fprintf('string\n%s %d', 'string', number);
+fprintf('string\n%s %d','string',number);
     \end{lstlisting}
     The variables are created as follows: 
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
 % Variables are created by assignements
-v = 3
-c = 'k'
-size(v)
-% Data types are automatically defined
+v=3
+c='k'
+% Data types can be checked
 whos v
-% Casting to 8-bit integers
-v = uint8(v)
+% Casting to 8-bit integer
+v=uint8(v)
     \end{lstlisting}
     The main data types used on MATLAB: double, uint8, and logical. The arrays are defined in the following ways: 
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
@@ -70,16 +69,16 @@ r=[1, 2, 3, 4]
 % A column vector
 c=[1; 2; 3; 4]
 % Vectors by regular increment operator
-% [start : step : end]
-a = [1 : 2 : 10];
+% [start:step:end]
+a = [1:2:10];
 % A matrix
 v=[ 1 2; 
     3 4 ]
     \end{lstlisting}
     It is possible to concatenate arrays: 
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
-B = [v', v']
-C = [v ; v]        
+B=[v', v']
+C=[v; v]        
     \end{lstlisting}
     The arrays can be divided in subarrays: 
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
@@ -96,16 +95,16 @@ B(:,2:4)
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
 % . means elementwise operation
 [1 2 3].*[4 5 6]
-[1 2 3] + 5
-[1 2 3] * 2 
-[1 2 3] .* 2 
-[1 2 3] / 2
-[1 2 3] ./ 2 
-[1 2 3] .^ 2 
+[1 2 3]+5
+[1 2 3]*2 
+[1 2 3].*2 
+[1 2 3]/2
+[1 2 3]./2 
+[1 2 3].^2 
 % Inner product
-[1 2 3] * [4 5 6]' 
+[1 2 3]*[4 5 6]' 
 % This is the matrix product, returns a matrix
-[1 2 3]' * [4 5 6] 
+[1 2 3]'*[4 5 6] 
 % Functions for rounding functions
 ceil(10.56)
 floor(10.56)
@@ -129,31 +128,31 @@ imshow([im; im]);
     \end{lstlisting}
     To plot the histogram of the various pixels it is possible to write: 
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
-h = hist(im(:), [0: im_length]);
-figure(2), stairs([0: im_length], h), title('Intensity histogram')
+h=hist(im(:),[0: im_length]);
+figure(2), stairs([0: im_length], h)
 axis tight
     \end{lstlisting}
     It is possible to modify the brightness and contrast with a simple operation:
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
-figure(1), imshow(im + 50), title('50 graylevels')
-figure(1), imshow(im + 100), title('100 graylevels')
+figure(1),imshow(im+50),title('50 graylevels')
+figure(1),imshow(im+100),title('100 graylevels')
 % contrast modify
-eq = double(im - min(im(:)))/double(max(im(:)) - min(im(:))) * 255;
+eq=double(im-min(im(:)))/double(max(im(:))-min(im(:)))*255;
     \end{lstlisting}
     Image ranges (in the visualization) can be also controlled:
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
-imshow(im,[-100 156]); title('more brighness');
-imshow(im,[0 156]); title('more brighness and contrast');
-imshow(im,[ 100 256]); title('less brighness, more contrast');
-imshow(im,[ 100 356]); title('less brighness');
+imshow(im,[-100 156]);title('more brighness');
+imshow(im,[0 156]);title('more brighness and contrast');
+imshow(im,[ 100 256]);title('less brighness, more contrast');
+imshow(im,[ 100 356]);title('less brighness');
     \end{lstlisting}
     The gamma correction is done in this way: 
     \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
-for gamma = [.04 .1 .2 .4 .7 1 1.5 2.5 5 10 25]
-    y = x.^gamma;
-    plot(x,y,'DisplayName',sprintf('\\gamma = %.2f',gamma));
+for gamma= [.04 .1 .2 .4 .7 1 1.5 2.5 5 10 25]
+    y=x.^gamma;
+    plot(x,y,'DisplayName',sprintf('\\gamma=%.2f',gamma));
     % display the text
-    text(x(round(end/2)),y(round(end / 2)), sprintf('\\gamma = %.2f',gamma));
+    text(x(round(end/2)),y(round(end/2)),sprintf('\\gamma=%.2f',gamma));
 end
     \end{lstlisting}
     Color is represented by 3 channels (RGB). We can read each channel:
@@ -327,23 +326,19 @@ lcg=cross(c,dae);
 ldh=cross(d,dae);
 lef=cross(e,dab);
 leg=cross(e,dac);
-
 f=cross(lbf,lef);
 g=cross(lcg,leg);
-
 lfh=cross(f,dac);
 h=cross(lfh,ldh);
-
 f=f/f(3);
 g=g/g(3);
 h=h/h(3);
-
-plot(f(1),f(2),'.w','MarkerSize',12,'LineWidth',3); % plots points clicked by user with red circles
-text(f(1), f(2), 'f', 'FontSize', FNT_SZ, 'Color', 'w')
-plot(g(1), g(2),'.w','MarkerSize',12, 'LineWidth', 3); % plots points clicked by user with red circles
-text(g(1), g(2), 'g', 'FontSize', FNT_SZ, 'Color', 'w')
-plot(h(1), h(2),'.w','MarkerSize',12, 'LineWidth', 3); % plots points clicked by user with red circles
-text(h(1), h(2), 'h', 'FontSize', FNT_SZ, 'Color', 'w')
+plot(f(1),f(2),'.w','MarkerSize',12,'LineWidth',3); 
+text(f(1),f(2),'f','FontSize',FNT_SZ,'Color','w')
+plot(g(1),g(2),'.w','MarkerSize',12,'LineWidth',3); 
+text(g(1),g(2),'g','FontSize',FNT_SZ,'Color','w')
+plot(h(1),h(2),'.w','MarkerSize',12, 'LineWidth',3);
+text(h(1),h(2),'h','FontSize',FNT_SZ,'Color','w')
         \end{lstlisting}
         We can now finally draw the cube: 
         \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
@@ -362,16 +357,4 @@ line(myline(:,1),myline(:,2),'LineWidth',5);
 hold off
         \end{lstlisting}
     \end{Answer}
-
-
-
-
-
-
-
-
-
-
-
-
 \end{document}
