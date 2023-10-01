@@ -50,7 +50,7 @@
     \begin{definition}
         The \emph{decision-making problems} are problems in which we must choose a feasible solution among many alternatives based on one or several criteria. 
     \end{definition}
-    The more complex decision-making problems are tackled via a mathematical modelling approach (mathematical models, algorithms and computer implementations). 
+    The more complex decision-making problems are tackled via a mathematical modelling approach. 
     Those problems can be classified in the following categories: 
     \begin{enumerate}
         \item Assignment problem: given $m$ jobs and $m$ machines, suppose that each job can be executed by any machine and that $t_{ij}$ is the execution time of job $J_i$ one
@@ -231,6 +231,62 @@
             \[\max_{x \in X}f_2(x) \:\:\:\: f_1(x)\leq \epsilon\]
             for an appropriate constant $\epsilon$. 
     \end{enumerate}
+
+\newpage
+
+\chapter{Algorithms}
+    \section{Complexity}
+    \begin{definition}
+        An \emph{algorithm} for a problem is a sequence of instructions that allows to solve any of its instances.
+    \end{definition}
+    The execution time of an algorithm depends on the instance and on the computer. We want to evaluate the complexity of the algorithm as a function of the size of the instance
+    independently of the hardware. Thus, we consider the number of elementary operations and assume all have the same cost. Since it is usually hard to determine the exact number of
+    elementary operations, so we consider the asymptotic number of elementary operations in the worst case. We look for a function $f(n)$ which is asymptotically an upper bound on 
+    number of elementary operations needed to solve any instance of size at most $n$. 
+    \begin{definition}
+        A function $f$ is \emph{ordered} of $g$, written $f(n)=O(g(n))$, if $\exists c > 0$ such that $f(n) \leq cg(n)$, for $n$ sufficiently large. 
+    \end{definition}
+    Two classes of algorithms are distinguished according to their worst-case complexity:
+    \begin{itemize}
+        \item Polynomial: $O(n^d)$ for a given constant $d$.
+        \item Exponential: $O(2^n)$. 
+    \end{itemize}
+    Algorithms with a high order polynomial complexity are not efficient in practice.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.25\linewidth]{images/complexity.png}
+        \caption{Plot of various algorithm's complexity}
+    \end{figure}
+
+    \section{Definitions}
+    \begin{definition}
+        An algorithm is \emph{exact} if it provides an optimal solution for every instance. 
+        
+        Otherwise, it is \emph{heuristic}. 
+    \end{definition}
+    \begin{definition}
+        A \emph{greedy algorithm} constructs a feasible solution iteratively by making at each step a locally optimal choice, without reconsidering previous choices. 
+    \end{definition}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \newpage
 
@@ -479,16 +535,37 @@
             \end{algorithmic}
     \end{algorithm}
     where $u \in S$ and $v \in N-S$. The worst-case complexity is $O(n^2)$. 
-    \begin{definition}
-        An algorithm is \emph{exact} if it provides an optimal solution for every instance. Otherwise, it is \emph{heuristic}. 
-    \end{definition}
     \begin{example}[Proposition]
-        The Prim's algorithm is exact. 
+        Prim's algorithm is exact. 
     \end{example}        
     The exactness does not depend on the choice of the first node nor on the selected edge of minimum cost in $\delta(S)$. 
-
-
-
-    
+    \begin{example}[Proposition]
+        Prim's algorithm is greedy. 
+    \end{example}     
+    At each step a minimum cost edge is selected among those in the cut $\delta (S)$ induced by the current set of nodes $S$. 
+    \begin{definition}
+        Given a spanning tree $T$, an edge $e \notin T$ is \emph{cost decreasing} if when $e$ is added to $T$ it creates a cycle $C$ with $C \subseteq T \cup \{e\}$ and 
+        $\exists f \in C-\{e\}$ such that $c_e<c_f$. 
+    \end{definition}
+    \begin{example}
+        Given the following graph
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/costdecreasing.png}
+        \end{figure}
+        Because $c(T \cup \{e\}-\{f\})=c(T)+c_e-c_f$, if $e$ is cost decreasing, then
+        \[c(T \cup \{e\}-\{f\})<c(T)\]
+    \end{example}
+    \begin{theorem}[Tree optimaility condition]
+        A tree $T$ is of minimum total cost if and only if no cost decreasing edge exists. 
+    \end{theorem}
+    \begin{proof}[of direct implication]
+        If a cost-decreasing edge exists, then T is not of minimum total cost.
+    \end{proof}
+    \begin{proof}[of inverse implication]
+        If no cost-decreasing edge exists, then $T$ is of minimum total cost. Let $T^{*}$ be a minimum cost spanning tree found by Prim's algorithm. It can be verified that, by 
+        exchanging one edge at a time, $T^{*}$ can be iteratively transformed into $T$ without modifying the total cost. Thus, $T$ is also optimal. 
+    \end{proof}
+    The optimality condition allows us to verify whether a spanning tree $T$ is optimal: it is sufficient to check that each $e \in E-T$ is not a cost-decreasing edge. 
 
 \end{document}
