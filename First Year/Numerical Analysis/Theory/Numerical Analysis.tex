@@ -180,7 +180,63 @@ The topics of the course are:
         \end{itemize}
     \end{definition}
 
+    \section{Stopping conditions}
+    The iterative methods needs a stopping criterion. It can be on four possible contitions: 
+    \begin{itemize}
+        \item On the error, stops if:
+            \[\left\lvert x^{(k)}-\alpha \right\rvert \leq \epsilon_e\]
+        \item On the residual, stops if:
+            \[\left\lvert f\left(x^{(k)}\right) \right\rvert \leq \epsilon_r\]
+        \item On the steps length, stops if:
+            \[\left\lvert x^{(k)}-x^{(k-1)} \right\rvert \leq \epsilon_s\]
+        \item On the max numbers of iterations, stops if:
+            \[k \leq k_{max}\]
+    \end{itemize}
+    If none of the first three stopping criterions are satisfied, it means that there are no convergence. 
 
+    \section{Bisection method}
+    \begin{theorem}[zeros of continuous functions]
+        Let $f(x)$ be a continuous function on the interval $I=(a,b)$, that is $f \in C^0([a,b])$. 
+        If $f(a)f(b)<0$, then there exists at least one zero $\alpha \in I$ of $f(x)$. 
+    \end{theorem}
+    Let us assume that exist a unique zero, and let us call it $\alpha$. 
+    The strategy of the bisection method is to have the given interval and select a sub-interval where $f$ features a sign change. Following 
+    such procedure it is guaranteed that every interval selected this way will contain $\alpha$. The sequence $\{x^{(k)}\}$ of the midpoints of 
+    these sub-intervals will inevitably tend to $\alpha$ since the length of the sub-intervals tends to zero as $k$ tends to infinity.
+    We have that:
+    \[\left\lvert x^{(k)} - \alpha \right\rvert \leq \dfrac{1}{2} \left\lvert b^{(k)}-a^{(k)} \right\rvert \]
+    So, since the first part of the equation is similar to the condition on the error, we have that the stoppinc criterion will be: 
+    \[\left\lvert b^{(k)}-a^{(k)} \right\rvert \leq 2 \epsilon_e\]
+    Now that we have the tolerance $\epsilon$ we can find that:
+    \[k_{min}= \left\lceil {\log_2{\left( \dfrac{\left\lvert b-a \right\rvert}{\epsilon} \right)} - 1}\right\rceil \]
+    \begin{algorithm}[H]
+        \caption{Algorithm for the bisection method}
+            \begin{algorithmic}[1]
+                \For {$k=0,1,\dots,n$}
+                    \State $x^{(k)}=\dfrac{a+b}{2}$
+                    \If {$\left\lvert b^{(k)}-a^{(k)} \right\rvert \leq 2 \epsilon_e$}
+                        \State \Return $x^{(k)}$
+                    \ElsIf {$f(x^{(k)})f(a) < 0$}
+                        \State $b \leftarrow x^{(k)}$
+                    \Else 
+                        \State $a \leftarrow x^{(k)}$
+                    \EndIf
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{l|l}
+        \textbf{Pros} & \begin{tabular}[c]{@{}l@{}}I can control the maximal error\\ Convergence is guaranteed\\ Use only evaluation of $f$\end{tabular} \\ \hline
+        \textbf{Cons} & \begin{tabular}[c]{@{}l@{}}Work only if $f$ changes sign\\ Convergence is slow\end{tabular}                                     
+        \end{tabular}
+    \end{table}
+   
+    \section{Newton method}
+
+    \section{Secant method}
+
+    \section{Fixed point method}
 
 
 

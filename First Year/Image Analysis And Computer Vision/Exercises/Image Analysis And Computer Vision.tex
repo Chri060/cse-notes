@@ -10,6 +10,26 @@
 \newtheorem[style=M,bodystyle=\normalfont]{lemma}{Lemma}
 \newtheorem[style=M,bodystyle=\normalfont]{definition}{Definition}
 
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
 
 \title{Image Analysis And Computer Vision\\ \textit{Exercises}}
 \author{Christian Rossi}
@@ -46,14 +66,14 @@
 \chapter{Introduction to MATLAB}
     \section{Main MATLAB operators}
     To print some string it is possible to use; 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 % Print the string
 disp('string');
 % Print the string with C-like syntax
 fprintf('string\n%s %d','string',number);
     \end{lstlisting}
     The variables are created as follows: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 % Variables are created by assignements
 v=3
 c='k'
@@ -63,7 +83,7 @@ whos v
 v=uint8(v)
     \end{lstlisting}
     The main data types used on MATLAB: double, uint8, and logical. The arrays are defined in the following ways: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 % A row vector
 r=[1, 2, 3, 4]
 % A column vector
@@ -76,12 +96,12 @@ v=[ 1 2;
     3 4 ]
     \end{lstlisting}
     It is possible to concatenate arrays: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 B=[v', v']
 C=[v; v]        
     \end{lstlisting}
     The arrays can be divided in subarrays: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 % First row and second column 
 v(1,2) 
 % The second column of v
@@ -92,7 +112,7 @@ v(1,:)
 B(:,2:4) 
     \end{lstlisting}
     Some useful mathematical operations are: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 % . means elementwise operation
 [1 2 3].*[4 5 6]
 [1 2 3]+5
@@ -117,7 +137,7 @@ sum([1:4;5:8],2)
 
     \section{Commands for images}
     The images in MATLAB are treated as matrices:
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 im=imread('photo.png');
 % Show the image
 imshow(im);
@@ -127,27 +147,27 @@ imshow([im im]);
 imshow([im; im]);
     \end{lstlisting}
     To plot the histogram of the various pixels it is possible to write: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 h=hist(im(:),[0: im_length]);
 figure(2), stairs([0: im_length], h)
 axis tight
     \end{lstlisting}
     It is possible to modify the brightness and contrast with a simple operation:
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 figure(1),imshow(im+50),title('50 graylevels')
 figure(1),imshow(im+100),title('100 graylevels')
 % contrast modify
 eq=double(im-min(im(:)))/double(max(im(:))-min(im(:)))*255;
     \end{lstlisting}
     Image ranges (in the visualization) can be also controlled:
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 imshow(im,[-100 156]);title('more brighness');
 imshow(im,[0 156]);title('more brighness and contrast');
 imshow(im,[ 100 256]);title('less brighness, more contrast');
 imshow(im,[ 100 356]);title('less brighness');
     \end{lstlisting}
     The gamma correction is done in this way: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 for gamma= [.04 .1 .2 .4 .7 1 1.5 2.5 5 10 25]
     y=x.^gamma;
     plot(x,y,'DisplayName',sprintf('\\gamma=%.2f',gamma));
@@ -156,7 +176,7 @@ for gamma= [.04 .1 .2 .4 .7 1 1.5 2.5 5 10 25]
 end
     \end{lstlisting}
     Color is represented by 3 channels (RGB). We can read each channel:
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 % Red channel
 imr=im(:,:,1);
 % Green channel
@@ -177,12 +197,12 @@ imr=im(:,:,3);
 \end{Exercise}
 \begin{Answer}[ref=1]
     Initially, we have to load the image in a matrix: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 I=imread('checkerboard.png');
 FNT_SZ=28;
     \end{lstlisting}
     We now want to manually select four points and save them in homogeneous coordinates: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 figure(1), imshow(I);
 hold on;
 [x,y]=getpts();
@@ -192,21 +212,21 @@ c=[x(3);y(3);1];
 d=[x(4);y(4);1];
     \end{lstlisting}
     And now we can show the points label on the picture with: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 text(a(1),a(2),'a','FontSize',FNT_SZ,'Color','b')
 text(b(1),b(2),'b','FontSize',FNT_SZ,'Color','b')
 text(c(1),c(2),'c','FontSize',FNT_SZ,'Color','b')
 text(d(1),d(2),'d','FontSize',FNT_SZ,'Color','b')
     \end{lstlisting}
     We now define the lines passing through these points: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 lab=cross(a,b); 
 lad=cross(a,d); 
 lac=cross(a,c); 
 lcd=cross(c,d);
     \end{lstlisting}
     Intersect these lines with the image borders
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 r1=[0;1;-1];       % Parameters of top-most row
 r500=[0;1;-500];   % Parameters of bottom row
 c1=[1;0;-1];       % Parameters of left-most column
@@ -222,13 +242,13 @@ text(x500(1),x500(2),'x500','FontSize',FNT_SZ,'Color','b')
 plot([x1(1),x500(1)],[x1(2),x500(2)],'LineWidth',3)
         \end{lstlisting}
     Compute the angles on these images:
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 computeEuclideanAngles(lab,lac) 
 computeEuclideanAngles(lab,lcd) 
 computeEuclideanAngles(lab,lad) 
     \end{lstlisting}
     Verify the proporty any linear combination of $a,b$ belongs to lab: 
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 lambda=rand(1);
 mu=1-lambda;
 p= lambda*a+mu*b;
@@ -237,7 +257,7 @@ p=p/p(3);
 text(p(1),p(2),'p','FontSize',FNT_SZ,'Color','b')
     \end{lstlisting}
     Intersect parallel lines
-    \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+    \begin{lstlisting}[language=Matlab]
 vac=cross(lab,lcd)
 vac=vac/vac(3) 
 vab=cross(r1,r500)
@@ -262,11 +282,11 @@ vad=cross(c1,c500)
     \end{Exercise}
     \begin{Answer}[ref=2]
         Initially, we have to load the image in a matrix: 
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 figure(1),imshow(imread('simplecube-letters.png'));
         \end{lstlisting}
         Data entering: 
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 figure(2),imshow(imread('buildingSmall.png'))
 hold on;
 [x y]=getpts
@@ -281,13 +301,13 @@ e=[x(4) y(4) 1]';
 text(e(1),e(2),'e','FontSize',FNT_SZ,'Color','w')
         \end{lstlisting}
         Finding some lines: 
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 lab=cross(a,b)
 lac=cross(a,c)
 lae=cross(a,e)
         \end{lstlisting}
         The incidence equation is staisfied if one of the following operations are null: 
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 lab'*a
 lab'*b
 lac'*a
@@ -297,7 +317,7 @@ lae'*e
         \end{lstlisting}  
         We now need to compute the line parallel to ab and passing through c. In order to do this, we create the line at infinity. 
         Then, we find the directions of segments by ab, ac and ae intersecting their lines with the line at infinity. 
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 linf=[0 0 1]';
 dab=cross(lab,linf)
 dac=cross(lac,linf)
@@ -305,22 +325,22 @@ dae=cross(lae,linf)
         \end{lstlisting}
         dab, dac and dae are points at the infinity, which represent directions. All lines with a given direction pass through the corresponding point at the infinity. 
         We can then find the lines containing segments bd and cd.
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 lbd=cross(b,dac);
 lcd=cross(c,dab);
         \end{lstlisting}
         point d is now found by just intersecting lbd and lcd
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 d=cross(lbd,lcd);
         \end{lstlisting}
         We normalize d's coordinates so that we can read its cartesian coordinates in d(1) and d(2). We plot the point with a blue circle.
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 d=d/d(3);
 plot(d(1),d(2),'.b','MarkerSize',12);
 text(d(1),d(2),'d','FontSize',FNT_SZ,'Color','w')
         \end{lstlisting}
         The rest of the procedure is straightforward, and follows exactly the same technique.
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 lbf=cross(b,dae);
 lcg=cross(c,dae);
 ldh=cross(d,dae);
@@ -341,7 +361,7 @@ plot(h(1),h(2),'.w','MarkerSize',12, 'LineWidth',3);
 text(h(1),h(2),'h','FontSize',FNT_SZ,'Color','w')
         \end{lstlisting}
         We can now finally draw the cube: 
-        \begin{lstlisting}[frame=single, numbers=none, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 myline=[a';b';d';c';a'];
 line(myline(:,1),myline(:,2),'LineWidth',5);
 myline=[e';f';h';g';e'];
