@@ -183,16 +183,15 @@ The topics of the course are:
     \section{Stopping conditions}
     The iterative methods needs a stopping criterion. It can be on four possible contitions: 
     \begin{itemize}
-        \item On the error, stops if:
-            \[\left\lvert x^{(k)}-\alpha \right\rvert \leq \epsilon_e\]
-        \item On the residual, stops if:
-            \[\left\lvert f\left(x^{(k)}\right) \right\rvert \leq \epsilon_r\]
-        \item On the steps length, stops if:
-            \[\left\lvert x^{(k)}-x^{(k-1)} \right\rvert \leq \epsilon_s\]
-        \item On the max numbers of iterations, stops if:
-            \[k \leq k_{max}\]
+        \item On the error, stops if $\left\lvert x^{(k)}-\alpha \right\rvert \leq \epsilon_e$.
+        \item On the residual, stops if $\left\lvert f\left(x^{(k)}\right) \right\rvert \leq \epsilon_r$. 
+        \item On the step length, stops if $\left\lvert x^{(k)}-x^{(k-1)} \right\rvert \leq \epsilon_s$. 
+        \item On the max numbers of iterations, stops if $k \leq k_{max}$. 
     \end{itemize}
     If none of the first three stopping criterions are satisfied, it means that there are no convergence. 
+
+
+
 
     \section{Bisection method}
     \begin{theorem}[zeros of continuous functions]
@@ -205,10 +204,11 @@ The topics of the course are:
     these sub-intervals will inevitably tend to $\alpha$ since the length of the sub-intervals tends to zero as $k$ tends to infinity.
     We have that:
     \[\left\lvert x^{(k)} - \alpha \right\rvert \leq \dfrac{1}{2} \left\lvert b^{(k)}-a^{(k)} \right\rvert \]
-    So, since the first part of the equation is similar to the condition on the error, we have that the stoppinc criterion will be: 
+    So, since the first part of the equation is similar to the condition on the error, we have that the stopping criterion will be: 
     \[\left\lvert b^{(k)}-a^{(k)} \right\rvert \leq 2 \epsilon_e\]
     Now that we have the tolerance $\epsilon$ we can find that:
     \[k_{min}= \left\lceil {\log_2{\left( \dfrac{\left\lvert b-a \right\rvert}{\epsilon} \right)} - 1}\right\rceil \]
+    The inputs for the algorithm are: a function $f \in C(\mathbb{R})$ and an interval $[a,b]$ such that $f(a)f(b) \leq 0$. 
     \begin{algorithm}[H]
         \caption{Algorithm for the bisection method}
             \begin{algorithmic}[1]
@@ -224,20 +224,101 @@ The topics of the course are:
                 \EndFor
             \end{algorithmic}
     \end{algorithm}
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{l|l}
-        \textbf{Pros} & \begin{tabular}[c]{@{}l@{}}I can control the maximal error\\ Convergence is guaranteed\\ Use only evaluation of $f$\end{tabular} \\ \hline
-        \textbf{Cons} & \begin{tabular}[c]{@{}l@{}}Work only if $f$ changes sign\\ Convergence is slow\end{tabular}                                     
-        \end{tabular}
-    \end{table}
+    The pros are: 
+    \begin{itemize}
+        \item I can control the maximal error.
+        \item Convergence is guaranteed.
+        \item Use only evaluation of $f$
+    \end{itemize}
+    The cons are: 
+    \begin{itemize}
+        \item Work only if $f$ changes sign. 
+        \item Convergence is slow.
+    \end{itemize}
    
     \section{Newton method}
+    The sign of the given function $f$ at the endpoints of the sub-intervals is the only information exploited by the bisection method. A more efficient method can be constructed 
+    by exploiting the values attained by $f$ and its derivative. If $f$ is differentiable we have that: 
+    \[y(x)=f(x^{(k)})+f^{'}(x^{(k)})(x-x^{(k)})\]
+    provides the equation of the tangent to the curve $(x,f(x))$ at the point $x^{(k)}$. If we pretend that $x^{(k+1)}$ is such that $f(x^{(k+1)})=0$, we obtain:
+    \[x^{(k+1)}=x^{(k)}-\dfrac{f(x^{(k)})}{f^{'}(x^{(k)})} \:\:\:\:\:\: k \geq 0\]
+    provided $f^{'}(x^{(k)}) \neq 0$. This method is known as Newton's method and corresponds to computing the zero of $f$ locally replacing $f$ by its tangent line. 
+
+    Obviously, this method converges in a single step when $f$ is linear. 
+
+    The Newton method in general does not converges for all possible choices of $x^{(0)}$, but only for those values of $x^{(0)}$ which are sufficiently close to $\alpha$. Since we 
+    don't know the value of $\alpha$ a possible initial value $x^{(0)}$ can be obtained by resorting to a few iterations of the bisection method or through an investigation of the 
+    graph of $f$. 
+
+    If $f \in C^2(\mathbb{R})$, $f^{'}(\alpha) \neq 0$, and $x^{(0)}$ is taken sufficiently near $\alpha$ the Newton method converges quadratically. In the case of zeros with 
+    multiplicity $m$ larger than one Newton method converges linearly. To avoid this degradation it is possible to use the modified Newton method:
+    \[x^{(k+1)}=x^{(k)}-m\dfrac{f(x^{(k)})}{f^{'}(x^{(k)})} \:\:\:\:\:\: k \geq 0\]
+    provided $f^{'}(x^{(k)}) \neq 0$.
+
+    Another modification to this method is the quasi-Newton method that uses a derivative by finite difference: 
+    \[f^{'}(x^{(k)}) \simeq \dfrac{f(x^{(k)}+h)-f(x^{(k)})}{h}\]
+
+    The inputs for the algorithm are: a function $f \in C^1(\mathbb{R})$ and an initial guess $x^{(0)} \in \mathbb{R}$. 
+    \begin{algorithm}[H]
+        \caption{Algorithm for the basic Newton method}
+            \begin{algorithmic}[1]
+                \For {$k=0,1,\dots,n$}
+                    \State $x^{(k+1)}=x^{(k)}-\dfrac{f(x^{(k)})}{f^{'}(x^{(k)})}$
+                    \If {$k>k_{max} \lor \left\lvert x^{(k)}-x^{(k-1)} \right\rvert \leq \epsilon_s \lor \left\lvert f\left(x^{(k+1)}\right) \right\rvert \leq \epsilon_r$}
+                        \State \Return $x^{(k+1)}$
+                    \EndIf
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+    The pros are: 
+    \begin{itemize}
+        \item Fast convergence. 
+        \item Works also for zeros with even multiplicity. 
+    \end{itemize}
+    The cons are: 
+    \begin{itemize}
+        \item Require computation of the derivative. 
+        \item Choice of the right $x^{(0)}$. 
+    \end{itemize}
 
     \section{Secant method}
+    For the computation of the zeros of a function $f$ whose derivative is not available in analytical form, the Newton method cannot be applied. However, we should be able to 
+    compute the function $f$ at any arbitrary point, and we could replace the exact value $f^{'}(x^{(k)})$ with an incremental ratio based on previously computed values of $f$. The 
+    secant method exploits this strategy and converges super-linearly ($q=1.6$). 
+
+    The inputs for the algorithm are: two initial guesses $x^{(0)} \in \mathbb{R}$ and $x^{(1)} \in \mathbb{R}$. 
+    \begin{algorithm}[H]
+        \caption{Algorithm for the secant method}
+            \begin{algorithmic}[1]
+                \For {$k=0,1,\dots,n$}
+                    \State $x^{(k+1)}=x^{(k)}-f(x^{(k)})\dfrac{x^{(k)}-x^{(k-1)}}{f(x^{(k)})-f(x^{(k-1)})}$
+                    \If {$k>k_{max} \lor \left\lvert x^{(k)}-x^{(k-1)} \right\rvert \leq \epsilon_s \lor \left\lvert f\left(x^{(k+1)}\right) \right\rvert \leq \epsilon_r$}
+                        \State \Return $x^{(k+1)}$
+                    \EndIf
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+
+    \section{Systems of nonlinear equations}
 
     \section{Fixed point method}
-
-
-
+    Given a function $\phi:[a,b] \rightarrow \mathbb{R}$, find $\alpha \in [a,b]$ such that $\alpha=\phi(\alpha)$. If such an $\alpha$ exists it will be called a fixed point of 
+    $\phi$, and it could be computed by the following algorithm: 
+    \[x^{(k+1)}=\phi(x^{(k)}) \:\:\:\:\:\: k \geq 0\]
+    where $x^{(0)}$ is an initial guess. This algorithm is called fixed point iteration and $\phi$ is said to be the iteration function. 
+    \begin{theorem}[Lipschitz continuity]
+        \begin{enumerate}
+            \item Let us suppose that $\phi(x)$ is continuous in $[a,b]$ and such that $\phi(x) \in [a,b]$ for every $x \in [a,b]$; then, there exists at least a fixed point 
+                $\alpha \in [a,b]$.
+            \item Moreover, if 
+                \[\exists L < 1 \textnormal{such that} \left\lvert \phi(x_1)-\phi(x_2) \right\rvert \leq L\left\lvert x_1-x_2 \right\rvert  \:\:\:\:\:\: \forall x_1,x_2 \in [a,b]\]
+                then there exists a unique fixed point $\alpha \in [a,b]$ of $\phi$ and the sequence converges to $\alpha$, for any choice of initial guess $x^{(0)} \in [a,b]$.
+        \end{enumerate}
+    \end{theorem}
+    \begin{proof}[of the first proposition]
+        
+    \end{proof}
+    \begin{proof}[of the second proposition]
+        
+    \end{proof}
 \end{document}
