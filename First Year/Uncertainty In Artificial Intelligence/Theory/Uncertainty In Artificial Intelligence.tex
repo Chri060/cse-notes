@@ -647,4 +647,290 @@
     "a lot". 
 
     The fuzzy systems can be also used in Artificial Intelligence systems like Expert Systems, scheduling, and Decision Support Systems.
+
+    \newpage
+
+    \chapter{Evidence theory}
+    \section{Fuzzy mathematics}
+    Fuzzy numbers are fuzzy sets defined over the set of real numbers, which model our concept of approximate value. The constraints used to 
+    define fuzzy numbers are: 
+    \begin{enumerate}
+        \item Normal fuzzy sets.
+        \item Convex fuzzy sets (all $\alpha$-cut intervals should be closed).
+        \item The support of A should be bounded. 
+    \end{enumerate}
+    The first constraint captures the concept of approximate value corresponding to a number. The other two constraints are needed to define 
+    arithmetic. 
+
+    With fuzzy sets it is possible to define fuzzy numbers (first graph), fuzzy intervals (second graph), defined intervals (third graph) and 
+    crisp numbers (fourth graph). 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/numbers.png}
+        \caption{Possible representation of numbers}.
+    \end{figure}
+
+    The arithmetic of fuzzy numbers is based on two properties:
+    \begin{itemize}
+        \item Each fuzzy number can be completely represented by its $\alpha$-cuts uniquely. 
+        \item The $\alpha$-cuts of fuzzy numbers are closed intervals of real numbers. 
+    \end{itemize}
+
+    The four main operators are defined as the union of the operations on intervals ($\alpha$-cut) that compose the fuzzy number and are: 
+    \begin{itemize}
+        \item $[a,b]+[d,e]=[a+d,b+e]$.
+        \item $[a,b]-[d,e]=[a-e,b-d]$.
+        \item $[a,b] \times [d,e]=[\min (ad,ae,bd,be),\max (ad,ae,bd,be)]$
+        \item $[a,b] \div [d,e]=[\min (\frac{a}{d},\frac{a}{e},\frac{b}{d},\frac{b}{e}),\max (\frac{a}{d},\frac{a}{e},\frac{b}{d},\frac{b}{e})]$ with $[d,e] \neq [0,0]$
+    \end{itemize}
+
+    \begin{example}
+        Given the fuzzy numbers $[1,3]$ and $[4,6]$ we have that:
+        \begin{itemize}
+            \item The sum of the numbers is given by the sum of the minimum and the maximum of each interval:
+                \[[1,3]+[4,6]=[1+4,3+6]=[5,9]\]
+                Graphically, we obtain the following graph:
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.75\linewidth]{images/sum.png}
+                \end{figure}
+            \item The subtraction of the numbers is given by the subtraction of the minimum of the first interval with the maximum of the 
+            second and the subtraction of the maximum of the first interval with the minimum of the second interval:
+                \[[1,3]+[4,6]=[1-6,3-4]=[-5,-1]\]
+                Graphically, we obtain the following graph:
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.75\linewidth]{images/subtraction.png}
+                \end{figure}
+            \item The multiplication of the numbers is given by the minimum and the maximum of the multiplication of each element:
+                \[[1,3] \times [4,6]=[\min(1 \cdot 4, 1 \cdot 6, 3 \cdot 4, 3 \cdot 6),\max(1 \cdot 4, 1 \cdot 6, 3 \cdot 4, 3 \cdot 6)]=[4,18]\]                Graphically, we obtain the following graph:
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.75\linewidth]{images/multiplication.png}
+                \end{figure}
+            \item The division of the numbers is given by the minimum and the maximum of the division of each element:
+            \[[1,3] \times [4,6]=[\min(\frac{1}{4}, \frac{1}{6}, \frac{3}{4}, \frac{3}{6}),\max(\frac{1}{4}, \frac{1}{6}, \frac{3}{4}, \frac{3}{6})]=[\frac{1}{6},\frac{3}{4}]\]
+                Graphically, we obtain the following graph:
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.5\linewidth]{images/division.png}
+                \end{figure}
+        \end{itemize}
+    \end{example}
+    
+    From fuzzy arithmetic is also possible to define fuzzy functions, fuzzy integrals and fuzzy derivatives. In general, fuzzy numbers are used 
+    to represent approximation.
+
+    \section{Fuzzy measure and probability assignment}
+    \begin{definition}
+        If a field has the property that, if the sets $A_1, \dots ,A_n$ belong to the fields, then also the union and the intersection of the sets
+        belong to the field, this is named a \emph{Borel field}. A function $g$ defined on a Borel field $B$ of the universe of discourse $X$ is 
+        a \emph{fuzzy measure} if it has the following properties: 
+        \begin{enumerate}
+            \item $g(\varnothing)=0$ and $g(X)=1$.
+            \item If $A,B \in B$ and $A \subseteq B$, then $g(A) \leq g(B)$.
+            \item If $A_n \in B$ and $A_1 \subseteq A_2 \subseteq \dots$ then $\lim_{n \to \infty}g(A_n)=g(\lim_{n \to \infty}A_n)$.
+        \end{enumerate}
+    \end{definition}
+    The fuzzy measure is different from classical measure, since the additivity property is relaxed.
+    \begin{definition}
+        The \emph{basic probabilistic assignment} is defined as:
+        \begin{itemize}
+            \item $m:\mathcal{P}(X) \rightarrow [0,1]$.
+            \item $m(\varnothing)=0$.
+            \item $\sum_{A \in \mathcal{P}(X)}m(A)=1$.
+        \end{itemize}
+        Where $m$ gives, for any set $A$ belonging to the power set of $X(\mathcal{P}(X))$, how much the available and relevant evidence
+        supports the fact that a given element belongs to $A$.
+    \end{definition}
+    Note that: it is not needed that $m(X)=1$, it is not needed that $m(A) \leq m(B)$ when $A\subseteq B$ and no relationship holds between 
+    $m(A)$ and $m(\lnot A)$. 
+
+    \section{Evidence theory}
+    We would like to define a measure of evidence for or against a proposition. To do that we will use two fuzzy measures: Belief and Plausibility.
+
+    \begin{definition}
+        \emph{Belief} is an estimation of the minimum probability that can be assigned to an element, given the collected evidence. The 
+        \emph{Belief} has the following definition:
+        \begin{itemize}
+            \item $Bel:\mathcal{P} (X) \rightarrow [0,1]$.
+            \item $Bel(\varnothing)=0$ and $Bel(X)=1$.
+            \item $Bel(A_1 \cup A_2 \cup \dots \cup A_n) \geq \sum_{j}Bel(A_j)-\sum_{j<k}Bel(A_j \cap A_k)+\dots+(-1)^{n+1}Bel(A_1 \cap A_2 \cap \dots \cap A_n)$
+            \item $Bel(A)+Bel(\lnot A) \leq 1$.
+        \end{itemize}
+    \end{definition}
+    \begin{definition}
+        \emph{Plausibility} is an estimation of the maximum probability that can be assigned to an element, given the collected evidence.
+        The \emph{Plausibility} has the following definition:
+        \begin{itemize}
+            \item $Pl:\mathcal{P} (X) \rightarrow [0,1]$.
+            \item $Pl(\varnothing)=0$ and $Pl(X)=1$.
+            \item $Pl(A_1 \cap A_2 \cap \dots \cap A_n) \geq \sum_{j}Pl(A_j)-\sum_{j<k}Pl(A_j \cup A_k)+\dots+(-1)^{n+1}Pl(A_1 \cup A_2 \cup \dots \cup A_n)$
+            \item $Pl(A)+Pl(\lnot A) \geq 1$.
+        \end{itemize}
+    \end{definition}
+    The evidence theory can be used when we have multiple sources of knowledge and when the basic probability assignment is distributed on 
+    different sets of statements, or intervals. In these cases, we may exploit the features of evidence theory to collect the basic probability
+    assignments and to combine them to evaluate upper and lower bounds for probability of a single statement. Evidence theory has the following 
+    implications: 
+    \begin{itemize}
+        \item It is not necessary to elicit a precise measurement from a knowledge source or an experiment if it is not realistic or feasible 
+            to do so.
+        \item The principle of insufficient reason is not imposed. Statements can be made about the likelihood of multiple events together without
+            having to resort to assumptions about the probabilities of the individual events under ignorance.
+        \item The axiom of additivity is not imposed. The measures can:
+            \begin{itemize}
+                \item Add to exactly one: it corresponds to a traditional probabilistic representation. 
+                \item Add to less than one (sub-additive case): incompatibility between multiple sources of information providing conflicting 
+                    information.
+                \item Add to more than one (super-additive): cooperative effect between multiple sources of information (multiple sensors 
+                    providing the same information).
+            \end{itemize}
+    \end{itemize}
+    Given five sources ($A,B,C,D,E$ where $A$ is the target) of information it is possible to have four cases:
+    \begin{itemize}
+        \item Conflict: each source provides evidence for disjoint sets. 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/conflict.png}
+            \end{figure}
+        \item Consonance: sources provide some evidence on nested sets converging on the target
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/consonance.png}
+            \end{figure}
+        \item Arbitrary: each source provides evidence for sets, only some of which include the target hypothesis. 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/arbitrary.png}
+            \end{figure}
+        \item Consistent: all sources provide some evidence for sets that include the same hypothesis. 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/consistent.png}
+            \end{figure}
+    \end{itemize}
+    To combine the basic probability assignments it is possible to use the Dempster rule of combination:
+    \[m_{1,2}(A)=\frac{\sum_{B \cap C=A}m_1(B)m_2(C)}{1-K}\]
+    where $K$ is the basic probability mass associated with conflict. Its role in the denominator has the effect of completely ignoring conflict 
+    and attributing any probability mass associated with conflict to the null set. The value of this variable is the following: 
+    \[K=\sum_{B \cap C=O}m_1(B)m_2(C)\]
+    \begin{example}[Klir, Yuan, 1995]
+        Let’s assume that an old painting was discovered which strongly resembles paintings by Raphael. Such a discovery is likely to generate 
+        various questions regarding the status of the painting. Let’s assume the following three questions:
+        \begin{enumerate}
+            \item Is the discovered painting a genuine painting by Raphael?
+            \item Is the discovered painting a product of one of Raphael's many disciples?
+            \item Is the discovered painting a counterfeit?
+        \end{enumerate}
+        Let $R$, $D$, and $C$ denote subsets of our universal set $X$-the set of all paintings, which contain the set of all paintings by Raphael, 
+        the set of all paintings by disciples of Raphael, and the set of all counterfeits of Raphael's paintings, respectively.
+        Assume now that two experts performed careful examinations of the painting and subsequently provided us with basic assignments $m_1$ and 
+        $m_2$. By applying the above introduced formulas, it is possible to compute plausibility and belief of all the subsets of hypotheses.
+    \end{example}
+
+    \section{Possibility and necessity}
+    \begin{definition}
+        \emph{Possibility} is another fuzzy measure working on sets. A \emph{possibility measure} is given by the equation $\Pi : \mathcal{P}(X) \rightarrow [0,1]$,
+        for which the following properties hols: 
+        \begin{enumerate}
+            \item $\Pi(\varnothing)=0$ and $\Pi(X)=1$.
+            \item $A \subseteq B \implies \Pi(A) \leq \Pi(B)$. 
+            \item $\Pi(A)=\sup_{x \in A} f(x)$ where $A \subset X$. 
+        \end{enumerate}
+    \end{definition}
+    It can be uniquely defined by a possibility relationship $f:X \rightarrow [0,1]$ so that:
+    \[\Pi\left(\bigcup_{i \in I}A_i\right)=\sup_{i \in I}\Pi\left(A_i\right)\]
+    Therefore, $f$ is defined as $\Pi\left(\{X\}\right) \: \forall x \in X$.
+    \begin{example}[Possibility]
+        Given the set $x=\{0,1,2,3,4,5,6,7,8,9,10\}$ and $\Pi({x})$, the possibility that $x$ is close to the value $8$:
+        \begin{center}
+            \begin{tabular}{ | c | c | c | c | c | c | c | c | c | c | c | c | } 
+            \hline
+                $x$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ 
+            \hline
+                $\Pi\left(\{X\}\right)$ & 0 & 0 & 0 & 0 & 0 & 0.1 & 0.5 & 0.8 & 1 & 0.8 & 0.5 \\ 
+            \hline
+            \end{tabular}
+        \end{center}
+        Now we need to compute $\Pi(A)$ that is the possibility that $A$ includes an integer close to $8$.
+        For a given set $A=\{2,5,9\}$, it is possible to compute its possibility: 
+        \[\Pi(A)=\sup \left[\Pi\left(\{2\}\right), \Pi\left(\{5\}\right), \Pi\left(\{9\}\right)\right]=\sup\left[0,0.1,0.8\right]=0.8\]
+    \end{example}
+
+    \begin{definition}
+        \emph{Necessity} is the dual of possibility, and it is defined as: 
+        \[\Pi(A)=\-N(\lnot A)\]
+        \emph{Necessity} also satisfy the condition: 
+        \[\min\left[N(A),N(\lnot A)\right]=0\]
+    \end{definition}
+    
+    Those two parameters are connected by the following relations: 
+    \begin{itemize}
+        \item $\Pi(A) \geq N(A)$.
+        \item $N(A) > 0 \implies \Pi(A)=1$.
+        \item $\Pi(A) < 1 \implies N(A)=0$.
+    \end{itemize}
+    \begin{definition}
+        The \emph{confirmation degree} is a value that puts together possibility and necessity:
+        \[C(A)=N(A)+\Pi(A)-1\]
+        Negatives values of $C(A)$ correspond to a disconfirmation degree. 
+    \end{definition}
+
+    It is possible to demonstrate that if the focal set of elements of possibility (the one with values of $m$ different from $0$) is composed of sets with a single element,
+    then $Bel$ and $Pl$ have the same value and this is equal to the sum of the probabilities of the elements of the set $A$ to which they are applied, given by $m$.
+
+    The evidence in the probabilistic model is on single elements, in the possibility model it can also be on sets.
+
+    Both have distribution functions, even if they are normalized differently: probabilities add up to one, for possibilities the maximum value is one.
+
+    In possibility theory ignorance is expressed by assigning all the evidence to the total set (i.e., anything is possible), in probability, instead, by distributing a 
+    uniform fraction of the evidence to each element (each element is equiprobable). 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/measures.png}
+        \caption{Inclusion relationships among fuzzy}
+    \end{figure}
+
+    \section{Fuzzyness measure}
+    The fuzzyness measures provide the fuzzyness degree of a fuzzy set. A fuzzyness measure is the entropy of a fuzzy set. 
+    \begin{definition}
+        Given a fuzzy set $A=\{x,\mu_A(x)\}$ the fuzzyness measure (entropy) is defined as:
+        \[d(A)=K \sum_{i=1}^{n}S(\mu_A(x_i))\]
+        where $S(x)$ is the Shannon's function: 
+        \[S(x)=-x \ln(x)-(1-x)\ln(1-x)\]
+    \end{definition}
+    \begin{example}
+        Let's define $A$ as "the set of integer close to ten" we have that:
+        \begin{center}
+            \begin{tabular}{ | c | c | c | c | c | c | c | c | } 
+            \hline
+                $x$ & 7 & 8 & 9 & 10 & 11 & 12 & 13 \\ 
+            \hline
+                $\mu_A(x)$ & 0.1 & 0.5 & 0.8 & 1 & 0.8 & 0.5 & 0.1 \\ 
+            \hline
+            \end{tabular}
+        \end{center}
+        The entropy of this set has a value of: 
+        \[d(A)=0.325+0.693+0.673+0.501+0+0.501+0.693+0.325=3.711\]
+        Let's define $B$ as "the set of integer quite close to ten" we have that:
+        \begin{center}
+            \begin{tabular}{ | c | c | c | c | c | c | c | c | c | c | } 
+            \hline
+                $x$ & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 \\ 
+            \hline
+                $\mu_A(x)$ & 0.1 & 0.3 & 0.4 & 0.7 & 1 & 0.8 & 0.5 & 0.3 & 0.1 \\ 
+            \hline
+            \end{tabular}
+        \end{center}
+        The entropy of this set has a value of: 
+        \[d(A)=4.35\]
+        It is possible to notice that $B$ is more fuzzy than $A$, since $d(B)>d(A)$.    
+    \end{example}
+    
+    \newpage
+
+    \chapter{Probabilistic reasoning}
+    
+    
 \end{document}
