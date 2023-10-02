@@ -72,21 +72,21 @@
 \chapter{Introduction to MATLAB}
     \section{Main MATLAB operators}
     Assignment operator: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Print output
 a = 1 
 % Does not print output
 b = 2;
     \end{lstlisting}
     The active variables can be found in the workspace and the value can be checked on the command window with: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Value of all variables
 whos
 % Value of a
 whos a
     \end{lstlisting}
     If you want to save the file: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Save the command history
 diary file_name.txt 
 % Save the whole workspace
@@ -99,7 +99,7 @@ load file_name_only_a
 load file_name 
     \end{lstlisting}
     It is possible to clear variables with the following commands: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Clear only the variable a
 clear a 
 % Clear the whole workspace
@@ -108,7 +108,7 @@ clear all
 
     \section{Vector and matrices}
     Most of the entities in MATLAB are matrices, even real numbers. The matrices can be defined in the following ways: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Row vector definition
 c = [1 2 3]
 % Column vector definition
@@ -121,7 +121,7 @@ D = [ 1 2 3;
         7 8 9 ]
     \end{lstlisting}
     It is also possible to define various types of matrices: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Zeros vector/matrix
 A = zeros(row_length,column_length)	
 % Ones vector/matrix
@@ -150,7 +150,7 @@ numel(b);
 size(a);
     \end{lstlisting}  
     The operations on vectors are done in the following way: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Given two row vectors a and b
 % Vector sum
 a + b    
@@ -169,7 +169,7 @@ a ./ b
 a .^ 2      
     \end{lstlisting}  
     The operations on matrices are done in the following way: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Givcen two matrices A and B (both 3x2)
 % Matrix sum
 A + B
@@ -196,7 +196,7 @@ inv(A)
 A \ b       
     \end{lstlisting}  
     The function used to plot a graph are the following: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % To plot y=f(x) in [a,b]
 x = a:step_length:b;
 y = f(x);   
@@ -215,7 +215,7 @@ axis([xmin xmax ymin ymax])
 axis equal 
     \end{lstlisting} 
     To handle functions the commands are: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Define a function handle to g(x)
 f = @g(x);
 % Evaluation of f in a
@@ -225,7 +225,7 @@ f(a)
 f = @(argument-list) expression
     \end{lstlisting} 
     The operators that u logical values are:  
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % Smaller than
 a < b     
 % Greater than
@@ -242,7 +242,7 @@ a ~= b
 (a < b) | (b > c)     
     \end{lstlisting} 
     The control-flow statement are: 
-    \begin{lstlisting}[language=Python]
+    \begin{lstlisting}[language=Matlab]
 % if-then-else statements
 if (condition1)
     block1
@@ -281,19 +281,17 @@ end
         \end{enumerate}
     \end{Exercise}
     \begin{Answer}[ref=1]
-        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
-% Point one
+        \begin{lstlisting}[language=Matlab]
 k = 8;
-A = 0:k;
-for i=1:1:(k + 1)
-    A(i) = (2 * (i - 1) + 1).^2;
-end
 
-% Point two
-k = 8;
-A = 0:k;
-B = 2 * A + 1;
-C = B.^2;
+% For loop strategy
+vk = zeros(1, k+1);
+for (ii = 0:k)
+    vk(ii+1) = (2*ii + 1)^2;
+end
+vk
+% Vector syntax
+vk = [1:2:2*k+1].^2;            
         \end{lstlisting}  
     \end{Answer}
 
@@ -303,11 +301,11 @@ C = B.^2;
         Define a function which, for an input value $k$, returns the corresponding vector $v_k$ as defined in the previous exercise.
     \end{Exercise}
     \begin{Answer}[ref=2]
-        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
-function A = vector(k)
-    A = 0:k;
-    B = 2 * A + 1;
-    A = B.^2;
+        \begin{lstlisting}[language=Matlab]
+function vk = ex_1_2(k)
+
+vk = [1:2:2*k+1].^2;
+
 end
         \end{lstlisting}
     \end{Answer}
@@ -332,23 +330,20 @@ end
         \]
     \end{Exercise}
     \begin{Answer}[ref=3]
-        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
-A = zeros(k);
-B = vector(k);
-b = 1;
-for i=1:1:(k+1)
-    A(i,i) = nthroot(2,i);
-    a = mod(i,2);
-    % Odd
-    if a == 1
-        A(k + 1,i) = B(b);
-    end
-    % Even 
-    if a == 0
-        A(k + 1,i) = B(b);
-        A(i, k + 1) = B(b);
-        b = b + 1;
-    end
+        \begin{lstlisting}[language=Matlab]
+function Mk = ex_1_3(k)
+
+% Create a diagonal matrix with the right elements and dimension
+Mk = diag(2.^(1./[1:2*(k+1)]))
+% The bottom right element will be overwritten
+
+% Last column
+Mk(2:2:end, end) = ex_1_2(k)
+
+% Last line
+Mk(end, 1:2:end) = ex_1_2(k)
+Mk(end, 2:2:end) = ex_1_2(k)
+
 end
         \end{lstlisting}
     \end{Answer}
@@ -357,7 +352,7 @@ end
 
     \begin{Exercise}[label=4]
         Compare the results of the following code segments:
-        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 % Code A
 x = 0;
 while (x ~= 1)
@@ -372,7 +367,29 @@ end
         \end{lstlisting}
     \end{Exercise}
     \begin{Answer}[ref=4]
-        Code A work as expected: the while loop is repeated $16$ times, and the final value of $x$ is $1$. Instead, code B does not work as expected, and results in an infinite loop.
+        \begin{lstlisting}[language=Matlab]
+% Code A
+x = 0;
+while (x ~= 1)
+    x = x + 1/16
+end
+
+% Code B
+x = 0;
+k = 1;
+format long
+while (x ~= 1)
+    k
+    x = x + 0.1
+    if k==10 || k==11
+        x-1
+    end
+    k=k+1;
+    if k==15
+        break
+    end
+end
+        \end{lstlisting}   
     \end{Answer}
 
     \newpage
@@ -381,20 +398,30 @@ end
         Find the machine epsilon by implementing an ad hoc procedure. Comment and justify the obtained results.
     \end{Exercise}
     \begin{Answer}[ref=5]
-        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
-macheps = 1;
-while 1.0 + (macheps/2) > 1.0
-    macheps = macheps / 2;
-end            
+        \begin{lstlisting}[language=Matlab]
+% Pay attention, you cannot use "eps" since it is a built-in variable
+k = 0;
+EPS = 1/2;
+while (1 + EPS) > 1
+    EPS_old = EPS;    % keep track of the value
+    EPS = EPS / 2;
+    k = k + 1;
+end
+format long
+EPS_old		% computed with the ad-hoc procedure
+(1 + EPS_old) > 1
+EPS
+(1 + EPS) > 1
+k			% Number of iterations, which is also the numer of digits in the mantissa, according to the standard
+eps			% Octave/MATLAB built-in        
         \end{lstlisting}
-        The machine epsilon is the nearest number to one. With this algorithm the $macheps$ is the same found by the command $eps$. 
     \end{Answer}
 
     \newpage
 
     \begin{Exercise}[label=6]
         Given the following code:
-        \begin{lstlisting}[frame=single, numbers=left, style=Matlab-bw]
+        \begin{lstlisting}[language=Matlab]
 realmax
 a = 1.0e+308;
 b = -a;
@@ -405,7 +432,14 @@ c = 1.1e+308;
         Explain why the second result is $Inf$.
     \end{Exercise}
     \begin{Answer}[ref=6]
-        The result is $Inf$ due to the error between the real numbers and floating points numbers.
+        \begin{lstlisting}[language=Matlab]
+realmax
+a = 1.0e+308;
+b = 1.1e+308;
+c = -a;
+(a + b) + c
+a + (b + c)
+        \end{lstlisting}    
     \end{Answer}
 
     \newpage
@@ -420,13 +454,91 @@ c = 1.1e+308;
         \end{enumerate}
     \end{Exercise}
     \begin{Answer}[ref=7]
-        \begin{enumerate}
-            \item The function in $0$ return a value of $NaN$ because it results in an undetermined fraction ($\frac{0}{0}$). 
-                With $k=1$ we obtain the value $1.0517$, and with $k=20$ we obtain the value $0$. This means that the function tends to 
-                $0$ with $x$ small, but the function is not defined. 
-            \item TODO
-            \item TODO
-        \end{enumerate}
+        \begin{lstlisting}[language=Matlab]
+%   Evaluate f(x) for values of x around zero (try with xk = 10^{-k}, k in [1,20]). What do you obtain? Explain the results.
+
+
+k = [1:20]';
+x = 10.^(-k);
+f = @(x) (exp(x) - 1) ./ x;
+format long
+[k x f(x)]
+figure;
+plot(x, f(x), '*')
+
+% 	The computed f(xk) have the expected behavior until k = 7, in agreement with
+% 	lim{x -> 0} f(x) = 1.
+% 	
+% k = 8 to k = 15: the sequence oscillates with increasing amplitude (bigger and bigger). 
+% k = 16: the result becomes 0! The cause of these effects is the loss of accuracy due to 
+% numerical cancellation. 
+
+% The numerical cancellation is the most serious consequence related to the
+% floating point representation, that is the representation of the real
+% numbers with a finite precision. 
+% It occurs when you subtract two numbers which are very close to each other.
+% So you lose significant digits and consequently accuracy of the finite 
+% representation
+% a = 1.11e-15, b = 1.12e-15, b-a=1.0e-17_ b-a very close to the machine
+% epsilon
+
+% For k = 8, ..., 15 e^{xk} and 1 are very close to each other, 
+% still being different in floating point arithmetic. 
+% We are subtracting them and the result suffers of a great relative error. 
+% Moreover, we are dividing by xk, that approaches 0, hence the error is magnified.
+
+% Finally, for k = 16, e^{xk} and 1 are too close to have a different representation 
+% in the floating ploint arithmetic (eps ~ 10^{-16}), hence the difference is 0.
+% 	
+% 	Write the Taylor expansion of e^x around x0 = 0, truncating it at the fifth order:
+% 
+% 	e^x  = sum_{k=0}^{+infinity} {f^{(k)}(x0)}/{k!} (x-x0)^k = 
+%        = sum_{k=0}^{5}         {f^{(k)}(x0)}/{k!} (x-x0)^k + O(x^6) =
+% 		 = 1 + x + {x^2}/{2} + {x^3}/{6} + {x^4}/{24} + {x^5}/{120} + O(x^6)
+% 
+% 	and substitute it in f(x).
+% 
+% 	f(x) = 1 + {x}/{2} + {x^2}/{6} + {x^3}/{24} + {x^4}/{120} + O(x^5)
+% 
+% 	With this formula, at least for x > 0, all the terms have the same sign, so no numerical cancellation occurs.
+
+
+f_taylor_5 = @(x) 1 + 1/2*x + 1/6*x.^2 + 1/24*x.^3 + 1/120*x.^4;
+
+[k x f(x) f_taylor_5(x)]
+
+
+%%% How many terms in the Taylor expansion are needed to get double precision accuracy (16 decimal digits) for all x in [0, 1/2]?
+% 	
+% 	The error in the approximation of a function g(x) at a point x = a with its Taylor expansion up to order n is
+% 	E[g,n,a](x) = {g^{(n+1)}(xi)}/{(n+1)!} (x-a)^{n+1} for at least a xi
+% 	s.t. |xi -a| < |x -a|.
+% 	
+% 	In this case
+% 	
+% 	E[e^x,n+1,0](x) = {e^{xi}}/{(n+2)!} x^{n+2} for xi in [0,x]
+% 
+% 	and therefore, substituting in f(x) 
+% 
+% 	E[f,n,0](x) = {E[e^x,n+1,0](x)}/{x} = {e^{xi}}{(n+2)!} x^{n+1} for xi in [0,x]
+% 
+% 	We want 
+% 
+% 	E[f,n,0](x) < eps for all x in [0, 0.5]:
+% 
+% 	since both e^xi and x^{n+1} are increasing functions, it's enough to choose xi = x = 0.5 and seek the first n* such that
+% 
+% 	{e^{1/2}}/{(n*+2)!} (1/2)^{n*+1} < eps
+
+
+format short e
+n = [1:20]';
+err = 1./factorial(n+2) .* (0.5).^(n+1).*exp(0.5);
+
+[n err]
+
+%   Therefore n* = 13$.            
+        \end{lstlisting}
     \end{Answer}
 
     \newpage
@@ -453,7 +565,68 @@ c = 1.1e+308;
         \end{enumerate}
     \end{Exercise}
     \begin{Answer}[ref=8]
-        
+        \begin{lstlisting}[language=Matlab]
+            % Implement the two relations in order to generate the first 100 terms of the sequence.
+
+% First recursive relation
+
+p(1) = 1;
+p(2) = 1/3;
+for i = 2:100
+    p(i+1) = 10/3*p(i) - p(i-1);
+end
+
+figure
+subplot(2,1,1)
+plot(0:100, p, 'LineWidth',3)
+% gca return the current axes 
+% setting the fontsize on axes
+set(gca,'FontSize',16)
+xlabel('n','FontSize',16)
+ylabel('p_n','FontSize',16)
+% The sequence explodes!
+
+% Second recursive relation
+
+q(1) = 1;
+for i=1:100
+    q(i+1) = 1/3*q(i);
+end
+
+subplot(2,1,2)
+plot(0:100, q, 'LineWidth',3)
+set(gca,'FontSize',16)
+xlabel('n','FontSize',16)
+ylabel('q_n','FontSize',16)
+% The sequence is ok.
+
+
+% 	Study the stability of the two algorithms and justify the obtained results.
+% 	
+% 	Error analysis: since we use finite precision numbers, we know the initial 
+%  data up to an error eps. Actually, if we start from 1, we know it exactly, 
+%  but we may introduce anyway errors in the following steps.
+% 	Indeed, denoting by fl(pi) the floating point representative for pi:
+% 	
+% 	fl(p0) = p0 + eps,  fl(p1) = p1 + eps.
+% 	
+% 	It follows
+% 	
+% 	fl(p2)  = {10}\{3} fl(p1) - fl(p0) = {10}\{3}(p1 + eps)- (p0 + eps) = p2 + {7}\{3} eps
+% 	fl(p3)  = {10}\{3} fl(p2) - fl(p1) = {10}\{3}(p2 + {7}\{3}eps) - (p1 + eps) = p2 + {61}\{9} eps
+% 	fl(p4)  = ...
+% 	
+% 	The error is amplified! 
+% 	
+% 	Instead, with the second formula
+% 
+% 	fl(q0)  = q0 + eps
+% 	fl(q1)  = {1}\{3} fl(q0) = {1}\{3} q0 + {1}\{3} eps = q1 + {1}\{3} eps
+% 	fl(q2)  = {1}\{3} fl(q1) = {1}\{3} q1 + {1}\{9} eps = q2 + {1}\{9} eps
+% 	fl(q3)  = ...
+% 	
+% 	The error is reduced! 
+        \end{lstlisting}
     \end{Answer}
 
     \newpage
@@ -462,7 +635,21 @@ c = 1.1e+308;
         Find the minimum positive number representable in MATLAB/Octave by implementing an ad hoc procedure. Compare with $realmin$.
     \end{Exercise}
     \begin{Answer}[ref=9]
-        
+        \begin{lstlisting}[language=Matlab]
+k = 0;
+zero = 1/2;
+while (0 + zero) > 0
+  zero_old = zero;
+  zero = zero / 2;
+  k = k + 1;
+end
+
+% Remember: realmin is the minimum !normalized! positive floating point number
+realmin
+% The minimum positive floating point number is instead a !denormalized! number
+zero_old % < realmin
+k   
+        \end{lstlisting}
     \end{Answer}
 
     \newpage
@@ -476,7 +663,80 @@ c = 1.1e+308;
         \end{enumerate}
     \end{Exercise}
     \begin{Answer}[ref=10]
-        
+        \begin{lstlisting}[language=Matlab]
+format long
+
+
+% 	Use Taylor polynomial approximation to avoid the loss of significance
+% 	errors in the following function when x approaches 0
+% 
+%     f(x) = {1-cos(x)}/{x^2}
+% 
+% 	The limit of f(x) = {1-cos(x)}/{x^2} as x -> 0 is well known:
+% 
+% 	lim {x -> 0} {1-cos(x)}/{x^2} = {1}/{2}
+
+
+clear all, close all, clc
+k = [1:30]';
+x = 2.^(-k);
+f = @(x) (1 - cos(x))./(x.^2);
+[k x f(x)]
+
+
+% 	If we try to evaluate f(x) directly with a sequence xk = 2^{-k} that approaches 0, we notice anomalous behaviour at k = 13, k = 27, k = ...
+% 	The reason is numerical cancellation of the terms on the numerator. We can use Taylor expansion of cos(x) for x -> 0 to obtain a better approximation. Indeed
+% 	
+% 	cos(x) = 1 - {1}/{2} x^2 + {1}/{24} x^4 - {1}/{720} x^6 + o(x^8)
+% 
+% 	so that 
+% 
+% 	f(x) = {1}/{2} - {1}/{24} x^2 + {1}/{720} x^4 + o(x^6)
+
+
+f_taylor_4 = @(x) 1/2 - x.^2/24 + x.^4/720;
+
+[k x f(x) f_taylor_4(x)]
+
+%	The obtained formula is more stable that the direct evaluation of f(x), and the computed values approach {1}/{2}.
+
+
+% 	Reformulate the following function g(x) to avoid the loss of
+% 	significance error in its evaluation for increasing values of x towards +infinity.
+% 	
+% 	g(x) =  x (sqrt{x+1} - sqrt{x}).
+% 	
+% 	It is well known that 
+% 	
+% 	lim{x -> +infinity} g(x) = +infinity
+
+
+clear all, close all, clc
+format short e
+
+k = [1:20]';
+x = 10.^(k);
+
+g = @(x) x.*(sqrt(x+1) - sqrt(x));
+
+[k x g(x)]
+
+
+% 	If we try to evaluate g(x) for a sequence xk = 10^{k} that approaches 0, we notice anomalous behaviour at k = 16, k = ..., for which the computed value is 0. This happens since, in floating point representation, x16 + 1 = x16!
+% 
+% 	Rationalization of the expression in bracket solves this numerical cancellation: indeed, multiplying the numerator and the denominator by sqrt{x+1} + sqrt{x}
+% 	
+% 	g(x)  = {x (sqrt{x+1} - sqrt{x})(sqrt{x+1} + sqrt{x})}/{(sqrt{x+1} + {x})} = {x}/{(sqrt{x+1} + sqrt{x})}.
+
+
+
+g2 = @(x) x./(sqrt(x+1) + sqrt(x));
+
+[k x g(x) g2(x)]
+
+%	This formula is more stable and does not suffer of numerical cancellation.
+
+        \end{lstlisting}
     \end{Answer}
 
     \newpage
@@ -489,7 +749,33 @@ c = 1.1e+308;
         Which approach is the most accurate?
     \end{Exercise}
     \begin{Answer}[ref=11]
-        
+        \begin{lstlisting}[language=Matlab]
+clear all, close all, clc
+format long
+
+f_taylor_pos = @(x) 1 - x + 1/2*x.^2 - 1/6*x.^3 + 1/24*x.^4 - 1/120*x.^5;
+f_taylor_neg = @(x) 1./(1 + x + 1/2*x.^2 + 1/6*x.^3 + 1/24*x.^4 + 1/120*x.^5);
+
+k = [1:20]';
+
+x_pos = 10.^(-k);
+[x_pos f_taylor_pos(x_pos) f_taylor_neg(x_pos)]
+
+x_neg = -10.^(-k);
+[x_neg f_taylor_pos(x_neg) f_taylor_neg(x_neg)]
+
+
+% 	No bad behaviour is observed since the 1 in both formulas dominates the sum and numerical cancellation does not occur. 
+%   Therefore both expression can be accepted.
+% 
+% 	Instead, if the sum were not dominated by the term 1 (or if you didn't notice that), 
+%   the following combination could have been proposed
+% 
+% 	e^{-x} ~ {1}/{1 + x + {1}/{2}x^2 + {1}/{6}x^3 + ...}, x > 0;
+% 	       ~ 1 - x + {1}/{2}x^2 - {1}/{6}x^3 +      ... , x <=0.
+% 	
+% 	The choice of the previous expression for x > 0 should not display any numerical cancellation because all the terms in the sum are positive. Similarly, the choice for x < 0 grants that the terms -x^{2k+1} are positive, again avoiding any numerical cancellation.
+        \end{lstlisting}
     \end{Answer}
 
     \newpage
@@ -511,7 +797,64 @@ c = 1.1e+308;
         \end{enumerate}
     \end{Exercise}
     \begin{Answer}[ref=12]
-        
+        \begin{lstlisting}[language=Matlab]
+clear all;
+format short e
+
+n = 40;
+
+% alpha = 1/8 not requested in the homework
+for (alpha = [1/8, 8])
+    I(1) = log((alpha+1)/alpha);
+    for (k = 1:n)
+        I(k+1) = -alpha*I(k) + 1/k;
+    end
+    recursion_integral = I(n+1);
+    upper_bound = (1/alpha)*(1/(n+1));
+    exact_integral = quadl(@(x) (x.^n)./(x+alpha), 0, 1, 1e-16); % Exact value (not requested)
+    [recursion_integral, upper_bound, exact_integral]
+end
+
+
+% 	The recursive approximation of I{40}(alpha =  8) is 1.6389 ... 10^{18}: this result is for sure incorrect because it violates the upper bound for $I_{40}(\alpha =  8)$.
+% 	
+% 	This is due to the finite precision we use and the error propagation: the initial value I0(alpha) = ln({alpha+1}/{alpha}) is represented with a certain error eps; denoting by fl(y) the floating point representation of the number y, we have
+% 	
+% 	fl(I0(alpha))  = I0(alpha) + eps,
+% 	fl(I1(alpha))  = -alpha fl(I0(alpha)) + 1 = -alpha (I0(alpha) + eps) + 1 = I1(alpha) - alpha eps,
+% 	... 
+% 	fl(Ik(alpha))  = In(alpha) + (-1)^k alpha^k eps,
+% 	
+% 	Therefore, at the final (n-th) step the error is multiplied by a factor alpha^n, which result in an amplification of the error if alpha > 1. Instead, for alpha < 1, the error is damped and the recursive relation is stable (e.g. see the previous test for alpha = 1/8).
+% 	
+% 	Now write a numerically stable recursive relation for I{40}(alpha =  8).
+% 	
+% 	The idea is to transform the factor alpha on the RHS of the recursive relation in a factor {1}/{alpha}; this can be achieved inverting the recursive relation:
+% 	
+% 		I{k-1}(alpha) = - {1}/{alpha} I{k}(alpha) + {1}/{k alpha}
+% 		lim{k -> +infinity} I{k}(alpha) = 0
+% 		
+% 	The final value lim{k -> +infinity} I{k}(alpha) is equal to zero because 0 <= I{k}(alpha) <= {1}/{alpha} {1}/{k+1} -> 0, as k -> + infinity.
+
+
+clear all;
+n = 40;
+big = 1000;
+
+% alpha = 1/8 not requested in the homework
+for (alpha = [1/8, 8])
+    I(big + 1) = 0;
+    for (k = big:-1:n+1)
+        I(k) = -1/alpha*I(k+1) + 1/(k*alpha);
+    end
+    recursion_integral = I(n+1);
+    upper_bound = (1/alpha)*(1/(n+1));
+    exact_integral = quadl(@(x) (x.^n)./(x+alpha), 0, 1, 1e-16); % Exact value (not requested)
+    [recursion_integral, upper_bound, exact_integral]
+end
+
+%	The recursion is now stable for alpha > 1 (and note that, now, an additional error is present, because the final condition can be set for an arbitrary large k = k* instead of k = +infinity).
+        \end{lstlisting}
     \end{Answer}
 
     \newpage
@@ -533,6 +876,104 @@ c = 1.1e+308;
 
     \end{Exercise}
     \begin{Answer}[ref=13]
-        
+        \begin{lstlisting}[language=Matlab]
+%	Set x0 = 1, compute x1, x2, ... , x{71} and explain the obtained results.
+	
+clear all, close all, clc
+format long
+
+n_max = 71;
+x = zeros(n_max+1, 1);
+
+x(1) = 1;         % x0 set to 1
+for n = 0:n_max-1
+  x(n+2) = 2^(n+1)*(sqrt(1 + x(n+1)/2^(n)) - 1);    % Pay attention to the indexing!!!
+end
+x(end)            
+x_lim = log(1 + x(1))
+
+figure
+hold on, box on
+plot([0:71], x, 'bx-','Linewidth',3)
+plot([0:71], x_lim*ones(n_max+1,1)', 'r-','Linewidth',3)
+axis([-1 72 -0.05 1.05])
+set(gca,'LineWidth',2)
+set(gca,'FontSize',16)
+
+%	When computing the sequence with Octave/MATLAB we find that x{71} differs a lot from ln(1+x0) = ln(2). The plots also shows that xn = 0, for all n >= n* = 52: this is due to numerical cancellation effects, because at n = n* it holds {x{n*}}/{2^{n*}} < eps, hence in finite precision arithmetic x{n*} = 0!
+
+x(53)
+
+%%
+
+% 	The value of n* can also be computed with the following argument: since (hopefully) numerical cancellation will occur for large n
+% 	x{n} ~ ln(1+x0)
+% 	therefore
+% 	{x{n}}/{2^{n}} < eps is approximately equivalent to {ln(1+x0)}/{2^{n}} < eps
+% 	which can be solved for n, finding
+% 	n > log2({ln(1+x0)}/{eps})
+
+    
+x_0 = 1;
+n = log(log(1 + x_0)/eps)/log(2)
+
+
+% 	Transform the sequence in an equivalent one that converges to the theoretical limit.
+% 	
+% 	After a razionalization, the recurrence can be written as
+% 	x{n+1} = 2^{n+1} [ sqrt{1+{xn}/{2^{n}}} - 1 ] = {2 xn}{ sqrt{1 + {xn}/{2^{n}}} + 1}
+	
+	
+clc, clear all
+
+n_max = 71;
+x = zeros(n_max+1, 1);
+
+x(1) = 1;           % x0 set to 1
+for n = 0:n_max-1
+  x(n+2) = 2*x(n+1)/(sqrt(1 + x(n+1)/2^(n)) + 1);
+end
+x(end)
+
+%   The error in this case is
+x(end) - log(1 + x(1))
+
+figure
+hold on, box on
+plot([0:n_max], x,'bx-','Linewidth',3)
+plot([0:n_max], log(1+x(1))*ones(n_max+1), 'r-','Linewidth',3)
+axis([-1 72 0.67 1.02])
+set(gca,'LineWidth',2)
+set(gca,'FontSize',14)
+
+%   Using the previous calculations we know that (1 + xn/2^n) approximately 1 for n >= 52, so x(n+1) = 2*xn/(1 + 1) = xn
+        \end{lstlisting}
     \end{Answer}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    \newpage
+    \chapter{Laboratory session II}
+
+
+
+
+
+
 \end{document}
