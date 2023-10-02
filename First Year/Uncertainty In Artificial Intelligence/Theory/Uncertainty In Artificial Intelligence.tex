@@ -928,9 +928,136 @@
         It is possible to notice that $B$ is more fuzzy than $A$, since $d(B)>d(A)$.    
     \end{example}
     
-    \newpage
+\newpage
 
-    \chapter{Probabilistic reasoning}
-    
-    
+\chapter{Probabilistic reasoning}
+    \section{Basic probability}
+    \begin{definition}
+        $A$ is a \emph{boolean-valued random variable} if $A$ denotes an event, and there is some degree of uncertainty as to whether $A$ occurs.
+
+        \emph{Probability} of $A$ is the fraction of possible worlds in which $A$ is true. 
+    \end{definition}
+    \begin{theorem}[probabilty axioms]
+        The axioms of the probability theory are: 
+        \begin{itemize}
+            \item $0 \leq P(A) \leq 1$. 
+            \item $P(A=true) = 1 \: \land P(A=false) = 0\: $. 
+            \item $P(A \lor B)=P(A)+P(B)-P(A \land B)$.
+        \end{itemize}
+    \end{theorem}
+    Some useful formulas are: 
+    \begin{enumerate}
+        \item $P(\overline{A})=1-P(A)$.
+        \item $P(A)=P(A \land B)+P(\overline{A} \land B)$
+    \end{enumerate}
+    \begin{definition}
+        A \emph{multivalued random variable} $A$ is a random variable of arity $k$ if it can take on exactly one values out of $\{v_1,v_2,v_3,\dots,v_k\}$.
+    \end{definition}
+    \begin{theorem}[multivalued random variable axioms]
+        The axioms for multivalued random variable are: 
+        \begin{itemize}
+            \item $P(A=v_i \land A=v_j) \:\:\:\:\:\: i \neq j$. 
+            \item $P(A=v_1 \lor A=v_2 \lor A=v_3 \lor \dots \lor A=v_k)=1$. 
+        \end{itemize}
+    \end{theorem}
+    Some useful formulas are: 
+    \begin{enumerate}
+        \item $P(A=v_1 \lor A=v_2 \lor \dots \lor A=v_i)=\sum_{j=1}^{i}{P(A=v_j)}$.
+        \item $\sum_{j=1}^{k}{P(A=v_j)}=1$. 
+        \item $P(B \land (A=v_1 \lor A=v_2 \lor \dots \lor A=v_i))=\sum_{j=1}^{i}{B \land A=v_j}$. 
+        \item $P(B)=\sum_{j=1}^{k}{P(B \land A=v_j)}$.
+    \end{enumerate}
+    \begin{definition}
+        The \emph{conditional probability} of $A$ given $B$ is the fraction of possible worlds in which $B$ is true that also have $A$ true. 
+    \end{definition}
+    The inference can be obtained using these formulas: 
+    \begin{itemize}
+        \item Chain rule: $P(A \land B)=P(A|B)P(B)$
+        \item Bayes theorem: $P(A|B)=\dfrac{P(B|A)P(A)}{P(B)}$.
+        \item Sum rule (marginalization): $P(A)=\sum_{b}{(A \land B=b)}$.
+    \end{itemize}
+    \begin{definition}
+        Assume $A$ and $B$ are boolean random variables; $A$ and $B$ are independent (denote it with $A \perp B$) if and only if:
+        \[P(A|B)=P(A)\]
+
+        Given two random variables $A$ and $B$, the \emph{joint distribution} of $A$ and $B$ is the distribution of $A$ and $B$ together: $P(A,B)$
+    \end{definition}
+    Representing a joint distribution of $M$ (binary) variables:
+    \begin{itemize}
+        \item Make a truth table listing all combination of values ($2^M$ entries).
+        \item For each combination compute how probable it is. 
+        \item Check that all probabilities sum up to one. 
+    \end{itemize}
+
+    \section{Probabilistic reasoning}
+    Graphical models describe a factorization for the join distribution, and the process which possibly generates the data. They can be used for backward reasoning via Bayes' theorem.
+    These models are graph-based algorithms for calculation and computation. The graphs can be: 
+    \begin{itemize}
+        \item Directed graphs (useful for designing models).
+        \item Undirected graphs (good for some domains).
+        \item Factor graphs (useful for inference and learning).
+    \end{itemize}
+    \begin{example}
+        A fiendish murder has been committed. There are two suspects: the butler and the cook. There are three possible murder weapons: a butcher's knife, a pistol, and a 
+        fireplace poker. 
+
+        We know that the butler has served family well for many years, and the cook, hired recently, rumors of dodgy history, so we can say that: 
+        \[P(Culprit=butler)=20\% \:\:\:\:\:\:\:\:\:\:\:\: P(Culprit=cook)=80\%\]
+        Culprit is a binary random variable which probabilities add to $100\%$. 
+
+        The butler is ex-army, and keeps a gun in a locker drawer. The cook has access to a lot of knives. The butler is older, and getting frail. We know that the weapons are: 
+        \[Weapon=\{pistol,knife,poker\}\]
+        And given the evidence we can state that: 
+        \[P(Weapon|Culprit=butler)=\begin{bmatrix} 80\% & 10\% & 10\% \end{bmatrix}\]
+        \[P(Weapon|Culprit=cook)=\begin{bmatrix} 5\% & 65\% & 30\% \end{bmatrix}\]
+        
+        Using the chain rule we can finally compute the joint distribution, that is: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{l|lll|}
+            \cline{2-4}
+                                                  & \textbf{Pistol} & \textbf{Knife} & \textbf{Poker} \\ \hline
+            \multicolumn{1}{|l|}{\textbf{cook}}   & $4\%$           & $52\%$         & $24\%$         \\
+            \multicolumn{1}{|l|}{\textbf{butler}} & $16\%$          & $2\%$          & $2\%$          \\ \hline
+            \end{tabular}
+        \end{table}
+
+        Using the sum rule we can compute the marginal distribution of culprits: cook ($80\%$), and culprit $20\%$. 
+        And the marginal distribution of weapons: pistol: ($20\%$), knife: ($54\%$), and poker: ($26\%$). 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.2\linewidth]{images/GM.png}
+        \end{figure}
+        If at a certain point we discover the weapon, we can use the Bayes' theorem to compute who is probably the culprit. 
+    \end{example}
+
+    \section{Density estimation and its complexity}
+    To compute the probability for logic expression is: 
+    \[P(E)=\sum_{row \backsim E}P(row)\]
+    To compute the inference (that is probabilistic reasoning) we can use the formula: 
+    \[P(E_1|E_2)=\dfrac{P(E_1 \land E_2)}{E_2}=\dfrac{\sum_{row \backsim E_1 \land E_2}P(row)}{\sum_{row \backsim E_2}P(row)}\]
+    \begin{example}
+        TODO
+    \end{example}
+    \begin{definition}
+        A \emph{density estimator} learns a mapping from a set of attributes to a probability distribution over the attributes space: 
+        \[M:\{0,1\}^I \rightarrow [0,1]\]
+    \end{definition}
+    We can use likelihood for evaluating density estimation. Given a record $x$, a density estimator $M$ tells you how likely it is $\widehat{P}(x|M)$. Given a dataset with $N$ 
+    records, a density estimator can tell how likely data is under the assumption that all records were independently generated from it: 
+    \[\widehat{P}(\textnormal{dataset})=\widehat{P}(x_1,x_2,\dots,x_N)=\prod_{n=1}^{N}\widehat{P}(x|M)\]
+    Since likelihood can get too small we usually use log-likelihood:
+    \[\log{\widehat{P}(\textnormal{dataset})}=\log{\prod_{n=1}^{N}{\widehat{P}(x_n|M)}}=\sum_{n=1}^{N}{\log{\widehat{P}(x_n|M)}}\]
+    Density estimators can do many good things: 
+    \begin{itemize}
+        \item Can sort the records by probability, and thus spot weird records. 
+        \item Can do inference. 
+        \item Can be used for Bayes classifiers. 
+    \end{itemize}
+    The main problem about joint density estimators is that they can badly overfit. 
+
+
+
+
+
 \end{document}
