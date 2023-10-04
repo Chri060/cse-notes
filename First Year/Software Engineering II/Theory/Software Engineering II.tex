@@ -261,7 +261,8 @@
         \item Describe exceptions.
         \item Describe special requirements.
     \end{itemize}
-\section{Modeling requirements}
+
+    \section{Modeling requirements}
     \begin{definition}
         A \emph{model} is a representation in a certain medium of something in the same or another medium. The model captures the important aspects of the thing being modeled and 
         simplifies or omits the rest. 
@@ -377,7 +378,73 @@
     For a good dynamic modeling we ha to construct a model only for classes with significant dynamic behaviour and consider only relevant attributes. We have also to look ate the
     granularity of the application when deciding on actions and activities and reduce notational clutter.
 
+\newpage
 
+\chapter{Alloy}
+    \section{Definition}
+        Alloy is a formal notation for specifying models of systems and software. It looks like a declarative object oriented language, but also has a mathematical foundation.
+        \par
+        Alloy comes with a supporting tool to simulate specifications and performs property verification.
+        \par
+        Alloy has been created to offer an expressive power similar to the Z language as well as the strong automated analysis of the SMW model checker. 
+        \par
+        Alloy can be used in requirement engineering  to formally describe the domain and its properties, or operations that the machine has to provide. In software design Alloy can be used to formally model components and their interactions. 
+    \section{Introduction}
+        Alloy is a mixture of first order logic and relational calculus. The main elements of this formal language are: 
+        \begin{itemize}
+            \item Carefully chosen subset of relational algebra (uniform model for individuals, sets and relations; no high-order relations).
+            \item Almost no arithmetic.
+            \item Modules and hierarchies.
+            \item Suitable for small, explanatory specification.
+            \item Powerful and fast analysis tool.
+        \end{itemize}
+    \section{Syntax}
+        Alloy shows bounded snapshots of the world that satisfy the specification. Allow does bounded exhaustive search for counterexample to a claimed property using SAT.
+        \begin{definition}
+            \emph{Atoms} are Alloy's primitive entities (indivisible, immutable and uninterpreted). 
+        \end{definition}
+        \begin{definition}
+            \emph{Relations} associate atoms with one another (set of tuples; tuples are sequence of atoms).
+        \end{definition}
+        The relations in Alloy are typed. The relation type is determined by the declaration of the relation. The basic Alloy relations type are: $none$ (empty set), $univ$ (universal set) and $iden$ (identity relation). The logic operators in Alloy are: 
+        \begin{itemize}
+            \item Union $\cup$.
+            \item Intersection $\&$.
+            \item Difference $-$.
+            \item Subset $in$.
+            \item Equality $=$.
+            \item Cross product $\rightarrow$ (similar to a natural join). 
+            \item Dot join $.$ or $[\:]$ (the last element of the first relation joins on the corresponding first elements of the second relation, and then removes the element from the relation).
+        \end{itemize}
+        The possible binary closures on the relations are: 
+        \begin{itemize}
+            \item Transpose $\sim$ (inverts the order of the elements in the relation).
+            \item Transitive $\land$ ($^{\land}r=r+r.r+r.r.r+\dots$). 
+            \item Reflexive transitive $*$ ($^{*}r=iden+^{\land}r$)
+        \end{itemize}
+        The possible restrictions are: 
+        \begin{itemize}
+            \item Domain restriction $<:$, that restricts the elements on the left side to the set on the right side.
+            \item Range restriction $:>$, that is same as before but the relations are inverted. 
+            \item Override $++$, that removes the tuples on the left that are in the right relations and adds all the remaining relations of the right relation. 
+        \end{itemize}
+        The Alloy Boolean operators are the following: negation ($!$ or $not$), conjunction ($\&$ or $and$), disjunction ($\mid \mid$ or $or$), implication ($\implies$ or $implies$), alternative ($,$ or $else$) and bi-implication ($\iff$ or $iff$). The alloy logic quantifiers are: 
+        \begin{itemize}
+            \item $all$: holds for every element.
+            \item $some$: holds for at least one element.
+            \item $no$: holds for no elements.
+            \item $lone$: holds for at most one element.
+            \item $one$: holds for exactly one element.
+        \end{itemize}
+        To define a relation with a singleton we can use the following declaration: 
+        \[x \: : \: m \: e\]
+        Where $x$ is the name of the relation, $m$ is the multiplicity of the element (that can be: $set$, $one$, $lone$ or $some$) and $e$ is the name of the element in the relation. If the relation is composed by couple the declaration became like this: 
+        \[r \: : \: A \: m \: \rightarrow \: n \: B\]
+        Where $r$ is the name of the relation, $A$ and $B$ are the name of the elements with multiplicity $m$ and $n$ respectively.
+        \par
+        $let$ is used to define a formula or expression that can be reused. Other useful operators are: $\# r$ (that define the number of tuples in $r$), $0,1,\dots$ (integer used to define the value of some variables or constants), $+$ (plus), $-$ (minus), all the comparison operators ($<$, $<=$, $=$, $=>$, $>$). There is also the operator $sum$ that adds all the elements in the selected tuple. 
+        
+    \newpage
 
 
 
