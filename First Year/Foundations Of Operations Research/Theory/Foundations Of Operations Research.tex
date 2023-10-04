@@ -238,11 +238,11 @@
 \chapter{Algorithms}
     \section{Complexity}
     \begin{definition}
-        An \emph{algorithm} for a problem is a sequence of instructions that allows to solve any of its instances.
+        An \emph{algorithm} is a sequence of instructions that allows to solve any instance of a problem.
     \end{definition}
     The execution time of an algorithm depends on the instance and on the computer. We want to evaluate the complexity of the algorithm as a function of the size of the instance
     independently of the hardware. Thus, we consider the number of elementary operations and assume all have the same cost. Since it is usually hard to determine the exact number of
-    elementary operations, so we consider the asymptotic number of elementary operations in the worst case. We look for a function $f(n)$ which is asymptotically an upper bound on 
+    elementary operations. We consider the asymptotic number of elementary operations in the worst case: we look for a function $f(n)$ which is asymptotically an upper bound on 
     number of elementary operations needed to solve any instance of size at most $n$. 
     \begin{definition}
         A function $f$ is \emph{ordered} of $g$, written $f(n)=O(g(n))$, if $\exists c > 0$ such that $f(n) \leq cg(n)$, for $n$ sufficiently large. 
@@ -263,31 +263,16 @@
     \begin{definition}
         An algorithm is \emph{exact} if it provides an optimal solution for every instance. 
         
-        Otherwise, it is \emph{heuristic}. 
-    \end{definition}
-    \begin{definition}
+        An algorithm is \emph{heuristic} if it does not provide an optimal solution for every instance.
+
         A \emph{greedy algorithm} constructs a feasible solution iteratively by making at each step a locally optimal choice, without reconsidering previous choices. 
     \end{definition}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    \section{Dynamic programming}
+    Dynamic programming was proposed by Richard Bellman in 1953 as a general technique in which an optimal solution, composed of a sequence of elementary decisions, is determined 
+    by solving a set of recursive equations. So, dynamic programming is applicable to any sequential decision problem for which the optimality property is satisfied. 
+    
+    It is used nowadays in multiple sectors: optimal control, equipment maintenance and replacement, selection of inspection points along a production line. 
 
 \newpage
 
@@ -454,6 +439,11 @@
         \item Let $F$ be a partial tree contained in an optimal tree of $G$. Consider $e\{u,v\}\in \delta(S)$ of minimum cost, then there exists a minimum cost spanning tree of 
             $G$ containing $e$. 
         \item If $c_j \geq 0$ for all $(i,j) \in A$, there is at least one shortest path which is simple. 
+        \item The directed graph G representing any project is acyclic (it is a DAG). 
+        \item The minimum overall project duration is the length of the longest path from $s$ to $t$. 
+        \item Given a feasible flow $x$ from $s$ to $t$, for each cut $\delta(S)$ separating $s$ from $t$, we have $\varphi(S)=\varphi(\{s\})$.
+        \item For every feasible flow $x$ from $s$ to $t$ and every cut $\delta(S)$, with $S \subseteq V$, separating $s$ from $t$, we have $\varphi(S) \leq k(S)$. In other words,
+            the value of the flow is less or equal to the capacity of the cut. 
     \end{enumerate}
     \begin{proof}[Property one]
         We will demonstrate this property with a proof by induction. For the base case we have that the claim holds for $n=1$. 
@@ -469,6 +459,20 @@
             \item If $c_e<c_f$, then $c\left(T^{*}\cup\{e\}-\{f\}\right)<C(T^{*})$, hence $T^{*}$ is not optimal.
         \end{itemize}
     \end{proof}
+    \begin{proof}[Property seven]
+        By contradiction, if $A_{i1} \varpropto A_{12},\dots,A_{jk} \varpropto A_{ki}$ there would be a logical inconsistency. 
+    \end{proof}  
+    \begin{proof}[Property eight]
+        Since any $s-t$ path represents a sequence of activities that must be executed in the specified order, its length provides a lower bound on the minimum overall
+        project duration. 
+    \end{proof}  
+    \begin{proof}[Property ten]
+        By the definition of value of the flow through the cut $\delta(S)$ we have:
+        \[\varphi(S)=\sum_{(i,j) \in \delta^{+}(S)}x_{ij}-\sum_{(i,j) \in \delta^{-}(S)}x_{ij}\]
+        and because $0 \leq x_{ij } \leq k_{ij}$, for any $(i, j) \in A$ we also have
+        \[\sum_{(i,j) \in \delta^{+}(S)}x_{ij}-\sum_{(i,j) \in \delta^{-}(S)}x_{ij} \leq \sum_{(i,j) \in \delta^{+}(S)}k_{ij}=k(S)\]
+        Then, $\varphi(S) \leq k(S)$.
+    \end{proof}  
 
     \section{Graph reachability problem}
     Given the directed graph $G=(N,A)$ and a node $s$, determine all the nodes that are reachable from $s$. 
@@ -586,13 +590,14 @@
     The optimality condition allows us to verify whether a spanning tree $T$ is optimal: it is sufficient to check that each $e \in E-T$ is not a cost-decreasing edge. 
 
     \section{Graph shortest path problem}
+    \subsection{Dijkstra's algorithm}
     Given a directed graph $G=(N,A)$ with a cost $c_j \in R$ for each arc $(i,j) \in A$, and two nodes $s$ and $t$, determine a minimum cost path from $s$ to $t$. 
 
     Each value $c_j$ represents the cost  of arc $(i,j) \in A$. Node $s$ is the origin, or source, and $t$ is the destination, or sink. 
     \begin{definition}
         A path is \emph{simple} if no node is visited more than once. 
     \end{definition}
-    The input of Dijkstra's algorithm is a Graph $G = (N, A)$ with non-negative arc costs and $s \in N$. This algorithm will give us the shortest paths from $s$ to 
+    The input of Dijkstra's algorithm is a graph $G = (N, A)$ with non-negative arc costs and $s \in N$. This algorithm will give us the shortest paths from $s$ to 
     all other nodes of $G$. The idea behind it is to consider the nodes in increasing order of cost of the shortest path from $s$ to any one of the other nodes. 
     To each node $j \in N$, we assign a label $L_j$ which corresponds to the cost of a minimum cost path from $s$ to $j$ and a label $pred_j$ that is the predecessor of $j$ in the
     shortest path from $s$ to $j$. Note that this algorithm is greedy with respect to path from $s$ to $j$. 
@@ -626,6 +631,7 @@
         has a cost of $13$ and the path is $(1,2,3,5)$. 
     \end{example}
 
+    The inputs of the algorithm are: a graph $G = (N, E)$ with non-negative arc costs, $s \in N$. 
     \begin{algorithm}[H]
         \caption{Dijkstra's algorithm for the graph shortest path problem}
             \begin{algorithmic}[1]
@@ -676,13 +682,377 @@
     \end{proof}
     We can note that: 
     \begin{itemize}
-        \item A set of shortest paths from $s$ to all the nodes $j$ can be retrieved via the vector of predecessors. 
-        \item The union of a set of shortest paths from node $s$ to all the other nodes of $G$ is a shortest path trees rooted at $s$. Such shortest path trees have 
+        \item A set of the shortest paths from $s$ to all the nodes $j$ can be retrieved via the vector of predecessors. 
+        \item The union of a set of the shortest paths from node $s$ to all the other nodes of $G$ is the shortest path trees rooted at $s$. Such shortest path trees have 
             nothing to do with minimum cost spanning trees. 
         \item Dijkstra's algorithm does not work when there are arcs with negative cost. 
     \end{itemize}
 
+    \subsection{Floyd-Warshall's algorithm}
+    If the graph $G$ contains a circuit of negative cost, the shortest path problem may not be well-defined. Each time the circuit appears, the cost decreases. There is no 
+    finite shortest path from $s$ to $t$. Floyd-Warshall's algorithm detects the presence of circuits with negative cost. It provides a set of the shortest paths between all pairs
+    of nodes, even when there are arcs with negative cost. It is based on iteratively applying a triangular operation. 
+    The algorithm uses two $n \times n$ matrices, D, P, whose elements correspond, at the end of the algorithm to: 
+    \begin{itemize}
+        \item $d_{ij}$, that is the cost of the shortest path from $i$ to $j$.
+        \item $p_{ij}$, that is the predecessor of $j$ in that shortest path from $i$ to $j$.
+    \end{itemize}
+    \begin{definition}
+        The \emph{triangular operation} states that for each pair of nodes $i,j$ with $i \neq u$ and $j \neq u$ (including case $i=j$), check whether when going from $i$ to $j$ it is 
+        more convenient to go via $u$, so if the following relation holds: 
+        \[d_{iu}+d_{uj} < d_{ij}\]
+    \end{definition}
+    \begin{example}
+        Given the following graph: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.25\linewidth]{images/floyd.png}
+        \end{figure}
+        We have to initialize the matrices in the following way: 
+        \[D=\begin{bmatrix}
+            0 & 2 & \infty & 1 \\
+            \infty & 0 & 3 & 3 \\
+            \infty & 2 & 0 & \infty \\
+            \infty & -5 & 5 & 0 \\
+        \end{bmatrix}
+        \:\:\:\:\:\:
+        P=\begin{bmatrix}
+            1 & 1 & 1 & 1 \\
+            2 & 2 & 2 & 2 \\
+            3 & 3 & 3 & 3 \\
+            4 & 4 & 4 & 4 \\
+        \end{bmatrix}
+        \]
+        The first iteration with $u=1$ (we consider the first row and the first column) leave the matrices unchanged, in fact the triangular operation is always satisfied: 
+        \begin{itemize}
+            \item $0=d_{22} < d_{21} + d_{12} = \infty + 2$ (no changes). 
+            \item $3=d_{23} < d_{21} + d_{13} = \infty + \infty$ (no changes). 
+            \item $3=d_{24} < d_{21} + d_{14} = \infty + 1$ (no changes). 
+            \item $2=d_{32} < d_{31} + d_{12} = \infty + 2$ (no changes). 
+            \item $0=d_{33} < d_{31} + d_{13} = \infty + \infty$ (no changes). 
+            \item $\infty=d_{34} < d_{31} + d_{14} = \infty + 1$ (no changes). 
+            \item $-5=d_{42} < d_{41} + d_{12} = \infty + 2$ (no changes). 
+            \item $5=d_{43} < d_{41} + d_{13} = \infty + \infty$ (no changes). 
+            \item $0=d_{44} < d_{41} + d_{14} = \infty + 1$ (no changes). 
+        \end{itemize}
+        The second iteration with $u=2$ (we consider the second row and the second column) changes the matrices and halts the algorithm because of the negative arc found: 
+        \begin{itemize}
+            \item $0=d_{11} < d_{12} + d_{21} = 2 +\infty $ (no changes). 
+            \item $\infty=d_{13} < d_{12} + d_{23} = 2+3$ ($p_{13} \leftarrow p_{23}$). 
+            \item $1=d_{14} < d_{12} + d_{24} = 2+3$ (no changes). 
+            \item $\infty=d_{31} < d_{32} + d_{21} = 2 + \infty$ (no changes). 
+            \item $0=d_{33} < d_{32} + d_{23} = 2+3$ (no changes). 
+            \item $\infty=d_{34} < d_{32} + d_{24} = 2+3$ ($p_{34} \leftarrow p_{24}$). 
+            \item $\infty=d_{41} < d_{42} + d_{21} = 5 + \infty$ (no changes). 
+            \item $5=d_{43} < d_{42} + d_{23} = -5+3$ ($p_{43} \leftarrow p_{23}$). 
+            \item $0=d_{44} < d_{42} + d_{24} = -5+3$ (negative cost circuit found). 
+        \end{itemize}
+    \end{example}
 
+    The inputs of the algorithm are: a directed graph $G = (N,A)$ with an $n \times n$ cost matrix, $C = [c_{ij}]$.
+    \begin{algorithm}[H]
+        \caption{Walshall-Floyd's algorithm}
+            \begin{algorithmic}[1]
+                \For {$i \in N$}
+                    \For {$j \in N$}
+                        \State $p_{ij} \leftarrow i$
+                        \State $d_{ij} \leftarrow \begin{cases}
+                            0 \:\:\:\:\:\:\:\:\:\:\: i = j \\
+                            c_{ij} \:\:\:\:\:\:\:\:\: i \neq j \land (i,j) \in A \\
+                            +\infty \:\:\:\:\:\: \textnormal{otherwise}
+                        \end{cases}$
+                    \EndFor
+                \EndFor
+                \For {$u \in N$}
+                    \For {$i \in N-\{u\}$}
+                        \For {$j \in N-\{u\}$}
+                            \If {$d_{iu}+d_{uj} \ d_{ij}$}
+                                \State $p_{ij} \leftarrow p_{uj}$
+                                \State $d_{ij} \leftarrow d_{iu}+d_{uj}$
+                            \EndIf
+                        \EndFor
+                    \EndFor
+                    \For {$i \in N$}
+                        \If {$d_{ii} < 0$}
+                            \State \Return
+                        \EndIf
+                    \EndFor
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+    Since in the worst case the triangular operation is executed for all nodes $u$ and for each pair of nodes $i$ and $j$, the overall complexity is $O(n^3)$. 
+    \begin{example}[Proposition]
+        Floyd-Warshall's algorithm is exact. 
+    \end{example}
+    \begin{proof}
+        Assume that the nodes of $G$ are numbered from $1$ to $n$. Verify that, if the node index order is followed, after the $u$-th cycle the value $d_{ij}$ (for any $i$ and $j$) corresponds to the cost of 
+        the shortest path from $i$ to $j$ with only intermediate nodes in ${1,\dots,u}$. 
+    \end{proof}
 
+    \subsection{Topological order algorithm}
+    Given a directed acyclic graph $G = (N,A)$ with a cost $c_ij \in \mathbb{R}$ for each $(i,j) \in A$, and nodes $s$ and $t$, determine the shortest (longest) path from $s$ to $t$. 
+    The DAGs have the following property called topological order: the nodes of any directed acyclic graph $G$ can be ordered topologically, that is, indexed so that for each arc $(i,j) \in A$ we have $i < j$. 
+    The topological order can be exploited in a very efficient dynamic programming algorithm to find shortest (or longest) paths in DAGs. Given $G = (N,A)$ represented via the lists of predecessors
+    $\delta^{-}(v)$ and successors $\delta^{+}(v)$ for each node $v$ we have to follow these steps: 
+    \begin{enumerate}
+        \item Assign the smallest positive integer not yet assigned to a node $v \in N$ with $\delta^{-}(v)=\varnothing$. 
+        \item Delete the node $v$ with all its incident arcs. 
+        \item Go back to the point one until there are nodes in the current sub-graph. 
+    \end{enumerate}
+    The complexity of this algorithm is $O(m)$ where $m = \left\lvert A \right\rvert $, because each node/arc is considered at most once. 
+    \begin{example}
+        A graphical example of the algorithm is the following: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\linewidth]{images/spath.png}
+        \end{figure}
+    \end{example}
 
+    \subsection{DAGs' dynamic programming algorithm}
+    Any shortest path from 1 to $\pi_t$, with at least 2 arcs, can be subdivided into two parts: $\pi_t$ and $(i,t)$, where $\pi_t$ is the shortest sub-path from $s$ to $i$. 
+    For each node  $i=1,\dots,t$, let $L_i$ be the cost of the shortest path from $1$ to $i$. Then: 
+    \[L_t=\min_{(i,t) \in \delta^{-}(t)}\{L_i+c_{it}\}\]
+    where the minimum is taken over all possible predecessors $i$ of $t$. If $G$ is directed, acyclic and topologically ordered, the only possible predecessors of $t$ in the shortest 
+    path $\pi_t$ from $1$ to $t$ are those with index $i < t$. Thus,
+    \[L_t=\min_{i<t}\{L_i+c_{it}\}\]
+    In a graph with circuits, any node different from $t$ can be a predecessor of $t$ in $\pi_t$.  
+
+    For DAGs whose nodes are topologically ordered $L_{t-1},\dots,_L1$ satisfy the same type of recursive relations:
+    \[L_{t-1}=\min_{i<t-1}\{L_i+c_{i,t-1}\};\dots;L_2=\min_{i=1}\{L_i+c_i2\}=L_1+c_{12};L_1=0\]
+    which can be solved in the reverse order:
+    \[L_1=0;L_2=L_1+c_{12};\dots;L_{t}=\min_{i<t-1}\{L_i+c_{t}\}\]
+
+    \begin{example}
+        Given the following graph: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/DAG.png}
+        \end{figure}
+        The dynamic programming to find the shortest paths in DAGs follows this workflow: 
+        \begin{itemize}
+            \item $L_1=0 \rightarrow \textnormal{pred}_1=1$
+            \item $L_2=L_1+c_{12}=4 \rightarrow \textnormal{pred}_2=1$
+            \item $L_3=L_1+c_{13}=2 \rightarrow \textnormal{pred}_3=1$
+            \item $L_4=\min_{i=1,2,3}\{L_i+c_{i4}\}=\min{5,6,3}=3 \rightarrow \textnormal{pred}_4=3$
+            \item $L_5=\min_{i=1,2}\{L_i+c_{i5}\}=\min{12,5}=5 \rightarrow \textnormal{pred}_5=2$
+            \item $L_6=L_3+c_{36}=13 \rightarrow \textnormal{pred}_6=3$
+            \item $L_7=L_5+c_{57}=11 \rightarrow \textnormal{pred}_7=5$
+            \item $L_8=\min_{i=4,5,6,7}\{L_i+c_{i8}\}=\min{16,14,21,18}=14 \rightarrow \textnormal{pred}_8=5$
+        \end{itemize}
+    \end{example}
+    \begin{algorithm}[H]
+        \caption{Dynamic programming to find the shortest paths in DAGs}
+            \begin{algorithmic}[1]
+                \State Sort the nodes of $G$ topologically
+                \State $L_1 \leftarrow 0$
+                \For {$j=2,\dots,n$}
+                    \State $L_j \leftarrow \min\{L_i+c_{ij}|(i,j) \in \delta^{-}(j) \land i < j\}$
+                    \State $pred_j \leftarrow v \: \textnormal{such that} \: (v,j)=\textnormal{argmin} \{L_i+c_{ij}|(i,j) \in \delta^{-}(j) \land i < j\}$
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+    Since the nodes are topologically ordered each node and each arc is considered exactly once, so we have a complexity of $O(m)$, where $m=\left\lvert A \right\rvert$. 
+    
+    It is possible to use the same algorithm to find the longest path with the formula: 
+    \[L_t=\max_{i<t}\{L_i+c_{it}\},\dots\]
+
+    \begin{example}[Proposition]
+        The Dynamic Programming algorithm for DAGs is exact. 
+    \end{example}
+    \begin{proof}
+        This is due to the optimality principle: for any shortest (longest) path from 1 to $t,\pi_t$, there exists $i < j$ such that the path can be subdivided into two parts: 
+        $\pi_i$ and $(i,t)$, where $\pi_i$ is a minimum (maximum) length from $s$ to $i$. 
+    \end{proof}
+
+    \subsection{Project planning algorithm}
+    \begin{definition}
+        A \emph{project} consists of a set of $m$ activities with their duration: activity $A_i$ has an estimated duration $d_j \geq 0, i=1,\dots,m$. 
+
+        Some pairs of activities are subject to a \emph{precedence constraint}: $A_i \varpropto A_j$  indicates that $A_j$ can start only after the end of $A_i$. 
+    \end{definition}
+    A project can be represented by a directed graph $G = (N, A)$ where each arc corresponds to an activity, and its arc length represents the duration of the corresponding 
+    activity. To account for the precedence constraints, the arcs must be positioned so that 
+    \[A_i \varpropto A_j\]
+    implies that there exists a directed path where the arc associated to $A_i$ precedes the arc associated to $A_j$. Therefore, a node $v$ marks an event corresponding to the end of 
+    all the activities $(i,v) \in \delta^{-}(v)$ and, hence, the possible beginning of all those $(v,j) \in \delta^{+}(v)$. 
+    We can also introduce new nodes so that graph $G$: 
+    \begin{itemize}
+        \item Contains a unique initial node $s$ corresponding to the event beginning of the project.
+        \item Contains a unique final node $t$ corresponding to the event end of the project. 
+        \item Does not contain multiple arcs (with same endpoints). 
+    \end{itemize}
+
+    \begin{example}
+        A project can be defined in the following way: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\linewidth]{images/project.png}
+        \end{figure}
+        This graph can be simplified by contracting some arcs, but we have to pay attention in introducing unwanted precedence constraints. The correct contracted graph is: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/cproject.png}
+        \end{figure}
+        We can add the initial and the final nodes: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/fproject.png}
+        \end{figure}
+    \end{example}
+
+    The problem to solve is: given a project, schedule the activities to minimize the overall project duration. To solve this problem with can use the critical path method that
+    determines: 
+    \begin{itemize}
+        \item A schedule that minimizes the overall project duration. 
+        \item The slack of each activity. 
+    \end{itemize}
+    The input of the algorithm is the graph $G$ representing the project and find a topological order of the nodes. The steps are: 
+    \begin{enumerate}
+        \item Consider the nodes by increasing indices and, for each $h \in N$, find the earliest time $T_{min_h}$ at which the event associated to node $h$ can occur
+            ($T_{min_n}$ corresponds to the minimum project duration). 
+        \item Consider the nodes by decreasing indices and, for each $h \in N$, find the latest time $T_{max_h}$, at which the event associated to node $h$ can occur
+            without delaying the project completion date beyond $T_{min_n}$. 
+        \item For each activity $(i,j) \in A$, find the slack: $\sigma_{ij}=T_{max_j}-T_{max_i}-d_{ij}$. 
+    \end{enumerate}
+    \begin{example}
+        Consider the following project: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{ccc}
+            \hline
+            \textbf{Activity} & \textbf{Duration} & \textbf{Predecessors} \\ \hline
+            A                 & 3                 & -                     \\
+            B                 & 2                 & A                     \\
+            C                 & 3                 & A                     \\
+            D                 & 3                 & C                     \\
+            E                 & 4                 & B,C                   \\
+            F                 & 3                 & B                     \\
+            G                 & 1                 & E,D                   \\
+            H                 & 4                 & C                     \\
+            I                 & 2                 & F                     \\ \hline
+            \end{tabular}
+        \end{table}
+        With these precedence constraints: 
+        \[A \varpropto B,A \varpropto C,C \varpropto D,B \varpropto E, C \varpropto E,B \varpropto F,E \varpropto G,D \varpropto G,C \varpropto H,F \varpropto I\]
+        Determine the overall minimum duration of the project and the slack for each activity. We have to find the graph associated to the given problem, that is: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/eproject.png}
+        \end{figure}
+        The first two phases are: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/aproject.png}
+        \end{figure}
+        So, we have that the longest path that is critical is: $(1,2,4,5,6,8)$.
+    \end{example}
+    This algorithm inputs are: a graph $G = (N,A)$, with $n= \left\lvert N \right\rvert $ and the duration $d_{ij}$ associated to each $(i,j) \in A$. 
+    \begin{algorithm}[H]
+        \caption{Algorithm for the critical path method}
+            \begin{algorithmic}[1]
+                \State Sort the nodes of $G$ topologically
+                \State $T_{min_1} \leftarrow 0$
+                \For {$j=2,\dots,n$}
+                    \State $T_{min_j} \leftarrow \max\{T_{min_i}+d_{ij}|(i,j) \in \delta^{-}(j)\}$
+                \EndFor
+                \State $T_{max_n} \leftarrow T_{min_n}$
+                \For {$i=n-1,\dots,1$}
+                \State $T_{max_j} \leftarrow \min\{T_{max_j}-d_{ij}|(i,j) \in \delta^{+}(j)\}$
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+    The complexity is $O(m)$, where $m = \left\lvert A \right\rvert $. 
+    \begin{definition}
+        An activity $(i,j)$ with zero slack: 
+        \[\sigma_{ij}=T_{max_j}-T_{min_i}-d_{ij}=0\]
+        is \emph{critical}. 
+
+        A \emph{critical path} is an $s-t$ path only composed of critical activities (it always exists).
+    \end{definition}
+    To find the slack of a project it is also possible to use Gantt charts, that were introduced in 1910 by Henry Gantt. It provides a temporal representations of the project. 
+    \begin{example}
+        The result of the previous example are the following: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{cccc}
+            \hline
+            $(i,j)$ & $d_{ij}$ & $T_{min_i}$ & $T_{max_j}$ \\ \hline
+            A       & 3        & 0           & 3           \\
+            B       & 2        & 3           & 6           \\
+            C       & 3        & 3           & 6           \\
+            D       & 3        & 6           & 10          \\
+            E       & 4        & 6           & 10          \\
+            F       & 3        & 5           & 9           \\
+            G       & 1        & 10          & 11          \\
+            H       & 4        & 6           & 11          \\
+            I       & 2        & 8           & 11          \\ \hline
+            \end{tabular}
+        \end{table}
+        And they can be represented with a Gantt chart as follows: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/Gantt.png}
+        \end{figure}
+    \end{example}
+
+    \section{Minimum network flow problem}
+    The network flows problems are problem involving the distribution of a given product from a set of sources to a set of users to optimize a given objective function. 
+    \begin{definition}
+        A network is a directed and connected graph $G = (V,A)$ with a source $s \in V$ and a sink $t \in V$, with $s \neq t$, and a capacity $k_{ij} \geq 0$ for each arc 
+        $(i,j) \in A$. 
+
+        A \emph{feasible flow} $x$ from $s$ to $t$ is a vector $x \in \mathbb{R}^m$ with a component $x_{ij}$ for each arc $(i,j) \in A$ satisfying the capacity constraints:
+        \[0 \leq x_{ij} \leq k_{ij} \:\:\:\:\:\: \forall (i,j) \in A\]
+        and the flow balance constraints at each intermediate node $u \in V (u \neq s,t)$: 
+        \[\sum_{(i,u)\in \delta^{-}(u)}x_{iu}=\sum_{(u,j)\in \delta^{+}(u)}x_{uj} \:\:\:\:\:\: \forall u \in N-\{s,t\}\]
+
+        The \emph{value of flow} $x$ is:
+        \[\varphi = \sum_{(s,j) \in \delta^{+}(s)} x_{sj}\]
+
+        Given a network and a feasible flow $x$, an arc $(i,j) \in A$ is \emph{saturated} if $x_{ij} = k_{ij}$. 
+
+        Given a network and a feasible flow $x$, an arc $(i,j) \in A$ is \emph{empty} if $x_{ij} = 0$. 
+    \end{definition}
+    Given a network $G = (V,A)$ with an integer capacity $k_{ij}$ for each arc $(i,j) \in A$, and nodes $s,t \in V$, determine a feasible flow from $s$ to $t$ of maximum value. 
+
+    If there are many sources/sinks with a unique type of product, dummy nodes $s^{*}$ and $t^{*}$ can be added. The linear programming model of the problem is to maximize 
+    $max \varphi$ such that: 
+    \[\sum_{(u,j)\in \delta^{+}(u)}x_{uj}-\sum_{(i,u)\in \delta^{-}(u)}x_{iu}=
+    \begin{cases}
+        \varphi \:\:\:\:\:\:\:\:\: u=s    \\
+        -\varphi \:\:\:\:\:\: u=t   \\
+        0 \:\:\:\:\:\:\:\:\:\: \textnormal{otherwise}
+    \end{cases}\]
+    where $\varphi$ denotes the value of the feasible flow $x$, $0 \leq x_{ij} \leq k_{ij}$ with $\varphi,x_{ij} \in \mathbb{R}$, and $(i,j) \in A$.
+    \begin{definition}
+        A \emph{cut separating $s$ from $t$} is $\delta(S)$ of $G$ with $s \in S \subset V$ and $t \in V-S$. There are $2^{n-2}$ cuts separating $s$ from $t$, where 
+        $n=\left\lvert V \right\rvert $.
+
+        The \emph{capacity of the cut} $\delta(S)$ induced by $S$ is equal to: 
+        \[k(S)=\sum_{(i,j)\in \delta^{+}(S)}k_{ij}\]
+
+        Given a feasible flow $x$ from $s$ to $t$ and a cut $6\delta(S)$ separating $s$ from $t$, the \emph{value of the feasible flow $x$ through the cut $\delta(S)$} is: 
+        \[\varphi(S)=\sum_{(i,j)\in \delta^{+}(S)}x_{ij} - \sum_{(i,j)\in \delta^{-}(S)}x_{ij}\]
+    \end{definition}
+    With this notation the value of the flow $x$ is $\varphi = \varphi(\{s\})$. 
+    \begin{example}
+        The value of the feasible flow $x$ through the cut $\delta(S)$ in the graph is: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/flow.png}
+        \end{figure}
+        \[\varphi(\{s,1\})=2+0+2-1=3\]
+        And the other values are: 
+        \[\delta(\{s,1\})=\{(s, 2),(1,2),(1, t)\}\]
+        \[k(S)=7\]
+    \end{example}
+    If $\varphi(S) = k(S)$ for a subset $S \subseteq V$ with $s \in S$ and $t \notin S$, then $x$ is a flow of maximum value and the cut $\delta(S)$ is of minimum capacity. 
+    The property $\varphi(S) \leq k(S)$ for any feasible flow $x$ and for any cut $\delta(S)$ separating $s$ from $t$, expresses a weak duality relationship between the two problems:
+    \begin{itemize}
+        \item Given $G = (V,A)$ with integer capacities on the arcs and $s,t \in V$, determine a feasible flow of maximum value. 
+        \item Given $G = (V,A)$ with integer arc capacities and $s,t in V$, determine a cut (separating $s$ from $t$) of minimum capacity. 
+    \end{itemize} 
+
+    The idea of the Ford-Fulkerson's algorithm to find the network flows is the following. Start from a feasible flow $x$ and try to iteratively increase its value $\varphi$ by 
+    sending, at each iteration, an additional amount of product along an undirected path from $s$ to $t$ with a strictly positive residual capacity. 
 \end{document}
