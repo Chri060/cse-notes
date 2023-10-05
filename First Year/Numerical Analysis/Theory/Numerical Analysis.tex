@@ -6,6 +6,7 @@
 \renewcommand\thmbox@headstyle[2]{\bfseries #1}
 \makeatother
 \newtheorem[style=M,bodystyle=\normalfont]{theorem}{Theorem}
+\newtheorem[style=M,bodystyle=\normalfont]{proposition}{Proposition}
 \newtheorem[style=M,bodystyle=\normalfont]{corollary}{Corollary}
 \newtheorem[style=M,bodystyle=\normalfont]{lemma}{Lemma}
 \newtheorem[style=M,bodystyle=\normalfont]{definition}{Definition}
@@ -181,7 +182,7 @@ The topics of the course are:
     \end{definition}
 
     \section{Stopping conditions}
-    The iterative methods needs a stopping criterion. It can be on four possible contitions: 
+    The iterative methods need a stopping criterion. It can be on four possible conditions: 
     \begin{itemize}
         \item On the error, stops if $\left\lvert x^{(k)}-\alpha \right\rvert \leq \epsilon_e$.
         \item On the residual, stops if $\left\lvert f\left(x^{(k)}\right) \right\rvert \leq \epsilon_r$. 
@@ -189,9 +190,6 @@ The topics of the course are:
         \item On the max numbers of iterations, stops if $k \leq k_{max}$. 
     \end{itemize}
     If none of the first three stopping criterions are satisfied, it means that there are no convergence. 
-
-
-
 
     \section{Bisection method}
     \begin{theorem}[zeros of continuous functions]
@@ -246,7 +244,7 @@ The topics of the course are:
 
     Obviously, this method converges in a single step when $f$ is linear. 
 
-    The Newton method in general does not converges for all possible choices of $x^{(0)}$, but only for those values of $x^{(0)}$ which are sufficiently close to $\alpha$. Since we 
+    The Newton method in general doe not converge for all possible choices of $x^{(0)}$, but only for those values of $x^{(0)}$ which are sufficiently close to $\alpha$. Since we 
     don't know the value of $\alpha$ a possible initial value $x^{(0)}$ can be obtained by resorting to a few iterations of the bisection method or through an investigation of the 
     graph of $f$. 
 
@@ -299,8 +297,6 @@ The topics of the course are:
             \end{algorithmic}
     \end{algorithm}
 
-    \section{Systems of nonlinear equations}
-
     \section{Fixed point method}
     Given a function $\phi:[a,b] \rightarrow \mathbb{R}$, find $\alpha \in [a,b]$ such that $\alpha=\phi(\alpha)$. If such an $\alpha$ exists it will be called a fixed point of 
     $\phi$, and it could be computed by the following algorithm: 
@@ -316,9 +312,180 @@ The topics of the course are:
         \end{enumerate}
     \end{theorem}
     \begin{proof}[of the first proposition]
-        
+        The function $g(x)= \phi(x)-x$ is continuous in $[a,b]$ and, thanks to assumption made on the range of $\phi$, it holds $g(a) = \phi(a)-a \geq 0$ and $g(b) = \phi(b)-b \geq 0$.
+        By applying the theorem of zeros of continuous functions, we can conclude that $g$ has at least one zero in $[a,b]$. 
     \end{proof}
     \begin{proof}[of the second proposition]
-        
+        Indeed, should two different fixed points $\alpha_1$ and $\alpha_2$ exist, then: 
+        \[\left\lvert \alpha_1-\alpha_2 \right\rvert = \left\lvert \phi(\alpha_1)-\phi(\alpha_2) \right\rvert \leq L \left\lvert \alpha_1-\alpha_2 \right\rvert < 
+        \left\lvert \alpha_1-\alpha_2 \right\rvert\]
+        which cannot be. We prove now that the sequence $x^{(k)}$ converges to the unique fixed point $\alpha$ when $k \rightarrow \infty$, for any choice of initial guess $x^{(0)} 
+        \in [a,b]$. It holds: 
+        \[\dfrac{\left\lvert x^{(k)}-\alpha \right\rvert}{\left\lvert x^{(0)}-\alpha \right\rvert} \leq L^k\]
+        Passing to the limit as $k \rightarrow \infty$, we obtain $\lim_{k \rightarrow \infty}{\left\lvert x^{(k)}-\alpha \right\rvert}=0$, which is the desired result. 
     \end{proof}
+    In practice it is often very difficult to choose a priori an interval $[a,b]$ for which the assumptions of previous proposition are fulfilled. In such cases the following local
+    convergence result will be useful. 
+    \begin{theorem}[Ostrowski]
+        Let $\alpha$ be a fixed point of a function $\phi$ which is continuous and continuously differentiable in a suitable neighborhood $\mathcal{J}$ of $\alpha$. If 
+        $\left\lvert \phi^{'}(\alpha) \right\rvert < 1$, then there exists $\delta > 0$ for which $\{x^{(k)}\}$ converges to $\alpha$, for every $x^{(0)}$ such that 
+        $\left\lvert x^{(0)}-\alpha \right\rvert < \delta$. Moreover, it holds: 
+        \[\lim_{k \rightarrow \infty}\dfrac{x^{(k+1)}-\alpha}{x^{(k)}-\alpha}=\phi^{'}(\alpha)\]
+    \end{theorem}
+
+    For the hypothesis of the Ostrowski theorem we have that: 
+    \[\exists \delta | \left\lvert \phi^{'}(\alpha) \right\rvert < 1 \:\:\:\:\:\: \forall x \left\lvert x - \alpha \right\rvert < \delta\]
+    We will call this interval $I_{\delta}$. If I choose a point $x$ inside this interval, I will have that $\phi(x) \in I_{\delta}$. 
+    \begin{proof}
+        Let us take $\left\lvert \phi(x)-\alpha \right\rvert$, where it is satisfied the relation $\left\lvert x- \alpha \right\rvert < \delta$. We have
+        \[\left\lvert \phi(x)-\alpha \right\rvert=\left\lvert \phi(x)-\phi(\alpha) \right\rvert \leq \left\lvert \phi^{'}(\xi)(x-\alpha) \right\rvert \]
+        So, we have that $\xi$ is between $x$ and $alpha$, and so it holds $\xi \in I_{\delta}$. At the meantime we have by hypothesis that: 
+        \[\left\lvert \phi^{'}(\xi) \right\rvert < 1\]
+        Now we can write 
+        \[\left\lvert \phi^{'}(\xi)(x-\alpha) \right\rvert = \left\lvert \phi^{'}(\xi) \right\rvert \left\lvert x-\alpha \right\rvert \leq \left\lvert x-\alpha \right\rvert < \delta\]
+        In the end we found that: 
+        \[\left\lvert \phi(x)-\alpha \right\rvert < \delta\]
+        So we have proved that $\phi(x) \in I_{\delta}$. 
+    \end{proof}
+    \begin{proof}[Ostrowski]
+        Thanks to the Lagrange theorem, for any $k \geq 0$, there exists a point $\xi_k$ between $x^{(k)}$ and $\alpha$ such that $\left\lvert x^{(x)}-\alpha\right\rvert =
+        \left\lvert \phi(x^{(x)})-\phi(\alpha)\right\rvert = \left\lvert \phi^{'}(\xi_k)(x^{(x)}-\alpha)\right\rvert $. We found that $\xi_k$ is between $x^{(k)}$ and $x^{(k+1)}$. 
+        So if $x^{(k)} \in I_{\delta}$, for the previous proof I have that also $x^{(k+1)} \in I_{\delta}$ and $\xi_k \in I_{\delta}$. And so we have that: 
+        \[\dfrac{\left\lvert x^{(k+1)}-\alpha\right\rvert }{\left\lvert x^{(k)}-\alpha\right\rvert }=\left\lvert \phi^{'}(\xi_k)\right\rvert \]
+        But since $\xi_k \rightarrow \alpha$, we have the convergence formula. 
+    \end{proof}
+    The fixed point iteration converge at least linearly. When $\left\lvert \phi^{'}(\alpha) \right\rvert > 1$, if $x^{(k)}$ is sufficiently close to $\alpha$, such that 
+    $\left\lvert \phi^{'}(x^{(k)}) \right\rvert > 1$, then $\left\lvert \alpha - x^{(k+1)} \right\rvert > \left\lvert \alpha - x^{(k)} \right\rvert$, and the sequence cannot 
+    converge to the fixed point. On the contrary, when $\left\lvert \phi^{'}(\alpha) \right\rvert = 1$, non conclusion can be drawn since either convergence or divergence could 
+    take place, depending on the properties of the iteration function $\phi^{'}(x)$. 
+    \begin{proposition}
+        Assume that all hypothesis of Ostrowski's theorem are satisfied. In addition, assume that $\phi$ is twice continuously differentiable and that $\phi^{'}(\alpha)=0$ and 
+        $\phi^{''}(\alpha) \neq 0$. Then, the fixed point iteration converge with order two and:
+        \[\lim_{k \rightarrow \infty}\dfrac{x^{(k+1)}-\alpha}{\left(x^{(k)}-\alpha\right)^2}=\dfrac{1}{2}\phi^{''}(\alpha)\]
+    \end{proposition}
+    Given a simple zero such that $f(\alpha)=0$ we can use the fixed point method to derive the Newton method: 
+    \[\phi_N(x)=x-\dfrac{f(x)}{f^{'}(x)}\]
+    If we derive the previous function we obtain:
+    \[\phi^{'}_N(x)=\dfrac{f(x)f^{''}(x)}{\left[f^{'}(x)\right]^2}\]
+    And we can say that: 
+    \[\phi^{'}_N(\alpha)=\dfrac{f(\alpha)f^{''}(\alpha)}{\left[f^{'}(\alpha)\right]^2}=0\]
+    \begin{proof}
+        We can note that the denominator is not null (the zero is simple, so the first derivative is not null). We assumed that $f(\alpha)=0$, and we can say nothing about 
+        $f^{''}(\alpha)$. But since we have 
+        \[\phi^{'}_N(\alpha)=\dfrac{f(\alpha)f^{''}(\alpha)}{\left[f^{'}(\alpha)\right]^2}=\dfrac{0 \cdot n}{n}=\dfrac{0}{n}=0\]
+        We have that the function evaluated in $\alpha$ is zero. 
+    \end{proof}
+
+    The stopping criterion for the fixed point iteration method is: 
+    \[\left\lvert x^{(k+1)}-x^{(k)} \right\rvert \leq \epsilon_s\]
+    \begin{proof}[not null derivative]
+        We have that the error in a certain iteration is: 
+        \[\left\lvert x^{(k+1)} - \alpha \right\rvert = \left\lvert \phi(x^{(k)}) - \phi(\alpha) \right\rvert \leq \left\lvert \phi^{'}(\xi_k)\right\rvert \left\lvert x^{(k)} - \alpha\right\rvert \]
+        Then I add and subtract $x^{(k+1)}$: 
+        \[\left\lvert \phi^{'}(\xi_k)\right\rvert \left\lvert x^{(k)} - \alpha + x^{(k+1)} - x^{(k+1)}\right\rvert\]
+        Applying the triangular inequality we obtain: 
+        \[\left\lvert \phi^{'}(\xi_k)\right\rvert 
+        \left\lvert x^{(k)} - \alpha + x^{(k+1)} - x^{(k+1)}\right\rvert \leq 
+        \left\lvert \phi^{'}(\xi_k)\right\rvert 
+        \left\lvert x^{(k+1)} - \alpha \right\rvert 
+        \left\lvert x^{(k)} - x^{(k+1)} \right\rvert\]
+        From where we can derive: 
+        \[\left( 1-\left\lvert \phi^{'}(\xi_k)\right\rvert \right) \left\lvert x^{k+1}-\alpha \right\rvert \leq \left\lvert \phi^{'}(\xi_k)\right\rvert \left\lvert x^{(k+1)} - x^{(k)} \right\rvert\]
+        That is: 
+        \[ \left\lvert x^{(k+1)} - \alpha \right\rvert \leq \dfrac{\phi^{'}(\xi_k)}{1-\left\lvert \phi^{'}(\xi_k)\right\rvert} \left\lvert x^{(k+1)} - x^{(k)} \right\rvert\]
+    \end{proof}
+    \begin{proof}[null derivative]
+        We have that: 
+        \[\left\lvert x^{(k+1)} - \alpha \right\rvert \leq \left\lvert x^{(k+1)} - \alpha + x^{(k)} - x^{(k)}\right\rvert \leq \left\lvert x^{(k+1)}-x^{(k)}\right\rvert \left\lvert \phi{x^{(k+1)}}-\phi(\alpha)\right\rvert\]
+        That is less or equal than:
+        \[ \left\lvert x^{(k+1)} - x^{(k)} \right\rvert 
+        + 
+        \left\lvert \phi^{'}(\xi_k) \right\rvert  
+        \left\lvert x^{(k+1)} - \alpha \right\rvert\]
+        But for hypothesis we have that $\phi^{'}(\alpha)=0$ we obtain: 
+        \[ \left\lvert x^{(k+1)} - \alpha \right\rvert \leq \left\lvert x^{(k+1)} - x^{(k)} \right\rvert\]
+    \end{proof}
+
+    \section{Aitken method}
+    We have that: 
+    \[x^{(k+1)}-\alpha=\phi(x^{(k+1)})-\phi(\alpha)=\lambda_k\left( x^{(k+1)}-\alpha \right)\]
+    And we know that $\lambda_k$ is the first derivative of $\phi$ in a certain point $\xi$. If I know $\lambda_k$ I have that: 
+    \[\alpha=\dfrac{\phi(x^{(k)})-\lambda_k x^{k}}{1-\lambda_k}\]
+    We also have that the quantity 
+    \[A_k=\dfrac{\phi(\phi(x^{(k)}))-\phi(x^{(k)})}{\phi(x^{(k)})-x^{(k)}}\]
+    is a good approximation of $\lambda_k$, so I can replace $\lambda_k$ with $A_k$. By substituting, we obtain the formula used in the Aitken method. 
+    \begin{algorithm}[H]
+        \caption{Algorithm for the Aitken method}
+            \begin{algorithmic}[1]
+                \For {$k=0,1,\dots,n$}
+                    \State $x^{(k+1)}=x^{(k)}-\dfrac{\left[ \phi(x^{(k)})-x^{(k)} \right]^2}{\phi(\phi(x^{(k)}))-2\phi(x^{(k)})+x^{(k)}}$
+                    \If {stopping criterion is satisfied}
+                        \State \Return $x^{(k+1)}$
+                    \EndIf
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+    \begin{theorem}
+        Let $\phi(x)=x-f(x)$ and $f(\alpha)$ be a simple zero. Let $\phi^{(k)}$ converge to the first order to $\alpha$, then $\phi_A$ converge to the second order. 
+
+        If $\phi(x)$ converges with order $p$ and $f(x)$ is still a simple zero, then $\phi_A$ converges with order $2p-1$. 
+    \end{theorem}
+    Sometimes $\phi_A$ converges even if $\phi$ does not. 
+
+    \section{Systems of nonlinear equations}
+    \subsection{Newton method}
+    Let us consider a system of nonlinear equations of the form
+    \[\begin{cases}
+        f_1(x_1,x_2,\dots,x_n)=0 \\
+        f_2(x_1,x_2,\dots,x_n)=0 \\
+        \vdots                   \\
+        f_n(x_1,x_2,\dots,x_n)=0 
+    \end{cases}\]
+    where $f_1,\dots,f_n$ are nonlinear functions. Setting $\textbf{f}=(f_1,\dots,f_n)^T$ and $\textbf{x}=(x_1,\dots,x_n)^T$, the system can be written in a compact way as: 
+    \[\textbf{f}(\textbf{x})=\textbf{0}\]
+    In order to extend Newton's method to the case of a system, we replace the first derivative of the scalar function $f$ with the Jacobian matrix $J_{\textbf{f}}$ of the vectorial 
+    function $\textbf{f}$ whose components are: 
+    \[(\textbf{J}_{\textbf{f}})_{ij}=\dfrac{\partial f_1}{\partial x_1} \:\:\:\:\:\: i,j=1,\dots,n\]
+
+    The input of the algorithm is the initial guess $\textbf{x}^{(0)}$. 
+    \begin{algorithm}[H]
+        \caption{Algorithm for the Newton method for systems}
+            \begin{algorithmic}[1]
+                \For {$k=0,1,\dots,n$}
+                    \State $\textnormal{solve  } \textbf{J}_{\textbf{f}}(\textbf{x}^{(k)})\boldsymbol{\delta}\textbf{x}^{(k)}=-\textbf{f}(\textbf{x}^{(k)})$
+                    \State $\textbf{x}^{(k+1)} \leftarrow \textbf{x}^{(k)}+\boldsymbol{\delta}\textbf{x}^{(k)}$
+                    \If {stopping criterion is satisfied}
+                        \State \Return $x^{(k+1)}$
+                    \EndIf
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+
+    \subsection{Broyden method}
+    The secant method can be adapted to the solution of systems of nonlinear equations still featuring super-linear rate of convergence. The idea consists in replacing the Jacobian 
+    matrix $\textbf{J}_{\textbf{f}}(\textbf{x}^{(k)})$ (for $k \geq 0$) of Newton's method with suitable matrices $B_k$, recursively defined starting from a convenient matrix $B_0$, 
+    representing a suitable approximation of $\textbf{J}_{\textbf{f}}(\textbf{x}^{(0)})$.
+    
+    The input of the algorithm is the initial guess $\textbf{x}^{(0)} \in \mathbb{R}^n$ and a given $B_0 \in \mathbb{R}^{n \times n}$. 
+    \begin{algorithm}[H]
+        \caption{Algorithm for the Broyden method for systems}
+            \begin{algorithmic}[1]
+                \For {$k=0,1,\dots,n$}
+                    \State $\textnormal{solve  } \textbf{B}_k\boldsymbol{\delta}\textbf{x}^{(k)}=-\textbf{f}(\textbf{x}^{(k)})$
+                    \State $\textbf{x}^{(k+1)} \leftarrow \textbf{x}^{(k)}+\boldsymbol{\delta}\textbf{x}^{(k)}$
+                    \State $\boldsymbol{\delta}\textbf{f}^{(k)} \leftarrow \textbf{f}(\textbf{x}^{(k+1)})+\textbf{f}(\textbf{x}^{(k)})$
+                    \State $B_{k+1}=B_k+\dfrac{\left(\boldsymbol{\delta}\textbf{f}^{(k)}-B_k\boldsymbol{\delta}\textbf{x}^{(k)}\right)\boldsymbol{\delta}\textbf{x}^{(k)^T}}
+                    {\boldsymbol{\delta}\textbf{x}^{(k)^T}\delta\textbf{x}^{(k)}}$
+                    \If {stopping criterion is satisfied}
+                        \State \Return $x^{(k+1)}$
+                    \EndIf
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+    We do not require the sequence $\{B_k\}$ to converge to the Jacobian matrix $\textbf{J}_{\textbf{f}}(\alpha)$. Rather, it can be proved that:
+    \[\lim_{k \rightarrow \infty}\dfrac{\Vert \left( B_k-\textbf{J}_{\textbf{f}}(\boldsymbol{\alpha}) \right) \left( \textbf{x}^{(k)}-\boldsymbol{\alpha} \right) \Vert}{\Vert 
+    \textbf{x}^{(k)}-\boldsymbol{\alpha} \Vert}=0\]
+    This property guarantees that $B_k$ is a convenient approximation of $\textbf{J}_{\textbf{f}}(\alpha)$ along the direction error $\textbf{x}_{(k)}-\boldsymbol{\alpha}$. 
+
+
 \end{document}
