@@ -167,7 +167,7 @@
     \[x=f \dfrac{X}{Z} = f \dfrac{X_0 + \alpha Z}{Z} = f\alpha + \dfrac{X_0}{Z}\]
     \[y=f \dfrac{Y}{Z} = f \dfrac{Y_0 + \beta Z}{Z}  = f\beta  + \dfrac{Y_0}{Z}\]
     We now want to find the image of the point at the infinity of these lines, so we obtain the point: 
-    \[\begin{bmatrix} f\alpha f\beta \end{bmatrix}\]
+    \[\begin{bmatrix} f\alpha & f\beta \end{bmatrix}\]
     that is independent of $X_0$ and $Y_0$. So, we have that all parallel lines have the same image if their points at the infinity.
     \begin{definition}
         The image of the point at the infinity of the lines is called \emph{vanishing point}. 
@@ -315,8 +315,6 @@
     is the angle between their normal directions $\begin{bmatrix} a_1 & b_1 \end{bmatrix}$ and $\begin{bmatrix} a_2 & b_2 \end{bmatrix}$, namely: 
     \[\cos\theta=\dfrac{a_1a_2+b_1b_2}{\sqrt{\left( a_1^2 + b_1^2 \right)\left( a_2^2 + b_2^2 \right)}}\]
     
-    The ratio of length is an invariant.
-
     Given a line with four points that have the following relations: 
     \[\textbf{X}_1=\alpha_1\textbf{Y}+\beta_1\textbf{Z}\]
     \[\textbf{X}_2=\alpha_2\textbf{Y}+\beta_2\textbf{Z}\]
@@ -347,7 +345,6 @@
     \end{proof}
 
     \section{Conics}
-    \subsection{Definition}
     The conics derives from the intersection of cones with planes. 
     \begin{figure}[H]
         \centering
@@ -638,5 +635,261 @@
             0 & 0 & 0 
         \end{bmatrix}\]
     \end{definition}
+
+    \section{Transformations}
+    \begin{definition}
+        A \emph{projective mapping} between a projective plane $\mathbb{P}^2$ and another projective plane $\mathbb{P}^{'2}$ is an invertible mapping which preserves colinearity:
+        \[h:\mathbb{P}^2 \rightarrow \mathbb{P}^{'2}, \textbf{x}^{'}=h(\textbf{x}),\textbf{x}_1,\textbf{x}_2,\textbf{x}_3 \textnormal{ are colinear}\]
+        \[\Leftrightarrow\]
+        \[\textbf{x}_1^{'}=h(\textbf{x}_1),\textbf{x}_2^{'}=h(\textbf{x}_2),\textbf{x}_3^{'}=h(\textbf{x}_3) \textnormal{ are colinear}\]
+    \end{definition}
+    Projective mapping is also called projectivity or homography. 
+    \begin{example}
+        Mappings between two planes induced by central projection are projective, since they preserve colinearity. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/map1.png}
+        \end{figure}
+        Mapping between a planar scene and its image is a homography, since it is induced by a central projection
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/map2.png}
+        \end{figure}
+        Mapping between two images of a planar scene is a homography.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/map3.png}
+        \end{figure}
+        Two images of a 3D scene, taken by a camera rotating around its center are related by a homography, since the second image is a central projection of the first image. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/map4.png}
+        \end{figure}
+        The shadow cast by a planar silhouette onto a ground plane is a projective transformation of the planar silhouette, since they are related by a central projection. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.3\linewidth]{images/map5.png}
+        \end{figure}
+    \end{example}
+    \begin{theorem}[Fundamental theorem of projective geometry]
+        A mapping $h:\mathbb{P}^{2} \rightarrow \mathbb{P}^{'2}$ is projective if and only if there exists an invertible $3 \times 3$ matrix $H$ such that for any point in 
+        $\mathbb{P}^{2}$ represented by the vector $\mathbf{x}$, is $h(\textbf{x})=H\textbf{x}$, where: 
+        \[H=\begin{bmatrix}
+            h_{11} & h_{12} & h{13} \\
+            h_{21} & h_{22} & h{23} \\
+            h_{31} & h_{32} & h{33} 
+        \end{bmatrix}\]
+    \end{theorem}
+    Projective mappings are linear in the homogeneous coordinates, but they are not in Cartesian coordinates. 
+
+    From the theorem we have that $h(\textbf{x})=\textbf{x}^{'}=H\textbf{x}$. Therefore, if we multiply the matrix $H$ by any nonzero scalar $\lambda$, the relation is satisfied by 
+    the same points $\textbf{x}^{'}=\lambda H\textbf{x}$. Thus, any nonzero multiple of the matrix $H$ represents the same projective mapping as $H$. Hence, $H$ is a homogeneous 
+    matrix: in spite of its $9$ entries, $H$ has only $8$ degrees of freedom, namely the ratios between its elements. Therefore, it can be estimated by just four point 
+    correspondences, since each point correspondence $\textbf{x}^{'}=H\textbf{x}$ yields two independent equations. 
+
+    \begin{definition}
+        A homography transform each: 
+        \begin{enumerate}
+            \item Point $\textbf{x}$ into a point $\textbf{x}^{'}$ such that: $\textbf{x} \rightarrow H \textbf{x}=\textbf{x}^{'}$
+            \item Line $\textbf{l}$ into a line $\textbf{l}^{'}$ such that: $\textbf{l} \rightarrow H^{-T} \textbf{l}=\textbf{l}^{'}$
+            \item Conic $C$ into a conic $C^{'}$ such that: $C \rightarrow H^{-T} CH^{-1}=C^{'}$
+            \item Dual conic $C^{*}$ into a dual conic $C^{*'}$ such that: $C^{*} \rightarrow H C^{*}H^{T}=C^{*'}$
+        \end{enumerate}
+    \end{definition}
+    \begin{proof}[property two]
+        The equation of the line on $\textbf{x}$ is $\textbf{l}^T\textbf{x}=\textbf{0}$ has to be converted into a constraint on $\textbf{x}^{'} = H \textbf{x}$. Combining the two 
+        equations we obtain a linear equation on $\textbf{x}^{'}$: 
+        \[\textbf{l}^{'T}\textbf{x}^{'}=\textbf{0}\]
+        With $\textbf{l}^{'T}=\textbf{l}^{T}H^{-1}$ and so we have: 
+        \[\textbf{l}^{'}=H^{-T}\textbf{l}\]
+    \end{proof}
+    \begin{proof}[property three]
+        The equation of the conic on $\textbf{x}$ is $\textbf{x}^{T}\textbf{C}\textbf{x}=\textbf{0}$ has to be converted into a constraint on $\textbf{x}^{'} = H \textbf{x}$, that 
+        is equal to:
+        \[\textbf{x}=H^{-1}\textbf{x}^{'} \textnormal{ and } \textbf{x}^{T}=\textbf{x}^{iT}H^{-T}\]
+        Combining the three equations we obtain a linear equation on $\textbf{x}^{'}$: 
+        \[\textbf{x}^{'T}\textbf{C}^{'}\textbf{x}^{'}=\textbf{0}\]
+        And so we have: 
+        \[C^{'}=H^{-T} CH^{-1}\]
+    \end{proof}
+    \begin{proof}[property four]
+        It is possible to apply the same idea to prove the transformation of a dual conic, obtaining:
+        \[C^{*'}=H C^{*}H^{T}\]
+    \end{proof}
+    The point line incidence is preserved. 
+    \begin{proof}
+        Suppose that point $\textbf{x}$ is on the line $\textbf{l}$, that is $\textbf{l}^T\textbf{x}=\textbf{0}$. Apply the same projective transformation $H$ both to $\textbf{x}$ 
+        and $\textbf{l}$: $H\textbf{x}=\textbf{x}^{'}$ and $H^{-1}\textbf{l}=\textbf{l}^{'}$. They are still incident if $\textbf{l}^{'T}\textbf{x}^{'}=\textbf{0}$:
+        \[\textbf{l}^{'T}\textbf{x}^{'}=\textbf{l}^{T}H^{-1}\textbf{x}^{'}=\textbf{l}^{T}H^{-1}H\textbf{x}=\textbf{l}^{T}\textbf{x}=\textbf{0}\]
+    \end{proof}
+
+    \subsection{Vanishing points and vanishing line}
+    The point common to both parallel lines $\textbf{l}_1={\begin{bmatrix} a & b & c_1 \end{bmatrix}}^{T}$ and $\textbf{l}_2={\begin{bmatrix} a & b & c_2 \end{bmatrix}}^{T}$ is the 
+    point $\textbf{x}={\begin{bmatrix} b & -a & 0 \end{bmatrix}}^{T}$, that is the point at the infinty along the direction of both lines. If we search for the common point of 
+    infinte lines $\textbf{l}_i$ we obtain that thay all have in common the point: 
+    \[\textbf{x}_{\infty}={\begin{bmatrix} b & -a & 0 \end{bmatrix}}^{T}\]
+    So, we obtained that all lines are concurrent at ${\begin{bmatrix} b & -a & 0 \end{bmatrix}}^{T}$. 
+    
+    Applying a projective transformation to all the above parallel lines $\textbf{l}_i$ we obtain lines $\textbf{l}_i^{'}$. The common point $\textbf{x}_{\infty}$ to all lines
+    $\textbf{l}_i$ is mapped onto a point $\textbf{x}_{\infty}^{'}$ which belongs to each of the lines $\textbf{l}_i^{'}$. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/vanishing.png}
+    \end{figure}
+    So, we have that all lines $\textbf{l}_i^{'}$ are concurrent at the point $\textbf{x}_{\infty}^{'}=H\textbf{x}_{\infty}$ called the vanishing point associated to the direction 
+    $(b,-a)$, of the parallel lines. 
+    \begin{theorem}
+        The image of a set of parallel lines $\textbf{l}_i$ is a set of lines $\textbf{l}_i^{'}$ concurrent at a common point $\textbf{x}^{'}$ called the vanishing point of the 
+        direction of lines $\textbf{l}_i$. 
+    \end{theorem}
+
+    Applying a projective transformation to line at the infinity $\textbf{l}_{\infty}$ we obtain a line $\textbf{l}_{\infty}^{'}$. This line goes through the image all the points at 
+    the infinity $\textbf{x}_{\infty}$ of the original plane. So, we have that the vanishing line $\textbf{l}_{\infty}^{'}$ can be determined from two vanishing points. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/vanishingline.png}
+    \end{figure}
+
+    \subsection{Polarity}
+    Polarity is preserved under projective mappings. The polar line $\textbf{l}=\textbf{Cx}$ of a point $\textbf{x}$ with respect to a conic $\textbf{C}$ is mapped onto the polar line 
+    of the transformed point $\textbf{x}^{'}=H\textbf{x}$ with respect to the transformed conic: 
+    \[\textbf{C}^{'}=H^{-T}\textbf{C}H^{-1}\]
+    \begin{proof}
+        This property is satisfied because we have: 
+        \[\textbf{C}^{'}\textbf{x}^{'}=H^{-T}\textbf{C}H^{-1}H\textbf{x}=H^{-T}\textbf{Cx}=H^{-T}\textbf{l}=\textbf{l}^{'}\]
+    \end{proof}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/polarity.png}
+    \end{figure}
+    In the end we have that since polarity is preserved, also conjugacy is preserved under projective mappings and also $CR=-1$ is preserved.
+
+    \subsection{Cross ratio}
+    Given a line with four points that have the following relations: 
+    \[\textbf{X}_1=\propto_1\textbf{Y}+\beta_1\textbf{Z}\]
+    \[\textbf{X}_2=\propto_2\textbf{Y}+\beta_2\textbf{Z}\]
+    We have that the cross ratio is the following: 
+    \[CR_{X_1,X_2,Y,Z}=\dfrac{\beta_1/\alpha_1}{\beta_2/\alpha_2}\]
+    If we apply a projective transformation $H$ to the four points we will have: 
+    \[\textbf{Y}^{'}=\textbf{HY} \:\:\:\:\:\: \textbf{Z}^{'}=\textbf{HZ}\] 
+    \[\textbf{X}^{'}_1=\textbf{HX}_1=\textbf{X}_1=\propto_1\textbf{Y}^{'}+\beta_1\textbf{Z}^{'} \:\:\:\:\:\: \textbf{X}^{'}_2=\textbf{HX}_2=\propto_2\textbf{Y}^{'}+\beta_2\textbf{Z}^{'}\]
+    The linear combination coefficients are the same. Therefore their cross ratio is preserved and it is again: 
+    \[CR_{X_1^{'},X_2^{'},Y^{'},Z^{'}}=\dfrac{\beta_1/\alpha_1}{\beta_2/\alpha_2}=CR_{X_1,X_2,Y,Z}\]
+
+    \subsection{Hierarchy of projective transformations}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/hierarchy.png}
+    \end{figure}
+
+    \subsection{Isometries}
+    The isometries have three degree of freedom, which are the translation $\textbf{t}$ and the rotation angle $\vartheta$. So, the invariants of this transformation are: lengths, 
+    distances, and areas. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/isometry.png}
+    \end{figure}
+    \begin{definition}
+        The orthogonal matrix $R_{\perp}$ is defined as follows: 
+        \[R_{\perp}^{-1}=R_{\perp}^{T}\]
+    \end{definition}
+    So, we have that the matrix $H_I$ for the isometries is the follow: 
+    \[H_I=
+    \begin{bmatrix}
+        \cos \vartheta & -\sin \vartheta & t_x \\
+        \sin \vartheta & \cos \vartheta & t_y \\
+        0 & 0 & 1
+    \end{bmatrix}\]
+    Where $
+    \begin{bmatrix}
+        \cos \vartheta & -\sin \vartheta \\
+        \sin \vartheta & \cos \vartheta
+    \end{bmatrix}
+    =R_{\perp}$
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/isometry1.png}
+    \end{figure}
+
+    \subsection{Similarities}
+    The similarities have four degree of freedom, which are the translation $\textbf{t}$, the scale $s$, and the rotation angle $\vartheta$. So, the invariants of this transformation are: ratio of lenghts, and angles.
+    Also the circular points $\textbf{I}$ and $\textbf{J}$ are invariant of the transofrmation. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/similarity.png}
+    \end{figure}
+    So, we have that the matrix $H_S$ for the similarities is the follow: 
+    \[H_I=
+    \begin{bmatrix}
+        s\cos \vartheta & -s\sin \vartheta & t_x \\
+        s\sin \vartheta & s\cos \vartheta & t_y \\
+        0 & 0 & 1
+    \end{bmatrix}\]
+    Where $
+    \begin{bmatrix}
+        s\cos \vartheta & -s\sin \vartheta \\
+        s\sin \vartheta & s\cos \vartheta
+    \end{bmatrix}
+    =sR_{\perp}$
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/isometry1.png}
+    \end{figure}
+
+    \subsection{Affinities}
+    The affinities have six degree of freedom, which are the submatrix $A$ and the translation. So, the invariants of this transformation are: parallelism, ratio of parallel lenghts, ratio of areas.
+    $A$ is any $2 \times 2$ (rank two) matrix. Also the line at the infinity $\textbf{l}_{\infty}$ is invariant of the transofrmation.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/affinities.png}
+    \end{figure}
+    So, we have that the matrix $H_A$ for the affinities is the follow: 
+    \[H_I=
+    \begin{bmatrix}
+        a_{11} & a_{21} & t_x \\
+        a_{12} & a_{21} & t_y \\
+        0 & 0 & 1
+    \end{bmatrix}\]
+    Where $
+    \begin{bmatrix}
+        a_{11} & a_{21} \\
+        a_{12} & a_{21} \\
+    \end{bmatrix}
+    =A$
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/affinities1.png}
+    \end{figure}
+
+    \subsection{Projectivities}
+    The projectivities have eight degree of freedom, which are the submatrix $A$, the vector $v$, and the translation. So, the invariants of this transformation are: colinearity, incidence, order of contact.
+    $A$ is any $2 \times 2$ (rank two) matrix. Also the cross ratio is invariant of the transofrmation.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/projectivities.png}
+    \end{figure}
+    So, we have that the matrix $H_A$ for the affinities is the follow: 
+    \[H_I=
+    \begin{bmatrix}
+        a_{11} & a_{21} & t_x \\
+        a_{12} & a_{21} & t_y \\
+        0 & 0 & 1
+    \end{bmatrix}\]
+    Where $
+    \begin{bmatrix}
+        a_{11} & a_{21} \\
+        a_{12} & a_{21} \\
+    \end{bmatrix}
+    =A$
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/projectivities1.png}
+    \end{figure}
+
+\newpage
+
+\chapter{Two dimensional reconstruction}
+
+
 
 \end{document}
