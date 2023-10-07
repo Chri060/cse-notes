@@ -441,51 +441,98 @@ The topics of the course are:
         \vdots                   \\
         f_n(x_1,x_2,\dots,x_n)=0 
     \end{cases}\]
-    where $f_1,\dots,f_n$ are nonlinear functions. Setting $\textbf{f}=(f_1,\dots,f_n)^T$ and $\textbf{x}=(x_1,\dots,x_n)^T$, the system can be written in a compact way as: 
-    \[\textbf{f}(\textbf{x})=\textbf{0}\]
-    In order to extend Newton's method to the case of a system, we replace the first derivative of the scalar function $f$ with the Jacobian matrix $J_{\textbf{f}}$ of the vectorial 
-    function $\textbf{f}$ whose components are: 
-    \[(\textbf{J}_{\textbf{f}})_{ij}=\dfrac{\partial f_1}{\partial x_1} \:\:\:\:\:\: i,j=1,\dots,n\]
+    where $f_1,\dots,f_n$ are nonlinear functions. Setting $\boldsymbol{f}=(f_1,\dots,f_n)^T$ and $\boldsymbol{x}=(x_1,\dots,x_n)^T \in \mathbb{R}^d$, the system can be written in a compact way as: 
+    \[\boldsymbol{f}(\boldsymbol{x})=\boldsymbol{0}\]
+    In order to extend Newton's method to the case of a system, we replace the first derivative of the scalar function $f$ with the Jacobian matrix $J_{\boldsymbol{f}}$ of the vectorial 
+    function $\boldsymbol{f}$ whose components are: 
+    \[(\boldsymbol{J}_{\boldsymbol{f}})_{ij}=\dfrac{\partial f_1}{\partial x_1} \:\:\:\:\:\: i,j=1,\dots,n\]
 
-    The input of the algorithm is the initial guess $\textbf{x}^{(0)}$. 
+    The input of the algorithm is the initial guess $\boldsymbol{x}^{(0)}$. 
     \begin{algorithm}[H]
         \caption{Algorithm for the Newton method for systems}
             \begin{algorithmic}[1]
                 \For {$k=0,1,\dots,n$}
-                    \State $\textnormal{solve  } \textbf{J}_{\textbf{f}}(\textbf{x}^{(k)})\boldsymbol{\delta}\textbf{x}^{(k)}=-\textbf{f}(\textbf{x}^{(k)})$
-                    \State $\textbf{x}^{(k+1)} \leftarrow \textbf{x}^{(k)}+\boldsymbol{\delta}\textbf{x}^{(k)}$
-                    \If {stopping criterion is satisfied}
+                    \State $\textnormal{solve  } \boldsymbol{J}_{\boldsymbol{f}}(\boldsymbol{x}^{(k)})\boldsymbol{\delta}\boldsymbol{x}^{(k)}=-\boldsymbol{F}(\boldsymbol{x}^{(k)})$
+                    \State $\boldsymbol{x}^{(k+1)} \leftarrow \boldsymbol{x}^{(k)}+\boldsymbol{\delta}\boldsymbol{x}^{(k)}$
+                    \If {$\left\lVert \boldsymbol{\delta}\boldsymbol{x}^{(k+1)} \leq \epsilon \right\rVert \lor \left\lVert \boldsymbol{F}(\boldsymbol{x}^{(k+1)}) \leq \epsilon_r \right\rVert$}
                         \State \Return $x^{(k+1)}$
                     \EndIf
                 \EndFor
             \end{algorithmic}
     \end{algorithm}
+    The computation of the Jacobian matrix $\boldsymbol{J}_{\boldsymbol{f}}$ can be expensive if the number of equations $d$ is relatively large. To simplify the computation of this matrix
+    it is possible to use the approximation with finite difference, that is: 
+    \[(\boldsymbol{J}_{\boldsymbol{f}})_{ij} \approx \dfrac{f_i(x_1^{k},\dots,x_{j-1}^{k},x_{j+h}^{k},x_{j+1}^{k},\dots,x_{d}^{k})-f(\boldsymbol{x}_{k})}{h}\]
+    But also this method is costly. There are other method used to approximate the Jacobian that are less expensive that are called quasi-Newton methods. The most important 
+    quasi-Newton method used for this purpose is called Broyden. 
 
     \subsection{Broyden method}
     The secant method can be adapted to the solution of systems of nonlinear equations still featuring super-linear rate of convergence. The idea consists in replacing the Jacobian 
-    matrix $\textbf{J}_{\textbf{f}}(\textbf{x}^{(k)})$ (for $k \geq 0$) of Newton's method with suitable matrices $B_k$, recursively defined starting from a convenient matrix $B_0$, 
-    representing a suitable approximation of $\textbf{J}_{\textbf{f}}(\textbf{x}^{(0)})$.
+    matrix $\boldsymbol{J}_{\boldsymbol{f}}(\boldsymbol{x}^{(k)})$ (for $k \geq 0$) of Newton's method with suitable matrices $B_k$, recursively defined starting from a convenient matrix $B_0$, 
+    representing a suitable approximation of $\boldsymbol{J}_{\boldsymbol{f}}(\boldsymbol{x}^{(0)})$.
     
-    The input of the algorithm is the initial guess $\textbf{x}^{(0)} \in \mathbb{R}^n$ and a given $B_0 \in \mathbb{R}^{n \times n}$. 
+    The starting idea is to replace $\boldsymbol{I}_k$ with a matrix $\boldsymbol{B}_k$ that satisfies the equation: 
+    \[\boldsymbol{B}_k\left(\boldsymbol{x}_k-\boldsymbol{x}_{k-1}\right)=\boldsymbol{F}(\boldsymbol{x}_k)-\boldsymbol{F}(\boldsymbol{x}_{k-1})(S)\]
+    Since there are infinite matrices that satisfies the previous equation, the idea of Broyden was to choose $\boldsymbol{B}_k$ so that it satisfies $(S)$ and minimizes: 
+    \[\min{\left\lVert \boldsymbol{B}_k-\boldsymbol{B}_{k-1} \right\rVert_{\boldsymbol{F}}^{2}}\]
+
+    The input of the algorithm is the initial guess $\boldsymbol{x}^{(0)} \in \mathbb{R}^n$ and a given $\boldsymbol{B}_0 \in \mathbb{R}^{n \times n}$ (we usually set $\boldsymbol{B}_0=\boldsymbol{I}$). 
     \begin{algorithm}[H]
         \caption{Algorithm for the Broyden method for systems}
             \begin{algorithmic}[1]
                 \For {$k=0,1,\dots,n$}
-                    \State $\textnormal{solve  } \textbf{B}_k\boldsymbol{\delta}\textbf{x}^{(k)}=-\textbf{f}(\textbf{x}^{(k)})$
-                    \State $\textbf{x}^{(k+1)} \leftarrow \textbf{x}^{(k)}+\boldsymbol{\delta}\textbf{x}^{(k)}$
-                    \State $\boldsymbol{\delta}\textbf{f}^{(k)} \leftarrow \textbf{f}(\textbf{x}^{(k+1)})+\textbf{f}(\textbf{x}^{(k)})$
-                    \State $B_{k+1}=B_k+\dfrac{\left(\boldsymbol{\delta}\textbf{f}^{(k)}-B_k\boldsymbol{\delta}\textbf{x}^{(k)}\right)\boldsymbol{\delta}\textbf{x}^{(k)^T}}
-                    {\boldsymbol{\delta}\textbf{x}^{(k)^T}\delta\textbf{x}^{(k)}}$
-                    \If {stopping criterion is satisfied}
-                        \State \Return $x^{(k+1)}$
+                    \State $\textnormal{solve  } \boldsymbol{B}_k\boldsymbol{\delta}\boldsymbol{x}^{(k)}=-\boldsymbol{f}(\boldsymbol{x}^{(k)})$
+                    \State $\boldsymbol{x}^{(k+1)} \leftarrow \boldsymbol{x}^{(k)}+\boldsymbol{\delta}\boldsymbol{x}^{(k)}$
+                    \State $\boldsymbol{\delta}\boldsymbol{f}^{(k)} \leftarrow \boldsymbol{f}(\boldsymbol{x}^{(k+1)})+\boldsymbol{f}(\boldsymbol{x}^{(k)})$
+                    \State $B_{k+1}=B_k+\dfrac{\left(\boldsymbol{\delta}\boldsymbol{f}^{(k)}-B_k\boldsymbol{\delta}\boldsymbol{x}^{(k)}\right)}{{\left\lVert \delta\boldsymbol{x}^{(k)} \right\rVert}^{2}}\boldsymbol{\delta}\boldsymbol{x}^{(k)^T}$
+                    \If {$\left\lVert \boldsymbol{\delta}\boldsymbol{x}^{(k+1)} \leq \epsilon \right\rVert \lor \left\lVert \boldsymbol{F}(\boldsymbol{x}^{(k+1)}) \leq \epsilon_r \right\rVert$}
+                        \State \Return $B_{k+1}$
                     \EndIf
                 \EndFor
             \end{algorithmic}
     \end{algorithm}
-    We do not require the sequence $\{B_k\}$ to converge to the Jacobian matrix $\textbf{J}_{\textbf{f}}(\alpha)$. Rather, it can be proved that:
-    \[\lim_{k \rightarrow \infty}\dfrac{\Vert \left( B_k-\textbf{J}_{\textbf{f}}(\boldsymbol{\alpha}) \right) \left( \textbf{x}^{(k)}-\boldsymbol{\alpha} \right) \Vert}{\Vert 
-    \textbf{x}^{(k)}-\boldsymbol{\alpha} \Vert}=0\]
-    This property guarantees that $B_k$ is a convenient approximation of $\textbf{J}_{\textbf{f}}(\alpha)$ along the direction error $\textbf{x}_{(k)}-\boldsymbol{\alpha}$. 
+    We do not require the sequence $\{\boldsymbol{B}_k\}$ to converge to the Jacobian matrix $\boldsymbol{J}_{\boldsymbol{f}}(\alpha)$. Rather, it can be proved that:
+    \[\lim_{k \rightarrow \infty}\dfrac{\Vert \left( \boldsymbol{B}_k-\boldsymbol{J}_{\boldsymbol{f}}(\boldsymbol{\alpha}) \right) \left( \boldsymbol{x}^{(k)}-\boldsymbol{\alpha} \right) \Vert}{\Vert 
+    \boldsymbol{x}^{(k)}-\boldsymbol{\alpha} \Vert}=0\]
+    This property guarantees that $\boldsymbol{B}_k$ is a convenient approximation of $\boldsymbol{J}_{\boldsymbol{f}}(\alpha)$ along the direction error $\boldsymbol{x}_{(k)}-\boldsymbol{\alpha}$. 
+    The convergence rate of the Broyden method is $q \simeq 1.6$, so it is super-linear. 
 
+    Since the Newton method for systems of nonlinear equation uses the inverse of the Jacobian to compute the solution, it is better to compute directly the inverse instead of the
+    normal matrix. The matrix found with the Broyden formula (the one added to the $\boldsymbol{B}_k$ matrix) is always of rank one, so it is possible to find the inverse with the 
+    Sherman-Morrison formula: 
+    \[\left( \boldsymbol{A}+\boldsymbol{uw}^{T} \right) = \boldsymbol{A}^{-1}-\dfrac{\boldsymbol{Auw}^T\boldsymbol{A}^{-1}}{1+\boldsymbol{w}^T\boldsymbol{Au}}\]
+    where $\boldsymbol{A} \in \mathbb{R}^{n \times n}$ is an invertible square matrix, and $\boldsymbol{u},\boldsymbol{v} \in \mathbb{R}^{n}$ are column vectors. Now it is possible to compute 
+    the approximation of the Jacobian with the Broyden method: 
+    \[\boldsymbol{B}_{k+1}^{-1}=\boldsymbol{B}_{k}^{-1}+\dfrac{\boldsymbol{\delta x}^{(k)}-\boldsymbol{B}_k^{-1}\boldsymbol{\delta f}_k}{\boldsymbol{\delta x}^{(k)}\boldsymbol{B}_k^{-1}\boldsymbol{\delta f}_k}\left( \boldsymbol{\delta x}^{(k)} \right)\boldsymbol{B}_k^{-1}\]
+
+    \subsection{Bad Broyden method}
+    The bad version of the Broyden method compute the difference between two steps with the secant condition: $\boldsymbol{x}_k-\boldsymbol{x}_{k+1}=\boldsymbol{B}_k^{-1}\left[ F(\boldsymbol{x}_k)-F(\boldsymbol{x}_{k-1}) \right]$, and then construct the approximation of the Jacobian directly imposing the secant condition and minimizing: 
+    \[\min{\left\lVert \boldsymbol{B}_k^{-1}-\boldsymbol{B}_{k-1}^{-1} \right\rVert_{\boldsymbol{F}}^{2}}\]
+    With these formulas, the Broyden method becomes: 
+    \[\boldsymbol{B}_{k+1}^{-1}=\boldsymbol{B}_{k}^{-1}+\dfrac{\boldsymbol{\delta x}^{(k)}-\boldsymbol{B}_k^{-1}\boldsymbol{\delta f}^{(k)}}{{\left\lVert \boldsymbol{\delta f}^{(k)} \right\rVert}^2}\left[ \boldsymbol{\delta f}^{(k)} \right]^T\]
+
+\newpage
+
+\chapter{Linear systems}
+    \section{Introduction}
+    The systems of nonlinear equations can be expressed as: 
+    \[\boldsymbol{Ax}=\boldsymbol{b}\]
+    where $\boldsymbol{A}$ is a non-singular square matrix of dimension $n \times n$ whose elements $a_{ij}$ are either real or complex, while $\boldsymbol{x}$ and $\boldsymbol{b}$ are column vectors of dimension $n$: 
+    $\boldsymbol{x}$ represents the unknown solution while $\boldsymbol{b}$ is a given vector. Component-wise, it can be written as: 
+    \[
+    \begin{cases}
+        a_{11}x_1+a_{12}x_2+\dots+a_{1n}x_n=b_1 \\
+        a_{21}x_1+a_{22}x_2+\dots+a_{2n}x_n=b_2 \\
+        \vdots                                  \\
+        a_{n1}x_1+a_{n2}x_2+\dots+a_{nn}x_n=b_n
+    \end{cases}
+    \]
+    \begin{definition}
+        The matrix $\boldsymbol{A}$ is \emph{non-singular} if and only if: 
+        \[\boldsymbol{Av}=\boldsymbol{0}\leftrightarrow\boldsymbol{v}=\boldsymbol{0}\]
+    \end{definition}
+    In other words, the kernel of $\boldsymbol{A}$ contains only the vector $\boldsymbol{0}$ or, equivalently: 
+    \[\dim{\left(\ker{\left(\boldsymbol{A}\right)}\right)}=\boldsymbol{0}\]
+    We also need that $\textnormal{rank}(\boldsymbol{A})=n$ or $\det(\boldsymbol{A})\neq 0$. 
 
 \end{document}

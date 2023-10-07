@@ -283,7 +283,6 @@ end
     \begin{Answer}[ref=1]
         \begin{lstlisting}[language=Matlab]
 k = 8;
-
 % For loop strategy
 vk = zeros(1, k+1);
 for (ii = 0:k)
@@ -303,9 +302,7 @@ vk = [1:2:2*k+1].^2;
     \begin{Answer}[ref=2]
         \begin{lstlisting}[language=Matlab]
 function vk = ex_1_2(k)
-
 vk = [1:2:2*k+1].^2;
-
 end
         \end{lstlisting}
     \end{Answer}
@@ -332,18 +329,14 @@ end
     \begin{Answer}[ref=3]
         \begin{lstlisting}[language=Matlab]
 function Mk = ex_1_3(k)
-
 % Create a diagonal matrix with the right elements and dimension
 Mk = diag(2.^(1./[1:2*(k+1)]))
 % The bottom right element will be overwritten
-
 % Last column
 Mk(2:2:end, end) = ex_1_2(k)
-
 % Last line
 Mk(end, 1:2:end) = ex_1_2(k)
 Mk(end, 2:2:end) = ex_1_2(k)
-
 end
         \end{lstlisting}
     \end{Answer}
@@ -351,55 +344,10 @@ end
     \newpage
 
     \begin{Exercise}[label=4]
-        Compare the results of the following code segments:
-        \begin{lstlisting}[language=Matlab]
-% Code A
-x = 0;
-while (x ~= 1)
-    x = x + 1/16
-end
-
-% Code B
-x = 0;
-while (x ~= 1)
-    x = x + 0.1
-end
-        \end{lstlisting}
+        Find the machine epsilon by implementing an ad hoc procedure. Comment and justify the obtained results.
     \end{Exercise}
     \begin{Answer}[ref=4]
         \begin{lstlisting}[language=Matlab]
-% Code A
-x = 0;
-while (x ~= 1)
-    x = x + 1/16
-end
-
-% Code B
-x = 0;
-k = 1;
-format long
-while (x ~= 1)
-    k
-    x = x + 0.1
-    if k==10 || k==11
-        x-1
-    end
-    k=k+1;
-    if k==15
-        break
-    end
-end
-        \end{lstlisting}   
-    \end{Answer}
-
-    \newpage
-
-    \begin{Exercise}[label=5]
-        Find the machine epsilon by implementing an ad hoc procedure. Comment and justify the obtained results.
-    \end{Exercise}
-    \begin{Answer}[ref=5]
-        \begin{lstlisting}[language=Matlab]
-% Pay attention, you cannot use "eps" since it is a built-in variable
 k = 0;
 EPS = 1/2;
 while (1 + EPS) > 1
@@ -408,43 +356,18 @@ while (1 + EPS) > 1
     k = k + 1;
 end
 format long
-EPS_old		% computed with the ad-hoc procedure
+EPS_old		
 (1 + EPS_old) > 1
 EPS
 (1 + EPS) > 1
 k			% Number of iterations, which is also the numer of digits in the mantissa, according to the standard
-eps			% Octave/MATLAB built-in        
+eps			 
         \end{lstlisting}
     \end{Answer}
 
     \newpage
 
-    \begin{Exercise}[label=6]
-        Given the following code:
-        \begin{lstlisting}[language=Matlab]
-realmax
-a = 1.0e+308;
-b = -a;
-c = 1.1e+308;
-(a + b) + c
-(a + c) + b  
-        \end{lstlisting}
-        Explain why the second result is $Inf$.
-    \end{Exercise}
-    \begin{Answer}[ref=6]
-        \begin{lstlisting}[language=Matlab]
-realmax
-a = 1.0e+308;
-b = 1.1e+308;
-c = -a;
-(a + b) + c
-a + (b + c)
-        \end{lstlisting}    
-    \end{Answer}
-
-    \newpage
-
-    \begin{Exercise}[label=7]
+    \begin{Exercise}[label=5]
         Consider the following function:
         \[f(x)=\dfrac{e^x-1}{x}\]
         \begin{enumerate}
@@ -453,11 +376,9 @@ a + (b + c)
             \item How many terms in the Taylor expansion are needed to get double precision accuracy (16 decimal digits) $\forall x \in \left[0, \dfrac{1}{2}\right]$?
         \end{enumerate}
     \end{Exercise}
-    \begin{Answer}[ref=7]
+    \begin{Answer}[ref=5]
         \begin{lstlisting}[language=Matlab]
 %   Evaluate f(x) for values of x around zero (try with xk = 10^{-k}, k in [1,20]). What do you obtain? Explain the results.
-
-
 k = [1:20]';
 x = 10.^(-k);
 f = @(x) (exp(x) - 1) ./ x;
@@ -465,85 +386,19 @@ format long
 [k x f(x)]
 figure;
 plot(x, f(x), '*')
-
-% 	The computed f(xk) have the expected behavior until k = 7, in agreement with
-% 	lim{x -> 0} f(x) = 1.
-% 	
-% k = 8 to k = 15: the sequence oscillates with increasing amplitude (bigger and bigger). 
-% k = 16: the result becomes 0! The cause of these effects is the loss of accuracy due to 
-% numerical cancellation. 
-
-% The numerical cancellation is the most serious consequence related to the
-% floating point representation, that is the representation of the real
-% numbers with a finite precision. 
-% It occurs when you subtract two numbers which are very close to each other.
-% So you lose significant digits and consequently accuracy of the finite 
-% representation
-% a = 1.11e-15, b = 1.12e-15, b-a=1.0e-17_ b-a very close to the machine
-% epsilon
-
-% For k = 8, ..., 15 e^{xk} and 1 are very close to each other, 
-% still being different in floating point arithmetic. 
-% We are subtracting them and the result suffers of a great relative error. 
-% Moreover, we are dividing by xk, that approaches 0, hence the error is magnified.
-
-% Finally, for k = 16, e^{xk} and 1 are too close to have a different representation 
-% in the floating ploint arithmetic (eps ~ 10^{-16}), hence the difference is 0.
-% 	
-% 	Write the Taylor expansion of e^x around x0 = 0, truncating it at the fifth order:
-% 
-% 	e^x  = sum_{k=0}^{+infinity} {f^{(k)}(x0)}/{k!} (x-x0)^k = 
-%        = sum_{k=0}^{5}         {f^{(k)}(x0)}/{k!} (x-x0)^k + O(x^6) =
-% 		 = 1 + x + {x^2}/{2} + {x^3}/{6} + {x^4}/{24} + {x^5}/{120} + O(x^6)
-% 
-% 	and substitute it in f(x).
-% 
-% 	f(x) = 1 + {x}/{2} + {x^2}/{6} + {x^3}/{24} + {x^4}/{120} + O(x^5)
-% 
-% 	With this formula, at least for x > 0, all the terms have the same sign, so no numerical cancellation occurs.
-
-
 f_taylor_5 = @(x) 1 + 1/2*x + 1/6*x.^2 + 1/24*x.^3 + 1/120*x.^4;
-
 [k x f(x) f_taylor_5(x)]
-
-
-%%% How many terms in the Taylor expansion are needed to get double precision accuracy (16 decimal digits) for all x in [0, 1/2]?
-% 	
-% 	The error in the approximation of a function g(x) at a point x = a with its Taylor expansion up to order n is
-% 	E[g,n,a](x) = {g^{(n+1)}(xi)}/{(n+1)!} (x-a)^{n+1} for at least a xi
-% 	s.t. |xi -a| < |x -a|.
-% 	
-% 	In this case
-% 	
-% 	E[e^x,n+1,0](x) = {e^{xi}}/{(n+2)!} x^{n+2} for xi in [0,x]
-% 
-% 	and therefore, substituting in f(x) 
-% 
-% 	E[f,n,0](x) = {E[e^x,n+1,0](x)}/{x} = {e^{xi}}{(n+2)!} x^{n+1} for xi in [0,x]
-% 
-% 	We want 
-% 
-% 	E[f,n,0](x) < eps for all x in [0, 0.5]:
-% 
-% 	since both e^xi and x^{n+1} are increasing functions, it's enough to choose xi = x = 0.5 and seek the first n* such that
-% 
-% 	{e^{1/2}}/{(n*+2)!} (1/2)^{n*+1} < eps
-
-
 format short e
 n = [1:20]';
 err = 1./factorial(n+2) .* (0.5).^(n+1).*exp(0.5);
-
 [n err]
-
 %   Therefore n* = 13$.            
         \end{lstlisting}
     \end{Answer}
 
     \newpage
 
-    \begin{Exercise}[label=8]
+    \begin{Exercise}[label=6]
         The sequence: 
         \[1, \dfrac{1}{3}, \dfrac{1}{9}, \dots, \dfrac{1}{3^n},\dots\]
         can be generated with the following recursive relations: 
@@ -564,18 +419,13 @@ err = 1./factorial(n+2) .* (0.5).^(n+1).*exp(0.5);
             \item Study the stability of the two algorithms and justify the obtained results. 
         \end{enumerate}
     \end{Exercise}
-    \begin{Answer}[ref=8]
+    \begin{Answer}[ref=6]
         \begin{lstlisting}[language=Matlab]
-            % Implement the two relations in order to generate the first 100 terms of the sequence.
-
-% First recursive relation
-
 p(1) = 1;
 p(2) = 1/3;
 for i = 2:100
     p(i+1) = 10/3*p(i) - p(i-1);
 end
-
 figure
 subplot(2,1,1)
 plot(0:100, p, 'LineWidth',3)
@@ -586,393 +436,401 @@ xlabel('n','FontSize',16)
 ylabel('p_n','FontSize',16)
 % The sequence explodes!
 
-% Second recursive relation
-
 q(1) = 1;
 for i=1:100
     q(i+1) = 1/3*q(i);
 end
-
 subplot(2,1,2)
 plot(0:100, q, 'LineWidth',3)
 set(gca,'FontSize',16)
 xlabel('n','FontSize',16)
 ylabel('q_n','FontSize',16)
 % The sequence is ok.
-
-
-% 	Study the stability of the two algorithms and justify the obtained results.
-% 	
-% 	Error analysis: since we use finite precision numbers, we know the initial 
-%  data up to an error eps. Actually, if we start from 1, we know it exactly, 
-%  but we may introduce anyway errors in the following steps.
-% 	Indeed, denoting by fl(pi) the floating point representative for pi:
-% 	
-% 	fl(p0) = p0 + eps,  fl(p1) = p1 + eps.
-% 	
-% 	It follows
-% 	
-% 	fl(p2)  = {10}\{3} fl(p1) - fl(p0) = {10}\{3}(p1 + eps)- (p0 + eps) = p2 + {7}\{3} eps
-% 	fl(p3)  = {10}\{3} fl(p2) - fl(p1) = {10}\{3}(p2 + {7}\{3}eps) - (p1 + eps) = p2 + {61}\{9} eps
-% 	fl(p4)  = ...
-% 	
-% 	The error is amplified! 
-% 	
-% 	Instead, with the second formula
-% 
-% 	fl(q0)  = q0 + eps
-% 	fl(q1)  = {1}\{3} fl(q0) = {1}\{3} q0 + {1}\{3} eps = q1 + {1}\{3} eps
-% 	fl(q2)  = {1}\{3} fl(q1) = {1}\{3} q1 + {1}\{9} eps = q2 + {1}\{9} eps
-% 	fl(q3)  = ...
-% 	
-% 	The error is reduced! 
         \end{lstlisting}
+    \end{Answer}
+
+\newpage
+
+\chapter{Laboratory session II}
+    \begin{Exercise}[label=7]
+        Consider the following function
+        \[f(x) = x^3-(2+e)x^2+(2e+1)x+(1-e)-\cosh(x-1) \:\: x \in [0.5, 5.5]\]
+        \begin{itemize}
+            \item Plot the function f and determine two intervals that contain its roots.
+            \item Implement the bisection method:
+                \begin{lstlisting}[language=Matlab]
+function [x,x_iter]=bisection(f,a,b,tol)
+                \end{lstlisting}
+                where $x$ is the solution, $x\_iter$ is the vector of the approximations at each iteration, $f$ is the function, defined as handle function, $a,b$ are the end points 
+                of the interval, $tol$ is the required tolerance.
+            \item For which roots the bisection method can be used? Compute the number of needed iterations for the bisection method to converge with a tolerance of $10^{-3}$, 
+                when the interval $[3, 5]$ is chosen as starting interval.
+        \end{itemize}
+    \end{Exercise}
+    \begin{Answer}[ref=7]
+        \begin{lstlisting}[language=Matlab]
+1.  f= @(x) x.^3-(2 + exp(1))*x.^2 + (2*exp(1) + 1)*x + (1 - exp(1)) - cosh(x - 1);
+    a=0.5;
+    b=5.5;
+    x_plot=linspace(a,b,1000);
+    plot(x_plot,f(x_plot));
+    grid on
+
+2.  function [x,x_iter]=bisection(f,a,b,tol)
+        Nmax = ceil(log((b-a)/tol)/log(2));
+        for i=1:Nmax
+            x_iter(i)=(b+a)/2;
+            if f(x_iter(i))*f(a)<0
+                b=x_iter(i);
+            else
+                a=x_iter(i);
+            end
+        end
+        x=x_iter(end);
+    end
+3.  a=3;
+    b=5;
+    tol=1.e-3;
+    [x,x_iter]=bisection(f,a,b,tol);
+    x
+    x_plot=linspace(a,b,1000);
+    figure
+    plot(x_plot,f(x_plot));
+    title("Iterations required to reach the tollerance:", length(x_iter))
+    grid on
+    hold on
+        \end{lstlisting}  
+    \end{Answer}
+
+    \newpage
+
+    \begin{Exercise}[label=8]
+        Consider the following function in the interval $[-0.5, 1.5]$
+        \[f (x) = sin(x)(1 - x)^2\]
+        \begin{enumerate}
+            \item Plot $f$ in order to find some intervals containing the roots. 
+            \item Implement the Newton method by using a stopping criterion based on the error estimator $\left\lvert x^k - x^{k-1}\right\rvert$. The signature of the function is:
+                \begin{lstlisting}[language=Matlab]
+function [x,x_iter]=newton(f,df,x0,tol,Nmax)
+                \end{lstlisting}  
+                where $x$ is the approximate, $x\_iter$ is the vector of the approximations at each iteration, $f$, $df$ are the function and its first derivative, defined as
+                handle functions, $x0$ is the initial guess, $tol$ is the tolerance demanded by user and $Nmax$ is the maximum number of allowed iterations.
+            \item Use Newton method to find the roots with a tolerance equal to $10^{-6}$, by considering as initial guess $x0 = 0.3$ and $x0 = 0.5$.
+            \item Compute an estimate of the convergence rate. 
+        \end{enumerate}
+    \end{Exercise}
+    \begin{Answer}[ref=8]
+        \begin{lstlisting}[language=Matlab]
+1.  f=@(x) sin(x).*(1-x).^2;
+    df=@(x) cos(x).*(1-x).^2-2*sin(x).*(1-x);
+    x_plot=linspace(-0.5,1.5,1000);
+    plot(x_plot,f(x_plot));
+    grid on
+2.  function [x,x_iter]=newton(f,df,x0,tol,Nmax)
+        i=1;
+        err=1+tol;
+        x_iter(i)=x0;
+        while i<=Nmax && err>tol
+            if(abs(df(x_iter(i))) < 1e-8) 
+                break;
+            end
+            x_iter(i+1)=x_iter(i)-f(x_iter(i))/df(x_iter(i));
+            err=abs(x_iter(i+1)-x_iter(i));
+            i=i+1;
+        end
+        x=x_iter(end);
+    end
+3.  [x1,x1_iter]=newton(f,df,0.3,1.e-6,100);
+    err1=abs(x1_iter-0)
+4.  function p = conv_order(e) % e is the error
+        p = log(e(3:end)./e(2:end-1))./log(e(2:end-1)./e(1:end-2));
+    end
+    p = conv_order(err1)
+    figure;
+    plot(p);
+    title('convergence order, root x1=0');
+    [x2,x2_iter]=newton(f,df,0.5,1.e-6,100);
+    err2=abs(x2_iter-1);
+    p = conv_order(err2)
+    figure;
+    plot(p);
+    title('convergence order, root x2=1');
+        \end{lstlisting}  
     \end{Answer}
 
     \newpage
 
     \begin{Exercise}[label=9]
-        Find the minimum positive number representable in MATLAB/Octave by implementing an ad hoc procedure. Compare with $realmin$.
+        \begin{enumerate}
+            \item Implement the Newton method for systems. The signature of the function is:
+                \begin{lstlisting}[language=Matlab]
+function [x,res,niter,difv,x_vect]=newtonsys(Ffun,Jfun,x0,tol, kmax,normtype,varargin)
+                \end{lstlisting}  
+                where $Ffun$ is the function handle to vector function f(x), $Jfun$ is Jacobian handle matrix, $x0$ is the initial value for iterative process, $nmax$ is the 
+                maximum number of allowed iterations, $tol$ is the absolute error tolerance, $normtype$ is the type of norm used in the error estimation, and $varargin$ is an input 
+                variable in a function definition statement that enables the function to accept any number of input arguments. 
+            \item Use Newton method for the given system and the given parameters. 
+        \end{enumerate}
+        
     \end{Exercise}
     \begin{Answer}[ref=9]
         \begin{lstlisting}[language=Matlab]
-k = 0;
-zero = 1/2;
-while (0 + zero) > 0
-  zero_old = zero;
-  zero = zero / 2;
-  k = k + 1;
-end
-
-% Remember: realmin is the minimum !normalized! positive floating point number
-realmin
-% The minimum positive floating point number is instead a !denormalized! number
-zero_old % < realmin
-k   
-        \end{lstlisting}
+1.  function [x,res,niter,difv,x_vect] = newtonsys(Ffun,Jfun,x0,tol, kmax,normtype,varargin)
+    k = 0;
+    x_vect = x0;
+    err = tol + 1; difv=[ ];
+    x = x0;
+    if normtype == 2
+        nor = 2;
+    else
+        nor = inf;
+    end
+    while err >= tol && k < kmax
+        J = Jfun(x,varargin{:});
+        F = Ffun(x,varargin{:});
+        delta = - J\F;
+        x = x + delta;
+        err = norm(delta,nor); 
+        difv=[difv; err];
+        x_vect = [x_vect x];
+        k = k + 1;
+    end
+    res = norm(Ffun(x,varargin{:}));
+    if (k==kmax && err> tol)
+        fprintf(['The method does not converge'],F);
+    end
+    niter=k;          
+2.  F = @(x) [x(1).^2+x(2).^2-1;  sin(pi*x(1)/2)+x(2).^3];
+    J = @(x) [2*x(1), 2*x(2);     cos(pi*x(1)/2)*pi/2, 3*x(2).^2];
+    nmax = 200;
+    tol = 1e-10;
+    x0 = [-1;-1];
+    [x,res,niter,difv,x_vect] = newtonsys(F,J,x0,tol,nmax,2);
+    format long                       
+    x
+    niter
+        \end{lstlisting}  
     \end{Answer}
 
-    \newpage
+\newpage
 
+\chapter{Laboratory session III}
     \begin{Exercise}[label=10]
+        Given $\xi=\sqrt{5}$, using the fixed point iteration method: 
         \begin{enumerate}
-            \item Use Taylor polynomial approximation to avoid the loss of significance errors in the following function when $x$ approaches $0$:
-                \[f(x)=\dfrac{1-\cos(x)}{x^2}\]
-            \item Reformulate the following function $g(x)$ to avoid the loss of significance error in its evaluation for increasing values of $x$ towards $+ \infty$:
-                \[g(x)=x \left( \sqrt{x+1} - \sqrt{x} \right)\]
+            \item Check if $\phi(x)=5+x-x^2$ converges in $\xi$.
+            \item Check if $\phi(x)=5/x$ converges in $\xi$.
+            \item Check if $\phi(x)=1+x-(1/5)*x^2$ converges in $\xi$.
+            \item Check if $\phi(x)=(1/2)*(x + 5/x)$ converges in $\xi$ and the order of convergence. 
+            \item Apply the fixed point iteration method in all previous cases. 
         \end{enumerate}
     \end{Exercise}
     \begin{Answer}[ref=10]
         \begin{lstlisting}[language=Matlab]
-format long
+1.  xi = sqrt(5);
+    phi1  = @(x) 5 + x - x.^2;
+    dphi1 = @(x) 1 - 2*x;
+    abs(dphi1(xi))
+    % The absolute value of the derivative of phi at xi
+    % is greater than 1: the method will not converge.
+2.  xi = sqrt(5);
+    phi2  = @(x) 5./x;
+    dphi2 = @(x) -5./x.^2;
+    abs(dphi2(xi))
+    % The absolute value of the derivative of phi at xi
+    % is equal to 1: no theoretical conclusion can be stated in this case.
+3.  xi = sqrt(5);
+    phi3  = @(x) 1 + x - 1/5*x.^2;
+    dphi3 = @(x) 1 - 2/5*x;
+    abs(dphi3(xi))
+    % The absolute value of the derivative of phi at xi
+    % is less than 1: the method will converge provided that the initial guess x{(0)} is close enough to xi (local convergence).
+4.  xi = sqrt(5);
+    phi4  = @(x) 1/2*(x + 5./x);
+    dphi4 = @(x) 1/2 - 5./(2*x.^2);
+    abs(dphi4(xi))
+    % The absolute value of the derivative of phi at xi
+    % is zero (i.e. less than 1): the method will converge provided that the initial guess x{(0)} is close enough to xi (local convergence).
+    d2phi4 = @(x) 5./x.^3;
+    abs(d2phi4(xi))
+    % The second derivative is different from zero,
+    % so method 4 is expected to be of second order.
+5.  function [xi, x_iter] = fixed_point(phi, x0, tol, maxit)
+        x_iter(1) = x0;
+        for (iter = 1:maxit)
+        x_iter(iter+1) = phi(x_iter(iter));
+        if (abs (x_iter(iter+1) - x_iter(iter)) < tol)
+            break;
+        end
+        end
+        xi = x_iter(end);
+    end
 
+    tol = 1e-6;
+    maxit = 1000;
+    x0 = xi + 0.001;
+    [xi1, x1] = fixed_point(phi1, x0, tol, maxit);
+    xi1
+    iter1 = numel(x1) - 1
+    [xi1, x1] = fixed_point_FV(phi1, x0, tol, maxit);
+    xi1
+    iter1 = numel(x1) - 1
+    % The approximation xi is incorrect and the number of performed iterations is the maximum: as expected, the method did not converge.
 
-% 	Use Taylor polynomial approximation to avoid the loss of significance
-% 	errors in the following function when x approaches 0
-% 
-%     f(x) = {1-cos(x)}/{x^2}
-% 
-% 	The limit of f(x) = {1-cos(x)}/{x^2} as x -> 0 is well known:
-% 
-% 	lim {x -> 0} {1-cos(x)}/{x^2} = {1}/{2}
+    x0 = 3;
+    [xi2, x2] = fixed_point(phi2, x0, tol, maxit);
+    xi2
+    % number of iterations of method 2
+    iter2 = numel(x2) - 1
+    % different implementation of fixed point method
+    [xi2, x2] = fixed_point_FV(phi2, x0, tol, maxit);
+    xi2
+    iter2 = numel(x2) - 1
+    % The approximation xi is incorrect and the number of performed iterations is the maximum: the method did not converge.
 
+    x0 = 4;
+    [xi3, x3] = fixed_point(phi3, x0, tol, maxit);
+    xi3
+    iter3 = numel(x3) - 1
+    [xi3, x3] = fixed_point_FV(phi3, x0, tol, maxit);
+    xi3
+    iter3 = numel(x3) - 1
+    % The method converged locally to xi.
 
-clear all, close all, clc
-k = [1:30]';
-x = 2.^(-k);
-f = @(x) (1 - cos(x))./(x.^2);
-[k x f(x)]
-
-
-% 	If we try to evaluate f(x) directly with a sequence xk = 2^{-k} that approaches 0, we notice anomalous behaviour at k = 13, k = 27, k = ...
-% 	The reason is numerical cancellation of the terms on the numerator. We can use Taylor expansion of cos(x) for x -> 0 to obtain a better approximation. Indeed
-% 	
-% 	cos(x) = 1 - {1}/{2} x^2 + {1}/{24} x^4 - {1}/{720} x^6 + o(x^8)
-% 
-% 	so that 
-% 
-% 	f(x) = {1}/{2} - {1}/{24} x^2 + {1}/{720} x^4 + o(x^6)
-
-
-f_taylor_4 = @(x) 1/2 - x.^2/24 + x.^4/720;
-
-[k x f(x) f_taylor_4(x)]
-
-%	The obtained formula is more stable that the direct evaluation of f(x), and the computed values approach {1}/{2}.
-
-
-% 	Reformulate the following function g(x) to avoid the loss of
-% 	significance error in its evaluation for increasing values of x towards +infinity.
-% 	
-% 	g(x) =  x (sqrt{x+1} - sqrt{x}).
-% 	
-% 	It is well known that 
-% 	
-% 	lim{x -> +infinity} g(x) = +infinity
-
-
-clear all, close all, clc
-format short e
-
-k = [1:20]';
-x = 10.^(k);
-
-g = @(x) x.*(sqrt(x+1) - sqrt(x));
-
-[k x g(x)]
-
-
-% 	If we try to evaluate g(x) for a sequence xk = 10^{k} that approaches 0, we notice anomalous behaviour at k = 16, k = ..., for which the computed value is 0. This happens since, in floating point representation, x16 + 1 = x16!
-% 
-% 	Rationalization of the expression in bracket solves this numerical cancellation: indeed, multiplying the numerator and the denominator by sqrt{x+1} + sqrt{x}
-% 	
-% 	g(x)  = {x (sqrt{x+1} - sqrt{x})(sqrt{x+1} + sqrt{x})}/{(sqrt{x+1} + {x})} = {x}/{(sqrt{x+1} + sqrt{x})}.
-
-
-
-g2 = @(x) x./(sqrt(x+1) + sqrt(x));
-
-[k x g(x) g2(x)]
-
-%	This formula is more stable and does not suffer of numerical cancellation.
-
-        \end{lstlisting}
+    x0 = 10;
+    [xi3, x3] = fixed_point(phi3, x0, tol, maxit);
+    xi3
+    iter3 = numel(x3) - 1
+    [xi3, x3] = fixed_point_FV(phi3, x0, tol, maxit);
+    xi3
+    iter3 = numel(x3) - 1
+    % With a different initial guess, the method may not converge to xi.
+    
+    x0 = 4;
+    [xi4, x4] = fixed_point(phi4, x0, tol, maxit);
+    xi4
+    iter4 = numel(x4) - 1
+    [xi4, x4] = fixed_point_FV(phi4, x0, tol, maxit);
+    xi4
+    iter4 = numel(x4) - 1
+    % The method converged to xi.
+        \end{lstlisting}  
     \end{Answer}
 
-    \newpage
+    \newpage 
 
     \begin{Exercise}[label=11]
-        We can compute $e^{-x}$ around $x=0$ using Taylor polynomials in two ways, either using:
-        \[e^{-x} \approx 1-x-\dfrac{1}{2}x^2+\dfrac{1}{6}x^3+\dots\]
-        or using 
-        \[e^{-x}=\dfrac{1}{e^x} \approx \dfrac{1}{1-x-\dfrac{1}{2}x^2+\dfrac{1}{6}x^3+\dots}\]
-        Which approach is the most accurate?
+        Consider the following function in the interval $[-1, 6]$
+        \[f (x) = \arctan\left[7\left(x-\dfrac{\pi}{2}\right)\right]+\sin\left[\left(x-\dfrac{\pi}{2}\right)^{3}\right]\]
+        \begin{enumerate}
+            \item Plot $f$ in order to find an interval containing a root. What is the multiplicity of the root?
+            \item Use the Newton method to find the root with a tolerance of $10^{-10}$ and initial guess $x^{(0)}=1.5$. Compute the error.
+            \item Use the Newton method to find the root with a tolerance of $10^{-10}$ and initial guess $x^{(0)}=4$. Compute the error.
+            \item If possible, apply the bisection method on the interval $[a, b] = [-1, 6]$ and tolerance $\dfrac{b-a}{20^{30}}$. Compute the error.
+            \item Write a function $bisection\_newton.m$ to find $\xi$ using the Newton method starting from an initial guess obtained after few iterations of a bisection method. 
+                Test with $[a, b] = [-1, 6]$, $5$ iterations of the bisection method and tolerance $10^{-10}$ for the Newton method.
+        \end{enumerate}
     \end{Exercise}
     \begin{Answer}[ref=11]
         \begin{lstlisting}[language=Matlab]
-clear all, close all, clc
-format long
-
-f_taylor_pos = @(x) 1 - x + 1/2*x.^2 - 1/6*x.^3 + 1/24*x.^4 - 1/120*x.^5;
-f_taylor_neg = @(x) 1./(1 + x + 1/2*x.^2 + 1/6*x.^3 + 1/24*x.^4 + 1/120*x.^5);
-
-k = [1:20]';
-
-x_pos = 10.^(-k);
-[x_pos f_taylor_pos(x_pos) f_taylor_neg(x_pos)]
-
-x_neg = -10.^(-k);
-[x_neg f_taylor_pos(x_neg) f_taylor_neg(x_neg)]
-
-
-% 	No bad behaviour is observed since the 1 in both formulas dominates the sum and numerical cancellation does not occur. 
-%   Therefore both expression can be accepted.
-% 
-% 	Instead, if the sum were not dominated by the term 1 (or if you didn't notice that), 
-%   the following combination could have been proposed
-% 
-% 	e^{-x} ~ {1}/{1 + x + {1}/{2}x^2 + {1}/{6}x^3 + ...}, x > 0;
-% 	       ~ 1 - x + {1}/{2}x^2 - {1}/{6}x^3 +      ... , x <=0.
-% 	
-% 	The choice of the previous expression for x > 0 should not display any numerical cancellation because all the terms in the sum are positive. Similarly, the choice for x < 0 grants that the terms -x^{2k+1} are positive, again avoiding any numerical cancellation.
-        \end{lstlisting}
-    \end{Answer}
-
-    \newpage
-
-    \begin{Exercise}[label=12]
-        Consider the following integral: 
-        \[I_n(\alpha)=\int_{0}^{1} \dfrac{x^n}{x+\alpha} \,dx \:\:\:\:\:\: \forall n \in \mathbb{N},\alpha>0\]
-        \begin{enumerate}
-            \item Give an upper bound for $I_n(\alpha)$, $\forall n \in \mathbb{N}, \alpha > 0$.
-            \item Prove the following recursive relation between $In(\alpha)$ and $I_{n-1}(\alpha)$:
-            \[
-                \begin{cases}
-                    I_n(\alpha)=-\alpha I_{n-1}(\alpha)+\dfrac{1}{n} \\
-                    I_o(\alpha)=\ln{\left( \dfrac{\alpha + 1}{\alpha} \right)}
-                \end{cases}
-            \]
-            \item Employing the previous relation, compute $I_40(\alpha = 8)$ and comment the obtained results. 
-            \item Write a numerically stable recursive relation for $I_40(\alpha = 8)$.
-        \end{enumerate}
-    \end{Exercise}
-    \begin{Answer}[ref=12]
-        \begin{lstlisting}[language=Matlab]
-clear all;
-format short e
-
-n = 40;
-
-% alpha = 1/8 not requested in the homework
-for (alpha = [1/8, 8])
-    I(1) = log((alpha+1)/alpha);
-    for (k = 1:n)
-        I(k+1) = -alpha*I(k) + 1/k;
+1.  function rootfinding_function_plot(f, a, b, new_figure)
+        if ((nargin < 4) || new_figure)
+        figure
+        end
+        hold on, box on
+        x_plot = linspace(a, b, 1000);
+        plot(x_plot, f(x_plot), 'LineWidth', 2)
+        plot(x_plot, 0*x_plot, 'k-', 'LineWidth', 1)
+        xlabel('x','FontSize', 16)
+        ylabel('f(x)','FontSize', 16)
+        set(gca,'FontSize', 16)
+        set(gca,'LineWidth', 1.5)
     end
-    recursion_integral = I(n+1);
-    upper_bound = (1/alpha)*(1/(n+1));
-    exact_integral = quadl(@(x) (x.^n)./(x+alpha), 0, 1, 1e-16); % Exact value (not requested)
-    [recursion_integral, upper_bound, exact_integral]
-end
 
-
-% 	The recursive approximation of I{40}(alpha =  8) is 1.6389 ... 10^{18}: this result is for sure incorrect because it violates the upper bound for $I_{40}(\alpha =  8)$.
-% 	
-% 	This is due to the finite precision we use and the error propagation: the initial value I0(alpha) = ln({alpha+1}/{alpha}) is represented with a certain error eps; denoting by fl(y) the floating point representation of the number y, we have
-% 	
-% 	fl(I0(alpha))  = I0(alpha) + eps,
-% 	fl(I1(alpha))  = -alpha fl(I0(alpha)) + 1 = -alpha (I0(alpha) + eps) + 1 = I1(alpha) - alpha eps,
-% 	... 
-% 	fl(Ik(alpha))  = In(alpha) + (-1)^k alpha^k eps,
-% 	
-% 	Therefore, at the final (n-th) step the error is multiplied by a factor alpha^n, which result in an amplification of the error if alpha > 1. Instead, for alpha < 1, the error is damped and the recursive relation is stable (e.g. see the previous test for alpha = 1/8).
-% 	
-% 	Now write a numerically stable recursive relation for I{40}(alpha =  8).
-% 	
-% 	The idea is to transform the factor alpha on the RHS of the recursive relation in a factor {1}/{alpha}; this can be achieved inverting the recursive relation:
-% 	
-% 		I{k-1}(alpha) = - {1}/{alpha} I{k}(alpha) + {1}/{k alpha}
-% 		lim{k -> +infinity} I{k}(alpha) = 0
-% 		
-% 	The final value lim{k -> +infinity} I{k}(alpha) is equal to zero because 0 <= I{k}(alpha) <= {1}/{alpha} {1}/{k+1} -> 0, as k -> + infinity.
-
-
-clear all;
-n = 40;
-big = 1000;
-
-% alpha = 1/8 not requested in the homework
-for (alpha = [1/8, 8])
-    I(big + 1) = 0;
-    for (k = big:-1:n+1)
-        I(k) = -1/alpha*I(k+1) + 1/(k*alpha);
+    a = -1;
+    b = 6;
+    f = @(x) atan(7*( x - pi/2)) + sin((x-pi/2).^3);
+    rootfinding_function_plot(f, a, b, true);
+    xi_ex = pi/2;
+    df = @(x) 7 ./ ( 1 + 49 * ( x-pi/2 ).^2 ) + 3 * (x-pi/2).^2 .* cos( (x-pi/2).^3 );
+    df(xi_ex); 
+2.  x0 = 1.5;
+    tol = 1e-10;
+    maxit = 1000;
+    [xi1, x_iter1] = newton(f, df, x0, tol, maxit);
+    xi1
+    iter1 = numel(x_iter1) - 1
+    err1 = abs( xi1 - xi_ex)
+    % Newton method converges to xi
+3.  x0 = 4;
+    tol = 1e-10;
+    maxit = 1000;
+    [xi2, x_iter2] = newton(f, df, x0, tol, maxit);
+    xi2
+    iter2 = numel(x_iter2) - 1
+    err2 = abs( xi2 - xi_ex)
+    % Newton method does not converge to xi
+4.  tol = (b-a)/(2^30);
+    [xi3, x_iter3] = bisection(f, a, b, tol);
+    xi3
+    iter3=numel(x_iter3)  
+    tol_bisection = (b-a)/(2^5);
+    tol_newton = 1e-10;
+    maxit_newton = 1000;
+    [xi4, x_iter4_bisection, x_iter4_newton] = bisection_newton(f, df, a, b, tol_bisection, tol_newton, maxit_newton);
+    xi4
+    iter4_bisection=numel(x_iter4_bisection)
+    iter4_newton=numel(x_iter4_newton)
+    err4 = abs( xi4 - xi_ex)
+5.  function [xi, x_iter_bisection, x_iter_newton] = bisection_newton(f, df, a, b, tol_bisection, tol_newton, maxit_newton, multiplicity)
+        if (nargin < 8)
+        multiplicity = 1;
+        end
+        [xi_bisection, x_iter_bisection] = bisection(f, a, b, tol_bisection);
+        [xi_newton, x_iter_newton] = newton(f, df, xi_bisection, tol_newton, maxit_newton, multiplicity);
+        xi = xi_newton;
     end
-    recursion_integral = I(n+1);
-    upper_bound = (1/alpha)*(1/(n+1));
-    exact_integral = quadl(@(x) (x.^n)./(x+alpha), 0, 1, 1e-16); % Exact value (not requested)
-    [recursion_integral, upper_bound, exact_integral]
-end
 
-%	The recursion is now stable for alpha > 1 (and note that, now, an additional error is present, because the final condition can be set for an arbitrary large k = k* instead of k = +infinity).
-        \end{lstlisting}
+    function [xi, x_iter] = bisection(f, a, b, tol)
+        max_iterb = ceil( log((b - a)/tol)/log(2) );
+
+        for (iter = 1:max_iterb)
+        x_iter(iter) = a + (b-a)/2;
+        f_iter(iter) = f(x_iter(iter));
+
+        if ( f(b)*f_iter(iter) < 0 )
+            a = x_iter(iter);
+        elseif ( f(a)*f_iter(iter) < 0 )
+            b = x_iter(iter);
+        else % f(x) = 0
+            break;
+        end
+        end
+
+        xi = x_iter(end);
+    end
+
+    function [xi, x_iter] = newton(f, df, x0, tol, maxit, multiplicity)
+        if (nargin < 6)
+        multiplicity = 1;
+        end
+        x_iter(1) = x0;
+        for (iter = 1:maxit)
+        newton_method = @(x) x - multiplicity*f(x)/df(x);
+        x_iter(iter+1) = newton_method(x_iter(iter));
+
+        if (abs (x_iter(iter+1) - x_iter(iter)) < tol)
+            break;
+        end
+        end
+        xi = x_iter(end);
+    end
+        \end{lstlisting}  
     \end{Answer}
 
-    \newpage
+\newpage
 
-    \begin{Exercise}[label=13]
-        Given the following sequence:
-        \[
-          \begin{cases}
-                x_{n+1}=2^{n+1}\left[ \sqrt{1+\dfrac{x_n}{2^n}}-1 \right] \\
-                x_0>-1
-          \end{cases}  
-        \]
-        for which $\lim_{n \rightarrow + \infty}x_n=\ln\left({1+x_0}\right)$
-        \begin{enumerate}
-            \item Set $x_0 = 1$, compute $x_1, x_2, \dots , x_{71}$ and explain the obtained results.
-            \item Transform the sequence in an equivalent one that converges to the theoretical limit.
-        \end{enumerate}
-
-
-    \end{Exercise}
-    \begin{Answer}[ref=13]
-        \begin{lstlisting}[language=Matlab]
-%	Set x0 = 1, compute x1, x2, ... , x{71} and explain the obtained results.
-	
-clear all, close all, clc
-format long
-
-n_max = 71;
-x = zeros(n_max+1, 1);
-
-x(1) = 1;         % x0 set to 1
-for n = 0:n_max-1
-  x(n+2) = 2^(n+1)*(sqrt(1 + x(n+1)/2^(n)) - 1);    % Pay attention to the indexing!!!
-end
-x(end)            
-x_lim = log(1 + x(1))
-
-figure
-hold on, box on
-plot([0:71], x, 'bx-','Linewidth',3)
-plot([0:71], x_lim*ones(n_max+1,1)', 'r-','Linewidth',3)
-axis([-1 72 -0.05 1.05])
-set(gca,'LineWidth',2)
-set(gca,'FontSize',16)
-
-%	When computing the sequence with Octave/MATLAB we find that x{71} differs a lot from ln(1+x0) = ln(2). The plots also shows that xn = 0, for all n >= n* = 52: this is due to numerical cancellation effects, because at n = n* it holds {x{n*}}/{2^{n*}} < eps, hence in finite precision arithmetic x{n*} = 0!
-
-x(53)
-
-%%
-
-% 	The value of n* can also be computed with the following argument: since (hopefully) numerical cancellation will occur for large n
-% 	x{n} ~ ln(1+x0)
-% 	therefore
-% 	{x{n}}/{2^{n}} < eps is approximately equivalent to {ln(1+x0)}/{2^{n}} < eps
-% 	which can be solved for n, finding
-% 	n > log2({ln(1+x0)}/{eps})
-
-    
-x_0 = 1;
-n = log(log(1 + x_0)/eps)/log(2)
-
-
-% 	Transform the sequence in an equivalent one that converges to the theoretical limit.
-% 	
-% 	After a razionalization, the recurrence can be written as
-% 	x{n+1} = 2^{n+1} [ sqrt{1+{xn}/{2^{n}}} - 1 ] = {2 xn}{ sqrt{1 + {xn}/{2^{n}}} + 1}
-	
-	
-clc, clear all
-
-n_max = 71;
-x = zeros(n_max+1, 1);
-
-x(1) = 1;           % x0 set to 1
-for n = 0:n_max-1
-  x(n+2) = 2*x(n+1)/(sqrt(1 + x(n+1)/2^(n)) + 1);
-end
-x(end)
-
-%   The error in this case is
-x(end) - log(1 + x(1))
-
-figure
-hold on, box on
-plot([0:n_max], x,'bx-','Linewidth',3)
-plot([0:n_max], log(1+x(1))*ones(n_max+1), 'r-','Linewidth',3)
-axis([-1 72 0.67 1.02])
-set(gca,'LineWidth',2)
-set(gca,'FontSize',14)
-
-%   Using the previous calculations we know that (1 + xn/2^n) approximately 1 for n >= 52, so x(n+1) = 2*xn/(1 + 1) = xn
-        \end{lstlisting}
-    \end{Answer}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    \newpage
-    \chapter{Laboratory session II}
-
-
-
+\chapter{Laboratory session IV}
 
 
 
