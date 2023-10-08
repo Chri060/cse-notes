@@ -1,5 +1,5 @@
 \documentclass[12pt, a4paper]{report}
-\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox, chronology,multirow,tikz}
+\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox, chronology, multirow, tikz, listings}
 \usepackage[english]{babel}
 
 \makeatletter
@@ -14,6 +14,26 @@
     \draw[line width=0.7,line cap=round] (0,0) to [bend left=6] (1,1);
     \draw[line width=0.7,line cap=round] (0.2,0.95) to [bend right=3] (0.8,0.05);
 }}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
 
 
 \title{Data Bases II \\ \textit{Theory}}
@@ -752,10 +772,162 @@
     transaction conflict with writes of other concurrent transactions after the snapshot timestamp, it aborts. Snapshot isolation does not guarantee serializability: it is possible 
     to have a new anomaly called write skew (the order of the operation can change in different executions changing the final result). 
     
-    \newpage 
+\newpage 
 
 \chapter{Ranking}
+    \section{Introduction}
+    Data are: available in large quantities, represented under many models, queried with many languages, and processed with many algorithms. We can use ranking to get the best
+    result out of the data. To do this we have to use the so called multi-objective optimization, that consist in the simultaneous optimization of different criteria. A general 
+    multi-objective problem can be formulated as follows: given $N$ objects described by $d$ attributes, we need to find the best $k$ objects. 
+    
+    This problem is relevant in many fields, for instance: search engines, e-commerce, recommender systems, and Machine Learning. 
 
+    The main approaches to solve the multi-objective optimization are: 
+    \begin{itemize}
+        \item Ranking queries: selects the top $k$ objects according to a given scoring function.
+        \item Skyline queries: selects the set of non-dominated objects. 
+    \end{itemize}
 
+    \section{History}
+    Rank aggregation is the problem of combining several ranked lists of objects in a robust way to produce a single consensus ranking of the objects. 
 
+    In the $13^{\textnormal{th}}$ century started this problem was introduced with the elections polls. Borda proposed to give a number of penalty points equivalent to the position 
+    of the electors in a voter's ranking, so the winner will be the candidate with the lowest overall penalty. Condorcet, instead, proposed to consider as winner the candidate who 
+    defeats every other candidate in pairwise majority rule election. The winner with two methods can be different. 
+    \begin{example}
+        Given ten voters and three candidates with the following votes: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+            \hline
+            1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
+            A & A & A & A & A & A & C & C & C & C  \\ 
+            C & C & C & C & C & C & B & B & B & B  \\ 
+            B & B & B & B & B & B & A & A & A & A  \\ \hline
+            \end{tabular}
+        \end{table}
+        For Borda we have: 
+        \begin{itemize}
+            \item $A: 1 \cdot 6+3 \cdot 4 = 18$
+            \item $B: 3 \cdot 6+2 \cdot 4 = 26$
+            \item $C: 2 \cdot 6+1 \cdot 4 = 16$ (winner)
+        \end{itemize}
+        While for Condorcet we have that $A$ beats both $B$ and $C$ in pairwise majority, so it is the winner. So, the winner is different and depends on the method used. 
+    \end{example}
+
+    In 1950 Arrow proposed the axiomatic approach. He defined the aggregation as axioms and understood that a small set of natural requirements cannot be simultaneously achieved by 
+    any nontrivial aggregation function. So, he stated the Arrow's paradox: no rank-order electoral system can be designed that always satisfies these fairness criteria:
+    \begin{itemize}
+        \item No dictatorship (nobody determines, alone, the group's preference). 
+        \item If all prefer $X$ to $Y$, then the group prefers $X$ to $Y$. 
+        \item If, for all voters, the preference between $X$ and $Y$ is unchanged, then the group preference between $X$ and $Y$ is unchanged. 
+    \end{itemize}
+
+    To solve this paradox, in the later years researchers tried to measure the values of all analyzed objects and created the metric approach. This consist in finding a new ranking 
+    $R$ whose total distance to the initial rankings $R_1,\dots,R_n$ is minimized. The distance between rankings can be found in several ways: 
+    \begin{itemize}
+        \item Kendall tau distance $K(R_1, R_2)$, defined as the number of exchanges in a bubble sort to convert $R_1$ to $R_2$. 
+        \item Spearman's foot-rule distance $F(R_1, R_2)$, which adds up the distance between the ranks of the same item in the two rankings. 
+    \end{itemize}
+    Finding an exact solution is computationally hard for Kendall tau (NP-complete), but tractable for Spearman's foot-rule (P time). These distances are related:
+    \[K(R_1, R_2) \leq F(R_1, R_2) \leq 2K(R_1, R_2)\]
+    And it is possible to find efficient approximation for $F(R_1, R_2)$. 
+
+    \section{Opaque rankings}
+    The technique that works on opaque rankings are those which use only the position of the elements in the ranking and no other associated score. The algorithm called MedRank is
+    based on the notion of median and provides an approximation of the Foot-rule optimal aggregation. The inputs of this algorithm are: an integer $k$ and a ranked list 
+    $R_1,\dots,R_m$ of $N$ elements. The output is the top k elements according to median ranking. The idea of the algorithm is the following: 
+    \begin{enumerate}
+        \item Use sorted accesses in each list, one element at a time, until there are $k$ elements that occur in more than $m/2$ lists.
+        \item These are the top $k$ elements. 
+    \end{enumerate}
+    \begin{definition}
+        The maximum number of sorted accesses made on each list is also called the \emph{depth reached} by the algorithm. 
+    \end{definition}
+    \begin{example}
+        Suppose we have to sort the hotels based on three rankings criteria: price, rating, and distance. Using the MedRank algorithm we can make e one sorted access at a time in 
+        each ranking and then look for hotels that appear in at least two rankings. We assume that price, rating and distance are opaque, so only the rank's position matters. The 
+        ranks of hotels are the following:
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|c|c}
+            \textbf{Price} & \textbf{Rating} & \textbf{Distance} \\ \hline
+            Ibis           & Crillon         & Le Roch           \\
+            Etap           & Novotel         & Lodge In          \\
+            Novotel        & Sheraton        & Ritz              \\
+            Mercure        & Hilton          & Lutetia           \\
+            Hilton         & Ibis            & Novotel           \\
+            Sheraton       & Ritz            & Sheraton          \\
+            Crillon        & Lutetia         & Mercure           \\
+            $\dots$        & $\dots$         & $\dots$          
+            \end{tabular}
+        \end{table}
+        If we use MedRank with $k=3$, we will obtain the following rank: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{cc}
+            \hline
+            \textbf{Top k hotels}       & \textbf{Median rank}          \\ \hline
+            Novotel                     & median$\{2,3,5\}=3$           \\ 
+            Hilton                      & median$\{4,5,?\}=5$           \\ 
+            Ibis                        & median$\{1,5,?\}=5$           \\ \hline
+            \end{tabular}
+        \end{table}
+        The depth in this case is equal to five. 
+    \end{example}
+    \begin{definition}
+        An algorithm is \emph{optimal} if its execution cost is never worse than any other algorithm on any input.
+    \end{definition}
+    MedRank is not optimal, but it is instance optimal. This means that among the algorithms that access the lists in sorted order, this is the best possible algorithm on every 
+    input instance. In other words, its cost cannot be arbitrarily worse than any other algorithm on any problem instance. The instance optimality is a form of optimality aimed 
+    at when standard optimality is unachievable. 
+    \begin{definition}
+        Let $\textbf{A}$ be a family of algorithms, $\textbf{I}$ a set of problem instances. Let cost be a cost metric applied to an algorithm-instance pair. Algorithm 
+        $A^{*}$ is instance-optimal with respect to $\textbf{A}$ and $\textbf{I}$ for the cost metric cost if there exist constants $k_1$ and $k_2$ such that, for all 
+        $A \in \textbf{A}$ and $I \in \textbf{I}$: 
+        \[\textnormal{cost}(A^{*}, I) \leq k_1 \textnormal{cost}(A, I) + k_2\]
+    \end{definition}
+    If $A^{*}$ is instance-optimal, then any algorithm can improve with respect to $A^{*}$ by only a constant factor $r$, which is therefore called the optimality ratio of $A^{*}$. 
+    Instance optimality is a much stronger notion than optimality in the average or worst case. 
+
+    \section{Ranking queries}
+    Ranking queries, also called top-$k$ queries, aim to retrieve only the $k$ best answers from a potentially very large result set. Ranking is based on ordering objects based on their relevance.
+
+    Assume a scoring function $S$ that assigns to each tuple $t$ a numerical score for ranking tuples. The algorithm needs this inputs: cardinality $k$, dataset $R$, scoring function $S$. The output is 
+    the $k$ highest-scored tuples with respect to $S$. The idea is the following: 
+    \begin{enumerate}
+        \item For all tuples $t$ in $R$ compute $S(t)$. 
+        \item Sort tuples based on their scores.
+        \item Return the first $k$ highest-scored tuples. 
+    \end{enumerate}
+    This naïve approach is expensive for large dataset because it requires to sort a large amount of data. It is even worse if more than one relation is involved because it needs to join all tuples. So, 
+    we now know that two abilities are required: 
+    \begin{itemize}
+        \item Ordering the tuples according to their scores. This is taken care of by 
+            \begin{lstlisting}[language=SQL]
+ORDER BY
+            \end{lstlisting}
+        \item Limiting the output cardinality to $k$ tuples. This is taken care (since 2008) of by 
+            \begin{lstlisting}[language=SQL]
+FETCH FIRST k ROWS ONLY
+            \end{lstlisting}
+    \end{itemize} 
+    \begin{example}
+        Consider the following queries: 
+        \begin{lstlisting}[language=SQL]
+a)  SELECT *
+    FROM UsedCarsTable
+    WHERE Vehicle = 'Audi/A4'
+    AND Price <= 21000
+    ORDER BY 0.8*Price+0.2*Miles
+b)  SELECT *
+    FROM UsedCarsTable
+    WHERE Vehicle = 'Audi/A4'
+    ORDER BY 0.8*Price+0.2*Miles
+        \end{lstlisting}
+        The values 0.8 and 0.2, also called weights, are a way to normalize our preferences on price and mileage.
+        Query a will likely miss some relevant answers (near-miss). Query b will return all Audi/A4 in the dataset (information overload).
+    \end{example}
+    Only the first $k$ tuples become part of the result. If more than one set of $k$ tuples satisfies the ordering directive, any of such sets is a valid answer 
+    (non-deterministic semantics). 
 \end{document}
