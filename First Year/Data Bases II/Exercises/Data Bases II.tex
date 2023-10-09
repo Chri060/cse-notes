@@ -332,4 +332,216 @@
                 in deadlock, especially if the system on which they run applies $2PL$. UL is totally irrelevant here, because there is no update pattern. 
         \end{enumerate}
     \end{Answer}
+
+\newpage
+
+\chapter{Exercise session III}
+\begin{Exercise}[label=13]
+    Consider the following waiting conditions:
+    \begin{itemize}
+        \item Node $A$: $E_B \rightarrow t_1, t_1 \rightarrow t_2, E_C \rightarrow t_2, t_2 \rightarrow t_3, t_3 \rightarrow E_B, E_B \rightarrow t_4, t_4 \rightarrow t_3$
+        \item Node $B$: $E_A \rightarrow t_3, t_3 \rightarrow t_5, t_5 \rightarrow t_6, t_6 \rightarrow E_C, E_C \rightarrow t_7, t_7 \rightarrow t_6, t_9 \rightarrow t_4,t_4 \rightarrow E_A, t_1 \rightarrow E_A$
+        \item Node $C$: $E_B \rightarrow t_6, t_6 \rightarrow t_8, t_8 \rightarrow t_2, t_2 \rightarrow E_A, t_7 \rightarrow E_B$
+    \end{itemize}
+    Simulate the Obermarck algorithm and indicate whether there is a distributed deadlock.
+\end{Exercise}
+\begin{Answer}[ref=13]
+    We need to construct the graph with the given constraints, that is: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/Ob1.png}
+    \end{figure}
+    We have to check all the nodes where the sender has a lower value than the receiver. In this case we have that the update is sent to the 
+    other distributed node. The interesting cases are highlighted in the image. So, we now have to add the nodes: 
+    \begin{itemize}
+        \item $4 \rightarrow 3$ in $E_B$. 
+        \item $7 \rightarrow 6$ in $E_C$. 
+        \item $6 \rightarrow 2$ in $E_A$. 
+    \end{itemize}
+    If the numbered node is not present we can add it to the graph of the distributed node. We obtain the following graphs: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/Ob2.png}
+    \end{figure}
+    We have to check if other messages are sent. We have:
+    \begin{itemize}
+        \item $6 \rightarrow 3$ in $E_B$. 
+    \end{itemize}
+    So the updated graph is: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/Ob3.png}
+    \end{figure}
+    Now we find a cycle, so there is a deadlock. 
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=14]
+    The nodes $A$, $B$, and $C$ of a distributed transactional system are aware of the following remote and local waiting conditions:
+    \begin{itemize}
+        \item Node $A: E_B \rightarrow t_3, E_C \rightarrow t_2, t_1 \rightarrow E_C, t_3 \rightarrow t_5, t_5 \rightarrow t_1$
+        \item Node $B: E_C \rightarrow t_2, t_3 \rightarrow E_A, t_2 \rightarrow t_3$
+        \item Node $C: t_2 \rightarrow E_A, t_2 \rightarrow E_B, t_1 \rightarrow t_4, t_4 \rightarrow t_2$
+    \end{itemize}
+    Execute the Obermarck's algorithm twice, with different conventions:
+    \begin{enumerate}
+        \item Sending messages of the form $E_X \rightarrow t_i \rightarrow t_j \rightarrow E_Y$ forward (toward node $Y$) and only 
+            if and only if $i > j$. 
+        \item With the opposite conventions, so if and only if $i > j$
+    \end{enumerate}
+    Discuss the outcome, and explain it, taking into account the properties of the algorithm and the initial conditions.
+\end{Exercise}
+\begin{Answer}[ref=14]
+    The graph is the following: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/Ob4.png}
+    \end{figure}
+    \begin{enumerate}
+        \item We have to add the nodes (connections are distributed): 
+            \begin{itemize}
+                \item $3 \rightarrow 1$ in $E_C$. 
+                \item $3 \rightarrow 2$ in $E_A$. 
+                \item $3 \rightarrow 2$ in $E_B$. 
+            \end{itemize}
+            By adding those nodes we found that the third one creates a deadlock. 
+        \item We have to add the node (connections are distributed): 
+            \begin{itemize}
+                \item $2 \rightarrow 3$ in $E_A$. 
+            \end{itemize}
+            No cycles are found, so no deadlocks found. 
+    \end{enumerate}
+    The algorithm is independent of the conventions but the initial conventions, but the initial conditions must be consistent and complete. 
+    On a faulty dataset even the best algorithm returns untrustworthy results. In this case we have a link missing between node $A$ and $C$.
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=15]
+    Classify the following schedule with respect to timestamps: 
+    \[r_4(x) r_2(x) w_4(x) w_2(y) w_4(y) r_3(y) w_3(x) w_4(z) r_3(z) r_6(z) r_8(z) w_6(z) w_9(z) r_5(z) r_{10}(z)\]
+\end{Exercise}
+\begin{Answer}[ref=15]
+    We can identify pairs of operations that cause killings:
+    \begin{itemize}
+        \item $X: r_4 r_2 w_4 w_3$
+        \item $Y: w_2 w_4 r_3$
+        \item $Z: w_4 r_3 r_6 r_8 w_6 w_9 r_5 r_{10}$
+    \end{itemize}
+    On $X$ we have that $w_3$ is too late with respect to $r_4$ and $w_4$. On $Y$ we have that $r_3$ is late with respect to $w_4$. On 
+    $Z$ we have that $r_3$ is late with respect to $w_4$, $w_6$ with respect to $r_8$, $r_5$ with respect to both $w_6$ and $w_9$. 
+    So, the schedule is not in TS-mono. 
+
+    The schedule is also outside TS-multi, because $w_3(X)$ comes too late ($r_4(X)$ was already given the initial version instead) and 
+    also because $w_6(Z)$ is late with respect to r$8(Z)$. The other five reasons were due to reads (that are always accepted in TS-multi).
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=16]
+    Classify the following schedule with respect to timestamps: 
+    \[r_1(x) r_2(y) w_3(y) r_5(x) w_5(u) w_3(s) w_2(u) w_3(x) w_1(u) r_4(y) w_5(z) r_5(z)\]
+\end{Exercise}
+\begin{Answer}[ref=16]
+    We can identify pairs of operations that cause killings:
+    \begin{itemize}
+        \item $S:w_3$
+        \item $U:w_5w_2w_1$
+        \item $X:r_1r_5w_3$
+        \item $Y:r_2w_3r_4$
+        \item $Z:w_5r_5$
+    \end{itemize}
+    $S$, $Y$ and $Z$ are ok, $U$ is ok only if the Thomas rule is applied, and $X$ is not ok for both TS-mono and TS-multi. 
+
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=17]
+    Classify the following schedule:
+    \[r_1(X) w_1(Y) w_2(Y) w_3(Z) r_1(Z) w_4(X) r_4(Y) w_3(X) r_5(Y) w_5(X)\] 
+\end{Exercise}
+\begin{Answer}[ref=17]
+    Firstly, we check if it is CSR:
+    \begin{itemize}
+        \item $X: r_1 w_4 w_3 w_5$
+        \item $Y: w_1 w_2 r_4 r_5$
+        \item $Z: w_3 r_1$
+    \end{itemize}
+    We found a cycle between the nodes three and one, so it is not CSR. It is also not VSR. We now check for TS using the same list: 
+    we find that $w_4 w_3$ are not in the correct order, so it is not in TS-mono, neither in TS-multi (it is a write that causes the 
+    problem).
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=18]
+    Classify the following schedule:
+    \[r_1(x) r_2(y) w_3(x) r_5(z) w_6(z) w_2(x) w_3(y) r_7(z) w_4(x)\] 
+\end{Exercise}
+\begin{Answer}[ref=19]
+    Firstly, we check if it is CSR:
+    \begin{itemize}
+        \item $X: r_1 w_3 w_2 w_4$
+        \item $Y: r_2 w_3$
+        \item $Z: r_5 w_6 r_7$
+    \end{itemize}
+    There is a cycle between two and three, so it is not CSR, but by swapping $w_3 w_2$ we can obtain a VSR schedule without changing the 
+    schedule. 
+
+    The schedule is not TS-mono because we have $w_3 w_2$ and so also non TS-multi. 
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=19]
+    Given the resource hierarchy below, is the following schedule compatible with a 2PL-strict scheduler that applies hierarchical locking?
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/HL1.png}
+    \end{figure}
+    \[r_1(A) w_1(S) w_2(T) r_2(A) w_1(A)\]
+\end{Exercise}
+\begin{Answer}[ref=18]
+    The lock manager works as follows: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/HLsol.png}
+    \end{figure}
+    So, it is compatible with a strict 2PL scheduler. 
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=20]
+    Consider the following short schedule occurring on a system with hierarchical lock over a hierarchy where $PagA$ contains tuples 
+    $t_1$ and $t_2$:
+    \[r_1( PagA ), w_2( t1 ), w_1( t2 )\]
+    Show a possible sequence of locks, unlocks, lock upgrades, and lock downgrades performed by transactions $T_1$ and $T_2$ such that
+    the schedule is in 2PL.
+\end{Exercise}
+\begin{Answer}[ref=20]
+    We have that: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/HLsol1.png}
+    \end{figure}
+    So the schedule is 2PL.
+\end{Answer}
+
+\newpage
+
+\begin{Exercise}[label=21]
+    Given the resources above and the following transactions:
+    \[T_1: r_1(C) w_1(B) w_1(C) \:\:\: T_2: w_2(A) r_2(C)\]
+    Consider that $T_1$ and $T_2$ can only be scheduled in 10 different ways (two serial, eight interleaved). What can be stated about 
+    the 2PL-strict compatibility of these schedules? 
+\end{Exercise}
+\begin{Answer}[ref=21]
+    We note that the only potential conflict is between $w_1(C)$ and $r_2(C)$. But these are also the last operations of their respective 
+    transactions: to check for compatibility, we can always assume that the commit occurs right after the last operation, and that all 
+    locks are released in favor of the other one. But this argument is independent of the order of the operations, and is therefore valid 
+    for all the 8 interleaved schedules. So, all the schedules are strict 2PL. 
+\end{Answer}
 \end{document}
