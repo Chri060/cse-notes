@@ -1103,4 +1103,120 @@
         \caption{Comparison between a joint and a naïve estimator}
     \end{figure}
 
+\newpage
+
+\chapter{Graphical models}
+    \section{Introduction}
+    In the real world the random variables are usually correlated. So, to overcome this problem we can describe a probability distribution via: 
+    \begin{itemize}
+        \item Conditional independence assumptions that apply on a subset of them. 
+        \item A set of conditional probabilities with their priors. 
+    \end{itemize}
+    These models are called graphical models. 
+
+    \section{Bayesian network}
+    A Bayesian network is a method to describe the joint probability distribution of a set of variables. It can be represented as a 
+    directed graph where the nodes represent random variables and the edges represent direct influence. 
+    \begin{example}
+        Given the following Bayesian network:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/insurance.png}
+        \end{figure}
+        We can see that the random variables "age", "income", and "occupation" are independent while "buy X" and 
+        "Interested in insurance" are conditional probability distributions. 
+    \end{example}
+    Let $x_1,x_2,\dots,x_n$ be a set of variables. We have that a Bayesian network can tell any combination probability. The full joint 
+    distribution will require: 
+    \[2^N-1 \textnormal{ parameters}\] 
+    To represent the probabilities in the network we need only the priors and conditional parameters. We simply multiply the number of
+    nodes for $2^k$, where $k$ is the number of incoming edges, and we obtain the numbers of parameters needed. 
+    \begin{example}
+        Given the following Bayesian network:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/insurance.png}
+        \end{figure}
+        In this case we have that the full joint distribution will need: 
+        \[2^N-1=2^5-1=31 \textnormal{ parameters}\]
+        And to represent the Bayesian network we will need 
+        \[3 \cdot 2^0 + 1 \cdot 2^3 + 1+ \cdot 2^1 = 13 \textnormal{ parameters}\]
+    \end{example}
+    \begin{definition}
+        We say $X_1$ is \emph{conditionally independent} of $X_2$ given $X_3$ if the probability of $X_1$ is independent of $X_2$ given some
+        knowledge about $X_3$:
+        \[P(X_1|X_2,X_3)=P(X_1|X_3)\]
+    \end{definition}
+    The same can be said for a set of variables: $X_1,X_2,X_3$ is independent of $Y_1,Y_2,Y_3$ given $Z_1,Z_2,Z_3$:
+    \[P(X_1,X_2,X_3|Y_1,Y_2,Y_3,Z_1,Z_2,Z_3)=P(X_1,X_2,X_3|Z_1,Z_2,Z_3)\]
+    \begin{example}
+        Martin and Norman toss the same coin. Let be $A$ “Norman's outcome”, and $B$ “Martin's outcome”. Assume the coin might be biased; 
+        in this case $A$ and $B$ are not independent: observing that $B$ is heads causes us to increase our belief in $A$ being heads. So
+        it holds: 
+        \[P(A|B) \neq P(A)\]
+        Variables $A$ and $B$ are both dependent on $C$ “The coin is biased towards Heads with probability $\theta$”. Once we know for 
+        $C$ then any evidence about $B$ cannot change our belief about $A$:
+        \[P(A|B,C)=P(A|C)\]
+    \end{example}
+    \begin{definition}
+        A \emph{prior probability} is a probability with zero incoming edges. 
+    \end{definition}
+    A node is independent of its ancestors given its parent. 
+    \begin{example}
+        The event “Grass is wet” ($W=true$) has two possible causes: either the water “Sprinkler” is on ($S=true$) or it is “Raining”
+        ($R=true$). The related Bayesian network is the following.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/sprinkler.png}
+        \end{figure}
+        Where the probabilities for cloudy are: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cc|}
+            \cline{2-3}
+                                              & $true$ & $false$ \\ \hline
+            \multicolumn{1}{|c|}{$P(cloudy)$} & 0.5    & 0.5     \\ \hline
+            \end{tabular}
+        \end{table}
+        Where the probabilities for sprinkler are: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cc|}
+            \cline{2-3}
+                                                 & $P(C)=true$ & $P(C)=false$ \\ \hline
+            \multicolumn{1}{|c|}{$P(sprinkler)$} & 0.5         & 0.9          \\ \hline
+            \end{tabular}
+        \end{table}
+        Where the probabilities for raining are: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cc|}
+            \cline{2-3}
+                                               & $P(C)=true$ & $P(C)=false$ \\ \hline
+            \multicolumn{1}{|c|}{$P(raining)$} & 0.5         & 0.2          \\ \hline
+            \end{tabular}
+        \end{table}
+        Where the probabilities for the wet grass are: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cccc|}
+            \cline{2-5}
+                                         & $S=t,R=t$ & $S=t,R=f$ & $S=f,R=t$ & $S=f,R=f$ \\ \hline
+            \multicolumn{1}{|c|}{$P(W)$} & 0.99                      & 0.9                        & 0.9                       & 0                                 \\ \hline
+            \end{tabular}
+        \end{table}
+        With all these values it is possible to compute all the probabilities. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/probabilities.png}
+        \end{figure}
+    \end{example}
+    Explaining away is known in statistics as Berkson's paradox, or selection bias, and it describes two variable which become dependent 
+    because you observe a third one. In general, the independencies in a Bayesian network can be: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/independencies.png}
+    \end{figure}
+
+
 \end{document}
