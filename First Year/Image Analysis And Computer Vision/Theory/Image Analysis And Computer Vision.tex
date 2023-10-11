@@ -813,7 +813,7 @@
 
     \subsection{Similarities}
     The similarities have four degree of freedom, which are the translation $\textbf{t}$, the scale $s$, and the rotation angle $\vartheta$. So, the invariants of this transformation are: ratio of lenghts, and angles.
-    Also the circular points $\textbf{I}$ and $\textbf{J}$ are invariant of the transofrmation. 
+    Also, the circular points $\textbf{I}$ and $\textbf{J}$ are invariant of the transofrmation. 
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\linewidth]{images/similarity.png}
@@ -862,18 +862,18 @@
     \end{figure}
 
     \subsection{Projectivities}
-    The projectivities have eight degree of freedom, which are the submatrix $A$, the vector $v$, and the translation. So, the invariants of this transformation are: colinearity, incidence, order of contact.
-    $A$ is any $2 \times 2$ (rank two) matrix. Also the cross ratio is invariant of the transofrmation.
+    The projectivities have eight degree of freedom, which are the sub-matrix $A$, the vector $v$, and the translation. So, the invariants of this transformation are: colinearity, incidence, order of contact.
+    $A$ is any $2 \times 2$ (rank two) matrix. Also, the cross ratio is invariant of the transformation.
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\linewidth]{images/projectivities.png}
     \end{figure}
-    So, we have that the matrix $H_A$ for the affinities is the follow: 
+    So, we have that the matrix $H_A$ for the projectivities is the follow: 
     \[H_I=
     \begin{bmatrix}
         a_{11} & a_{21} & t_x \\
         a_{12} & a_{21} & t_y \\
-        0 & 0 & 1
+        v_1 & v_2 & 1
     \end{bmatrix}\]
     Where $
     \begin{bmatrix}
@@ -888,7 +888,155 @@
 
 \newpage
 
-\chapter{Two dimensional reconstruction}
+\chapter{Two-dimensional reconstruction}
+    \section{Introduction}
+    We want to recover a model of the scene, given an image of an unknown planar scene. The scene is a set of unknown points $x_i$ on  a 
+    plane. The image is a projective transformation of the scene, that is $\boldsymbol{x}_i^{'}=H\boldsymbol{x}_i$. In this equation we
+    know only the $\boldsymbol{x}_i$ and not the matrix $H$. So, the main problem is that we cannot simply invert the 
+    mapping $H$. 
+
+    The general problem is unsolvable because we have too many unknowns. So, to find the projection matrix we can combine two strategies: 
+    \begin{enumerate}
+        \item Reduce unknowns: it is often not necessary to recover the original scene as it was, but it is simpler to recover just 
+            the shape of the scene. In this case the goal is to recover a model similar to the scene, that is called shape reconstruction. 
+            In this case, we can reduce the unknowns from eight to four and the matrix $H$ becomes: 
+            \[H=    
+            \begin{bmatrix}
+                s\cos \vartheta & -s\sin \vartheta & t_x \\
+                s\sin \vartheta & s\cos \vartheta & t_y \\
+                0 & 0 & 1
+            \end{bmatrix}\]
+            We can also make a similarity instead of the shape, but this will reduce the unknowns only by two. The affinity will reduce
+            the unknowns by six. 
+        \item Add constraints: we use additional information to recover a model of the scene. The useful information is the values of
+            parameters, that are invariant under the desired class of mappings, but are not invariant under more general classes. 
+    \end{enumerate}
+
+    \section{Reconstruction}
+    The reconstruction can be of two types: 
+    \begin{itemize}
+        \item Affine reconstruction: reconstructed scene is an affine mapping of the original one. 
+        \item Shape reconstruction: reconstructed scene is a similarity mapping of the original one. 
+    \end{itemize}
+
+    \subsection{Affine reconstruction}
+    \begin{theorem}
+        A projective transformation $H$ maps the line at the infinity $\boldsymbol{l}_{\infty}$ onto itself implies that and implies from $H$ is affine. 
+    \end{theorem}
+    \begin{proof}
+        Any point at the infinity $\boldsymbol{x}_{\infty}=\begin{bmatrix} x \\ y \\ 0 \end{bmatrix}$ mapped onto a point 
+        $\boldsymbol{x}^{'}=H\boldsymbol{x}_{\infty}$ also at the infinity if and only if the third coordinate of $\boldsymbol{x}^{'}$ is 
+        zero. For all $(x,y)$ we have that 
+        \[\begin{bmatrix} v_1 & v_2 & 1 \end{bmatrix} \begin{bmatrix} x \\ y \\ 0 \end{bmatrix}=0 \rightarrow \begin{bmatrix} v_1 & v_2 & 1 \end{bmatrix} = \begin{bmatrix} 0 & 0 & 1 \end{bmatrix}\]
+        Namely, $H$ is affine.
+    \end{proof}
+    The given image is a general projective mapping of the original scene. This implies that the vanishing line $\boldsymbol{l}^{'}_{\infty}$
+    is in general different from  $\boldsymbol{l}_{\infty}$. So, it is possible to use $\boldsymbol{l}^{'}_{\infty}$ as additional 
+    information: if we apply to the image a new projective mapping $H_{AR}$ which sends $\boldsymbol{l}^{'}_{\infty}$ back to 
+    $\boldsymbol{l}_{\infty}$, we obtain a new, modified image. The (new) image of the line at the infinity $\boldsymbol{l}_{\infty}$ is 
+    again $\boldsymbol{l}_{\infty}$. 
+
+    From the theorem, the obtained model (i.e. the new image) is an affine mapping of the original scene. So, the obtained model is an 
+    affine reconstruction of the scene. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/HAR.png}
+    \end{figure}
+    The issues with this method are: 
+    \begin{itemize}
+        \item Find a projective mapping $H_{AR}$ which sends $\boldsymbol{l}^{'}_{\infty}$ back to $\boldsymbol{l}_{\infty}$: this mapping 
+            must map any point $\boldsymbol{x}^{'} \in \boldsymbol{l}^{'}_{\infty}$ onto a set of point at the infinity: 
+            \[H_{AR}\boldsymbol{x}^{'} = \begin{bmatrix} * \\ * \\ 0 \end{bmatrix}\]
+            Everything works if we let \[H_{AR}=
+            \begin{bmatrix}
+                * & * & * \\
+                * & * & * \\
+                \: & \boldsymbol{l}^{'T}_{\infty} & \:
+            \end{bmatrix}\]
+            In fact we have: 
+            \[H_{AR}\boldsymbol{x}^{'}=
+            \begin{bmatrix}
+                * & * & * \\
+                * & * & * \\
+                \: & \boldsymbol{l}^{'T}_{\infty} & \:
+            \end{bmatrix}
+            \boldsymbol{x}^{'}
+            =
+            \begin{bmatrix}
+                * \\
+                * \\
+                \boldsymbol{l}^{'T}_{\infty}\boldsymbol{x}^{'}
+            \end{bmatrix}
+            \]
+        \item Find the vanishing line: it is possible to use additional knowledge items, such as the image of parallel lines. 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/van.png}
+            \end{figure}
+    \end{itemize}
+
+    \subsection{Shape reconstruction}
+    \begin{theorem}
+        A projective transformation $H$ maps the circular points $\boldsymbol{I}$ and $\boldsymbol{J}$ onto themselves implies that and 
+        implies from $H$ is a similarity. 
+    \end{theorem}
+    \begin{proof}
+        Multiplying a similarity matrix $H_S$ by circular point $\boldsymbol{I}$, a multiple of $\boldsymbol{I}$ is obtained. Analogous 
+        result is obtained for the other circular point $\boldsymbol{J}$. 
+    \end{proof}
+    The given image is a general projective mapping of the original scene. So, the image $(\boldsymbol{I}^{'},\boldsymbol{J}^{'})$ of 
+    circular points $()\boldsymbol{I},\boldsymbol{J}$ of the scene plane is in general different from $\boldsymbol{I},\boldsymbol{J}$.
+    We can use $\boldsymbol{I}^{'},\boldsymbol{J}^{'}$ as additional information: if we apply to the image a new projective
+    mapping $H_{SR}$ which maps $\boldsymbol{I}^{'},\boldsymbol{J}^{'}$ back to $\boldsymbol{I},\boldsymbol{J}$, we obtain a new, 
+    modified image. The new image of the circular points $\boldsymbol{I},\boldsymbol{J}$ is again $\boldsymbol{I},\boldsymbol{J}$. 
+    So, from the theorem, the obtained model (new image) is similar to the original scene. We have that the obtained model is a shape 
+    reconstruction of the scene. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/HSR.png}
+    \end{figure}
+    The issues with this method are: 
+    \begin{itemize}
+        \item Find a projective mapping $H_{SR}$ which maps $\boldsymbol{I}^{'},\boldsymbol{J}^{'}$ back to 
+            $\boldsymbol{I},\boldsymbol{J}$: finding one of the $\infty^{4}$ matrices such that: 
+            $\begin{cases}
+                H_{SR}\boldsymbol{I}^{'}=\boldsymbol{I} \\
+                H_{SR}\boldsymbol{J}^{'}=\boldsymbol{J}
+            \end{cases}$. Let us use equivalent information instead: the degenerate conic dual to $\boldsymbol{I}^{'},\boldsymbol{J}^{'}$, 
+            that is $C_{\infty}^{'*}=\boldsymbol{I}^{'}\boldsymbol{J}^{'T}+\boldsymbol{J}^{'}\boldsymbol{I}^{'T}$. This dual conic is the 
+            image of the original conic dual to the circular points $(\boldsymbol{I},\boldsymbol{J})$: 
+            \[C_{\infty}^{*}=\boldsymbol{I}\boldsymbol{J}^{T}+\boldsymbol{J}\boldsymbol{I}^{T}\]
+            in fact, since $(\boldsymbol{I}^{'},\boldsymbol{J}^{'})$ is the image of $(\boldsymbol{I},\boldsymbol{J})$, then also 
+            $C_{\infty}^{'*}$ is the image of $C_{\infty}^{*}$. So, any projectivity $H_{SR}$ which maps $(\boldsymbol{I}^{'},\boldsymbol{J}^{'})$
+            back to $(\boldsymbol{I},\boldsymbol{J})$ also maps $C_{\infty}^{'*}$ back to $C_{\infty}^{*}$. Using the transformation rule for dual 
+            conics under projective mappings we get: 
+            \[C^{*}_{\infty}=H_{SR}C^{'*}_{\infty}H_{SR}^T\]
+            Inverting this relationship yields: 
+            \[C_{\infty}^{'*}=H_{SR}^{-1} 
+            \begin{bmatrix}
+                1 & 0 & 0 \\
+                0 & 1 & 0 \\
+                0 & 0 & 0
+            \end{bmatrix}
+            H_{SR}^{-T}\]
+            If we apply the singular value decomposition to this equation we obtain that the matrices $H_{SR}^{-1}$ and $H_{SR}^{-T}$ are
+            perpendicular, so: 
+            \[SVC(C_{\infty}^{'*})=U_\perp
+            \begin{bmatrix}
+                1 & 0 & 0 \\
+                0 & 1 & 0 \\
+                0 & 0 & 0
+            \end{bmatrix}
+            U_{\perp}^T\]
+            This provides exactly one solution: $H_{SR}=U_{\perp}^{-1}=U_{\perp}^T$
+        \item Find the vanishing line: it is possible to use additional knowledge items, such as the image of parallel lines. 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/van.png}
+            \end{figure}
+    \end{itemize}
+
+
 
 
 

@@ -5,6 +5,7 @@
 \makeatletter
 \renewcommand\thmbox@headstyle[2]{\bfseries #1}
 \makeatother
+\newtheorem[style=M,bodystyle=\normalfont]{proposition}{Proposition}
 \newtheorem[style=M,bodystyle=\normalfont]{theorem}{Theorem}
 \newtheorem[style=M,bodystyle=\normalfont]{corollary}{Corollary}
 \newtheorem[style=M,bodystyle=\normalfont]{lemma}{Lemma}
@@ -258,6 +259,9 @@
         \includegraphics[width=0.25\linewidth]{images/complexity.png}
         \caption{Plot of various algorithm's complexity}
     \end{figure}
+    \begin{definition}
+        The \emph{size of an instance} $I$, $\left\lvert I \right\rvert$ is the number of bits needed to describe the instance. 
+    \end{definition}
 
     \section{Definitions}
     \begin{definition}
@@ -1055,4 +1059,90 @@
 
     The idea of the Ford-Fulkerson's algorithm to find the network flows is the following. Start from a feasible flow $x$ and try to iteratively increase its value $\varphi$ by 
     sending, at each iteration, an additional amount of product along an undirected path from $s$ to $t$ with a strictly positive residual capacity. 
+
+    If the arc $(i,j)$ is not saturated we can increase $x_{ij}$. If $(i,j)$ is not empty we can decrease $x_{ij}$ while respecting $0 \leq x_{ij} \leq k_{ij}$. 
+    \begin{definition}
+        A path $P$ from $s$ to $t$ is an \emph{augmenting path} with respect to the current feasible flow $x$ if $x_{ij} <  k_{ij}$ for any
+        forward arc $x_{ij}>0$ for any backward arc. 
+    \end{definition}
+
+    Given a feasible flow $x$ for $G=(V,A)$, we construct the residual network $\overline{G}=(V,\overline{A})$ associated to $x$, which 
+    accounts for all possible variations of $x$: 
+    \begin{itemize}
+        \item If $(i,j) \in A$ is not empty $(i,j) \in \overline{A}$ with $\overline{k}_{ij}=x_{ij}>0$.
+        \item If $(i,j) \in A$ is not saturated $(i,j) \in \overline{A}$ with $\overline{k}_{ij}=k_{ij}-x_{ij}>0$
+    \end{itemize}
+    where $\overline{k}_{ij}$ is called the residual capacity. 
+    \begin{example}
+        The residual capacity of the following graph is computed in this way: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/residual1.png}
+        \end{figure}
+        Then we update the flow, and we calculate again the residual capacity. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/residual2.png}
+        \end{figure}
+        We do the same process again.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/residual3.png}
+        \end{figure}
+        We cannot find other paths, so we now have obtained that the flow is $\phi=5$.
+    \end{example}
+    \begin{proposition}
+        Ford-Fulkerson's algorithm is exact. 
+    \end{proposition}
+    \begin{proof}
+        A feasible flow $x$ has a maximum value if and only if $t$ is not reachable from $s$ in the residual network associated to $x$. If 
+        there is an augmenting path, then $x$ is not optimal for maximum value. If $t$ is not reachable from $s$, then there is a cut of 
+        $\overline{G}$ such that $\delta^{+}_{\overline{G}}(S^{*})=\varnothing$. By definition of $\overline{G}$ we have that every 
+        $(i,j) \in \delta^{+}_{G}(S^{*})$ is saturated and every $\delta^{-}_{G}(S^{*})$ is empty. Therefore,
+        \[\phi(S^{*})=\sum_{(i,j) \in \delta^{+}_{G}(S^{*})}{x_{ij}}-\sum_{(i,j) \in \delta^{-}_{G}(S^{*})}{x_{ij}}=
+        \sum_{(i,j) \in \delta^{+}_{G}(S^{*})}{k_{ij}}=k(S^{*})\]
+        By weak duality, $\phi(S) < k(S)$, $\forall x$ feasible, $\forall S \subset V$ with $s \in S$, $t \notin S$. Then the flow $x$ has
+        maximum value and the cut induced by $S^{*}$ minimum capacity. 
+    \end{proof}
+    \begin{theorem}[Strong duality]
+        The value of a feasible flow of maximum value is equal to the capacity of a cut of minimum capacity.
+    \end{theorem}
+    The inputs of the algorithm are: a graph $G=(V,A)$ with capacity $k_{ij}>0$ for any $(i,j) \in A$ such that $t \in N$. 
+    \begin{algorithm}[H]
+        \caption{Ford-Fulkerson's algorithm}
+            \begin{algorithmic}[1]
+                \State $x \leftarrow 0$
+                \State $\phi \leftarrow 0$
+                \State $\textnormal{optimum} \leftarrow \textnormal{false}$
+                \While {optimum = true}
+                    \State Build residual network $\overline{G}$ associated to $x$
+                    \State $P \leftarrow$ path from $s$ to $t$ in $\overline{G}$
+                    \If {$P$ is not defined}
+                        \State optimum $\leftarrow$ true
+                    \Else
+                        \State $\delta \leftarrow \min\{\overline{k}_{ij}|(i,j) \in P\}$
+                        \State $\phi \leftarrow \phi + \delta$
+                        \For {$(i,j) \in P$}
+                            \If {$(i,j)$ is a forward arc}
+                                \State $x_{ij} \leftarrow x_{ij}+\delta$
+                            \Else 
+                                \State $x_{ij} \leftarrow x_{ij}-\delta$
+                            \EndIf
+                        \EndFor
+                    \EndIf
+                \EndWhile
+            \end{algorithmic}
+    \end{algorithm}
+    The overall complexity of this algorithm is $O(m^2k_{max})$. The space complexity of the algorithm is $O(m\log{k_{max}})$. 
+
+    The algorithm can be made polynomial by looking for augmenting path with a minimum number of arcs. 
+
+    \subsection{Minimum cost flow problem}
+    Given a network with a unit cost $c_{ij}$ associated to each arc $(i,j)$ and a value $\phi > 0$, determine a feasible flow from $s$ 
+    to $t$ of value $\phi$ and of minimum total cost. 
+
+    The idea to solve this problem is to start from a feasible flow $x$ of value $\phi$ and send, an additional amount of product in the
+    residual network along cycles of negative cost. 
+
+    
 \end{document}
