@@ -5,6 +5,7 @@
 \makeatletter
 \renewcommand\thmbox@headstyle[2]{\bfseries #1}
 \makeatother
+\newtheorem[style=M,bodystyle=\normalfont]{operation}{Operation}
 \newtheorem[style=M,bodystyle=\normalfont]{theorem}{Theorem}
 \newtheorem[style=M,bodystyle=\normalfont]{corollary}{Corollary}
 \newtheorem[style=M,bodystyle=\normalfont]{lemma}{Lemma}
@@ -48,8 +49,8 @@
 
 \newpage
 
-\chapter{Syntax}
-    \section{Formal language theory}
+\chapter{Regular Languages}
+    \subsection{Formal language theory}
     A \emph{formal language} consists of words whose letters are taken from an alphabet and are well-formed according to a specific set of rules.
     \begin{definition}
         An \emph{alphabet} is a finite set of elements called terminal symbols or \emph{characters}. 
@@ -86,59 +87,307 @@
         The length of the string $aab$ is equal to: 
         \[\left\lvert aab \right\rvert = 3\]
     \end{example}
-    In order to manipulate strings, it is convenient to introduce several operations:
-    \begin{itemize}
-        \item Concatenation: given two strings $x=a_1a_2\dots a_h$ and $y=b_1b_2\dots b_k$ this operation is defined as:
-            \[x \cdot y = a_1a_2\dots a_h b_1b_2\dots b_k\]
-            Concatenation is non-commutative and associative ($x(yz)=(xy)z$). The length of the result is the sum of the length of the concatenated strings
-             ($\left\lvert xy \right\rvert = \left\lvert x \right\rvert + \left\lvert y \right\rvert$). 
-        \item Empty string: $\varepsilon$ is the neutral element for concatenation that satisfies the identity:
-            \[x\varepsilon=\varepsilon x=x\]
-            It is important to note that $\left\lvert \varepsilon \right\rvert = 0$ and that the set that contains this operator is not the empty set. 
-        \item Substring: let string $x=xyv$ be written as the concatenation of three, possibly empty, strings $x,y$ and $v$. Then, strings $x,y$ and $v$ are substrings of $x$. 
-            Moreover, string $u$ is a prefix of $x$ and $v$ is a suffix of $x$. A non-empty substring is called proper if it does not coincide with string $x$. 
-        \item Reflection: the reflection of a string $x=a_1a_2\dots a_h$ is:
+    
+    \subsection{Operations on strings}
+    \begin{operation}[Concatenation]
+        Given two strings $x=a_1a_2\dots a_h$ and $y=b_1b_2\dots b_k$ the \emph{concatenation} is defined as:
+        \[x \cdot y = a_1a_2\dots a_h b_1b_2\dots b_k\]
+    \end{operation}
+    Concatenation is non-commutative and associative ($x(yz)=(xy)z$). The length of the result is the sum of the length of the concatenated strings
+    ($\left\lvert xy \right\rvert = \left\lvert x \right\rvert + \left\lvert y \right\rvert$). 
+    \begin{operation}[Empty string]
+        The \emph{empty string} $\varepsilon$ is the neutral element for concatenation that satisfies the identity:
+        \[x\varepsilon=\varepsilon x=x\]
+    \end{operation}
+    It is important to note that $\left\lvert \varepsilon \right\rvert = 0$ and that the set that contains this operator is not the empty set. 
+    \begin{operation}[Substring]
+        Let string $x=xyv$ be written as the concatenation of three, possibly empty, strings $x,y$ and $v$. Then, strings $x,y$ and $v$ are \emph{substrings} of $x$. 
+    \end{operation}
+    Moreover, string $u$ is a prefix of $x$ and $v$ is a suffix of $x$. A non-empty substring is called proper if it does not coincide with string $x$. 
+    \begin{operation}[Reflection]
+        The \emph{reflection} of a string $x=a_1a_2\dots a_h$ is:
             \[x^R=a_ha_{h-1}\dots a_1\]
-            The following identities are immediate: 
-            \[(x^R)^R=x \:\:\:\:\:\: (xy)^R=y^Rx^R \:\:\:\:\:\: \varepsilon^R=\varepsilon\]
-        \item Repetition: the $m$-th power $x^m$ of a string $x$ is the concatenation of $x$ with himself $m-1$ times. The formal definition is the following: 
-            \[x^m=x^{m-1}x \:\: for m \geq 1 \:\:\:\:\:\: x^0=\varepsilon\]
-    \end{itemize}
+    \end{operation}
+    The following identities are immediate: 
+    \[(x^R)^R=x \:\:\:\:\:\: (xy)^R=y^Rx^R \:\:\:\:\:\: \varepsilon^R=\varepsilon\]
+    \begin{operation}[Repetition]
+        The \emph{repetition} is the $m$-th power $x^m$ of a string $x$ is the concatenation of $x$ with himself $m-1$ times. The formal definition o the following: 
+        \[x^m=x^{m-1}x \:\: for m \geq 1 \:\:\:\:\:\: x^0=\varepsilon\]
+    \end{operation}
     Repetition and reflection take precedence over concatenation. 
 
-    Operations are typically defined on a language by extending the string operation to all its phrases: 
-    \begin{itemize}
-        \item Reflection: the reflection $L^R$ of a language $L$ is the finite set of strings that are the reflection of a sentence of $L$: 
-            \[L^R = \{ x | \exists y \left( y \in L \land x=y^R \right)\}\]
-        \item Prefixes: the set of prefixes of a language $L$ is defined as: 
-            \[Prefixes(L)=\{y | y \neq \varepsilon \land \exists x \exists z \left( x \in L \land x=yx \land z \neq \varepsilon \right)\}\]
-            A language is prefix-free if none of the proper prefixes of its sentences is in the language. 
-        \item Concatenation: given languages $L^{'}$ and $L^{''}$ we have that concatenation is defined as: 
+    \subsection{Operations on languages}
+    Operations are typically defined on a language by extending the string operation to all its phrases. 
+    \begin{operation}[Reflection]
+        The \emph{reflection} $L^R$ of a language $L$ is the finite set of strings that are the reflection of a sentence of $L$: 
+        \[L^R = \{ x | \exists y \left( y \in L \land x=y^R \right)\}\]
+    \end{operation}
+    \begin{operation}[Prefix]
+        The set of \emph{prefixes} of a language $L$ is defined as: 
+        \[Prefixes(L)=\{y | y \neq \varepsilon \land \exists x \exists z \left( x \in L \land x=yx \land z \neq \varepsilon \right)\}\]
+    \end{operation}
+    A language is prefix-free if none of the proper prefixes of its sentences is in the language. 
+    \begin{operation}[Concatenation]
+        Given languages $L^{'}$ and $L^{''}$ we have that \emph{concatenation} is defined as: 
             \[L^{'}L^{''}=\{ xy | x \in L^{'} \land y \in L^{''} \}\]
-        \item Repetition is redefined as: 
-            \[L^m=L^{m-1}L \:for \: m \geq 1 \:\:\:\:\:\: L^0=\{ \varepsilon \}\]
-            The identity now became: 
-            \[\varnothing ^0 = \{ \varepsilon \} \:\:\:\:\:\: L.\varnothing=\varnothing .L=\varnothing \:\:\:\:\:\: L.\{\varepsilon\}=\{\varepsilon\} .L=L\]
-            The power operator allows one to define concisely the language of strings whose length is not greater than a given integer $K$. 
-        \item Since a language is a set, the classical set operation of union ($\cup$), intersection ($\cap$), difference ($ \setminus $), inclusion ($ \subseteq $), strict 
-            inclusion ($ \subset $), and equality ($=$). 
-        \item The universal language is defined as the set of all the strings, over an alphabet $\Sigma$, of any length including zero: 
-            \[L_{universal}=\Sigma ^0 \cup \Sigma ^1 \cup \Sigma ^2 \cup \dots \]
-        \item The complement of a language $L$ over an alphabet $\Sigma$, denoted by $\lnot L$, is the set difference: 
+    \end{operation}
+    \begin{operation}[Repetition]
+        The \emph{repetition} is redefined as: 
+        \[L^m=L^{m-1}L \:for \: m \geq 1 \:\:\:\:\:\: L^0=\{ \varepsilon \}\]
+    \end{operation}
+    The identity now became: 
+    \[\varnothing ^0 = \{ \varepsilon \} \:\:\:\:\:\: L.\varnothing=\varnothing .L=\varnothing \:\:\:\:\:\: L.\{\varepsilon\}=\{\varepsilon\} .L=L\]
+    The power operator allows one to define concisely the language of strings whose length is not greater than a given integer $K$. 
+    \begin{operation}[Set operations]
+        Since a language is a set, the classical set operation of union ($\cup$), intersection ($\cap$), difference ($ \setminus $), inclusion ($ \subseteq $), strict inclusion 
+        ($ \subset $), and equality ($=$). 
+    \end{operation}
+    \begin{operation}[Universal language]
+        The \emph{universal language} is defined as the set of all the strings, over an alphabet $\Sigma$, of any length including zero: 
+        \[L_{universal}=\Sigma ^0 \cup \Sigma ^1 \cup \Sigma ^2 \cup \dots \]
+    \end{operation}
+    \begin{operation}[Complement]
+        The \emph{complement} of a language $L$ over an alphabet $\Sigma$, denoted by $\lnot L$, is the set difference: 
             \[ \lnot L = L_{universal} - L\]
-            that is, the set of the strings over the alphabet $\Sigma$ that are not in $L$. Note that: 
-            \[ L_{universal} = \lnot \varnothing \]
-            The complement of a finite language is always infinite. The complement of an infinite one is not necessarily finite. 
+    \end{operation}
+    That is, the set of the strings over the alphabet $\Sigma$ that are not in $L$. Note that: 
+    \[L_{universal} = \lnot \varnothing\]
+    The complement of a finite language is always infinite. The complement of an infinite one is not necessarily finite.   
+
+    Given a set A and a relation $R \subseteq A \times A$, $(a_1, a_2) \in R$ is also denoted as $a_1Ra_2$. $R^{*}$ is a relation defined by:
+    \begin{itemize}
+        \item $xR^{*}x \:\: \forall x \in A$ (reflexive property). 
+        \item $x_1Rx_2 \land x_2Rx_3 \land \dots x_{n-1}Rx_n \implies x_1R^{*}x_n$ (transitive property). 
     \end{itemize}
+    \begin{example}
+        Given $R = \{(a, b), (b, c)\}$, the transitive closure will be: 
+        \[R^{*} = \{(a, a), (b, b), (c, c), (a, b), (b, c), (a, c) \}\]
+    \end{example}
+    Given a set A and a relation $R \subseteq A \times A$, $(a_1, a_2) \in R$ is also denoted as $a_1Ra_2$. $R^{+}$ is a relation defined by: 
+    $x_1Rx_2 \land x_2Rx_3 \land \dots x_{n-1}Rx_n \implies x_1R^{*}x_n$ (transitive property). 
+
+    \begin{example}
+        Given $R = \{(a, b), (b, c)\}$, the transitive closure will be: 
+        \[R^{+} = \{ (a, b), (b, c), (a, c)\}\]
+    \end{example}
+    \begin{operation}[Star operator]
+        The \emph{star operator} (also called Kleene star) is the reflexive transitive closure under the concatenation operation. It is defined as the union of all the powers of the 
+        base language: 
+        \[L^{*}=\bigcup_{h=0\dots\infty}L^h=L^0 \cup L^1 \cup L^2 \cup \dots = \varepsilon \cup L^1 \cup L^2 \cup \dots\]
+    \end{operation}
+    \begin{example}
+        Given the language $L=\{ab,ba\}$ we have that the star operation gives the following language: 
+        \[L^{*}=\{\varepsilon, ab, ba, abab, abba, baab, baba, \dots\}\]
+        It is possible to see that $L$ is finite and $L^{*}$ is infinite. 
+    \end{example}
+    Every string of the star language $L^{*}$ can be chopped into substrings in $L$. The star language $L^{*}$ can be equal to the base language $L$. If we take $\Sigma$ as the base 
+    language, then $\Sigma^{*}$ contains all the strings built on that alphabet (it is the universal language of alphabet $\Sigma$). We often say that $L$ is a language on alphabet
+    $\Sigma$ by writing $L \subseteq \Sigma$. 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cc}
+        \hline
+        \textbf{Property}                                      & \textbf{Meaning}            \\ \hline
+        $L \subseteq L^{*}$                                    & Monotonicity                \\
+        if $x \in L^{*} \land y \in L^{*}$ then $xy \in L^{*}$ & Closure by concatenation    \\
+        $(L^{*})^{*}=L^{*}$                                    & Idempotence                 \\
+        $(L^{*})^R=(L^R)^{*}$                                  & Commutativity with reversal \\ \hline
+        \end{tabular}
+    \end{table}
+    Furthermore, if $L^{*}$ is finite we have $\varnothing^{*}=\{\varepsilon\}$ and that $\{\varepsilon\}^{*}=\{\varepsilon\}$. 
+    \begin{operation}[Cross operator]
+        The \emph{cross operator} is the transitive closure under the concatenation operation. It is defined as the union of all the powers of the 
+        base language except the first power $L^0$: 
+        \[L^{+}=\bigcup_{h=1\dots\infty}L^h=L^1 \cup L^2 \cup \dots\]
+    \end{operation}
+    \begin{example}
+        Given the language $L=\{ab,ba\}$ we have that the star operation gives the following language: 
+        \[L^{*}=\{ab, ba, abab, abba, baab, baba, \dots\}\]
+    \end{example}
+    \begin{operation}[Language quotient]
+        The \emph{quotient operator} shortens the phrases of $L_1$ by cutting off a suffix that belongs to $L_2$:
+        \[L=L_1/L_2=\{y|\exists x \in L_1 \exists y \in L_2 (x=yz)\}\]
+    \end{operation}
+    \begin{example}
+        Given the languages $L_1=\{a^{2n}b^{2n}|n>0\}$ and $L_2=\{b^{2n+1}|n \geq 0\}$ the quotient language is: 
+        \[L=L_1/L_2=\{aab,aaaab,aaaabbb\}\]
+    \end{example}
+
+
+    \subsection{Regular expressions and languages}
+    The family of regular languages is our simplest formal language family. It can be defined in three ways: algebraically, by means of generative grammars, and by means of 
+    recognizer automata. 
+    \begin{definition}
+        A \emph{regular expression} is a string $r$ containing the terminal characters of the alphabet $\Sigma$ and the following meta-symbols: union ($\cup$), concatenation ($.$), 
+        star ($^{*}$), empty string ($\varepsilon$), and parenthesis in accordance with the following rules:
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{|cc|}
+            \hline
+            $r=\varepsilon$ & Empty string                 \\
+            $r=a$           & Unitary language             \\
+            $r=s \cup t$    & Union of expressions         \\
+            $r=(st)$        & Concatenation of expressions \\
+            $r=s^{*}$       & Iteration of an expression   \\ \hline
+            \end{tabular}
+        \end{table}
+        where the symbols $s$ and $t$ are regular sub-expression. 
+    \end{definition}
+    For expressivity, the metasymbol cross is allowed. The operators precedence is: star, concatenation, and union. 
+    \begin{definition}
+        A \emph{regular language} is a language denoted by a regular expression. 
+
+        The \emph{family of regular languages} (REG) is the collection of all regular languages. 
+
+        The \emph{family of finite languages} (FIN) is the collection of all languages having a finite cardinality
+    \end{definition}
+    We have that every finite language is regular because it is the union of a finite number of strings each one being the concatenation of a finite 
+    number of alphabet symbols. The family of regular languages also includes languages having infinite cardinality (hence $FIN \subset REG$)
+    
+    The union and repetition operators correspond to possible choices. One obtains a sub-expression by making a choice that identifies a sub-language. Given a regular expression 
+    one can derive another one by replacing any outermost sub-expression with another that is a choice of it. 
+    \begin{definition}
+        We say that a regular expression $e^{'}$ \emph{derives} a regular expression $e^{''}$, written $e^{'} \implies e^{''}$, if the two regular expressions can be factorized as 
+        \[e^{'}=\alpha \beta \gamma \:\:\:\:\:\: e^{''}=\alpha \delta \gamma\]
+        where $\delta$ is a choice of $\beta$.
+    \end{definition}
+    The derivation relation can be applied repeatedly, yielding relation $\implies^{n}$ ($n$ steps), $\implies^{*}$ ($n \geq 0$ steps), and $\implies^{+}$ ($n > 0$ steps). 
+    \begin{definition}
+        Two regular expressions are \emph{equivalent} if they define the same language. 
+
+        A regular expression is \emph{ambiguous} if the language of the numbered version $f^{'}$ includes two distinct strings $x$ and $y$ that coincide when numbers are erased. 
+    \end{definition}
+
+\newpage 
+
+\chapter{Grammars}
+    \section{Context-free generative grammars}
+    Regular expressions are very practical for describing lists but fall short of the capacity needed to define other frequently occurring constructs. 
+    For defining other useful languages, regular or not, we move to the formal model of generative grammars.  A generative grammar or syntax is a set of multiple 
+    rules that can be repeatedly applied in order to generate all and only the valid strings. 
+    \begin{definition}
+        A \emph{context-free grammar} $G$ is defined by four entities: 
+        \begin{enumerate}
+            \item $V$ non-terminal alphabet, is the set of non-terminal symbols.
+            \item $\Sigma$ terminal alphabet, is the set of the symbols of which phrases or sentences are made.
+            \item $P$ is the set of rules or productions.
+            \item $S \in V$ is the specific non-terminal, called the axiom ($S$), from which derivations start. 
+        \end{enumerate}
+    \end{definition}
+    A rule of set $P$ is an order pair $X \rightarrow \alpha$, with $X \in V$ and $\alpha \in (V \cup \Sigma)^{*}$. Two or more rules: 
+    \[X \rightarrow \alpha_1 \:\:\:\: X \rightarrow \alpha_2 \:\:\:\: \dots \:\:\:\: X \rightarrow \alpha_n\]
+    with the same left part $X$ can be concisely groped in:
+    \[X \rightarrow \alpha_1 | \alpha_2 | \dots | \alpha_n\]
+    We say that the strings $\alpha_1,\alpha_2,\dots,\alpha_n$ are the alternative of $X$. 
+
+    \subsection{Conventional grammar representation}
+    In professional practice, different styles are used to represent terminals and non-terminals. We usually adopt these conventions: 
+    \begin{itemize}
+        \item Lowercase Latin letters $\{a,b,\dots\}$ for terminal characters. 
+        \item Uppercase Latin letters $\{A,B,\dots\}$ for non-terminal symbols. 
+        \item Lowercase Latin letters $\{r,s,\dots,z\}$ for strings over the alphabet $\Sigma$. 
+        \item Lowercase Greek letters $\{r,s,\dots,z\}$ for both terminals and non. 
+        \item $\sigma$ only for non-terminals. 
+    \end{itemize}
+    The classification of grammar rule forms is the following. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/grammars.png}
+    \end{figure}
+
+    \subsection{Derivation and Language Generation}
+    We reconsider and formalize the notion of string derivation. Let $\beta=\delta A \eta$ be a string containing a non-terminal, where $\delta$ and $\eta$ are any, 
+    possibly empty strings. Let $A \rightarrow \alpha$ be a rule of $G$ and let $\gamma=\delta\alpha\eta$ be the string obtained replacing in $\beta$ non-terminal $A$with 
+    the right part $\alpha$. The relation between such two strings is called derivation. We say that $\beta$ derives $\gamma$ for grammar $G$, written:
+    \[\beta \implies \gamma\]
+    $A\rightarrow \alpha$ is applied in such derivation and string $\alpha$ reduced to non-terminal $A$. The possible closures are: power ($\implies^n$), 
+    reflexive ($\implies^{*}$), and transitive ($\implies^{+}$). 
+    \begin{definition}
+        If $A \implies^{*} \alpha$ we have that $\alpha \in (V \cup \Sigma)$ is called \emph{string form} generated by $G$. 
+
+        If $S \implies^{*} \alpha$ we have that $\alpha$ is called \emph{sentential} or phrase form.
+
+        If $A \implies^{*} s$ we have that $s \in \Sigma^{*}$ is called \emph{phrase} or sentence. 
+
+        Language is \emph{context-free} if a context-free grammar exists that generates it. 
+        
+        Two grammars $G$ and $G^{'}$ are \emph{equivalent} if they generate the same language. 
+    \end{definition}
+
+    \subsection{Erroneous grammars and useless rules}
+    When writing a grammar attention should be paid that all non-terminals are defined and that each one effectively contributes to the production of some sentence. 
+    In fact, some rules may turn out to be unproductive. 
+    \begin{definition}
+        A grammar $G$ is called \emph{clean} (or reduced) under the following conditions:
+        \begin{enumerate}
+            \item Every non-terminal $A$ is reachable from the axiom.
+            \item Every non-terminal $A$ is well-defined.
+        \end{enumerate}
+    \end{definition}
+    It is often straightforward to check by inspection whether a grammar is clean. The following algorithm formalizes the checks. The algorithm operates in two phases, 
+    first pinpointing the undefined non-terminals, then the unreachable ones. Lastly the rules containing non-terminals of either type can be canceled. The phases are: 
+    \begin{enumerate}
+        \item Compute the set $DEF\subseteq V$ of well-defined non-terminals. The set $DEF$ is initialized with the non-terminals of terminal rules, those having a 
+            terminal string as right part:
+            \[DEF:=\{A|( A \rightarrow u ) \in P,with u \in \Sigma^{*}\}\]
+            Then the next transformation is applied until convergence is reached:
+            \[DEF:=DEF \cup B|( B \rightarrow D_1D_2\dots D_n)\in P\]
+            where every $D_i$ is a terminal or a non-terminal symbol present in $DEF$. At each iteration two outcomes are possible:
+            \begin{itemize}
+                \item A new non non-terminal is found having as right part a string of symbols that are well-defined non-terminals or terminals. 
+                \item The termination condition is reached
+            \end{itemize}
+            The non-terminals belonging to the complement set $V-DEF$ are undefined and should be eliminated.
+        \item A non-terminal is reachable from the axiom, if, and only if, there exists a path in the following graph, which represents a relation between non-terminals,
+            called product:
+            \[A \rightarrow^{produce} B\]
+            saying that $A$ produces $B$ if, and only if, there exists a rule $A \rightarrow \alpha B \beta$, where $A,B$ are non-terminals and $\alpha,\beta$ are any strings.
+            Clearly $C$ is reachable from $S$ if, and only if, in this graph there exists an oriented path from $S$ to $C$. The unreachable non-terminals are the complement
+            with respect to $V$. They should be eliminated because they do not contribute to the generation of any sentence.
+    \end{enumerate}
+    Quite often the following requirement is added to the above clearness conditions: $G$ should not permit circular deviations $A \implies^{+} A$. This is done to avoid 
+    ambiguity. We observe that a grammar, although clean, may still contain redundant rules. 
+
+    \subsection{Recursion and language infinity}
+    An essential property of most technical languages is to be infinite. We study how this property follows from the form of grammar rules. In order to generate an 
+    unbound number of strings, the grammar must be able to derive strings of unbound length. To this end, recursive rules are necessary, as next argued. An $n \geq 1$ 
+    steps derivation $A \implies^{n}xAy$ is called recursive (immediately recursive if $n=1$); similarly non-terminal $A$ is called recursive. If $x$ is empty, the recursion 
+    is termed left.
+
+    Let $G$ be a grammar clean and avoid of circular deviations. The language $L ( G )$ is infinite if, and only if, $G$ has a recursive derivation.
+
+    \subsection{Syntax trees and canonical derivations}
+    \begin{definition}
+        A \emph{tree} is an oriented and ordered graph not containing a circuit, such that every pair of nodes is connected by exactly one oriented path.
+        
+        An \emph{arc} $\langle N_1,N_2 \rangle$ define the $\langle \textnormal{father,son} \rangle$ relation, customarily visualized from top to bottom as in genealogical 
+        trees. The sides of a node are ordered from left to right. 
+
+        The \emph{degree} of a node is the number of its siblings. 
+        
+        A \emph{tree} contains one node without father, termed root.
+
+        Consider an internal node $N$: the subtree with root $N$ is the tree having $N$ as root and containing all descendants of $N$. Nodes without sibling are termed leaves or \emph{terminal nodes}. 
+    
+        The sequence of all leaves, read from left to right, is the \emph{frontier} of the tree.
+
+        A \emph{syntax tree} has as root the axiom and as frontier a sentence.
+    \end{definition}
+    A syntax tree of a sentence $x$ can also be encoded in a text, by enclosing each subtree between brackets. Brackets are subscribed with the non-terminal symbol. The representation can be simplified 
+    by dropping the non-terminal labels, thus obtaining a skeleton tree. A further simplification of the skeleton tree consists in shortening non bifurcating paths, resulting in the condensed skeleton tree. 
+
+
+    \subsection{Left and right derivations}
+    We can have right (expands at each step the rightmost non-terminal) and left derivation (expands at each step the leftmost non-terminal). 
+    However, for a fixed syntax tree of a sentence, there exist a unique right derivation, and a unique left derivation matching that tree. Right and left derivation are useful to define parsing algorithms. 
+
+    \subsection{Parenthesis languages}
 
 
 
 
 
 
-
-
-    \section{Regular expressions and languages}
 
 
 \end{document}
