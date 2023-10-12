@@ -180,21 +180,39 @@
         \[r_1(x) r_2(y) w_3(y) r_5(x) w_5(u) w_3(s) w_2(u) w_3(x) w_1(u) r_4(y) w_5(z) r_5(z)\]
     \subsection*{Solution}
         For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/2PL1.png}
-        \end{figure}
+            \resizebox{\columnwidth}{!}{%
+            \begin{tabular}{c|cccccccccccc}
+                    & \textit{1} & \textit{2}      & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7}                        & \textit{8}      & \textit{9}              & \textit{10} & \textit{11} & \textit{12}             \\ \hline
+            \textit{S} &            &                 &            &            &            & $w_3$      &                                   &                 &                         &             &             &                         \\
+            \textit{U} &            &                 &            &            & $w_5$      &            & $\searrow_5w_2\downharpoonleft_2$ &                 & $w_1\downharpoonleft_1$ &             &             &                         \\
+            \textit{X} & $r_1$      &                 &            & $r_5$      &            &            &                                   & $\searrow_1w_3$ &                         &             &             &                         \\
+            \textit{Y} &            & $r_2\searrow_2$ & $w_3$      &            &            &            &                                   &                 &                         & $r_4$       &             &                         \\
+            \textit{Z} &            &                 &            &            &            &            &                                   &                 &                         &             & $w_5$       & $r_5\downharpoonleft_5$
+            \end{tabular}%
+            }
+        \end{table}
         $S$ clearly cannot be in strict 2PL. The contradictions are:
         \begin{itemize}
             \item $T_1$ must release $X$ before $8$. 
             \item $T_2$ must release $Y$ before $7$.
             \item $T_5$ must release $U$ before $12$.
         \end{itemize}
-        For 2PL we have: 
-        \begin{figure}[H]
+        For 2PL we have:
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/2PL2.png}
-        \end{figure}
+            \resizebox{\columnwidth}{!}{%
+            \begin{tabular}{c|cccccccccccc}
+                    & \textit{1} & \textit{2}      & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7}                        & \textit{8}      & \textit{9}              & \textit{10} & \textit{11} & \textit{12}             \\ \hline
+            \textit{S} &                            &                                   &                           &                           &                           & $\nearrow_3w_3$       &                                       & $\searrow_3$                          &                         &                             &             &                         \\
+            \textit{U} &                            &                                   &                           &                           & $\nearrow_5w_5\searrow_5$ &                       & $\nearrow_2w_2\searrow_2\nearrow_1$   &                                       & $w_1\searrow_1$         &                             &             &                         \\
+            \textit{X} & $\nearrow_1r_1$            &                                   &                           & $\nearrow_5r_5$           &                           & $\searrow_5$          &                                       & $\searrow_1\nearrow_3w_3\searrow_3$   &                         &                             &             &                         \\
+            \textit{Y} &                            & $\nearrow_2r_2\searrow_2$         & $\nearrow_3w_3$           &                           &                           &                       &                                       &                                       & $\searrow_3$            & $\nearrow_4r_4\searrow_4$   &             &                         \\
+            \textit{Z} &                            &                                   &                           & $\nearrow_5$              &                           &                       &                                       &                                       &                         &                             & $w_5$       & $r_5\searrow_5$
+            \end{tabular}%
+            }
+        \end{table}
         It is also not in 2PL: an assignment is not possible for $T_2$ (which must release $Y$ before locking $U$).
 
     \newpage
@@ -204,18 +222,32 @@
         \[r_4(x) r_2(x) w_4(x) w_2(y) w_4(y) r_3(y) w_3(x) w_4(z) r_3(z) r_6(z) r_8(z) w_6(z) w_9(z) r_5(z) r_10(z)\]
     \subsection*{Solution}
         For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/2PL3.png}
-        \end{figure}
+            \resizebox{\columnwidth}{!}{%
+            \begin{tabular}{c|ccccccccccccccc}
+                       & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
+            \textit{X} & $r_4$      & $r_2\searrow _2$          & $w_4$      &                              &            &            & $w_3$      &            &            &             &             &             &             &             &             \\
+            \textit{Y} &            &                           &            & $w_2\downharpoonleft_2$      & $w_4$      & $r_3$      &            &            &            &             &             &             &             &             &             \\
+            \textit{Z} &            &                           &            &                              &            &            &            & $w_4$      & $r_3$      & $r_6$       & $r_8$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
+            \end{tabular}%
+            }
+        \end{table}
         It is therefore clear that the schedule cannot be in 2PL-strict, due to $T_2$ and $T_4$: $T_2$ ends after 4, but $T_4$ wants to write $X$ at 3, and $T_2$ would thus be 
         required to release $X$ earlier, which is impossible if $T_2$ has to keep all locks until after 4.
 
-        For 2PL we have: 
-        \begin{figure}[H]
+        For 2PL we have:
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/2PL4.png}
-        \end{figure}
+            \resizebox{\columnwidth}{!}{%
+            \begin{tabular}{c|ccccccccccccccc}
+                       & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
+            \textit{X} & $\nearrow_4r_4$        & $\nearrow_2r_2\searrow_2$         & $\nearrow_4w_4$       &                       & $\searrow_4$                          &                           & $\nearrow_3w_3$       &                       &                          & $\searrow_3$  &                       &             &             &             &             \\
+            \textit{Y} &                        & $\nearrow_2$                      &                       & $w_2\searrow_2$       & $\nearrow_4w_4\searrow_4$             & $\nearrow_3r_3$           &                       &                       &                          & $\searrow_3$  &                       &             &             &             &             \\
+            \textit{Z} &                        &                                   & $\nearrow_4$          &                       &                                       &                           &                       & $w_4\searrow_4$       & $\nearrow_3r_3$          & $r_6$         & $r_8\searrow_3$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
+            \end{tabular}%
+            }
+        \end{table}
         We need to look at those acquisitions that must be anticipated and to those releases that must be delayed to not violate the 2PL rules.
         $T_4$ can only get the XL on X only after 2 and on $Y$ after 4 and has to release $Y$ before 6 and $X$ before 7. Thus, the lock on $Z$ must be acquired before 6.
         $T_2$ can get all the locks at the beginning and release them immediately after each use. $T_3$ can acquire $X$, $Y$ and $Z$ just before using them and release them all before 12. 
@@ -228,17 +260,31 @@
         \[r_1(A) r_2(A) w_2(A) r_1(B) w_1(C) w_2(C) r_3(C) w_3(A) w_2(B) w_3(B)\]
     \subsection*{Solution}
         For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=0.75\linewidth]{images/2PL5.png}
-        \end{figure}
+            \resizebox{\columnwidth}{!}{%
+            \begin{tabular}{c|cccccccccc}
+                    & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} \\ \hline
+            \textit{A} & $r_1$      & $r_2\searrow _1$          & $w_2$      &            &            &            &            & $w_3$      &            &             \\
+            \textit{B} &            &                           &            &            & $w_1\downharpoonleft_1$      & $w_2$      & $r_3$      &            &            &             \\
+            \textit{C} &            &                           &            & $r_1$      &            &            &            &            & $w_2$      & $w_3$      
+            \end{tabular}%
+            }
+        \end{table}
         The schedule is not strict 2PL.
 
-        For 2PL we have: 
-        \begin{figure}[H]
+        For 2PL we have:
+        \begin{table}[H]
             \centering
-            \includegraphics[width=0.75\linewidth]{images/2PL6.png}
-        \end{figure}
+            \resizebox{\columnwidth}{!}{%
+            \begin{tabular}{c|cccccccccc}
+                    & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} \\ \hline
+            \textit{A} & $\nearrow_1r_1$        & $\nearrow_2r_2\searrow_1$         & $\nearrow_2w_2$       &                   &                   & $\searrow_2$                      &                           & $\nearrow_3w_3$       &                       & $\searrow_3$            \\
+            \textit{B} &                        & $\nearrow_1$                      &                       &                   & $w_1\searrow_1$   & $\nearrow_2w_2\searrow_2$         & $\nearrow_3r_3$           &                       &                       & $\searrow_3$            \\
+            \textit{C} &                        & $\nearrow_1$                      &                       & $r_1\searrow_1$   &                   &                                   &                           &                       & $w_2\searrow_2$       & $\nearrow_3w_3\searrow_3$      
+            \end{tabular}%
+            }
+        \end{table}
         The schedule is 2PL. 
 
     \newpage
@@ -248,17 +294,31 @@
         \[r_1(x) w_2(x) r_1(z) w_1(y) r_3(x) r_4(x) w_3(z) w_2(y) r_3(y) w_4(x) w_4(y)\]
     \subsection*{Solution}
         For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/2PL7.png}
-        \end{figure}
+            \resizebox{\columnwidth}{!}{%
+            \begin{tabular}{c|ccccccccccc}
+                       & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11}          \\ \hline
+            \textit{X} & $r_1\searrow_1$       & $w_2$      &            &                                  & $r_3$      & $r_4$      &            &            &            & $w_4$       &                    \\
+            \textit{Y} &                       &            &            & $w_1\downharpoonleft_1$          &            &            &            & $w_2$      & $r_3$      &             & $w_4$                \\
+            \textit{Z} &                       &            & $r_1$      &                                  &            &            & $w_3$      &            &            &             &                     
+            \end{tabular}%
+            }
+        \end{table}
         The schedule is not strict 2PL.
 
-        For 2PL we have: 
-        \begin{figure}[H]
+        For 2PL we have:
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/2PL8.png}
-        \end{figure}
+            \resizebox{\columnwidth}{!}{%
+            \begin{tabular}{c|ccccccccccc}
+                       & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11}          \\ \hline
+            \textit{X} & $\nearrow_1r_1\searrow_1$              & $\nearrow_2w_2$       &                       &                                   & $\searrow_2\nearrow_3r_3$         & $\nearrow_4r_4$       &                       &                   & $\searrow_3$                   & $\nearrow_4w_4$       & $\searrow_4$     \\
+            \textit{Y} & $\nearrow_1$                           &                       &                       & $w_1\searrow_1\nearrow_2$         &                                   &                       &                       & $w_2\searrow_2$   & $\nearrow_3r_3\searrow_3$      &                       & $\nearrow_4w_4\searrow_4$                \\
+            \textit{Z} & $\nearrow_1$                           &                       & $r_1\searrow_1$       &                                   &                                   &                       & $\nearrow_3w_3$       &                   & $\searrow_3$                   &                       &                     
+            \end{tabular}%
+            }
+        \end{table}
         The schedule is 2PL. 
 
     \newpage
@@ -456,22 +516,52 @@
         schedule. 
 
         The schedule is not TS-mono because we have $w_3 w_2$ and so also non TS-multi. 
+   
+    \newpage 
+
+    \section{Schedule classification}
+        Given the resources above and the following transactions:
+        \[T_1: r_1(C) w_1(B) w_1(C)\] 
+        \[T_2: w_2(A) r_2(C)\]
+        Consider that $T_1$ and $T_2$ can only be scheduled in 10 different ways (two serial, eight interleaved). What can be stated about 
+        the 2PL-strict compatibility of these schedules? 
+    \subsection*{Solution}
+        We note that the only potential conflict is between $w_1(C)$ and $r_2(C)$. But these are also the last operations of their respective 
+        transactions: to check for compatibility, we can always assume that the commit occurs right after the last operation, and that all 
+        locks are released in favor of the other one. But this argument is independent of the order of the operations, and is therefore valid 
+        for all the 8 interleaved schedules. So, all the schedules are strict 2PL. 
 
     \newpage
 
     \section{Hierarchical lock}
-        Given the resource hierarchy below, is the following schedule compatible with a 2PL-strict scheduler that applies hierarchical locking?
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.25\linewidth]{images/HL1.png}
+            \includegraphics[width=0.4\linewidth]{images/HL1.png}
         \end{figure}
+        Given the resource hierarchy above, is the following schedule compatible with a 2PL-strict scheduler that applies hierarchical locking?
         \[r_1(A) w_1(S) w_2(T) r_2(A) w_1(A)\]
     \subsection*{Solution}
         The lock manager works as follows: 
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/HLsol.png}
-        \end{figure}
+            \begin{tabular}{c|cccccc|c}
+            \cline{2-7}
+            \textit{}                          & \textit{X}               & \textit{A}              & \textit{B} & \textit{Y}               & \textit{S}          & \textit{T}          & \textit{}    \\ \cline{1-7}
+            \multicolumn{1}{|c|}{$r_1(A)$}     & $\textnormal{ISL}_1$     & -                       & -          & -                        & -                   & -                   &              \\
+            \multicolumn{1}{|c|}{}             & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & -                        & -                   & -                   &              \\
+            \multicolumn{1}{|c|}{$w_1(S)$}     & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_1$     & -                   & -                   &              \\
+            \multicolumn{1}{|c|}{}             & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_1$     & $\textnormal{XL}_1$ & -                   &              \\
+            \multicolumn{1}{|c|}{$w_2(T)$}     & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_{1,2}$ & $\textnormal{XL}_1$ & -                   &              \\
+            \multicolumn{1}{|c|}{}             & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_{1,2}$ & $\textnormal{XL}_1$ & $\textnormal{XL}_2$ &              \\
+            \multicolumn{1}{|c|}{$r_2(A)$}     & $\textnormal{ISL}_{1,2}$ & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_{1,2}$ & $\textnormal{XL}_1$ & $\textnormal{XL}_2$ &              \\
+            \multicolumn{1}{|c|}{}             & $\textnormal{ISL}_{1,2}$ & $\textnormal{SL}_{1,2}$ & -          & $\textnormal{IXL}_{1,2}$ & $\textnormal{XL}_1$ & $\textnormal{XL}_2$ &              \\
+            \multicolumn{1}{|c|}{commit $T_2$} &                          &                         &            &                          &                     &                     & End of $T_2$ \\
+            \multicolumn{1}{|c|}{}             & $\textbf{ISL}_1$         & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_1$     & $\textnormal{XL}_1$ & -                   &              \\
+            \multicolumn{1}{|c|}{$w_1(A)$}     & $\textbf{IXL}_1$         & $\textbf{SL}_1$         & -          & $\textnormal{IXL}_1$     & $\textnormal{XL}_1$ & -                   &              \\
+            \multicolumn{1}{|c|}{}             & $\textnormal{IXL}_1$     & $\textbf{XL}_1$         & -          & $\textnormal{IXL}_1$     & $\textnormal{XL}_1$ & -                   &              \\
+            \multicolumn{1}{|c|}{commit $T_1$} &                          &                         &            &                          &                     &                     & End of $T_1$ \\ \cline{1-7}
+            \end{tabular}
+        \end{table}
         So, it is compatible with a strict 2PL scheduler. 
 
     \newpage
@@ -484,22 +574,26 @@
         the schedule is in 2PL.
     \subsection*{Solution}
         We have that: 
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/HLsol1.png}
-        \end{figure}
+            \begin{tabular}{c|ccc|}
+            \cline{2-4}
+            \textit{}                    & \textbf{PagA}                           & \textbf{t2}          & \textbf{t1}           \\ \cline{2-4} 
+            $\textnormal{SIXL}_1(PagA)$  & $\textnormal{SIXL}_1$                   & -                    & -                     \\
+            $\textnormal{XL}_1(t2)$      & $\textnormal{SIXL}_1$                   & $\textnormal{XL}_1$  & -                     \\
+            $r_1(PagA)$                  &                                         &                      &                       \\
+            $\textnormal{U-SL}_1(PagA)$  & $\textnormal{IXL}_1,\textnormal{IXL}_2$ & $\textnormal{XL}_1$  & -                     \\
+            $\textnormal{IXL}_2(PagA)$   & $\textnormal{IXL}_1,\textnormal{IXL}_2$ & $\textnormal{XL}_1$  & -                     \\
+            $\textnormal{XL}_2(t1)$      & $\textnormal{IXL}_1,\textnormal{IXL}_2$ & $\textnormal{XL}_1$  & $\textnormal{XL}_2$   \\
+            $w_2(t1)$                    &                                         &                      &                       \\
+            $\textnormal{U-XL}_2(t1)$    & $\textnormal{IXL}_1,\textnormal{IXL}_2$ & $\textnormal{XL}_1$  & -                     \\
+            $\textnormal{U-IXL}_2(PagA)$ & $\textnormal{IXL}_1$                    & $\textnormal{XL}_1$  & -                     \\
+            Commit $T_2$                 &                                         &                      &                       \\
+            $w_1(t2)$                    &                                         &                      &                       \\
+            $\textnormal{U-XL}_1(t2)$    & $\textnormal{IXL}_1$                    & -                    & -                     \\
+            $\textnormal{U-IXL}_1(PagA)$ & -                                       & -                    & -                     \\
+            Commit $T_1$                 & \multicolumn{1}{l}{}                    & \multicolumn{1}{l}{} & \multicolumn{1}{l|}{} \\ \cline{2-4} 
+            \end{tabular}
+        \end{table}
         So the schedule is 2PL.
-
-    \newpage
-
-    \section{Schedule classification}
-        Given the resources above and the following transactions:
-        \[T_1: r_1(C) w_1(B) w_1(C) \:\:\: T_2: w_2(A) r_2(C)\]
-        Consider that $T_1$ and $T_2$ can only be scheduled in 10 different ways (two serial, eight interleaved). What can be stated about 
-        the 2PL-strict compatibility of these schedules? 
-    \subsection*{Solution}
-        We note that the only potential conflict is between $w_1(C)$ and $r_2(C)$. But these are also the last operations of their respective 
-        transactions: to check for compatibility, we can always assume that the commit occurs right after the last operation, and that all 
-        locks are released in favor of the other one. But this argument is independent of the order of the operations, and is therefore valid 
-        for all the 8 interleaved schedules. So, all the schedules are strict 2PL. 
 \end{document}
