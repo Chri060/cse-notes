@@ -96,4 +96,91 @@
             \item The regular expression is: 
                 \[L=\{(a(b|bb))^{*}aba\} \cup \{(a(b|bb))^{*}abba(a(b|bb))^{+}abba\}\]
         \end{enumerate}    
+    
+\newpage
+
+\chapter{Exercise session II}
+    \section{Regular expressions and FSA}
+        Consider the regular expression $R$ below, over the three-letter alphabet $\Sigma=\{a,b,c\}$ 
+        \[R=a\left( b|c^{+}a \right)^{*}\]
+        Answer the following questions:
+        \begin{enumerate}
+            \item Write all the strings $x$ of the language of $R$ that have a length less than or equal to four, i.e., $x \in L(R)$ with $|x| \leq 4$, in lexicographic order 
+                (with $a < b < c$).
+            \item By means of the Berry-Sethi method, find a deterministic automaton $A$ equivalent to the regular expression $R$. 
+            \item Is the deterministic automaton $A$ found before minimal? Justify your answer.
+            \item By means of the Brzozowski method (node elimination), starting from the automaton $A$ found before, obtain a regular expression $R^{'}$ equivalent to $A$.
+            \item Is the language $L(R)$ locally testable? Formally prove your answer.
+        \end{enumerate}
+    \subsection*{Solution}
+    \begin{enumerate}
+        \item The possible strings are: $a$, $ab$, $abb$, $aca$, $abba$, $abca$, $acab$, $acca$. 
+        \item First, we enumerate the symbols $R_{\#}=a_1\left( b_2|c^{+}_{3}a_4 \right)^{*}\dashv$. We construct the following support table: 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{cc}
+                Initials                       & $a_1$             \\ \hline
+                \multicolumn{1}{c|}{Terminals} & Followers         \\
+                \multicolumn{1}{c|}{$a_1$}     & $b_2c_3\dashv$ \\
+                \multicolumn{1}{c|}{$b_2$}     & $b_2c_3\dashv$  \\
+                \multicolumn{1}{c|}{$c_3$}     & $c_3a_4$         \\
+                \multicolumn{1}{c|}{$a_4$}     & $b_2c_3\dashv$ 
+                \end{tabular}
+            \end{table}
+            We start wit the initial, and we have: 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.2\linewidth]{images/FSA1.png}
+            \end{figure}
+            Now we create the state reachable from $a_1$, and we obtain: 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.4\linewidth]{images/FSA2.png}
+            \end{figure}
+            After doing this steps for all the states we obtain the following automaton: 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/FSA3.png}
+            \end{figure}
+        \item We can reduce an automaton if we can reduce the number of states. We have to use some criterions to do the check on automaton $A$. To simplify the automaton we start by renaming the states: 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/FSA4.png}
+            \end{figure}
+            We can see that $\alpha$ cannot be merged with $\beta$ because one is not final and the other one is final. 
+            Same reasoning holds for $\beta$ and $\gamma$. States $\alpha$ and $\gamma$ cannot be merged because they have different transitions. 
+            So, the three states are distinguishable, and the automaton is the minimal. 
+        \item We start by creating a virtual initial node and final node connected to the automata: 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.75\linewidth]{images/FSA5.png}
+            \end{figure}
+            Now we can remove the states one by one until we reach the final state directly from the initial one. 
+            So, we remove $\gamma$ with the loop $c^{+}a$. We have two cycles on $\beta$ that can be substituted by the expression
+            $(b|c^{+}a)^{*}$. We have only $\alpha$ that can be easily removed, and we finally have that: 
+            \[R^{'}=a(b|c^{+}a)^{*}\]
+        \item We have the following sets: 
+            \begin{itemize}
+                \item Initials: $\{a\}$
+                \item Finals: $\{a,b\}$
+                \item Digrams: $\{aa,ac,bb,bc,ca,cc\}$
+            \end{itemize}
+            Using these sets we can build a particular automaton $A^{'}$, that have the initial set connected to the set of initials, the final states are the ones in the finals set, and the transitions are the
+            one belonging to the digrams set. 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.75\linewidth]{images/FSA6.png}
+            \end{figure}
+            The automaton is local if it recognizes the initial language and if the edge reached by an arc has the same name of the transition. In this case we constructed the nodes such that the second property is 
+            satisfied, so we simply need to check the first property. We can not that the states $a$ and $b$ are not distinguishable, so we can reduce the automaton to the $A$ one. So, the language is locally testable. 
+    \end{enumerate}
+
+    \newpage
+
+    \section{Regular expressions and FSA}
+    Take a two-letter alphabet $\Sigma=\{a,b\}$.  Consider the nondeterministic automaton $A$ over $\Sigma$ below, which has spontaneous transitions ($\varepsilon$-transitions): 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/FSA1a.png}
+    \end{figure}
 \end{document}
