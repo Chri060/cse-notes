@@ -446,6 +446,394 @@
 
 \newpage
 
-\chapter{Finite automata as regular language recognizers}
+\chapter{Finite state automata}
+    \section{Recognition algorithms and automata}
+    To check if a string is valid for a specified language, we need a recognition algorithm, a type of algorithm producing a yes/no answer, commonly referred to in 
+    computational complexity studies as a decision algorithm. For the string membership problem, the input domain is a set of strings of alphabet $\Sigma$. The 
+    application of a recognition algorithm $\alpha$ to a given string $x$ is denoted as $\alpha(x)$. We say string $x$ is recognized or accepted if $\alpha(x)=yes$, 
+    otherwise it is rejected. The language recognized, $L(\alpha)$, is the set of accepted strings:
+    \[L(\alpha)=\{x \in \Sigma^{*}|\alpha(x)=yes\}\]
+    The algorithm is usually assumed to terminate for every input, so that the membership problem is decidable. However, it may happen that, for some string $x$,the 
+    algorithm does not terminate. In such case we say that the membership problem for $L$ is semi-decidable, or also that $L$ is recursively enumerable. In practice, 
+    we do not have to worry about such decidability issues because in language processing the only language families of concern are decidable. 
+    \subsection{A general automaton}
+    An automaton or abstract machine is an ideal computer featuring a very small set of simple instructions. In its more general form a recognizer it is composed by three 
+    parts: input tape, control unit, and (auxiliary) memory. The control unit has a limited store, to be represented as a finite set of states;the auxiliary memory, on the 
+    other hand, has unbounded capacity. The upper tape contains the given input or source string, which can be read but not changed. Each case of the tape contains a 
+    terminal character; the cases to the left and right of the input contain two delimiters, the start of text mark $\vdash$ and the end of text mark or terminator $\dashv$.
+    A peculiarity of automata is that the auxiliary memory is also a tape containing symbols of another alphabet. The automaton examines the source by performing a series
+    of moves; the choice of a move depends on the current two symbols (input  and  memory) and on the current state. A move may have some of the following effects:
+    \begin{itemize}
+        \item Shift the input head left or right by one position. 
+        \item Overwrite the current memory symbol with another one, and shift the memory head left or right by one position. 
+        \item Change the state of the control unit.
+    \end{itemize}
+    \begin{definition}
+        A machine is \emph{unidirectional} if the input head only moves from left to right. 
+    \end{definition}
+    At any time the future behavior of the machine depends on a three-tuple, called configuration: the suffix of the input string still to be read, the contents of the 
+    memory tape and the position of the head. 
+    \begin{definition}
+        The \emph{initial configuration} has: the input head positioned on character $a_1$, the control unit in an initial state, and the memory containing a specific 
+        symbol.
+    \end{definition}
+    Then the machine performs a computation. If for a configuration at most one move can be applied, the change of configuration is deterministic. A non-deterministic
+    automaton is essentially a manner of representing an algorithm that in some situation may explore alternative paths. 
+    \begin{definition}
+        A configuration is \emph{final} if the control is in a state specified as final, and the input head is on the terminator. 
+    \end{definition}
+    The source string $x$ is accepted if the automaton, starting in the initial configuration with $x\dashv$ as input, performs a computation leading to a final configuration. 
+    The language accepted or recognized by the machine is the set of accepted strings.
+
+    Notice a computation terminates either when the machine has entered a final con-figuration or when in the current configuration no move can be applied. In the latter 
+    case the source string is not accepted by that computation. 
+    \begin{definition}
+        Two automata accepting the same language are called \emph{equivalent}.
+    \end{definition}
+
+    \section{Introduction to finite automata}
+    Conforming to the general scheme, a finite automaton comprises: the input tape with the source string $x \in \Sigma^{*}$, the control unit, and the reading head scanning 
+    the string until its end, unless an error occurs before. Upon reading a character, the automaton updates the state  of the  control unit and advances the reading head. 
+    Upon reading the last character, the automaton accepts $x$ if and only if the state is an accepting one.
+
+    A well-known representation of an automaton is by a state-transition diagram or graph. This is a directed graph whose nodes are the states of the control unit. Each arc
+    is labeled with a terminal and represents the change of state or transition caused by reading the terminal.
+
+    An automaton may have several final states, but only one initial state. 
+
+    \section{Deterministic finite automata}
+    \begin{definition}
+        A \emph{finite deterministic automaton M} comprises five items:
+        \begin{enumerate}
+            \item $Q$, the state set (finite and not empty). 
+            \item $\Sigma$, the input or terminal alphabet
+            \item $\delta:(Q \times \Sigma) \rightarrow Q$, the transition function.
+            \item $q_0 \in Q$, the initial state. 
+            \item $F\subseteq Q$, the set of final states.
+        \end{enumerate}
+    \end{definition}
+    Function $\delta$ specifies the moves: the meaning of $\delta(q,a)=r$ is that machine $M$ in the current state $q$ reads $a$ and moves to next state $r$. 
+    If $\delta(q,a)$ is undefined, the automaton stops, and we can assume it enters the error state. 
+
+    A special case is the empty string, for which we assume no change of state: 
+    \[\forall q \in Q:\delta(q,\varepsilon)=q\]
+    \begin{definition}
+        The languages accepted by such automata are called \emph{finite-state recognizable}.
         
+        Two automata are \emph{equivalent} if they accept the same language.
+    \end{definition}
+    Observing that for each input character the automaton executes one step, the total number of steps is exactly equal to the length of the input string. Therefore, such
+    machines are very efficient as they can recognize strings in real time by a single left-to-right scan.
+
+    \subsection{Error state and total automata}
+    If the move is not defined in state $q$ when reading character $a$, we say that the automaton falls into the error state $q_{err}$. The error state is such that for 
+    any character the automaton remains in it, thus justifying its other name of sink or trap state. Obviously the error state is not final. The state-transition function 
+    can be made total by adding the error state and the transitions from/to it. 
+
+    Clearly any computation reaching the error state gets trapped in it and cannot reach a final state. As a consequence, the total automaton accepts the same language as 
+    the original one. It is customary to leave the error state implicit, neither drawing a node nor specifying the transitions for it.
+
+    \subsection{Clean automata}
+    An automaton may contain useless parts not contributing to any accepting computation, which are best eliminated.
+    \begin{definition}
+        A state $q$ is \emph{reachable} from state $p$ if a computation exists going from $p$ to $q$.
+
+        A state is \emph{accessible} if it can be reached from the initial state. 
+
+        A state is \emph{post-accessible} if a final state can be reached from it. 
+
+        A state is called \emph{useful} if it is accessible and post-accessible. 
+
+        An automaton is \emph{clean} if every state is useful.
+    \end{definition}
+    For every finite automaton there exists an equivalent clean automaton.
+
+    \subsection{Minimal automata}
+    For every finite-state language, the deterministic finite recognizer minimal with respect to the number of states is unique.
+    \begin{definition}
+        The states $p$ and $q$ are \emph{indistinguishable} if, and only if, for every string $x \in \Sigma^{*}$, either both states $\delta(p,x)$ and $\delta(q,x)$ are 
+        final, or neither one is. 
+        
+        The complementary relation is termed \emph{distinguishability}.
+    \end{definition}
+    Two states $p$ and $q$ are indistinguishable if, starting from them and scanning the same arbitrarily chosen input string $x$, it never happens that a computation 
+    reaches a final state and the other does not. Notice that: 
+    \begin{enumerate}
+        \item The sink state $q_{err}$ is distinguishable from every state $p$, since for any state there exists a string $x$ such that $\delta(p,x) \in F$, while for 
+            every string $x$ it is $\delta(q_{err},x)=q_{err}$. 
+        \item $p$ and $q$ are distinguishable if $p$ is final and $q$ is not, because $\delta(p,\varepsilon)\in F$ and $\delta(q,\varepsilon) \notin F$. 
+        \item $p$ and $q$ are distinguishable if, for some character $a$, the next states $\delta(p,a)$ and $\delta(q,a)$ are distinguishable.
+    \end{enumerate}
+    In particular, $p$ is distinguishable from $q$ if the set of labels attached to the outgoing arrows from $p$ and the similar set from $q$ are different. 
+
+    Indistinguishability as a relation is symmetric, reflexive, and transitive. 
+
+    \subsection{Construction of minimal automaton}
+    The minimal automaton $M^{'}$, equivalent to the given $M$, has for states the equivalence classes of the indistinguishability relation. From this it is a 
+    straightforward test to check whether two given machines are equivalent. First minimize both machines; then compare their state-transition graphs to see if 
+    they are identical. In practical use, obvious economy reasons make the minimal machine a prefer-able  choice. But the saving is often negligible for  
+    the cases of concern in compiler design. What is more, in certain situations state minimization of the recognizer should be avoided. The uniqueness property 
+    of the minimal automaton does not hold for the nondeterministic machines. 
+
+    \subsection{From automaton to grammars}
+    The grammar $G$ has as non-terminal set the states $Q$ of the automaton, and the axiom is the initial state. For each move $q \rightarrow^{a} r$ the grammar 
+    has the rule $q \rightarrow ar$. If state $q$ is final, it has also the terminal rule $q \rightarrow \varepsilon$. It is evident that there exists a bijective 
+    correspondence between the computations of the automaton and the derivations of the grammar. 
+    \begin{example}
+        The correspondence between an automaton and a grammar is shown below. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/autgram.png}
+        \end{figure}
+    \end{example}
+    The conversion from automaton to grammar has been straightforward, but to make the reverse transformation from grammar to automaton, we need to 
+    modify the machine definition by permitting nondeterministic behavior.
+        
+    \section{Nondeterministic automata}
+    A right-linear grammar may contain two alternative rules starting with the same character. In this case, converting the rules to machine transitions, two arrows with 
+    identical label would exit from the same state $A$ and enter two distinct states $B$ and $C$. This means that in state $A$, reading the character, the machine can 
+    choose which one of the next states to enter: its behavior is not deterministic. A machine move that does not read an input character is termed spontaneous or an epsilon 
+    move. Spontaneous moves too cause the machine to be nondeterministic. 
+
+    \subsection{Motivation of non-determinism}
+    The main advantages of this are: 
+    \begin{itemize}
+        \item Concision: defining a language with a nondeterministic machine often results in a more read-able and compact definition. 
+        \item Left right interchange and language reflection: it is useful when a deterministic machine is used to recognize the reflection. 
+        \item Converting regular expressions to automaton. 
+    \end{itemize}
+
+    \subsection{Nondeterministic recognizers}
+    \begin{definition}
+        A \emph{non-deterministic finite automaton} $N$, without spontaneous moves, is defined by: 
+        \begin{itemize}
+            \item The state set $Q$. 
+            \item The terminal alphabet $\Sigma$. 
+            \item Two subsets of $Q$: the set $I$ of the initial states and the set $F$ of final states.
+            \item The transition relation $\delta$, a subset of the Cartesian product $Q\times\Sigma\times Q$.     
+        \end{itemize}
+\end{definition} 
+    As before, a computation is a series of transitions such that the origin of each one coincides with the destination of the preceding one. The computation
+    origin is $q_0$, the termination is $q_n$, and the length is the number $n$ of transitions or moves. A computation of length 1 is just a transition.
+    A string $x$ is recognized or accepted by the automaton, if it is the label of a computation originating in some initial state, terminating in some final state, 
+    and having label $x$. The language $L(N)$ recognized by automaton $N$ is the set of accepted strings. The moves of a nondeterministic automaton can still be 
+    considered as a finite function, but one computing sets of values. For a machine $N=(Q,\Sigma,\delta,I,F)$, devoid of spontaneous moves, the functionality of the 
+    state-transition function $\delta$ is the following: 
+    \[\delta:Q\times\left(\Sigma\cup\{\varepsilon\}\right)\rightarrow \mathcal{P}(Q)\]
+    where symbol $\mathcal{P}(Q)$ indicates the power set of set $Q$. 
+
+    \subsection{Automata with spontaneous moves}
+    Another kind of nondeterministic behavior occurs when an automaton changes state without reading a character, thus performing a spontaneous move. In this case 
+    the number of steps of the computation can exceed the length of the input string, because of the presence of $\varepsilon$-arcs. As a consequence, the recognition 
+    algorithm no longer works in real time. Yet time complexity remains linear, because it is possible to assume that there are no cycles of spontaneous moves in any 
+    computation. The family of languages recognized by such nondeterministic automata is also called finite-state.
+
+    The official definition of nondeterministic machine allows two or more initial states, but it is easy to construct an equivalent machine with only one: add to the
+    machine anewstateq0, which will be the only initial state, and the $\varepsilon$-arcs going from it to the former initial states of the automaton.
+
+    \subsection{Correspondence between automata and grammars}
+    Consider a right-linear grammar $G=(V,\Sigma,P,S)$ and a nondeterministic automaton $N=(Q,\Sigma,\delta,q_0,F)$, which we may assume from the preceding discussion to 
+    have a single initial state. First assume the grammar rules are strictly unilinear. The states $Q$ of the automaton match the non-terminals $V$ of the grammar. The 
+    initial state corresponds to the axiom. Notice that the pair of alternatives $p\rightarrow aq|ar$ correspond to two nondeterministic moves. A copy rule matches a 
+    spontaneous move. A final state  matches a non-terminal having an empty rule.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/correspondence.png}
+        \caption{Correspondence between automaton and grammar}
+    \end{figure}
+
+    \subsection{Ambiguity of automata}
+    \begin{definition}
+        An automaton is \emph{ambiguous} if it accepts a string with two different computations.
+    \end{definition}
+    Clearly it follows from the definition that a deterministic automaton is never ambiguous. We also have that an automaton is ambiguous if, and only if, the right-linear 
+    equivalent grammar is ambiguous. 
+
+    REG families can be defined also using left-linear grammars. By interchanging left with right, it is simple to discover the mapping between such grammars and automata.
+
+    \section{From automaton to regular expression: the BMC method}
+    Suppose for simplicity the initial state $i$ is unique, and no arc enters in it; similarly the final state $t$ is unique and without outgoing arcs. Otherwise, just add
+    a new initial state $i$ connected by spontaneous moves to the ex-initial states; similarly introduce a new unique final state $t$. Every state other than $i$ and $t$ is 
+    called internal. We construct an equivalent automaton, termed generalized,  which is more flexible as it allows arc labels to be not just terminal characters, but also 
+    regular languages. The idea is to eliminate one by one the internal states, while compensating by introducing new arcs labeled with regular expression, until only the initial and final 
+    states are left. Then the label of arc $i \rightarrow t$ is the regular expression of the language.
+    \begin{example}
+        The BMC method applied to a simple automaton: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.6\linewidth]{images/brzozowski.png}
+        \end{figure}
+    \end{example}
+
+    \section{Elimination of non-determinism}
+    Every non-deterministic finite automaton can always be transformed into an equivalent deterministic one. Consequently, every right linear grammar always admits an 
+    equivalent non-ambiguous right linear one. Thus,  every ambiguous regular expression can always be transformed into a non-ambiguous one. The algorithm to transform a 
+    non-deterministic automaton into a deterministic one is structured in two phases: 
+    \begin{enumerate}
+        \item Elimination of the spontaneous moves. As such moves correspond to copy rules, it suffices to apply the algorithm for removing the copy rules. 
+        \item Replacement of the non-deterministic multiple transitions by changing the automaton state set. This is the well known subset construction. 
+    \end{enumerate}
+    \begin{example}
+        Given the following automaton: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/oaut.png}
+        \end{figure}
+        After applying the algorithm we have: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/faut.png}
+        \end{figure}
+    \end{example}
+
+    \section{From a regular expression to a finite state automaton}
+    There are a few algorithms to transform a regular expression into an automaton, which differ as for automaton characteristic. 
+    
+    \subsection{Thompson structural method}
+    Wit the Thompson structural method, given a regular expression, we analyze it into simple parts, we produce corresponding component automata, and we interconnect them 
+    to obtain the complete recognizer. In  this  construction each  component machine is  assumed to  have  exactly one initial state without incoming arcs and one final 
+    state without outgoing arcs. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/thompson.png}
+        \caption{Sub-expression to automaton}
+    \end{figure}
+    The validity of Thompson's method comes from it being an operational reformulation of the closure properties of regular languages under concatenation, union, and star.
+    In general the outcome of the Thompson method is a non-deterministic automaton with spontaneous moves. There are various optimizations of the Thompson method that avoid 
+    creating redundant states. 
+
+    \subsection{Glushkov-McNaughton-Yamada algorithm}
+    The GMY algorithm constructs the automaton equivalent to a given regular expression, with states that are in a one-to-one correspondence with the generators that occur
+    in the regular expression. 
+
+    \begin{definition}
+        Given a language $L$ over the alphabet $\Sigma$ we can define: 
+        \begin{itemize}
+            \item The set of initials: $Ini(L)=\{a \in \Sigma | a\Sigma^{*}\cap L \neq \varnothing\}$. 
+            \item The set of finals: $Fin(L)=\{a \in \Sigma | \Sigma^{*}a\cap L \neq \varnothing\}$.
+            \item The set of digrams: $Dig(L)=\{x \in \Sigma^{2} | \Sigma^{*}x\Sigma^{*} \cap L \neq \varnothing\}$.
+            \item The set of forbidden digrams: $\overline{Dig(L)}=\Sigma^{2}-Dig(L)$
+        \end{itemize}
+        The language $L$ is called \emph{local} or \emph{locally testable}, if and only if it satisfies the following identity: 
+        \[L-\{\varepsilon\}=\{x|Ini(x)\in Ini(L) \land Fin(x)\in Fin(L)\land Dig(x)\subseteq Dig(L)\}\]
+    \end{definition}
+    To design the recognizer of a local language we scan the input string from left to right and check whether: the initial character belongs to the set $Ini$, every 
+    digram belongs to the set $Dig$, and the final character belongs to the set $Fin$. The string is accepted if, and only if, all the above checks succeed. 
+
+    We can implement the above recognizer by resorting to a sliding window with a width of two characters, which is shifted over the input string from left to right.
+    At each shift step the window contents are checked, and if the window reaches the end of the string and all the checks succeed, then the string is accepted, otherwise
+    it is rejected. This sliding window algorithm is simple to implement by means of a non-deterministic automaton. 
+    \begin{definition}
+        A regular expression is said to be \emph{linear} if there is not any repeated generator. 
+    \end{definition}
+    The idea of the GMY algorithm, based on the linear regular expressions is the following: 
+    \begin{enumerate}
+        \item Denumerate the regular expression e and obtain the linear regular expression $e_{\#}$. 
+        \item Compute the three characteristic local sets $Ini$, $Fin$ and $Dig$ of $e_{\#}$.
+        \item Design the recognizer of the local language generated by $e_{\#}$.
+        \item Cancel the indexing and thus obtain the recognizer of $e$.
+    \end{enumerate}
+    
+    \subsection{Berry-Sethi method}
+    In order to obtain the deterministic recognizer, we can just apply the subset construction to the non-deterministic recognizer built by the GMY algorithm. However, there 
+    is a more direct algorithm called Berry-Sethi. The idea at the base of this algorithm is the following: 
+    \begin{enumerate}
+        \item From the original regular expression $e$ over alphabet $\Sigma$ derive the linear expression $e^{'}\dashv$, where $e^{'}$ is the numbered version of $e$ 
+            and $\dashv$ is a string terminator symbol, with $\dashv \notin \Sigma$.
+        \item Build the local automaton recognizing the local language $L(e^{'}\dashv)$: this automaton includes the initial state $q_0$, one non-initial and non-final
+            state for each element of $\Sigma_N$, and a unique final state $\vdash$.
+        \item Label each state of the automaton with the set of the symbols on its outgoing edges. The initial state $q_0$ is labeled with $Ini(e^{'}\dashv)$, the final 
+            state $\dashv$ is labeled with the empty set $\varnothing$. For each non-initial and non-final states $c$, $c \in \Sigma_N$, the set labeling that state is 
+            called the set of followers of symbol $c$, $Fol(c)$,in the expression $e^{'}\dashv$; it is derived directly from the local set of digrams as follows:
+            $Fol(a_i)=\{b_j|a_ib_j \in Dig(e^{'}\dashv)\}$. $Fol$ is equivalent to the $Dig$ local set and, together with the other two local sets $Ini$ and $Fin$, 
+            characterizes a local language.
+        \item Merge any existing states of the automaton that are labeled by the same set. The obtained automaton is equivalent to the previous one: since the recognized 
+            language is local, states marked with equal sets of followers are indistinguishable
+        \item Remove the numbering from the symbols that label the transitions of the automaton: the resulting automaton, which may be nondeterministic, accepts by 
+            construction the language $L(e^{'}\dashv)$.
+        \item Derive a deterministic, equivalent automaton by applying the construction of Accessible Subsets; label the sets resulting from the union of several states of 
+            the previous nondeterministic automaton with the union of the sets labeling the merged states. The resulting deterministic automaton recognizes $L(e^{'}\dashv)$.
+        \item Remove from the automaton the final state (labeled by $\varnothing$) and all arcs entering it; define as final states of the resulting automaton those labeled 
+            by a set that includes the $\dashv$ symbol; the resulting automaton is deterministic and recognizes $L(e)$.
+    \end{enumerate}
+    \begin{algorithm}[H]
+        \caption{Berry-Sethi algorithm}
+            \begin{algorithmic}[1]
+                \State $q_0 \leftarrow Ini(e_{\#} \dashv)$
+                \State $Q \leftarrow \{q_0\}$
+                \State $\delta \leftarrow \varnothing$
+                \While {$\exists q \in Q$ such that $q$ is unmarked}
+                    \State mark state $q$ as visited
+                    \For {each character $c \in \Sigma$}
+                        \State $q^{'} \leftarrow \bigcup_{\forall c_{\#} \in \Sigma_{c_{\#}}}Fol(c_{\#})$
+                        \If {$q^{'} \neq \varnothing$}
+                            \If {$q^{'} \notin Q$}
+                                \State set $q^{'}$ as a new unmarked state
+                                \State $Q \leftarrow Q \cup \{q^{'}\}$
+                            \EndIf
+                            \State $\delta \leftarrow Q \cup \{q^{'}\}$
+                        \EndIf
+                    \EndFor
+                \EndWhile
+            \end{algorithmic}
+    \end{algorithm}
+    \begin{example}
+        Given the language $L=(a|bb)^{*}(ac)^{+}$ apply the BS algorithm. First we enumerate the string: 
+        \[e_{\#}=(a_1|b_2b_3)^{*}(a_4c_5)^{+} \dashv\]
+        And with the table we obtain:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\linewidth]{images/BS.png}
+        \end{figure}
+    \end{example}
+    Another use of algorithm BS is as an alternative to the power set construction, for converting a nondeterministic machine $N$ into a deterministic one $M$. The steps are: 
+    \begin{enumerate}
+        \item Distinctly number the labels of non-$\varepsilon$ arcs of $N$, obtaining automaton $N^{'}$.
+        \item Compute the local sets $Ini$, $Fin$, and $Fol$ for the language $L(N^{'})$. These can be easily derived from the transition graph, possibly exploiting the 
+            identity $\varepsilon a=a\varepsilon=a$.
+        \item Applying the BS construction to the sets $Ini$, $Fin$, and $Fol$, produce the deterministic automaton $M$.
+    \end{enumerate}
+
+    \section{Regular expression: complement and intersection}
+    Regular expressions may also contain the operators of complement, intersection and set difference, which are very useful to make the regexp more concise. 
+    Let $L$ and $L^{'}$ be regular languages. The complement $\lnot L$ and the intersection$L \cap L^{'}$ are regular languages. The deterministic recognizer $\overline{M}$ 
+    of the complement language requires to complete the automaton $M$ by adding the error state p and the missing moves: 
+    \begin{itemize}
+        \item Create the error state $p$, not in $Q$, so the states of $\overline{M}$ are $Q \cup \{ p \}$
+        \item The transition function $\delta$ is: 
+            \begin{itemize}
+                \item $\delta(q,a)=\delta(q,a)$, where $\delta(q,a) \in Q$. 
+                \item $\delta(q,a)=p$, where $\delta(q,a)$ is not defined;
+                \item $\delta(p,a)=p$, for every character $a \in \Sigma$;
+            \end{itemize}
+        \item Swap the non-final and final states. 
+    \end{itemize}
+    \begin{example}
+        Find the complement of the given automaton: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\linewidth]{images/complement.png}
+        \end{figure}
+    \end{example}
+    For the complement construction to work correctly, the original automaton must be deterministic, otherwise the original and complement languages may be not disjoint,
+    which fact would be in violation of the complement definition. The complement automaton may contain useless states and may not be in the minimal form either; it should 
+    be reduced and minimized, if necessary. 
+    \subsection{Product of automata}
+    A very common construction of formal languages, where a single automaton simulates the computation of two automata that work in parallel on the same input string. 
+    It is very useful to construct the intersection automaton. To obtain the intersection automaton we can resort to the De Morgan theorem. The Cartesian product can 
+    also be obtained by a more direct construction. The intersection of the two languages is recognized directly by the Cartesian product of their automata. 
+    Suppose both automata do not contain any spontaneous moves. The state set of the product machine is the Cartesian product of the state sets
+    of the two automata. Each product state is a pair $\left\langle q^{'},q^{''} \right\rangle $, where the left (right) member is a state of the first (second) machine. 
+    The move is: 
+    \[\left\langle q^{'},q^{''} \right\rangle \rightarrow^a \left\langle r^{'},r^{''} \right\rangle \textnormal{ if and only if } q^{'} \rightarrow r^{'} \textnormal{ and } q^{''} \rightarrow r^{''}\]
+    The product machine has a move if, and only if, the projection of such a move onto the left (right) component is a move of the first (second) automaton. The initial 
+    and final state sets are the Cartesian products of the initial and final state sets of the two automata, respectively. The product construction is equivalent to simulating both 
+    machines in parallel.
+    \begin{example}
+        The intersection can be found as follows: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.52\linewidth]{images/intersection.png}
+        \end{figure}
+    \end{example}
 \end{document}
