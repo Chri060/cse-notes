@@ -1182,6 +1182,133 @@
     \[\min_{C \in H}{\sum_{(i,j) \in C}{c_{ij}}}\]
     This problem is an $\mathcal{N}\mathcal{P}$-hard problem. 
 
+    \newpage 
+
+    \chapter{Linear programming}
+    \begin{definition}
+        A \emph{linear programming problem} is an optimization problem: 
+        \[\min{f(\boldsymbol{x})}\]
+        such that $\boldsymbol{x} \in X \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$, where: 
+        \begin{itemize}
+            \item The objective function $f:X \rightarrow \mathbb{R}$ is linear. 
+            \item The feasible region $X=\{x \in \mathbb{R}^n|g_i(\boldsymbol{x})r_i0 \land i \in (1,m)\}$ with $r_i \in \{=,\geq,\leq\}$ and 
+            $g_i:\mathbb{R}^n \rightarrow \mathbb{R}$ linear functions, for $i=1,\dots,m$.
+        \end{itemize}
+
+        $\boldsymbol{x}^{*} \in \mathbb{R}^n$ is an \emph{optimal solution} of the LP(1) if $f(\boldsymbol{x}^{*}) \leq f(\boldsymbol{x})$, $\forall \boldsymbol{x} \in X$. 
+    \end{definition}
+    The general form of a linear programming problem is the following: 
+    \[\min{z}=\boldsymbol{c}^T\boldsymbol{x}\]
+    such that $\boldsymbol{Ax} \geq \boldsymbol{b}$ and $\boldsymbol{x} \geq \boldsymbol{0}$. In this notation we have that $\boldsymbol{x}$
+    is the vector of the decision variables. Note that the inequality for the matrix $\boldsymbol{A}$ can be changed to an equality, and the 
+    constraints on the variable values can be removed in some problem. It is useful to transform all the linear programming problem in the 
+    general form found before. To do so we can use the following transformation rules: 
+    \begin{itemize}
+        \item $\max{(\boldsymbol{c}^T\boldsymbol{x})}=\min{(-\boldsymbol{c}^T\boldsymbol{x})}$
+        \item $\boldsymbol{a}^T\boldsymbol{x} \leq \boldsymbol{b} \implies \begin{cases}
+            \boldsymbol{a}^T\boldsymbol{x}+s=\boldsymbol{b} \\
+            s \geq 0
+            \end{cases}$
+            where $s$ is called slack variable. 
+        \item $\boldsymbol{a}^T\boldsymbol{x} \geq \boldsymbol{b} \implies \begin{cases}
+            \boldsymbol{a}^T\boldsymbol{x}-s=\boldsymbol{b} \\
+            s \geq 0
+            \end{cases}$
+            where $s$ is called surplus variable. 
+        \item If $\boldsymbol{x}_{ij}$ is unrestricted in sign we have that $\begin{cases}
+            \boldsymbol{x}_j=\boldsymbol{x}_j^{+}-\boldsymbol{x}_j^{-} \\
+            \boldsymbol{x}_j=\boldsymbol{x}_j^{+},\boldsymbol{x}_j^{-} \geq 0
+            \end{cases}$
+            After substituting $\boldsymbol{x}_j$ with $\boldsymbol{x}_j^{+}-\boldsymbol{x}_j^{-}$, we delete $\boldsymbol{x}_j$ from the 
+            problem. 
+        \item $\boldsymbol{a}^T\boldsymbol{x} \leq \boldsymbol{b} \Leftrightarrow -\boldsymbol{a}^T\boldsymbol{x} \geq -\boldsymbol{b}$
+        \item $\boldsymbol{a}^T\boldsymbol{x} \geq \boldsymbol{b} \Leftrightarrow -\boldsymbol{a}^T\boldsymbol{x} \leq -\boldsymbol{b}$
+        \item $\boldsymbol{a}^T\boldsymbol{x} = \boldsymbol{b} \Leftrightarrow \begin{cases}
+            \boldsymbol{a}^T\boldsymbol{x} \geq \boldsymbol{b} \\
+            \boldsymbol{a}^T\boldsymbol{x} \leq \boldsymbol{b}
+        \end{cases}$
+    \end{itemize}
+    \begin{example}
+        Given the following linear programming model, rewrite it in the normal form: 
+        \begin{align*}
+            \max{f(x_1,x_2)}           =&\: 2x_1-3x_2          \\
+            \textnormal{such that }     &\: 4x_1-7x_2 \leq 5  \\
+                                        &\: 6x_1-2x_2 \geq 4  \\
+                                        &\: x_1 \geq 0, x_2 \in \mathbb{R}
+        \end{align*}
+        We can add two new variables $x_2=x_3-x_4$, with $x_3,x_4 \geq 0$, and we obtain:
+        \begin{align*}
+            \max{f(x_1,x_2)}           =&\: 2x_1-3x_2          \\
+            \textnormal{such that }     &\: 4x_1-7x_3+7x_4 \leq 5  \\
+                                        &\: 6x_1-2x_3+2x_4 \geq 4  \\
+                                        &\: x_1,x_2,x_4 \geq 0
+        \end{align*}
+        We now introduce slack and surplus variables  $x_5$ and $x_6$, and we obtain: 
+        \begin{align*}
+            \max{f(x_1,x_2)}           =&\: 2x_1-3x_2          \\
+            \textnormal{such that }     &\: 4x_1-7x_3+7x_4+x_5 = 5  \\
+                                        &\: 6x_1-2x_3+2x_4-x_6 = 4  \\
+                                        &\: x_1,x_2,x_4,x_5,x_6 \geq 0
+        \end{align*}
+        In the end we need to change the sign of the objective function: 
+        \begin{align*}
+            \min{f(x_1,x_2)}           =&\: -2x_1+3x_2          \\
+            \textnormal{such that }     &\: 4x_1-7x_3+7x_4+x_5 = 5  \\
+                                        &\: 6x_1-2x_3+2x_4-x_6 = 4  \\
+                                        &\: x_1,x_2,x_4,x_5,x_6 \geq 0
+        \end{align*}
+    \end{example}
+    The assumptions of the linear programming models are: 
+    \begin{enumerate}
+        \item Linearity of the objective function and constraints. 
+        \item Proportionality of the objective function and constraints: the contribution of each variable is weighted on a constant. 
+        \item Additivity of the objective function and constraints: the contribution of all variables is the sum of the single 
+            contributions.
+        \item Divisibility: the variables can take rational values. 
+        \item Parameters are considered as constant which can be estimated with a sufficient degree of accuracy. 
+    \end{enumerate}
+    The linear programming sensitivity analysis allows evaluating how sensitive an optimal solution is with respect to small changes in 
+    the parameter values. 
+    \begin{definition}
+        A \emph{level curve} of a value $z$ of a function $f$ is the set of points in $\mathbb{R}^n$ where $f$ is constant and takes value $z$.
+
+        A \emph{hyperplane} is defined as $H=\{\boldsymbol{x} \in \mathbb{R}^n|\boldsymbol{a}^T\boldsymbol{x}=\boldsymbol{b}\}$. 
+
+        An \emph{affine half-space} is defined as $H=\{\boldsymbol{x} \in \mathbb{R}^n|\boldsymbol{a}^T\boldsymbol{x} \leq \boldsymbol{b}\}$. 
+    \end{definition}
+    Each inequality constraint defines an affine half-space in the variable space. 
+    \begin{definition}
+        The feasible region $X$ of any linear programming is a \emph{polyhedron P}.
+
+        A subset $S \subseteq \mathbb{R}^n$ is \emph{convex} if for each pair $y_1,y_2 \in S$, $S$ contains the whole segment connecting $y_1$ 
+        and $y_2$. 
+
+        The segment defined by $y_1,y_2 \in S$, defined by all \emph{convex combinations} of $y_1$ and $y_2$ is: 
+        \[[y_1,y_2]=\{x \in \mathbb{R}^n|x=\alpha y_1+(1-\alpha)y_2 \land \alpha \in [0,1]\} \]
+    \end{definition}
+    \begin{example}[Property]
+        A polyhedron $P$ is a convex set of $\mathbb{R}^n$
+    \end{example}
+    This happens because every half-space is convex, and the intersection of a finite number of convex sets is also a convex set. 
+    \begin{definition}
+        A \emph{vertex} of $P$ is a point $P$ which cannot be expressed as a convex combination of two other distinct points of $P$. 
+    \end{definition}
+    Algebraically, a vertex is defined as: 
+    \[x= \alpha y_1+(1-\alpha)y_2, \alpha \in [0,1], y_1,y_2 \in P \implies x=y_1 \lor x=y_2\]
+    \begin{example}[Property]
+        A non-empty polyhedron $P=\{x \in \mathbb{R}^n|\boldsymbol{Ax}=\boldsymbol{b},\boldsymbol{x} \geq \boldsymbol{0}\}$ (in standard form)
+        or $P=\{\boldsymbol{x} \in \mathbb{R}^n|\boldsymbol{Ax}=\boldsymbol{b},\boldsymbol{x} \geq \boldsymbol{0}\}$ (in canonical form) has a 
+        finite number ($n \geq 1$) of vertices. 
+    \end{example}
+    \begin{definition}
+        Given a problem $P$, a vector $\boldsymbol{d} \in \mathbb{R}^n$ with $\boldsymbol{d} \neq \boldsymbol{0}$ is an 
+        \emph{unbounded feasible direction of P} if, for every point $x_0 \in P$, the ray $\{\boldsymbol{x} \in \mathbb{R}^n|\boldsymbol{x}=\boldsymbol{x}_0+\lambda\boldsymbol{d},\lambda \geq 0\}$ is contained in $P$.
+    \end{definition}
+
+
+
+
+
 
 
 \end{document}
