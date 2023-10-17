@@ -1100,8 +1100,121 @@ FETCH FIRST 1 ROW ONLY
         \end{figure}
     \end{example}
 
+    \subsection{A-zero algorithm}
+    The A-zero algorithm, also called Fagin's algorithm, works with every monotonic scoring function and not only with maximum. The inputs
+    of this algorithm are: an integer $k$, and a monotone function $S$ combining ranked lists $R_1,\dots,R_m$. The idea of this algorithm is: 
+    \begin{enumerate}
+        \item Extract the same number of objects by sorted accesses in each list until there are at least $k$ objects in common. 
+        \item For each extracted object, compute its overall score by making random accesses wherever needed. 
+        \item Among these, output the $k$ objects with the best overall score. 
+    \end{enumerate}
+    The complexity of this algorithm is $O(N^{\frac{m-1}{m}}k^{\frac{1}{m}})$, that is sublinear in the number $N$ of objects. The 
+    stopping criterion is independent of the scoring function, and it is not instance optimal. 
+    \begin{example}
+        Given the following hotel's review on different sites: 
+        
+        SLIDE 83
 
+        We decide to use the following scoring function: 
+        \[0.5 \cdot cheapness+0.5 \cdot rating\]
+        and $k=2$. We iterate on the rows until $k$ hotels are found in all columns. In this case we need to inspect $5$ column to find at
+        least two hotels (we found: Ibis, Novotel and Hilton). Now we have to complete the score of the remaining incomplete hotels, so we make 
+        random access to find the missing values. After summing completing the information about those hotels we can compute the final ranking 
+        with the give score function, and we obtain: 
 
+        SLIDE 83
+    \end{example}
+    The main drawback of this algorithm is that it is dependent from the accesses, so the specificity of some scoring function is not exploited
+    at all, and the memory requirements can become prohibitive because of the buffer that keeps the accessed objects. It is possible to make 
+    some improvements, but only changing the stopping condition can really improve the complexity. 
 
+    \subsection{Threshold algorithm}
+    The inputs of the threshold algorithm are: an integer $k$, and a monotone function $S$ combining ranked lists $R_1,\dots,R_m$. 
+    The idea of this algorithm is: 
+    \begin{enumerate}
+        \item Do sorted access in parallel in each list $R_i$. 
+        \item For each object $o$, do random accesses in the other lists $R_j$, thus extracting score $s_j$. 
+        \item Compute overall score $S(s_1, \dots, s_m)$. If the value is among the $k$ highest seen so far, and remember $o$. 
+        \item Let $s_{L_i}$ be the last score seen under sorted access for $R_i$. 
+        \item Define threshold $T=S(s_{L_1}, \dots, s_{L_m})$. 
+        \item If the score of the $k$-th object is worse than $T$, go to step one. 
+        \item Return the current top-$k$ objects. 
+    \end{enumerate}
+    The threshold algorithm is instance optimal among all algorithms that use random and sorted accesses, and the stopping criterion depends 
+    on the function and not on the number of accesses. 
+    \begin{example}
+        Given the following hotel's review on different sites: 
+        
+        SLIDE 83
+
+        We decide to use the following scoring function: 
+        \[0.5 \cdot cheapness+0.5 \cdot rating\]
+        and $k=2$. We do a sorted access, and we put the hotels in the first row in the buffer with the mean value of both variables (the 
+        second can be found with a random access). The threshold point is $(0.92,0.9)$ and has a value of $0.91$, found with the scoring 
+        function. We continue to do this procedure, and we update the top $k$ hotels only if the found hotel has a better score of at least
+        one of the hotels in the buffer (note that we keep in the buffer only the top $k$ hotels, while we delete the others). 
+        We stop the iteration when the value of all the objects in the buffer is greater or equal to the threshold value. In this example this
+        happens after three iteration. In fact, we have that the buffer contains the following values: 
+
+        and the threshold point has a value of $0.825$
+    \end{example}
+    n general, TA performs much better than FA, since it can adapt to the specific scoring function. In order to characterize the 
+    performance of TA, we consider the middleware cost: 
+    \[\textnormal{cost} = SA*c_{SA} + RA*c_{RA}\]
+    where:
+    \begin{itemize}
+        \item $SA$ is the total number of sorted accesses.
+        \item $RA$ is the total number of random accesses.
+        \item $c_{SA}$ is the base cost of sorted accesses.
+        \item $c_{RA}$ is the base cost of random accesses.
+    \end{itemize}
+
+    \subsection{No random access algorithm}
+    The NRA applies when random accesses cannot be executed. It returns the top-$k$ objects, but their 
+    scores might be uncertain. The idea at the base of this algorithm is to maintain, for each selected object
+    $o$ a lower bound $S^{-}(o)$ and an upper bound $S^{+}(o)$ on its score. So, we need an unlimited buffer to 
+    store the objects like in the $B_0$ algorithm, sorted by decreasing lower bound values. This algorithm 
+    stops when the new object upper bound is less or equal to the worst lower bound of the best objects. The inputs are: 
+    an integer $k \geq 1$, a monotone function $S$ combining ranked lists $R_1, \dots, R_m$ and the output is the ranking
+    without the score of the objects. The idea is the following: 
+    \begin{enumerate}
+        \item Make sorted access to each list. 
+        \item Store in $B$ each retrieved object $o$ and maintain $S^{-}(o)$ and $S^{+}(o)$ and a threshold $\tau$. 
+        \item Repeat from step one as long as $S^{-}(B[k]) < \max\{ \max\{S^{+}(B[i]), i > k\}, S(\tau) \}$
+    \end{enumerate}
+    \begin{example}
+        Given the following tables based on three different criterions: 
+
+        We decide to use SUM as score function, and $k=2$. For the first iteration we add to the buffer the 
+        objects in the first row with a lower bound corresponding to the sum of the score of each object and the 
+        upper bound corresponding to the sum of all the object in the row. In this case we have three different 
+        objects, so the lower bound correspond with the score of each object and the upper is the sum: 
+
+        B first round 
+
+        So we have that: 
+        \[0.8<\max\{2.4,2.4\}\]
+        and we need another iteration. We obtain:
+
+        B second round: 
+
+        So we have that:
+        \[0.8<\max\{2.4,2.4\}\]
+    \end{example}
+    NRA is instance optimal among all algorithms that do not make random accesses.
+    
+    \subsection{The overall picture}
+    TABLE 
+
+    The main aspects of the ranking queries are: 
+    \begin{itemize}
+        \item They are very effective identifying the best objects with respect to a specific scoring function. 
+        \item They have excellent control of the cardinality of the result. 
+        \item The computation is very efficient. 
+        \item It is easy to express the relative importance of attributes. 
+        \item For a user, it is difficult to specify a scoring function. 
+    \end{itemize}
+
+    \section{Skyline queries}
 
 \end{document}
