@@ -302,31 +302,135 @@
         \centering
         \includegraphics[width=0.5\linewidth]{images/mnet.png}
     \end{figure}
-    Answer the following questions:
-    \begin{enumerate}
-        \item Draw the complete pilot of grammar $G$ and show that grammar $G$ is ELR(1).
-        \item Write all the guide sets of the machine net of grammar $G$ (on the call arcs and exit arrows) and show that grammar $G$ is ELL(1).
-        \item Write a simulation of the bottom-up analysis of the valid string below:
-            \[a a b a c b \in L(G)\]
-            Show at least the stack contents, the parsing actions and the resulting syntax tree.
-        \item Write the recursive descent procedure for non-terminal $S$, based on the ELL method.
-    \end{enumerate}
+    Draw the complete pilot of grammar $G$, check for the conflicts, and show that grammar $G$ is ELR(1).
     \subsection*{Solution}
-    \begin{enumerate}
-        \item The initial state is the same as the one in the given machine. The final state have a circle surrounding the name. The machine is the following: 
-            \begin{figure}[H]
-                \centering
-                \includegraphics[width=0.6\linewidth]{images/pilot.png}
-            \end{figure} 
-    \end{enumerate}
+    The initial state is the same as the one in the given machine. The final state have a circle surrounding the name. The machine is the following: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\linewidth]{images/pilot.png}
+    \end{figure} 
+    The shift/reduce conflicts are present if an outgoing arc from the terminal states has a label with a symbol in the look ahead of the terminal states. 
+    In this case we have no shift/reduce conflicts. 
 
+    The reduce/reduce conflicts are present if an $m$-state have two final states and at least one shared symbol in the two look ahead of the final state. 
+    In this case we have no reduce/reduce conflicts. 
 
+    The convergence conflict arises if: 
+    \begin{itemize}
+        \item We lose the single arc properties (non-determinism). 
+        \item We have two arcs incoming in an $m$-state with the same label. 
+        \item There is one shared look ahead in the convergent $m$-states. 
+    \end{itemize}
+    In this case we have no convergence conflicts. 
 
-
+    Since we have no conflicts, we are in ELR(1). 
 \newpage 
 
 \chapter{Exercise session IV}
+    \section{Syntax analysis and parsing}
+        Consider the following grammar $G$, represented as a machine net over the two-letter terminal alphabet $\Sigma = \{ a, b \}$ and the two-letter non-terminal alphabet 
+        $V = \{ S, A \}$ (axiom $S$).
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/parsing.png}
+        \end{figure} 
+        Answer the following questions:
+        \begin{enumerate}
+            \item Draw the syntax tree (or trees if there are two or more) of the valid string $a a b$.
+            \item Draw the complete pilot of grammar $G$, say if grammar $G$ is of type ELR (1), and shortly justify your answer. If the grammar is not ELR(1) then highlight
+                all the conflicts in the pilot.
+            \item Write all the guide sets on the arcs of the machine net (shift and call arcs, and final arrows), say if grammar G is of type ELL(1), based on the guide sets, 
+                and shortly justify your answer. If you wish, you can use the figure above to add the call arcs and annotate the guide sets.
+            \item Analyze the valid string $a a b$ using the Earley method; show the item/all the items that gives/give evidence of string acceptance.
+        \end{enumerate}
+    \subsection*{Solution}
+        \begin{enumerate}
+            \item The string $a a b$ is ambiguous and admits these two syntax trees:
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.5\linewidth]{images/syntax.png}
+                \end{figure} 
+            \item The pilot is the following: 
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.5\linewidth]{images/synsol.png}
+                \end{figure} 
+                No reduce/reduce conflicts, no shift/reduce conflicts. The b transitions comes from the same $m$-state, converges in the same $m$-state, and there is 
+                an equal symbol in both convergent states, so there is a convergence conflict. So the grammar is not ELR(1). 
+            \item Here are all the guide sets of the machine net, completed with the call arcs to make the Predictive Control Flow Graph (PCFG):
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.5\linewidth]{images/PCFG.png}
+                \end{figure} 
+                The guide sets on the terminal shift arcs are trivial and not shown. The grammar is not ELL(1), because of the overlapping guide sets at the 
+                bifurcation state $0_S$ (we have non-determinism).
+            \item Here is the Earley vector for string $a a b$:
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.75\linewidth]{images/earley.png}
+                \end{figure} 
+                The final item $\left\langle 1_S,0\right\rangle$ in the last vector element indicates that string $a a b$ is accepted and corresponds to the two parsing trees 
+                of the string $a a b$. 
+        \end{enumerate}
 
+    \newpage
+    \section{Static control flow analysis}
+        Consider the program Control Flow Graph (CFG) below, with seven nodes:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/CFG.png}
+        \end{figure} 
+        Answer the following questions:
+        \begin{enumerate}
+            \item Informally find the live variables at the input of each node of the CFG.
+            \item Can variables a and b share the same memory cell?
+            \item Find again the live variables at the input of each CFG node, through the data-flow equation method. Verify that the result is coherent with point one. 
+        \end{enumerate}
+    \subsection*{Solution}
+        \begin{enumerate}
+            \item At the input of node 1 (initial) no variable is live, since every variable is assigned in the initial node itself or in some successor thereof before using.
+                At the output of node 7 (final), by definition no variable is live. The other liveness intervals are just an application of the liveness definition. 
+                For instance, variable c is live at the inputs of all the nodes in the two loops (2-3-4-5 and 2-3-4-6), since it is used inside both loops (in the node 4) 
+                and is never reassigned after being initialized in the node 1 outside the loops. Variables a and b are even simpler: $a$ is assigned in 2 and is used in 3,
+                thus it is live only at 3; and $b$ is assigned in 3 and is used in 4, 6 and 7, respectively first, second and third successor of 3, thus it is live at 4, 6 
+                and 7 themselves.
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.75\linewidth]{images/CFGlive.png}
+                \end{figure} 
+            \item Yes, variables $a$ and $b$ can share the same location. In fact, they are not simultaneously live at any program node, thus they can share the same 
+                memory cell or processor register.
+            \item We can construct the following table: 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{l|c|c|}
+                    \cline{2-3}
+                                            & \textbf{Defined} & \textbf{Used} \\ \hline
+                    \multicolumn{1}{|l|}{1} & $c$              &               \\
+                    \multicolumn{1}{|l|}{2} & $a$              &               \\
+                    \multicolumn{1}{|l|}{3} & $b$              & $a$           \\
+                    \multicolumn{1}{|l|}{4} &                  & $b,c$         \\
+                    \multicolumn{1}{|l|}{5} &                  & $c$           \\
+                    \multicolumn{1}{|l|}{6} &                  & $b$           \\
+                    \multicolumn{1}{|l|}{7} &                  & $b$           \\ \hline
+                    \end{tabular}
+                \end{table}
+                We have that: 
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.75\linewidth]{images/dataflow.png}
+                \end{figure} 
+                And the iterations are: 
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.75\linewidth]{images/dataflowit.png}
+                \end{figure} 
+                The out columns at steps 3 and 4 coincide, thus the iteration process converges in three steps. The in column at step 3 lists all the variables
+                live at the program node inputs. The live variable latest to reach a node input is $c$ at node 6 (compare the in columns at steps 2 and 3). In fact, 
+                variable $c$ propagates backwards from node 4, where it is used, to node 6, and to do so it has to cross nodes 3 and 2 in succession, which just takes 
+                three steps in total. All the other propagation cases are fast. The systematic solution obtained through the data-flow method is identical to the informal 
+                one of point one. 
+        \end{enumerate}
 
 \newpage 
 
