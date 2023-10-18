@@ -313,6 +313,119 @@
 
 \newpage
 
+\chapter{Exercise session III}
+    \section{Minimum cost spanning tree}
+        Find the minimum-cost spanning tree in the graph given in the figure by using Prim's algorithm, starting from the node three. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.35\linewidth]{images/prim.png}
+        \end{figure}
+    \subsection*{Solution}
+    We apply Prim's algorithm, starting from node three and in the end we obtain: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.35\linewidth]{images/primsol.png}
+    \end{figure}
+
+    \newpage
+    \section{Kruskal's algorithm}
+        In 1956 Joseph Kruskal proposed the following greedy algorithm to find a minimum cost spanning tree in an arbitrary connected undirected graph $G = (N, E)$ with a cost
+        $c_e$ attached to each edge $e \in E$. 
+        \begin{algorithm}[H]
+            \caption{Kruskal's algorithm}
+                \begin{algorithmic}[1]
+                    \State sort the edges of $E$ as $\{e_1,\dots,e_m\}$ where $c_{e_1} \leq c_{e_2} \leq \dots \leq c_{e_m}$
+                    \State $i \leftarrow 1$
+                    \State initialize the sub graph $G' = (N, E)$ of $G$ with $F=\varnothing$
+                    \While {$\left\lvert F \right\rvert < n-1$}
+                        \If {the two endpoints of the edge $e_i$ belong to different connected components of the current sub graph $G^{'}$}
+                            \State $F \leftarrow F \cup \{e_i\}$
+                            \State merge the two connected components 
+                        \EndIf 
+                        \State $i \leftarrow i+1$
+                    \EndWhile
+                    \State \Return the spanning tree $G^{'} = (N, E)$ 
+                \end{algorithmic}
+        \end{algorithm}
+        In other words, we order the edges by increasing (non-decreasing) cost, we consider the edges in that order and, at each step, we select the current edge (which is 
+        one of the cheapest edges still available) only if it does not create a cycle with the previously selected edges. The algorithm terminates when $n-1$ edges have
+        been selected. 
+        \begin{enumerate}
+            \item Describe an efficient way to identify/keep track of the connected components of the sub graph $G^{'}$ and to check that a new edge is creating a cycle with 
+                the previously selected edges (is connecting two distinct connected components of $G^{''}$). Determine the overall computational complexity of this 
+                implementation of Kruskal's algorithm. 
+            \item By invoking the optimality condition for minimum-cost spanning trees, verify that Kruskal's algorithm is exact. 
+            \item Find the maximum-cost spanning tree in the graph of the previous exercise by using a straightforward adaptation of Kruskal's algorithm. 
+        \end{enumerate}
+    \subsection*{Solution}
+        \begin{enumerate}
+            \item To identify/keep track of the connected components (subtrees) of the sub graph $G$, we use a vector $v$ with as many components as vertices in the graph, 
+                where $v_i$ indicates the index of the connected component containing node $i$. At the beginning of the algorithm, we start with $v_i=i$, for $i = 1,\dots,n$. 
+                When an edge $e = {i,j}$ is considered for addition to $G^{''}$, we compare the values $v_i$ and $v_j$. If $v_i \neq v_j$, then we can add the edge e to $G^{'}$ 
+                because it does not create a cycle. Since the two connected components of indices $v_i$ and $v_j$ are merged, the indices are updated as follows: in the vector $v$
+                we substitute each occurrence of the index of node $i$ with that of node $j$. If $v_i = v_j$, edge e is skipped because it would create a cycle. 
+            \item The $m$ edges can be ordered by non-decreasing cost in $O(m\log m)$, which is $O(m \log n)$ since $m\log m \leq m\log n^2 = 2m\log n$. At most $m$ edges are 
+                considered for addition to the current sub graph $G^{'}$. At each iteration, an edge $e = {i,j}$ is considered and the vector $v$ is updated (in $O(n)$) only if 
+                $v_i \neq v_j$. Since a merging operation occurs exactly$ n-1$ times (a spanning tree contains $n-1$ edges), the overall complexity is $O(m\log n + m+n^2)=
+                O(mlogn + n^2)$. 
+            \item To verify that Kruskal's algorithm is exact, we just need to recall that the edges are considered in order of non-decreasing cost and to invoke the 
+            optimality condition for minimum cost spanning tree. Since each edge e that has been discarded (not added to $F$) has a cost $c_e$ which is at least as large as 
+            the cost of all the previously selected edges, it is not a cost-decreasing edge. According to the optimality condition for minimum cost spanning trees, the 
+            resulting spanning tree is of minimum total cost because no cost-decreasing edge exists. 
+        \end{enumerate}
+        The execution of the algorithm gives the following result. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/kruskal.png}
+        \end{figure}
+
+    \newpage
+    \section{Optimality check}
+        Without applying any one of Prim's and Kruskal's algorithms, verify whether the following spanning tree is of minimum cost. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/optimality.png}
+        \end{figure}
+    \subsection*{Solution}
+        It suffices to verify that there exists a cost decreasing edge. By inspection, we observe that, by adding edge $\{1,5\}$ to the tree, the cycle 
+        $\left\langle 1,5,4,3,2,1\right\rangle$ is introduced. In such cycle, edge $\{4,3\}$ has a strictly larger cost than $\{1,5\}$. Therefore, by removing edge $\{4,3\}$ 
+        and adding edge $\{1,5\}$, a spanning tree of strictly smaller total cost is obtained. 
+
+    \newpage
+    \section{Compact storage of similar sequences}
+        Consider the problem of storing a large set of strings. We assume that the strings have many similar entries (they differ only in a small number of positions) and 
+        we wish to store them in a compact way. This problem arises in several contexts such as when storing DNA sequences, where the characters correspond to the four DNA 
+        bases. In this exercise, we consider the simplified version of the problem with only two characters. Given a set of $k$ sequences of $M$ bits, we compute for each 
+        pair $i,j$, with $1 < i,j < k$, the Hamming distance between the sequences $i$ and $j$, i.e., the number of bits that need to be flipped in sequence $i$ to obtain 
+        sequence $j$. This function clearly satisfies the three usual properties of a distance: non-negativity, symmetry and triangle inequality. Consider the following 
+        set of $6$ sequences and the corresponding matrix $D = {d_{ij}}$ of Hamming distances 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.6\linewidth]{images/DNA.png}
+        \end{figure}
+        where, due to symmetry, only the upper triangle of the matrix is shown. In order to exploit redundancies between sequences and to save memory, we can store: one of 
+        the sequences, called the reference sequence, completely and for every other sequence, only the set of bit flips that allow us to retrieve it either directly from 
+        the reference sequence or from another sequence. 
+
+        Show how the problem of deciding which differences to memorize, to minimize the total number of bits used for storage, can be reduced to the problem of finding a 
+        minimum-cost spanning tree in an appropriate graph. Solve the problem for the given instance. 
+    \subsection*{Solution}
+        We construct a complete graph $G$ with a node for each sequence and an edge for each pair of sequences. Moreover, each edge $\{i,j\}$ is assigned a cost 
+        $d_{ij}\log_2(M)$, which corresponds to the number of bits needed to store the indices of the positions in which the $i$-th and $j$-th sequences differ.
+        The problem is then to look for a sub graph $G^{'}$ of $G$ of minimum total cost. Since only one sequence is completely stored, $G^{'}$ must be connected to be 
+        able to retrieve any sequence. Since a sub graph of minimal cost is sought, $G^{'}$ will be acyclic. Therefore, a minimum cost spanning tree in $G$ provides an 
+        optimal solution to the problem under consideration. The following minimum cost spanning tree has been found using Prim's algorithm. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=1\linewidth]{images/DNA1.png}
+        \end{figure}
+
+\newpage
+
+\chapter{Exercise session IV}
+
+\newpage
+
 \chapter{Laboratory session I}
     \section*{Linear programming modeling}
         A canteen has to plan the composition of the meals that it provides. A meal can be composed of the types of food indicated in the following table. 
