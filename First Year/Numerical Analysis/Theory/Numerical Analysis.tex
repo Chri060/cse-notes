@@ -167,7 +167,7 @@ The topics of the course are:
     \[ \lim_{n \rightarrow \infty} = \alpha\]
     and the error related to the value found for $\alpha$ is equal to: 
     \[ \lim_{n \rightarrow \infty}e^n = 0\]
-    That implies that the error can be also written as: 
+    That Rightarrow that the error can be also written as: 
     \[e^n=\alpha-x^{(n)}\]
     All the methods we are going to see constructs a sequence $x^{(1)},x^{(2)},\dots,x^{(n)}$ of numbers that hopefully converges to $\alpha$:
     \[ \lim_{k \rightarrow + \infty} \left\lvert x^{(k)}-\alpha \right\rvert =0\]
@@ -604,7 +604,7 @@ The topics of the course are:
         \item Real symmetric and positive definite matrices. 
         \item Complex definite positive matrices. 
     \end{itemize}
-    The solution of a linear system with the LU factorization technique has a complexity $O(n^3)$. 
+    The solution of a linear system with the LU factorization technique has a complexity $O(\dfrac{2}{3}n^3)$. 
     \begin{example}
         Given the following system: 
         \[  \begin{cases}
@@ -669,6 +669,24 @@ The topics of the course are:
         \end{bmatrix}\]
     \end{example}
 
+    \subsection{Cholesky factorization}
+    If $\boldsymbol{A} \in \mathbb{R}^{n \times n}$ is symmetric positive definite, it is moreover possible to construct a special factorization: 
+    \[\boldsymbol{A}=\boldsymbol{R}^T\boldsymbol{R}\]
+    where $\boldsymbol{R}$ is an upper triangular matrix with positive diagonal elements. This is the so-called Cholesky factorization and requires about $\dfrac{1}{3}n^3$
+    operations. Further, let's note that, due to symmetry, only the upper part of $\boldsymbol{A}$ is stored, and $\boldsymbol{R}$ can be stored in the same area. 
+
+    The elements of $\boldsymbol{R}$ can be computed with the following algorithm: 
+    \begin{algorithm}[H]
+        \caption{Cholesky factorization algorithm}
+            \begin{algorithmic}
+                \State $r_{jj}\leftarrow\sqrt{a_{jj}-\sum_{k=1}^{j-1}r_{kj}^2}$
+                \State $r_{ij}\leftarrow\dfrac{1}{r_{ii}}\left(a_{ij}-\sum_{k=1}^{i-1}r_{ki}r_{kj}\right) \:\:\:\:\:\: i = 1,\dots,j-1$
+            \end{algorithmic}
+    \end{algorithm}
+    In some cases it is possible to modify the matrix $\boldsymbol{A}$ to apply this factorization by using an appropriate matrix $\boldsymbol{P}$: 
+    \[\boldsymbol{P}^T\boldsymbol{AP}=\boldsymbol{R}^T\boldsymbol{R}\]
+
+
     \subsection{The pivoting technique}
     The pivoting technique allows to achieve the LU factorization for every non-singular matrix. A suitable row permutation of the 
     original matrix $\boldsymbol{A}$ would make the entire factorization procedure feasible even if the hypothesis of the proposition
@@ -705,20 +723,88 @@ The topics of the course are:
 
     \subsection{Linear system solution accuracy}
     Due to round-off errors, when a linear system $\boldsymbol{Ax}=\boldsymbol{b}$ is solved numerically, one is indeed looking for the 
-    exact solution $\widehat{\boldsymbol{x}}$ of a perturbed system: 
-    \[\left( \boldsymbol{A} + \boldsymbol{\delta A}\right)\widehat{\boldsymbol{x}}=\boldsymbol{b}+\boldsymbol{\delta b}\]
+    exact solution $\widetilde{\boldsymbol{x}}$ of a perturbed system: 
+    \[\left( \boldsymbol{A} + \boldsymbol{\delta A}\right)\widetilde{\boldsymbol{x}}=\boldsymbol{b}+\boldsymbol{\delta b}\]
     where $\boldsymbol{\delta A}$ and $\boldsymbol{\delta b}$ are respectively a matrix and a vector which depend on the specific 
-    numerical method which is being used. 
+    numerical method which is being used. We start by considering the case $\boldsymbol{\delta A}=\boldsymbol{0}$ and $\boldsymbol{\delta b}\neq\boldsymbol{0}$ which is 
+    simpler than the most general case. Let $\boldsymbol{\delta A} \in \mathbb{R}^{n \times n}$ and $\boldsymbol{\delta b} \in \mathbb{R}^{n}$ with $\left\lVert \boldsymbol{\delta A} \right\rVert_2 \leq \varepsilon$ 
+    and $\left\lVert \boldsymbol{\delta b} \right\rVert_2 \leq \varepsilon$, with $\varepsilon > 0$. By comparing the previous equation with the general formula for system we obtain: 
+    \[\boldsymbol{A}\left(\boldsymbol{x}-\widetilde{\boldsymbol{x}}\right)=\boldsymbol{\delta b}\Rightarrow\Vert \boldsymbol{x}-\widetilde{\boldsymbol{x}} \Vert_2=\Vert \boldsymbol{A}^{-1}-\boldsymbol{\delta b} \Vert_2 \leq \Vert \boldsymbol{A}^{-1} \Vert_2 \Vert \boldsymbol{\delta b} \Vert_2\]
+    And also that: 
+    \[\Vert\boldsymbol{Ax}\Vert_2=\Vert\boldsymbol{b}\Vert_2 \Rightarrow \Vert\boldsymbol{A}\Vert_2\Vert\boldsymbol{x}\Vert_2 \geq \Vert\boldsymbol{Ax}\Vert_2=\Vert\boldsymbol{b}\Vert_2\]
+    By dividing the two equations we obtain: 
+    \[\dfrac{\left\lVert \widetilde{\boldsymbol{x}}-\boldsymbol{x} \right\rVert_2}{\left\lVert \boldsymbol{x} \right\rVert_2} \leq \dfrac{\left\lVert \boldsymbol{A} \right\rVert_2\left\lVert \boldsymbol{A}^{-1} \right\rVert_2\left\lVert \boldsymbol{\delta b} \right\rVert_2}{\left\lVert \boldsymbol{b} \right\rVert_2}=k_2(A)\dfrac{\left\lVert \boldsymbol{\delta b} \right\rVert_2}{\left\lVert \boldsymbol{b} \right\rVert_2}\]
+    Since the matrix is symmetric positive definite we have that: 
+    \[k_2(A)=\dfrac{\lambda_{max}(A)}{\lambda_{min}(A)}\]
 
-    Let $\boldsymbol{\delta}>0$ a small number: Let $\left\lVert \boldsymbol{\delta A} \right\rVert_2 \leq \boldsymbol{\delta}$ and 
-    $\left\lVert \boldsymbol{\delta b} \right\rVert_2 \leq \boldsymbol{\delta}$. We call $k_2$ the smallest number for which holds: 
-    \[\boldsymbol{\delta x}=\dfrac{\left\lVert \widetilde{\boldsymbol{x}}-\boldsymbol{x} \right\rVert_2}{\left\lVert \boldsymbol{x} \right\rVert_2} \leq k_2 \boldsymbol{\delta}\]
-    If $k_2 > 1$ the problem is said to be bad conditioned. 
+    If the value of the constant $k_2(A)$ is too large (order of 1000) we have to correct the result by using the residual correction algorithm. 
+    \begin{algorithm}[H]
+        \caption{Residual correction algorithm}
+            \begin{algorithmic}[1]
+                \State solve $\boldsymbol{Ax}=\boldsymbol{b}$
+                \State $\boldsymbol{r} \leftarrow \boldsymbol{b}-\boldsymbol{Ax}$
+                \State solve $\boldsymbol{Ad}=\boldsymbol{r}$
+                \State $\boldsymbol{x} \leftarrow \boldsymbol{x}+\boldsymbol{d}$
+            \end{algorithmic}
+    \end{algorithm}
 
+    \section{Direct methods}
+    A general technique to devise an iterative method is based on a splitting of the matrix $\boldsymbol{A}$ in: 
+    \[\boldsymbol{A}=\boldsymbol{P}-\left(\boldsymbol{P}-\boldsymbol{A}\right)\]
+    where $\boldsymbol{P}$ is a suitable non-singular matrix called preconditioner of $\boldsymbol{A}$. 
 
+    \subsection{Jacobi method}
+    If the diagonal entries of $\boldsymbol{A}$ are nonzero, we can set $\boldsymbol{P}=\boldsymbol{D}$, where $\boldsymbol{D}$ is the diagonal matrix containing the diagonal 
+    entries of $\boldsymbol{A}$. So we have that: 
+    \[\boldsymbol{Dx}^{(k+1)}=\boldsymbol{b}-\left( \boldsymbol{A}-\boldsymbol{D} \right)\boldsymbol{x}^{(k)} \:\:\:\:\:\: k \geq 0\]
+    or component-wise: 
+    \begin{algorithm}[H]
+        \caption{Jabobi method algorithm}
+            \begin{algorithmic}[1]
+                \State $x_i^{(k+1)}=\dfrac{1}{a_{ii}}\left( b_i-\sum_{j=1,j \neq i}^{n}a_{ij}x_j^{(k)}\right) \:\:\:\:\:\: i=1,\dots,n $
+            \end{algorithmic}
+    \end{algorithm}
+    The stopping criterions of the Jacobi method are: 
+    \[\dfrac{\left\lVert \boldsymbol{x}^{(k+1)}-\boldsymbol{x}^{(k)} \right\rVert_2}{\left\lVert \boldsymbol{x}^{(k)} \right\rVert_2} \leq \varepsilon \:\:\: \lor \:\:\: \dfrac{\left\lVert \boldsymbol{b}-\boldsymbol{Ax}^{(k+1)} \right\rVert_2}{\left\lVert \boldsymbol{b} \right\rVert_2} \leq \varepsilon_r\]
+    \begin{proposition}
+        If the matrix $\boldsymbol{A} \in \mathbb{R}^{n \times n}$ is strictly diagonally dominant by row, then the Jacobi method converges. 
+    \end{proposition}
 
+    \subsection{Gauss-Seidel method}
+    The Gauss-Seidel method computes the result iteratively with this formula: 
+    \[\left(\boldsymbol{D}-\boldsymbol{E}\right)\boldsymbol{x}^{(k+1)}=\boldsymbol{b}+\boldsymbol{Fx}^{(k)}\]
+    where $-\boldsymbol{F}$ is the upper triangular part of the matrix, diagonal excluded, $-\boldsymbol{E}$ is the lower triangular part of the matrix, diagonal excluded, and
+    $\boldsymbol{D}$ is the diagonal matrix with the diagonal entries of the matrix $\boldsymbol{A}$. 
+    \begin{algorithm}[H]
+        \caption{Gauss-Seidel algorithm}
+            \begin{algorithmic}[1]
+                \State $x_i^{(k+1)}=\dfrac{1}{a_{ii}}\left( b_i-\sum_{j=1}^{i-1}a_{ij}x_j^{(k+1)}-\sum_{j=i+1}^{n}a_{ij}x_j^{(k)}\right) \:\:\:\:\:\: i=1,\dots,n $
+            \end{algorithmic}
+    \end{algorithm}
+    \begin{proposition}
+        Let $\boldsymbol{A} \in \mathbb{R}^{n \times n}$ be a tridiagonal non-singular matrix whose diagonal elements are all non-null. Then the Jacobi method and the 
+        Gauss-Seidel method are either both divergent or both convergent. In the latter case, the Gauss-Seidel method is faster than Jacobi's. 
+    \end{proposition}
+    The case in which $\boldsymbol{P}=\boldsymbol{D}-\boldsymbol{E}$ is called Gauss-Seidel method, while the case in which $\boldsymbol{P}=\boldsymbol{D}-\boldsymbol{F}$
+    is called inverted Gauss-Seidel method. 
 
-
+    \subsection{Richardson method}
+    The general form of the Richardson method is: 
+    \[\boldsymbol{P}(\boldsymbol{x}^{(k+1)}-\boldsymbol{x}^{(k)})=\alpha_k\boldsymbol{r}^{(k)} \:\:\:\:\:\: k \geq 0\]
+    We call stationary the case when $\alpha_k=\alpha$ for any $k \geq 0$, dynamic the case in which $\alpha_k$ may change along the iterations. The case 
+    $\boldsymbol{P} \neq \boldsymbol{I}$ is called preconditioned Richardson method. In this case the formula become: 
+    \[\boldsymbol{x}^{(k+1)}=\boldsymbol{x}^{(k)}+\alpha_k \boldsymbol{r}^{(k)}\]
+    \begin{proposition}
+        Let $\boldsymbol{A} \in \mathbb{R}^{n \times n}$. For any non-singular matrix $\boldsymbol{P} \in \mathbb{R}^{n \times n}$ the stationary Richardson method converges
+        if and only if: 
+        \[\left\lvert \lambda_i\right\rvert < \dfrac{2}{\alpha} \textnormal{Re}\left[\lambda_i\right] \:\:\:\:\:\:\forall i=1,\dots,n\]
+        where $\lambda_i$ are the eigenvalues of $(\boldsymbol{P}^{-1}\boldsymbol{A})$. If the latter are all real, it converges if and only if: 
+        \[0 < \alpha\lambda_i<2 \:\:\:\:\:\:\forall i=1,\dots,n\]
+        If both $\boldsymbol{A}$ and $\boldsymbol{P}$ are symmetric positive definite matrices, the stationary Richardson method converges for any possible choice of 
+        $\boldsymbol{x}^{(0)}$ if and only if: 
+        \[0 < \alpha < \dfrac{2}{\lambda_{max}}\]
+        where $\lambda_{max} >0$ is the maximum eigenvalue of $(\boldsymbol{P}^{-1} \boldsymbol{A})$
+    \end{proposition}
 
 
 
