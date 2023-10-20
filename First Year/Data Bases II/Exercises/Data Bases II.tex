@@ -600,4 +600,61 @@
     \newpage 
 
     \chapter{Exercise session IV}
+    \section{Ranking and skyline queries}
+        Consider a distributed setting with three data sources, ranking basketball players according to their offensive rating (off), defensive rating (def) and rebounds (reb).
+        An associated score in $[0,1]$ is indicated (the higher, the better). Sorted access is available.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/rank1.png}
+        \end{figure}
+        \begin{enumerate}
+            \item Determine the top-3 players according to their median rank using MedRank.
+            \item Remove the first data source and consider the scoring function $MAX(o) = MAX\{def(o), reb(o)\}$. Determine the top-2 players according to MAX using the 
+                algorithms $B_0$ and NRA.
+            \item Assume now that random access is also available. Determine the top-2 players according to MAX with the algorithms TA and FA.
+            \item Consider now the scoring function $SUM(o) = def(o) + reb(o)$ equally weighing all partial scores. What are the top-2 players according to SUM?
+            \item Assume now that all the data regarding the players are centralized in a single datasource, in which the players are available sortedly according to SUM. 
+                Use SFS to determine the skyline of the players.
+        \end{enumerate}
+    \subsection*{Solution}
+    \begin{enumerate}
+        \item A player is considered when, while doing sorted access it appears in at least two tables. In this case we have found the following players: 
+            \begin{itemize}
+                \item 4 (median rank 3).
+                \item 2 (median rank 4).
+                \item 7 (median rank 4).
+                \item 9 (median rank 4).
+            \end{itemize}
+        \item With $B_0$ and also with NRA the result will be the players four and five. 
+        \item With TA and also with FA the result will be the players four and five. 
+        \item With TA the result will be the players four and five. 
+        \item The skyline found is composed by the players four, three and one. 
+    \end{enumerate}
+
+    \newpage 
+    \section{Ranking and skyline queries}
+        Consider the following three ranked lists reporting statistics about European soccer teams: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/rank2.png}
+        \end{figure}
+        \begin{enumerate}
+            \item Apply an algorithm that does not use random access to determine the best team according to the scoring function $S(team)=\max{ team.Goals,team.Possession,team.Passes}$. 
+            \item On this dataset, could you do better than the previous algorithm, in terms of access cost,  with an algorithm that also uses random access? 
+            \item Apply now the Threshold Algorithm to determine the best team according to the same scoring function as in one. 
+            \item Apply now the Threshold Algorithm to determine the best team according to the following scoring function $S(team) = team.Goals + team.Possession + team.Passes $. 
+            \item Determine the skyline of the dataset. 
+        \end{enumerate}
+    \subsection*{Solution}
+        \begin{enumerate}
+            \item We can use either $B_0$ or NRA. Both will find the result after scanning the first item in every list and determining PSG as the top team. With NRA, the 
+                threshold point $T$ will be $(75.0,63.2,89.9)$ with a maximum score of $89.9$, while PSG has both an upper and a lower bound of $89.9$, therefore meeting the 
+                stopping condition.
+            \item No algorithm could do better than reading at least the top scores on each list. 
+            \item The best team is again the PSG. 
+            \item The best team is again the PSG. We found the same top team as before, but this is just a coincidence for this dataset, since the scoring function has 
+                changed. 
+            \item The skyline points are PSG, BMU, and BAR. 
+        \end{enumerate}
+
 \end{document}
