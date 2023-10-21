@@ -1,6 +1,15 @@
 \documentclass[12pt, a4paper]{report}
-\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, xcolor, thmtools, thmbox, exercise}
+\usepackage{graphicx, array, amsthm, amssymb, amsmath, algorithm, algpseudocode, float, thmtools, thmbox, exercise}
 \usepackage[english]{babel}
+
+
+
+
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage{listings}
+\usepackage{alloy-style}
+
 
 \makeatletter
 \renewcommand\thmbox@headstyle[2]{\bfseries #1}
@@ -188,10 +197,202 @@
                     \centering
                     \includegraphics[width=0.9\linewidth]{images/UML.png}
                 \end{figure}
-            \item The UML use case diagram diagram of the given problem is: 
+            \item The UML use case diagram of the given problem is: 
                 \begin{figure}[H]
                     \centering
                     \includegraphics[width=0.9\linewidth]{images/usecase2.png}
                 \end{figure}
         \end{enumerate}
+    
+    \newpage
+
+    \chapter{Exercise session II}
+    \section{Alloy}
+        Consider construction cubes of three different sizes, small, medium, and large. You can build towers by piling up these cubes one on top of the other respecting the following rules:
+        \begin{itemize}
+            \item A large cube can be piled only on top of another large cube.
+            \item A medium cube can be piled on top of a large or a medium cube.
+            \item A small cube can be piled on top of any other cube.
+            \item It is not possible to have two cubes, A and B, simultaneously positioned right on top of the same other cube C. 
+        \end{itemize}
+        \begin{enumerate}
+            \item Model in Alloy the concept of cube and the piling constraints defined above.
+            \item Model also the predicate canPileUp that, given two cubes, is true if the first can be piled on top of the second and false otherwise.
+            \item Consider now the possibility of finishing towers with a top component having a shape that prevents further piling, for instance, a pyramidal 
+                or semispherical shape. This top component can only be the last one of a tower, in other words, it cannot have any other component piled on it.
+                Rework your model to include also this component. You do not need to consider a specific shape for it, but only its property of not allowing further 
+                piling on its top. Modify also the canPileUp predicate so that it can work both with cubes and top components.
+        \end{enumerate}
+    \subsection*{Solution}
+    \begin{enumerate}
+        \item The concept of cube and its constraints can be defined in the following way. 
+            \begin{lstlisting}[language=alloy]
+abstract sig Size{}
+
+sig Large extends Size{} 
+
+sig Medium extends Size{} 
+
+sig Small extends Size{}
+
+sig Cube {
+    size: Size,
+    piledOn: lone Cube
+}{piledOn != this}
+
+fact noCircularPiling {
+    no c: Cube | c in c.^piledOn
+}
+
+fact pilingUpRules {
+    all c1, c2: Cube | c1.piledOn = c2 implies (
+    c2.size = Large or
+    c2.size = Medium and (c1.size = Medium or c1.size = Small) or c2.size = Small and c1.size = Small)
+}
+
+fact noMultipleCubesOnTheSameCube {
+    no disj c1, c2: Cube | c1.piledOn = c2.piledOn
+}
+            \end{lstlisting}
+        \item The predicate canPileUp can be defined as follows. 
+            \begin{lstlisting}[language=alloy]
+pred canPileUp[cUp: Cube, cDown: Cube] {
+    cUp.piledOn = cDown and
+    (cDown.size = Large or
+    cDown.size = Medium and (cUp.size = Medium or cUp.size = Small) or 2
+    cDown.size = Small and cUp.size = Small) 
+}
+
+pred show {} 
+
+run show
+
+run canPileUp
+            \end{lstlisting}
+        \item The now model become: 
+            \begin{lstlisting}[language=alloy]
+abstract sig Size{}
+
+sig Large extends Size{} 
+
+sig Medium extends Size{} 
+
+sig Small extends Size{}
+
+abstract sig Block{ 
+    piledOn: lone Cube
+}
+
+sig Cube extends Block { 
+    size: Size
+}{piledOn != this}
+
+sig Top extends Block { }
+
+fact noCircularPiling {
+    no c: Cube | c in c.^piledOn
+}
+
+fact noMultipleBlocksOnTheSameCube {
+    no disj b1, b2: Block | b1.piledOn = b2.piledOn
+}
+
+fact pilingUpRules {
+    all c1, c2: Cube | c1.piledOn = c2 implies (
+    c2.size = Large or
+    c2.size = Medium and (c1.size = Medium or c1.size = Small) or c2.size = Small and c1.size = Small)
+}
+
+pred canPileUp[bUp: Block, cDown: Cube] {
+    bUp.piledOn = cDown and (bUp in Top or
+    (cDown.size = Large or
+    cDown.size = Medium and (bUp.size = Medium or bUp.size = Small) or cDown.size = Small and bUp.size = Small))
+}   
+
+pred show {} 
+
+run show
+
+run canPileUp 
+            \end{lstlisting}
+    \end{enumerate}
+
+    \section{Alloy}
+        The company TravelSpaces decides to help tourists visiting a city in finding places that can keep their luggage 
+        for some time. The company establishes agreements with small shops in various areas of the city and 
+        acts as a mediator between these shops and the tourists that need to leave their luggage in a safe
+        place. To this end, the company wants to build a system, called LuggageKeeper, that offers tourists 
+        the possibility to: look for luggage keepers in a certain area; reserve a place for the luggage in 
+        the selected place; pay for the service when they are at the luggage keeper; and, optionally, rate 
+        the luggage keeper at the end of the service.
+        
+        Given the scenario above, consider the following world phenomena:
+        \begin{itemize}
+            \item Every user owns various pieces of luggage.
+            \item Every user can carry around various pieces of luggage.
+            \item Each piece of luggage can be either safe, or unsafe.
+            \item Small shops store the luggage in lockers, where each locker can store at most one piece of luggage. 
+        \end{itemize}
+        
+        Consider also the following shared phenomena:
+        \begin{itemize}
+            \item Each locker is opened with an electronic key that is associated with it (the electronic key is regenerated at each use of the locker; also, a locker that does not have an electronic key associated with it is free).
+            \item Each user can hold various electronic keys. 
+        \end{itemize}
+
+        Formalize through an Alloy model:
+        \begin{enumerate}
+            \item The world and machine phenomena identified above.
+            \item A predicate capturing the domain assumption D1 that a piece of luggage is safe if, and only if, it is with its owner, or it is stored in a locker that has an associated key, and the owner of the piece of luggage holds the key of the locker.
+            \item A predicate capturing the requirement R1 that a key opens only one locker.
+            \item A predicate capturing the goal G1 that for each user all his/her luggage is safe.
+            \item A predicate capturing the operation GenKey that, given a locker that is free, associates with it a new electronic key.
+        \end{enumerate}
+    \subsection*{Solution}
+        The model requested is: 
+        \begin{lstlisting}[language=alloy]
+abstract sig Status{}
+
+one sig Safe extends Status{} 
+
+one sig Unsafe extends Status{}
+
+sig Luggage{
+    luggageStatus : one Status
+}
+
+sig EKey{}
+
+sig User{
+    owns : set Luggage, carries : set Luggage, hasKeys : set EKey
+}
+
+sig Locker{
+    hasKey : lone EKey, storesLuggage : lone Luggage
+}
+
+sig Shop{
+    lockers : some Locker
+}
+
+pred D1 {
+    all lg : Luggage | lg.luggageStatus in Safe 
+    iff 
+    all u : User | lg in u.owns implies ( lg in u.carries or some lk : Locker | lg in lk.storesLuggage and lk.hasKey != none and lk.hasKey in u.hasKeys )
+}
+
+pred R1 {
+    all ek : EKey | no disj lk1, lk2: Locker | ek in lk1.hasKey and ek in lk2.hasKey
+}
+
+pred G1 {
+    all u : User | all lg : Luggage | lg in u.owns implies lg.luggageStatus in Safe
+}
+
+pred GenKey[lk, lk' : Locker] {
+    lk.hasKey = none
+    lk'.storesLuggage = lk.storesLuggage
+    one ek : EKey | lk'.hasKey = ek 
+}
+        \end{lstlisting}
 \end{document}
