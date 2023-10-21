@@ -1039,13 +1039,76 @@
             \]
         \item Find the vanishing line: it is possible to use additional information on the observed scene. It is possible to derive these constraints: 
             \begin{enumerate}
-                \item Known angles between lines. 
-                \item Known shape of objects.
+                \item Known angles between lines: the angle between two lines is the angle between their normal direction, so they are independent of parameters 
+                    $c_1$ and $c_2$: 
+                    \[\cos\vartheta=\dfrac{a_1a_2+b_1b_2}{\sqrt{(a_1^2+b_1^2)(a_2^2+b_2^2)}}\]
+                    But since the term $a_1a_2+b_1b_2$ can be written as: 
+                    \[\begin{bmatrix}
+                        a_1 & b_1 & c_1
+                    \end{bmatrix}
+                    \begin{bmatrix}
+                        1 & 0 & 0 \\
+                        0 & 1 & 0 \\
+                        0 & 0 & 0
+                    \end{bmatrix}
+                    =
+                    \begin{bmatrix}
+                        a_2 \\ b_2 \\ c_2
+                    \end{bmatrix}
+                    =
+                    \boldsymbol{l}^TC_{\infty}^{*}\boldsymbol{m}
+                    \]
+                    We have that the previous formula is equivalent to: 
+                    \[\cos\vartheta=\dfrac{\boldsymbol{l}^TC_{\infty}^{*}\boldsymbol{m}}{\sqrt{(\boldsymbol{l}^TC_{\infty}^{*}\boldsymbol{l})(\boldsymbol{m}^TC_{\infty}^{*}\boldsymbol{m})}}\]
+                    But for the transformation rules we have that $C_{\infty}^{*}=H^{-1}C_{\infty}^{*'}H^{-T}$, it is possible to rewrite $\boldsymbol{l}^TC_{\infty}^{*}\boldsymbol{m}$ as 
+                    $\boldsymbol{l}^{'T}C_{\infty}^{*'}\boldsymbol{m}^{'}$, and the previous formula: 
+                    \[\cos\vartheta=\dfrac{\boldsymbol{l}^{'T}C_{\infty}^{*'}\boldsymbol{m}^{'}}{(\boldsymbol{l}^{'T}C_{\infty}^{*'}\boldsymbol{l}^{'})(\boldsymbol{m}^{'T}C_{\infty}^{*'}\boldsymbol{m}^{'})}\]
+                    In this case it is possible to extract $\boldsymbol{m}^{'}$ and $\boldsymbol{l}^{'}$ from the image. So, since we know the angle we have an equation on $C_{\infty}^{*'}$, that is linear when 
+                    the lines are perpendicular ($\cos\vartheta=0$). Since the unknown matrix is symmetric, homgeneous, and singular we have four independents constraints. 
+                \item Known shape of objects, where we have that:
+                    \[H_{SR}=
+                    \begin{bmatrix}
+                        \frac{1}{\sqrt{a}} & 0 & 0 \\
+                        0 & \frac{1}{\sqrt{b}} & 0 \\
+                        0 & 0 & 1
+                    \end{bmatrix}
+                    U^T
+                    \]
+                    And the Euclidean reconstructed image is $M_S=H_{SR} \cdot \textnormal{image}$
                 \item Combinations of one and two.
-                \item Observation of rigid planar motion.
+                \item Observation of rigid planar motion: it is a similarity, so the circular points are invariants. 
+                    The object has three degree of freedom since it is a pure rotation, and we can find the center of rotation, 
+                    and the rotation angle. So, given a matrix $H$ we have that the eigenvectors of $H$ are the fixed points, and 
+                    that the eigenvectors of $H^{-T}$ are fixed lines of the transformation. It can be shown that: 
+                    \begin{itemize}
+                        \item Eigenvectors $\boldsymbol{I}^{'},\boldsymbol{J}^{'}$ correspond to complex eigenvalues. 
+                        \item The phase of these eigenvectors is the rotation angle.
+                        \item Eigenvector $\boldsymbol{O}^{'}$ correspond to the real eigenvalues. 
+                    \end{itemize}
+                    The three eigenvector associated to $H$ are proportional respectively to $1, e^{i\theta}$, and $-e^{i\theta}$. The 
+                    eigenvector associated to 1 is the image of $\boldsymbol{O}$, and the angle $\theta$ is the rotation angle. The eigenvectors
+                    associated to the complex values are the images of the circular points $\boldsymbol{I}^{'},\boldsymbol{J}^{'}$, 
+                    but since we have 
+                    \[C_{\infty}^{'*}=\boldsymbol{I}^{'}\boldsymbol{J}^{'T}+\boldsymbol{J}^{'}\boldsymbol{I}^{'T}\]
+                    If we apply the singular value decomposition to this matrix we have $\textnormal{svd}(C_{\infty}^{'*})=UC_{\infty}^{*}U^T$, where 
+                    $U^T$ is the rectification matrix. It is possible to use two methods: 
+                    \begin{itemize}
+                        \item Direct method, where the steps are: 
+                            \begin{enumerate}
+                                \item Find $C_{\infty}^{*'}$. 
+                                \item Compute $H_{rect}$. 
+                            \end{enumerate}
+                        \item Stratified method, where the steps are: 
+                            \begin{enumerate}
+                                \item Affine reconstruction from projective to affine. 
+                                \item Shape reconstruction from affine to metric
+                            \end{enumerate}
+                    \end{itemize}
+                    Sometimes, the second method reduces numerical errors. 
             \end{enumerate}
-
     \end{itemize}
+
+    \section{Accuracy issues}
 
 
 
