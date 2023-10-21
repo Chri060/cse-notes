@@ -109,7 +109,7 @@
         The region found with the constraints is the following:
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.5\linewidth]{images/plane.png}
+            \includegraphics[width=0.4\linewidth]{images/plane.png}
         \end{figure}
         The feasible region is as shown in the picture. To find the feasible point where the objective function attains its maximal value, we can draw the level curves 
         $f(x_1,x_2)=0.15x_1+0.25x_2=z$ where each level curve is the set of points whose objective function value is equal to $z$, for any constant $z$. 
@@ -190,10 +190,10 @@
 
 \chapter{Exercise session II}
     \section{Linear programming modeling}
-        Assume that $n$ packets of data must be routed from node $s$ to node $t$, along one of two available links, with capacity (bandwidth)$ k_1 = 1 \: Mbps$ and $k_2 = 2 \: Mbps$. 
+        Assume that $n$ packets of data must be routed from node $s$ to node $t$, along one of two available links, with capacity (bandwidth) $k_1=1$ Mbps and $k_2=2$ Mbps. 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.3\linewidth]{images/link.png}
+            \includegraphics[width=0.5\linewidth]{images/link.png}
         \end{figure}
         The cost per unit of capacity of link $2$ is $30\%$ larger than that of link $1$. The following table indicates the quantity of capacity consumed by each packet 
         $i$, $i \in {l,\dots,n}$, and the cost to route it on link $1$. 
@@ -318,16 +318,36 @@
         Find the minimum-cost spanning tree in the graph given in the figure by using Prim's algorithm, starting from the node three. 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.35\linewidth]{images/prim.png}
+            \includegraphics[width=0.5\linewidth]{images/prim.png}
         \end{figure}
     \subsection*{Solution}
-    We apply Prim's algorithm, starting from node three and in the end we obtain: 
+    We apply Prim's algorithm, starting from node three and in the end we need to do the $10$ iterations since we have $11$ nodes. The iterations are summarized in the 
+    following table: 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{lccc}
+        \hline
+        \textbf{Reached nodes} & \textbf{Added edge} & \textbf{Edge cost} & \textbf{Iteration} \\ \hline
+        3                      & $\{2,3\}$           & 5                  & 1                  \\
+        2,3                    & $\{3,8\}$           & 7                  & 2                  \\
+        2,3,8                  & $\{7,8\}$           & 4                  & 3                  \\
+        2,3,7,8                & $\{8,9\}$           & 4                  & 4                  \\
+        2,3,7,8,9              & $\{6,7\}$           & 7                  & 5                  \\
+        2,3,6,7,8,9            & $\{5,6\}$           & 8                  & 6                  \\
+        2,3,5,6,7,8,9          & $\{4,5\}$           & 4                  & 7                  \\
+        2,3,4,5,6,7,8,9        & $\{2,10\}$          & 9                  & 8                  \\
+        2,3,4,5,6,7,8,9,10     & $\{1,4\}$           & 9                  & 9                  \\
+        1,2,3,4,5,6,7,8,9,10   & $\{9,11\}$          & 16                 & 10                 \\ \hline
+        \end{tabular}
+    \end{table}
+    The minimum cost spanning tree that has been found has total cost $73$, and it is shown in the following figure. 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.35\linewidth]{images/primsol.png}
+        \includegraphics[width=0.75\linewidth]{images/primsol.png}
     \end{figure}
 
     \newpage
+
     \section{Kruskal's algorithm}
         In 1956 Joseph Kruskal proposed the following greedy algorithm to find a minimum cost spanning tree in an arbitrary connected undirected graph $G = (N, E)$ with a cost
         $c_e$ attached to each edge $e \in E$. 
@@ -356,6 +376,7 @@
                 implementation of Kruskal's algorithm. 
             \item By invoking the optimality condition for minimum-cost spanning trees, verify that Kruskal's algorithm is exact. 
             \item Find the maximum-cost spanning tree in the graph of the previous exercise by using a straightforward adaptation of Kruskal's algorithm. 
+            \item Apply the Kruskal's algorithm on the graph of the previous exercise to find the minimum spanning tree. 
         \end{enumerate}
     \subsection*{Solution}
         \begin{enumerate}
@@ -369,17 +390,39 @@
                 $v_i \neq v_j$. Since a merging operation occurs exactly$ n-1$ times (a spanning tree contains $n-1$ edges), the overall complexity is $O(m\log n + m+n^2)=
                 O(mlogn + n^2)$. 
             \item To verify that Kruskal's algorithm is exact, we just need to recall that the edges are considered in order of non-decreasing cost and to invoke the 
-            optimality condition for minimum cost spanning tree. Since each edge e that has been discarded (not added to $F$) has a cost $c_e$ which is at least as large as 
-            the cost of all the previously selected edges, it is not a cost-decreasing edge. According to the optimality condition for minimum cost spanning trees, the 
-            resulting spanning tree is of minimum total cost because no cost-decreasing edge exists. 
+                optimality condition for minimum cost spanning tree. Since each edge e that has been discarded (not added to $F$) has a cost $c_e$ which is at least as large as 
+                the cost of all the previously selected edges, it is not a cost-decreasing edge. According to the optimality condition for minimum cost spanning trees, the 
+                resulting spanning tree is of minimum total cost because no cost-decreasing edge exists. 
+            \item The algorithm needs $10$ iteration to find the maximum spanning tree. The iterations are summarized in the following table (remember that we order the edges,
+                and we add them only if they do not create any cycle): 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{lccc}
+                    \hline
+                    \textbf{Connected components}       & \textbf{Edge} & \textbf{Cost} & \textbf{Iteration} \\ \hline
+                    $\varnothing$                       & \{7,11\}      & 21            & 1                  \\
+                    \{7,11\}                            & \{1,2\}       & 20            & 2                  \\
+                    \{1,2\}, \{7,11\}                   & \{6,8\}       & 19            & 3                  \\
+                    \{1,2\}, \{7,11\}, \{6,8\}          & \{10,11\}     & 19            & 4                  \\
+                    \{1,2\}, \{7,10,11\}, \{6,8\}       & \{4,6\}       & 18            & 5                  \\
+                    \{1,2\}, \{7,10,11\}, \{4,6,8\}     & \{4,8\}       & NO            & 6                  \\
+                    \{1,2\}, \{7,10,11\}, \{4,6,8\}     & \{9,11\}      & 16            & 7                  \\
+                    \{1,2\}, \{7,9,10,11\}, \{46,8\}    & \{1,3\}       & 15            & 8                  \\
+                    \{1,2,3\}, \{7,9,10,11\}, \{4,6,8\} & \{2,9\}       & 15            & 9                  \\
+                    \{1,2,3,7,9,10,11\}, \{4,6,8\}      & \{1,5\}       & 14            & 10                 \\
+                    \{1,2,3,5,7,9,10,11\}, \{4,6,8\}    & \{3,9\}       & No            & 11                 \\
+                    \{1,2,3,4,5,6,7,8,9,10,11\}         & \{3,4\}       & 10            & 12                 \\ \hline
+                    \end{tabular}
+                \end{table}
+                The spanning tree of maximum cost, of value 167, is shown in the figure. 
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.75\linewidth]{images/kruskal.png}
+                \end{figure}
         \end{enumerate}
-        The execution of the algorithm gives the following result. 
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.5\linewidth]{images/kruskal.png}
-        \end{figure}
 
     \newpage
+
     \section{Optimality check}
         Without applying any one of Prim's and Kruskal's algorithms, verify whether the following spanning tree is of minimum cost. 
         \begin{figure}[H]
@@ -388,22 +431,47 @@
         \end{figure}
     \subsection*{Solution}
         It suffices to verify that there exists a cost decreasing edge. By inspection, we observe that, by adding edge $\{1,5\}$ to the tree, the cycle 
-        $\left\langle 1,5,4,3,2,1\right\rangle$ is introduced. In such cycle, edge $\{4,3\}$ has a strictly larger cost than $\{1,5\}$. Therefore, by removing edge $\{4,3\}$ 
-        and adding edge $\{1,5\}$, a spanning tree of strictly smaller total cost is obtained. 
+        $\left\langle 1,5,4,3,2,1\right\rangle$ is introduced. In such cycle, edge $\{4,3\}$ has a strictly larger cost than $\{1,5\}$. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/optimality1.png}
+        \end{figure}
+        Therefore, by removing edge $\{4,3\}$ and adding edge $\{1,5\}$, a spanning tree of strictly smaller total cost is obtained. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/optimality2.png}
+        \end{figure}
 
     \newpage
+
     \section{Compact storage of similar sequences}
         Consider the problem of storing a large set of strings. We assume that the strings have many similar entries (they differ only in a small number of positions) and 
         we wish to store them in a compact way. This problem arises in several contexts such as when storing DNA sequences, where the characters correspond to the four DNA 
         bases. In this exercise, we consider the simplified version of the problem with only two characters. Given a set of $k$ sequences of $M$ bits, we compute for each 
         pair $i,j$, with $1 < i,j < k$, the Hamming distance between the sequences $i$ and $j$, i.e., the number of bits that need to be flipped in sequence $i$ to obtain 
         sequence $j$. This function clearly satisfies the three usual properties of a distance: non-negativity, symmetry and triangle inequality. Consider the following 
-        set of $6$ sequences and the corresponding matrix $D = {d_{ij}}$ of Hamming distances 
-        \begin{figure}[H]
+        set of $6$ sequences and the corresponding matrix $D = {d_{ij}}$ of Hamming distances: 
+        \begin{enumerate}
+            \item 011100011101 
+            \item 101101011001 
+            \item 110100111001 
+            \item 101001111101 
+            \item 100100111101 
+            \item 010101011100 
+        \end{enumerate}
+        \begin{table}[H]
             \centering
-            \includegraphics[width=0.6\linewidth]{images/DNA.png}
-        \end{figure}
-        where, due to symmetry, only the upper triangle of the matrix is shown. In order to exploit redundancies between sequences and to save memory, we can store: one of 
+            \begin{tabular}{c|cccccc}
+              & 1 & 2 & 3 & 4 & 5 & 6 \\ \hline
+            1 & 0 & 4 & 4 & 5 & 4 & 3 \\
+            2 &   & 0 & 4 & 3 & 4 & 5 \\
+            3 &   &   & 0 & 5 & 2 & 5 \\
+            4 &   &   &   & 0 & 3 & 6 \\
+            5 &   &   &   &   & 0 & 5 \\
+            6 &   &   &   &   &   & 0
+            \end{tabular}
+        \end{table}
+        Where, due to symmetry, only the upper triangle of the matrix is shown. In order to exploit redundancies between sequences and to save memory, we can store: one of 
         the sequences, called the reference sequence, completely and for every other sequence, only the set of bit flips that allow us to retrieve it either directly from 
         the reference sequence or from another sequence. 
 
@@ -423,6 +491,347 @@
 \newpage
 
 \chapter{Exercise session IV}
+    \section{Shortest paths with non-negative costs}
+        Given the following directed graph, find a set of the shortest paths from node 0 to all the other nodes, using Dijkstra's algorithm. Can we solve the problem with Dynamic 
+        Programming? If yes, do so.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/dijk.png}
+        \end{figure}
+    \subsection*{Solution}
+        Dijkstra's algorithm determines a set of shortest paths from a given node s to all the other nodes in the graph. It can be applied to any (directed) graph with 
+        non-negative arc costs. The iteration is summarized in the following table. 
+        \begin{table}[H]
+            \centering
+            \resizebox{\textwidth}{!}{%
+            \begin{tabular}{|c|cc|cc|cc|cc|cc|cc|cc|cc|cc|}
+            \hline
+            \multicolumn{1}{|l|}{Iteration} & \multicolumn{1}{l}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l}{1} & \multicolumn{1}{l|}{} & \multicolumn{1}{l}{2} & \multicolumn{1}{l|}{} & \multicolumn{1}{l}{3} & \multicolumn{1}{l|}{} & \multicolumn{1}{l}{4} & \multicolumn{1}{l|}{} & \multicolumn{1}{l}{5} & \multicolumn{1}{l|}{} & \multicolumn{1}{l}{6} & \multicolumn{1}{l|}{} & \multicolumn{1}{l}{7} & \multicolumn{1}{l|}{} & \multicolumn{1}{l}{8} & \multicolumn{1}{l|}{} \\ \hline
+            Node                           & L                     & p                     & L                     & p                     & L                     & p                     & L                     & p                     & L                     & p                     & L                     & p                     & L                     & p                     & L                     & p                     & L                     & p                    \\
+            0                              & 0                     & -                     & 0                     & -                     & 0                     & -                     & 0                     & -                     & 0                     & -                     & 0                     & -                     & 0                     & -                     & 0                     & -                     & 0                     & -                    \\
+            1                              & $\infty$              & -                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                    \\
+            2                              & $\infty$              & -                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                     & 1                     & 0                    \\
+            3                              & $\infty$              & -                     & $\infty$              & -                     & 3                     & 1                     & 3                     & 1                     & 3                     & 1                     & 3                     & 1                     & 3                     & 1                     & 3                     & 1                     & 3                     & 1                    \\
+            4                              & $\infty$              & -                     & 3                     & 0                     & 3                     & 0                     & 3                     & 0                     & 3                     & 0                     & 3                     & 0                     & 3                     & 0                     & 3                     & 0                     & 3                     & 0                    \\
+            5                              & $\infty$              & -                     & 2                     & 0                     & 2                     & 0                     & 2                     & 0                     & 2                     & 0                     & 2                     & 0                     & 2                     & 0                     & 2                     & 0                     & 2                     & 0                    \\
+            6                              & $\infty$              & -                     & $\infty$              & -                     & $\infty$              & -                     & $\infty$              & -                     & 4                     & 5                     & 4                     & 5                     & 4                     & 5                     & 4                     & 5                     & 4                     & 5                    \\
+            7                              & $\infty$              & -                     & $\infty$              & -                     & $\infty$              & -                     & $\infty$              & -                     & $\infty$              & -                     & 3                     & 3                     & 3                     & 3                     & 3                     & 3                     & 3                     & 3                    \\ \hline
+            \end{tabular}%
+            }
+        \end{table}
+        Graphically, we have that the final graph is the following. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/dijksol.png}
+        \end{figure}
+        A topological order can be obtained as follows. At iteration $i$, for $i = 1, \dots , n$, pick a node with no incoming arcs, label it as node $i$, remove it from 
+        the graph, iterate until all nodes are removed, or there is no node with no incident arcs. The graph we are dealing with is acyclic, and its node indices already 
+        correspond to a topological order. The Dynamic Programming technique can therefore be applied. The steps are the following: 
+        \begin{itemize}
+            \item $L(0) = 0, p(0) = 0$
+            \item $L(1) = L(0) + c_{01} = 1, p(1) = 0$
+            \item $L(2) = \min\{L(0) + c_{02}, L(1) + c_{12}\} = \min\{0 + 1, 1 + 2\} = 1, p(2) = 0$
+            \item $L(3) = \min\{L(1) + c_{13}, L(2) + c_{23}\} = \min\{1 + 2, 1 + 4\} = 3, p(3) = 1$
+            \item $L(4) = \min\{L(0) + c_{04}, L(3) + c_{34}\} = \min\{0 + 3, 3 + 1\} = 3, p(4) = 0$
+            \item $L(5) = \min\{L(0) + c_{05}, L(4) + c_{45}\} = \min\{0 + 2, 3 + 3\} = 3, p(5) = 0$
+            \item $L(6) = \min\{L(4) + c_{46}, L(5) + c_{56}\} = \min\{3 + 3, 2 + 2\} = 3, p(6) = 5$
+            \item $L(7) = \min\{L(3) + c_{37}, L(4) + c_{47}, L(6) + c_{67}\} = \min\{3 + 0, 3 + 1, 4 + 4\} = 3, p(7) = 3$
+        \end{itemize}
+
+    \newpage
+    
+    \section{Shortest paths with negative costs}
+        Given the following directed graph, find the shortest paths between all pairs of nodes, or show that the problem is ill-posed by exhibiting a circuit of total 
+        negative cost.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/neg.png}
+        \end{figure}
+    \subsection*{Solution}
+        Since the graph contains negative arc costs, we use Floyd-Warshall's algorithm that finds the shortest path between each pair of nodes, or establishes that the 
+        problem is ill-posed by exhibiting a circuit of negative cost. The graph can contain cycles, but such cycles must be of non-negative cost. The steps are the following: 
+        \begin{enumerate}
+            \item The initial configuration is the following. 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cccccc|cccc}
+                    D & 1        & 2        & 3        & 4  & $\:\:\:\:\:\:$ & P & 1 & 2 & 3 & 4 \\ \cline{1-5} \cline{7-11} 
+                    1 & 0        & 3        & 8        & 3  &                & 1 & 1 & 1 & 1 & 1 \\
+                    2 & 5        & 0        & 4        & 10 &                & 2 & 2 & 2 & 2 & 2 \\
+                    3 & -2       & $\infty$ & 0        & 4  &                & 3 & 3 & 3 & 3 & 3 \\
+                    4 & $\infty$ & -7       & $\infty$ & 0  &                & 4 & 4 & 4 & 4 & 4
+                    \end{tabular}
+                \end{table}
+            \item The first iteration is the following. 
+                \begin{enumerate}
+                    \item $d_{21} + d_{12} = 8 > d_{22} = 0$
+                    \item $d_{21} + d_{13} = 13 > d_{23} = 4$
+                    \item $d_{21} + d_{14} = 8 < d_{24} = 10 \Rightarrow$ update $d_{24}, p_{24}$
+                    \item $d_{31} + d_{12} = 1 < d_{32} = \infty \Rightarrow$ update $d_{32}, p_{32}$
+                    \item $d_{31} + d_{13} = 6 > d_{33} = 0$
+                    \item $d_{31} + d_{14} = 1 < d_{34} = 4 \Rightarrow$ update $d_{34}, p_{34}$
+                    \item $d_{41} + d_{ij} = \infty (\forall i, j)$
+                \end{enumerate}
+                The matrices become: 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cccccc|cccc}
+                    D & 1        & 2  & 3        & 4 & $\:\:\:\:\:\:$ & P & 1 & 2 & 3 & 4 \\ \cline{1-5} \cline{7-11} 
+                    1 & 0        & 3  & 8        & 3 &                & 1 & 1 & 1 & 1 & 1 \\
+                    2 & 5        & 0  & 4        & 8 &                & 2 & 2 & 2 & 2 & 1 \\
+                    3 & -2       & 1  & 0        & 1 &                & 3 & 3 & 1 & 3 & 1 \\
+                    4 & $\infty$ & -7 & $\infty$ & 0 &                & 4 & 4 & 4 & 4 & 4
+                    \end{tabular}
+                \end{table}
+            \item The second iteration is the following. 
+                \begin{enumerate}
+                    \item $d_{12} + d_{21} = 8 > d_{11} = 0$
+                    \item $d_{12} + d_{23} = 7 < d_{13} = 8 \Rightarrow$ update $d_{13}, p_{13}$
+                    \item $d_{12} + d_{24} = 11 > d_{24} = 3$
+                    \item $d_{32} + d_{21} = 6 > d_{31} = -2$
+                    \item $d_{32} + d_{23} = 5 > d_{33} = 0$
+                    \item $d_{32} + d_{24} = 9 > d_{34} = 1$
+                    \item $d_{42} + d_{21} = -2 < d_{41} = \infty \Rightarrow$ update $d_{41}, p_{41}$
+                    \item $d_{42} + d_{23} = -3 < d_{43} = \infty \Rightarrow$ update $d_{43}, p_{43}$
+                    \item $d_{42} + d_{24} = 1 > d_{44} = 0$
+                \end{enumerate}
+                The matrices become: 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cccccc|cccc}
+                    D & 1  & 2  & 3  & 4 & $\:\:\:\:\:\:$ & P & 1 & 2 & 3 & 4 \\ \cline{1-5} \cline{7-11} 
+                    1 & 0  & 3  & 7  & 3 &                & 1 & 1 & 1 & 2 & 1 \\
+                    2 & 5  & 0  & 4  & 8 &                & 2 & 2 & 2 & 2 & 1 \\
+                    3 & -2 & 1  & 0  & 1 &                & 3 & 3 & 1 & 3 & 1 \\
+                    4 & -2 & -7 & -3 & 0 &                & 4 & 2 & 4 & 2 & 4
+                    \end{tabular}
+                \end{table}
+            \item The third iteration is the following. 
+                \begin{enumerate}
+                    \item $d_{13} + d_{31} = 5 > d_{11} = 0$
+                    \item $d_{13} + d_{32} = 8 > d_{12} = 3$
+                    \item $d_{13} + d_{34} = 8 > d_{14} = 3$
+                    \item $d_{23} + d_{31} = 2 < d_{21} = 5 \Rightarrow$ update $d_{21}, p_{21}$
+                    \item $d_{23} + d_{32} = 5 > d_{22} = 0$
+                    \item $d_{23} + d_{34} = 5 < d_{24} = 8 \Rightarrow$ update $d_{24}, p_{24}$
+                    \item $d_{43} + d_{31} = -5 < d_{41} = -2 \Rightarrow$ update $d_{41}, p_{41}$
+                    \item $d_{43} + d_{32} = -2 > d_{42} = -7$
+                    \item $d_{43} + d_{34} = -2 < d_{44} = 0 \Rightarrow$ update $d_{44}, p_{44}$
+                \end{enumerate}
+                The matrices become: 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cccccc|cccc}
+                    D & 1  & 2  & 3  & 4  & $\:\:\:\:\:\:$ & P & 1 & 2 & 3 & 4 \\ \cline{1-5} \cline{7-11} 
+                    1 & 0  & 3  & 7  & 3  &                & 1 & 1 & 1 & 2 & 1 \\
+                    2 & 2  & 0  & 4  & 5  &                & 2 & 3 & 2 & 2 & 1 \\
+                    3 & -2 & 1  & 0  & 1  &                & 3 & 3 & 1 & 3 & 1 \\
+                    4 & -5 & -7 & -3 & -2 &                & 4 & 3 & 4 & 2 & 1
+                    \end{tabular}
+                \end{table}
+        \end{enumerate}
+        We obtain $d_{44} = -2 < 0$ and the algorithm halts: we found a circuit with a total negative cost of $-2$, $\left\langle (4, 2),(2, 3),(3, 1),(1, 4) \right\rangle $.
+
+    \newpage
+
+    \section{Dynamic Programming}
+        A company must buy a new machine and then determine a renewal (maintenance-replacement) plan for the next 5 years, making sure that, at any point in time, the available
+        machine works properly. At the beginning of each year of the planning horizon, the company must decide whether to keep the old machine or to substitute it with a new 
+        machine. The maintenance costs and the expected revenue (when the machine is sold) depend on how old the machine. They are indicated in the following table.
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{ccc}
+            \hline
+            \textbf{Years} & \textbf{Maintenance (k)} & \textbf{Revenue when sold (k)} \\ \hline
+            0              & 2                        & -                              \\
+            1              & 4                        & 7                              \\
+            2              & 5                        & 6                              \\
+            3              & 9                        & 2                              \\
+            4              & 12                       & 1                              \\ \hline
+            \end{tabular}
+        \end{table}
+        To avoid high maintenance costs of an old machine, the machine can be sold at the beginning of the second, third, fourth, and fifth year, and a new one can be bought. 
+        For the sake of simplicity, we suppose that a new machine always costs 12k Euro. Show that the problem of determining a machine renewal plan of minimum total net cost 
+        (total cost for buying/rebuying the machine + maintenance costs - total revenue) can be solved via Dynamic Programming by finding the shortest path in an ad hoc 
+        directed acyclic graph. Find an optimal renewal plan. Is it unique?
+    \subsection*{Solution}
+        Consider a directed graph with six nodes: nodes 1 to 5 are associated to the beginning of each year, while node 6 corresponds to the end of the 5 years time horizon.
+        For each pair $i, j$, with $i, j = 1, \dots , 5$ and $i < j$, the arc $(i, j)$ that represents the choice of buying a machine at the beginning of year $i$ and 
+        selling it at the beginning of year $j$. The cost $c_{ij}$ of arc $(i, j)$ is defined as the net cost of the corresponding partial renewal plan from the beginning of 
+        year $i$ to the beginning of year $j$, namely: 
+        \[c_{ij}=c_b+\left( \sum_{k=0}^{j-i-1}m_k \right)-r_{j-i}\]
+        where $c_b$ is the buying cost of 12000 Euro, $m_k$ is the annual maintenance cost for a machine that is $k$ years old, and $r_k$ is the selling price of a machine 
+        which is $k$ years old. We obtain the following directed acyclic graph:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/dag.png}
+        \end{figure}
+        Any path from node 1 to node 6 corresponds to a (complete) renewal plan whose total net cost is equivalent to the total cost of the path. To look for the shortest 
+        path from node 1 to node 6, we apply the Dynamic Programming algorithm, obtaining:
+        \begin{enumerate}
+            \item $L(1) = 0$
+            \item $L(2) = 7, p(2) = 1$
+            \item $L(3) = 12, p(3) = 1$
+            \item $L(4) = 19, p(4) = 3$
+            \item $L(5) = 24, p(5) = 3$
+            \item $L(6) = 31, p(6) = 5$
+        \end{enumerate}
+        The shortest path (of cost 31) is $\left\langle (1, 3),(3, 5),(5, 6)\right\rangle $. It amounts to buy a new machine every 2 years. Note that there are two other 
+        optimal solutions: path $\left\langle (1, 2),(2, 4)(4, 6)\right\rangle $ and path $\left\langle (1, 3),(3, 4),(4, 6)\right\rangle $.
+
+    \newpage
+
+    \section{Project planning}
+        The preparation of the apple pie has long been a tradition at Rossi's family. First the weight of the ingredients has to be determined: flour, sugar, butter, eggs, 
+        apples, cream. The butter must then be melted down, and added to a mixture of flour, sugar, and eggs. Apples must be added to this new mixture, once they have been 
+        peeled and cut into thin slices. The mixture can then be cooked, in the already heated oven. It is advisable to whip the cream only after the apple slices have 
+        been added to the mixture. Once the cake is cooked, the cream is used to garnish it. The following table reports the time needed for each activity.
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{ccc}
+            \hline
+            \textbf{} & \textbf{Activity}                        & \textbf{Times (minutes)} \\ \hline
+            A         & Weight the ingredients                   & 5                        \\
+            B         & Melt the butter                          & 3                        \\
+            C         & Mix flour, eggs and sugar                & 5                        \\
+            D         & Peel the apples and cut them into slices & 10                       \\
+            E         & Heat the oven                            & 20                       \\
+            F         & Add butter to the mixture                & 8                        \\
+            G         & Add apples to the mixture                & 4                        \\
+            H         & Cook the mixture in the oven             & 40                       \\
+            I         & Whip the cream                           & 10                       \\
+            L         & Garnish                                  & 5                        \\ \hline
+            \end{tabular}
+        \end{table}
+        Draw the graph (with activities associated to arcs) which represents the project precedence relations. Determine the minimum total completion time of the project 
+        as well as the earliest times and the latest times associated to each node. Identify the critical activities and draw Gantt's chart at earliest.
+    \subsection*{Solution}
+        We derive the directed graph representing the precedence relations as follows. For each activity, we introduce an arc whose cost is equivalent to the duration of the 
+        activity (its two nodes represent the beginning and the end of the activity). For each precedence relation $A_i < A_j$, a fictitious arc $(i, j)$ of duration 0 is 
+        introduced (dashed line) between the ending node of the arc associated to Ai and the beginning node of the arc associated to $A_j$. We include a node $s$ and, 
+        for each activity without predecessors associated to arc $(v, w)$, we add the arc $(s, v)$ of cost 0. Similarly, we include a node $t$ and, for each activity 
+        without successors associated to arc $(v, w)$, we add the arc $(w, t)$ of cost 0.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/prog.png}
+        \end{figure}
+        By deleting some fictitious arcs while paying attention not to create any unwanted precedence relations, we obtain the following more compact directed 
+        acyclic graph representing the project. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/prog1.png}
+        \end{figure}
+        We use the Critical Path Method to determine, for each node $v$ of the graph, the at earliest and at latest times, denoted by $T_{min_v}$ and respectively $T_{max_v}$.
+        The algorithm exploits the topological order of the nodes and consists of two phases where Dynamic Programming is applied considering the n nodes in the 
+        increasing/decreasing order of the indices. Here is the pseudocode of the algorithm:
+        \begin{algorithm}[H]
+            \caption{Critical Path Method algorithm}
+                \begin{algorithmic}[1]
+                    \State sort the nodes topologically
+                    \State $T_{min_1} \leftarrow 0$
+                    \For {$j=2,\dots,n$}
+                        \State $T_{min_j} \leftarrow \max\{T_{min_i} + d_{ij} | (i, j) \in \delta^{-}(j)\}$
+                    \EndFor
+                    \State $T_{max_n} \leftarrow T_{min_n}$
+                    \For {$i=n-1,\dots,1$}
+                    \State $T_{max_i} \leftarrow \min\{T_{mmax_j} - d_{ij} | (i, j) \in \delta^{+}(i)\}$
+                \EndFor
+                \end{algorithmic}
+        \end{algorithm}
+        After ordering topologically the nodes, we obtain the following earliest times and latest times:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/prog2.png}
+        \end{figure}
+        The slacks for the activities are: 
+        \begin{itemize}
+            \item $\sigma(A) = T_{max_2} - T_{min_1} - d_{12} = 5 - 0 - 5 = 0$
+            \item $\sigma(B) = T_{max_4} - T_{min_2} - d_{24} = 10 - 5 - 3 = 2$
+            \item $\sigma(C) = T_{max_3} - T_{min_2} - d_{23} = 10 - 5 - 5 = 0$
+            \item $\sigma(D) = T_{max_5} - T_{min_2} - d_{25} = 18 - 5 - 10 = 3$
+            \item $\sigma(E) = T_{max_6} - T_{min_1} - d_{16} = 22 - 0 - 20 = 2$
+            \item $\sigma(F) = T_{max_5} - T_{min_4} - d_{45} = 18 - 10 - 8 = 0$
+            \item $\sigma(G) = T_{max_6} - T_{min_5} - d_{56} = 22 - 18 - 4 = 0$
+            \item $\sigma(H) = T_{max_8} - T_{min_7} - d_{78} = 62 - 22 - 40 = 0$
+            \item $\sigma(I) = T_{max_8} - T_{min_6} - d_{68} = 62 - 22 - 10 = 30$
+            \item $\sigma(L) = T_{max_9} - T_{min_8} - d_{89} = 67 - 62 - 7 = 0$
+        \end{itemize}
+        The critical activities are A, C, F, G, H, L.
+
+    \newpage
+
+    \section{Shortest paths with negative costs}
+        Given the following directed graph, find the shortest paths between all pairs of nodes, or show that the problem is ill-posed, by exhibiting a circuit of total 
+        negative cost.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.3\linewidth]{images/neg1.png}
+        \end{figure}
+    \subsection*{Solution}
+        The steps of the Warshall-Floyd's algorithm are the following:
+        \begin{enumerate}
+            \item The initial configuration is the following. 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|ccccc|ccc}
+                    D & 1        & 2        & 3          & $\:\:\:\:\:\:$ & P & 1 & 2 & 3  \\ \cline{1-4} \cline{6-9} 
+                    1 & 0        & 4        & 3          &                & 1 & 1 & 1 & 1  \\
+                    2 & 2        & 0        & 5          &                & 2 & 2 & 2 & 2  \\
+                    3 & -2       & -4       & 0          &                & 3 & 3 & 3 & 3  \\ 
+                    \end{tabular}
+                \end{table}
+            \item The first iteration is the following. 
+                \begin{enumerate}
+                    \item $d_{21} + d_{12} = 2 + 4 = 6 > d_{22} = 0$
+                    \item $d_{21} + d_{13} = 2 + 3 = 5 = d_{23} = 5$
+                    \item $d_{31} + d_{13} = -2 + 3 = 1 > d_{33} = 0$
+                    \item $d_{31} + d_{12} = -2 + 4 = 2 > d_{32} = -4$
+                \end{enumerate}
+                The matrices become: 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|ccccc|ccc}
+                    D & 1        & 2        & 3          & $\:\:\:\:\:\:$ & P & 1 & 2 & 3  \\ \cline{1-4} \cline{6-9} 
+                    1 & 0        & 4        & 3          &                & 1 & 1 & 1 & 1  \\
+                    2 & 2        & 0        & 5          &                & 2 & 2 & 2 & 2  \\
+                    3 & -2       & -4       & 0          &                & 3 & 3 & 3 & 3  \\ 
+                    \end{tabular}
+                \end{table}
+            \item The second iteration is the following. 
+                \begin{enumerate}
+                    \item $d_{12} + d_{21} = 4 + 2 = 6 > d_{11} = 0$
+                    \item $d_{12} + d_{23} = 4 + 5 = 9 > d_{13} = 3$
+                    \item $d_{32} + d_{23} = -4 + 5 = 1 > d_{33} = 0$
+                    \item $d_{32} + d_{21} = -4 + 2 = -2 = d_{31} = -2$
+                \end{enumerate}
+                The matrices become: 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|ccccc|ccc}
+                    D & 1        & 2        & 3          & $\:\:\:\:\:\:$ & P & 1 & 2 & 3  \\ \cline{1-4} \cline{6-9} 
+                    1 & 0        & 4        & 3          &                & 1 & 1 & 1 & 1  \\
+                    2 & 2        & 0        & 5          &                & 2 & 2 & 2 & 2  \\
+                    3 & -2       & -4       & 0          &                & 3 & 3 & 3 & 3  \\ 
+                    \end{tabular}
+                \end{table}
+            \item The third iteration is the following. 
+                \begin{enumerate}
+                    \item $d_{13} + d_{31} = 3 - 2 = 1 > d_{11} = 0$
+                    \item $d_{13} + d_{32} = 3 - 4 = -1 < d_{12} = 4 \Rightarrow$ update $d_{12}, p_{12}$
+                    \item $d_{23} + d_{32} = 5 - 4 = 1 > d_{22} = 0$
+                    \item $d_{23} + d_{31} = 5 - 2 = 3 > d_{21} = 2$
+                \end{enumerate}
+                The matrices become: 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|ccccc|ccc}
+                    D & 1        & -1       & 3          & $\:\:\:\:\:\:$ & P & 1 & 2 & 3  \\ \cline{1-4} \cline{6-9} 
+                    1 & 0        & 4        & 3          &                & 1 & 1 & 3 & 1  \\
+                    2 & 2        & 0        & 5          &                & 2 & 2 & 2 & 2  \\
+                    3 & -2       & -4       & 0          &                & 3 & 3 & 3 & 3  \\ 
+                    \end{tabular}
+                \end{table}
+        \end{enumerate}
 
 \newpage
 
