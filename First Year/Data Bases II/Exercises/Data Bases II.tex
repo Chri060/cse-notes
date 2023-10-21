@@ -80,7 +80,7 @@
             \end{tabular}%
             }
         \end{table}
-        And we can see that there is a lost update with transactions $T_1$ and $T_2$ and a phantom update with $T_3$ and $T_4$. 
+        And, considering both definitions,  we can see that there is a lost update with transactions $T_1$ and $T_2$ and a phantom update with $T_3$ and $T_4$. 
 
     \newpage
     
@@ -104,7 +104,7 @@
         \end{figure}
         Some arcs can be omitted if the nodes are connected in another way (in this case we can remove arcs $\{\{5,1\},\{5,3\}\}$). 
 
-        There are no cycles: the schedule is CSR (and also VSR). 
+        There are no cycles, so the schedule is CSR (and also VSR). 
 
     \newpage
     
@@ -251,7 +251,7 @@
         We need to look at those acquisitions that must be anticipated and to those releases that must be delayed to not violate the 2PL rules.
         $T_4$ can only get the XL on X only after 2 and on $Y$ after 4 and has to release $Y$ before 6 and $X$ before 7. Thus, the lock on $Z$ must be acquired before 6.
         $T_2$ can get all the locks at the beginning and release them immediately after each use. $T_3$ can acquire $X$, $Y$ and $Z$ just before using them and release them all before 12. 
-        All other transactions ($T_6, T_9, T_5, T_10$) clearly pose no problems.
+        All other transactions ($T_6, T_9, T_5, T_{10}$) clearly pose no problems.
 
     \newpage
 
@@ -465,7 +465,7 @@
         So, the schedule is not in TS-mono. 
 
         The schedule is also outside TS-multi, because $w_3(X)$ comes too late ($r_4(X)$ was already given the initial version instead) and 
-        also because $w_6(Z)$ is late with respect to r$8(Z)$. The other five reasons were due to reads (that are always accepted in TS-multi).
+        also because $w_6(Z)$ is late with respect to $r_8(Z)$. The other five reasons were due to reads (that are always accepted in TS-multi).
 
     \newpage
 
@@ -490,7 +490,7 @@
         Classify the following schedule:
         \[r_1(X) w_1(Y) w_2(Y) w_3(Z) r_1(Z) w_4(X) r_4(Y) w_3(X) r_5(Y) w_5(X)\] 
     \subsection*{Solution}
-        Firstly, we check if it is CSR:
+        First, we check if it is CSR:
         \begin{itemize}
             \item $X: r_1 w_4 w_3 w_5$
             \item $Y: w_1 w_2 r_4 r_5$
@@ -506,7 +506,7 @@
         Classify the following schedule:
         \[r_1(x) r_2(y) w_3(x) r_5(z) w_6(z) w_2(x) w_3(y) r_7(z) w_4(x)\] 
     \subsection*{Solution}
-        Firstly, we check if it is CSR:
+        First, we check if it is CSR:
         \begin{itemize}
             \item $X: r_1 w_3 w_2 w_4$
             \item $Y: r_2 w_3$
@@ -529,7 +529,7 @@
         We note that the only potential conflict is between $w_1(C)$ and $r_2(C)$. But these are also the last operations of their respective 
         transactions: to check for compatibility, we can always assume that the commit occurs right after the last operation, and that all 
         locks are released in favor of the other one. But this argument is independent of the order of the operations, and is therefore valid 
-        for all the 8 interleaved schedules. So, all the schedules are strict 2PL. 
+        for all the eight interleaved schedules. So, all the schedules are strict 2PL. 
 
     \newpage
 
@@ -603,58 +603,458 @@
     \section{Ranking and skyline queries}
         Consider a distributed setting with three data sources, ranking basketball players according to their offensive rating (off), defensive rating (def) and rebounds (reb).
         An associated score in $[0,1]$ is indicated (the higher, the better). Sorted access is available.
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=0.4\linewidth]{images/rank1.png}
-        \end{figure}
+            \begin{tabular}{|cc|cc|cc|}
+            \hline
+            $\boldsymbol{R_0}$ \textbf{(off)} & \textbf{Player} & $\boldsymbol{R_1}$ \textbf{(def)} & \textbf{Player} & $\boldsymbol{R_2}$ \textbf{(reb)} & \textbf{Player} \\ \hline
+            0.8         & 9      & 0.9         & 4      & 0.6         & 1      \\
+            0.8         & 8      & 0.8         & 5      & 0.5         & 3      \\
+            0.8         & 2      & 0.7         & 7      & 0.3         & 4      \\
+            0.7         & 7      & 0.6         & 9      & 0.3         & 2      \\
+            0.6         & 3      & 0.5         & 0      & 0.3         & 0      \\
+            0.6         & 1      & 0.4         & 6      & 0.2         & 8      \\
+            0.5         & 6      & 0.2         & 3      & 0.2         & 6      \\
+            0.5         & 5      & 0.2         & 2      & 0.1         & 5      \\
+            0.5         & 0      & 0.0         & 8      & 0.0         & 9      \\
+            0.2         & 4      & 0.0         & 1      & 0.0         & 7      \\ \hline
+            \end{tabular}
+        \end{table}
         \begin{enumerate}
             \item Determine the top-3 players according to their median rank using MedRank.
-            \item Remove the first data source and consider the scoring function $MAX(o) = MAX\{def(o), reb(o)\}$. Determine the top-2 players according to MAX using the 
-                algorithms $B_0$ and NRA.
+            \item Remove the first data source and consider the scoring function
+                \[\textnormal{MAX}(o) = \max\{\textnormal{def}(o), \textnormal{reb}(o)\}\] 
+                Determine the top-2 players according to MAX using the algorithms $B_0$ and NRA.
             \item Assume now that random access is also available. Determine the top-2 players according to MAX with the algorithms TA and FA.
-            \item Consider now the scoring function $SUM(o) = def(o) + reb(o)$ equally weighing all partial scores. What are the top-2 players according to SUM?
-            \item Assume now that all the data regarding the players are centralized in a single datasource, in which the players are available sortedly according to SUM. 
+            \item Consider now the scoring function 
+                \[\textnormal{SUM}(o) = \textnormal{def}(o) + \textnormal{reb}(o)\] 
+                equally weighing all partial scores. What are the top-2 players according to SUM?
+            \item Assume now that all the data regarding the players are centralized in a single data source, in which the players are available sortedly according to SUM. 
                 Use SFS to determine the skyline of the players.
+            \item Identify the players in the 2-skyband, and in the 3-skyband.
         \end{enumerate}
     \subsection*{Solution}
     \begin{enumerate}
-        \item A player is considered when, while doing sorted access it appears in at least two tables. In this case we have found the following players: 
-            \begin{itemize}
-                \item 4 (median rank 3).
-                \item 2 (median rank 4).
-                \item 7 (median rank 4).
-                \item 9 (median rank 4).
-            \end{itemize}
-        \item With $B_0$ and also with NRA the result will be the players four and five. 
-        \item With TA and also with FA the result will be the players four and five. 
-        \item With TA the result will be the players four and five. 
-        \item The skyline found is composed by the players four, three and one. 
+        \item A player is considered when, while doing sorted access it appears in at least two tables. If we check the first row we find the following players: 
+            $\{9,4,1\}$ and the tables are three, so no player appears in at least two tables. For the second iteration we have found $\{9,4,1,8,5,3\}$, so again
+            no duplicate player. With the third row we have $\{9,4,1,8,5,3,2,7,4\}$. We have found the first player that appears in at least two rankings, but we 
+            need two more players, so we can check the fourth row: $\{9,4,1,8,5,3,2,7,4,7,9,2\}$. With this iteration we have found other three players, and 
+            the algorithm stops. The content of the buffer at this step is the following: 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{|c|ccc|}
+                \hline
+                \textbf{Player} & \textbf{First row} & \textbf{Second row} & \textbf{Third row} \\ \hline
+                4               & 1                  & 3                   & ?                  \\
+                2               & 3                  & 4                   & ?                  \\
+                7               & 3                  & 4                   & ?                  \\ 
+                9               & 1                  & 4                   & ?                  \\
+                1               & 1                  & ?                   & ?                  \\
+                8               & 2                  & ?                   & ?                  \\
+                5               & 2                  & ?                   & ?                  \\
+                3               & 2                  & ?                   & ?                  \\ \hline
+                \end{tabular}
+            \end{table}
+            With this algorithm we have found that the best players are: nine, four, two, and seven. In particular, the player four is the best 
+            due to the median rank and the other three are equally good. 
+        \item Since we have $k=2$, for the $B_0$ algorithm we need to make two sorted access to the first two rows, and add the objects to the buffer: 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{MAX} \\ \hline
+                4               & 0.9                               & ?                                 & 0.9                             \\
+                5               & 0.8                               & ?                                 & 0.8                             \\
+                1               & ?                                 & 0.6                               & 0.6                             \\
+                3               & ?                                 & 0.6                               & 0.6                             \\ \hline
+                \end{tabular}
+            \end{table}
+            For each object in the buffer we have to make some random accesses to find the missing values. The buffer will be updated like follows. 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{MAX} \\ \hline
+                4               & 0.9                               & 0.3                               & 0.9                             \\
+                5               & 0.8                               & 0.1                               & 0.8                             \\
+                1               & 0.0                               & 0.6                               & 0.6                             \\
+                3               & 0.2                               & 0.6                               & 0.6                             \\ \hline
+                \end{tabular}
+            \end{table}
+            The best two players in the buffer are four and five.
+
+            For the NRA algorithm we have to make a sorted access to each row until the upper bound of the first element out of the top-$k$ is less
+            or equal than the lower bound of the worst top-$k$. With the sorted access to the first row we have the following buffer. 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|cc}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Lower bound} & \textbf{Upper bound} \\ \hline
+                4               & 0.9                               & ?                                 & 0.9                  & 0.9                  \\
+                1               & ?                                 & 0.6                               & 0.6                  & 0.9                  \\ \hline
+                \end{tabular}
+            \end{table}
+            And the threshold point has the following coordinates $(0.9,0.6)$, and since the scoring function is MAX we have that its score is $0.9$.
+            After the second sorted access we have: 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|cc}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Lower bound} & \textbf{Upper bound} \\ \hline
+                4               & 0.9                               & ?                                 & 0.9                  & 0.9                  \\
+                5               & 0.9                               & ?                                 & 0.8                  & 0.8                  \\
+                1               & ?                                 & 0.6                               & 0.6                  & 0.8                  \\
+                3               & ?                                 & 0.6                               & 0.5                  & 0.8                  \\ \hline
+                \end{tabular}
+            \end{table}
+            And the threshold point has the following coordinates $(0.8,0.5)$, and since the scoring function is MAX we have that its score is $0.8$.
+            Since the lower bound of three is equal to the upper bound of one the algorithm stops.
+        \item With FA we have to make sorted accesses until we find $k$ elements that appears in each column. In this case (excluding $R_0$) we 
+            need to make five sorted accesses to find two elements in both tables (four and zero). The elements added to the buffer are: 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Score} \\ \hline
+                4               & 0.9                               & 0.3                               & 0.9            \\
+                5               & 0.8                               & ?                                 & 0.8            \\
+                7               & 0.7                               & ?                                 & 0.7            \\
+                1               & ?                                 & 0.6                               & 0.6            \\
+                9               & 0.6                               & ?                                 & 0.6            \\
+                3               & ?                                 & 0.5                               & 0.5            \\
+                0               & 0.5                               & 0.3                               & 0.5            \\
+                2               & ?                                 & 0.3                               & 0.3            \\ \hline
+                \end{tabular}
+            \end{table}
+            We can now complete the buffer with random accesses to the score, and we obtain the final buffer.
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Score} \\ \hline
+                4               & 0.9                               & 0.3                               & 0.9            \\
+                5               & 0.8                               & 0.1                               & 0.8            \\
+                7               & 0.7                               & 0.0                               & 0.7            \\
+                1               & 0.0                               & 0.6                               & 0.6            \\
+                9               & 0.6                               & 0.0                               & 0.6            \\
+                3               & 0.2                               & 0.5                               & 0.5            \\
+                0               & 0.5                               & 0.3                               & 0.5            \\
+                2               & 0.2                               & 0.3                               & 0.3            \\ \hline
+                \end{tabular}
+            \end{table}
+            The best players are: four and five. 
+
+            For the TA we have to make sorted access row by row and complete the value with sorted accesses in the other column. We have also 
+            to compute the threshold as the scoring function return value of the considered row. For the first row we have the following 
+            buffer. 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Score} \\ \hline
+                4               & 0.9                               & 0.3                               & 0.9            \\
+                1               & 0.0                               & 0.6                               & 0.6            \\ \hline
+                \end{tabular}
+            \end{table}
+            The threshold in this case is the maximum of the values of the first row, that is $0.9$. So, we need to do another iteration, that 
+            creates the following buffer. 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Score} \\ \hline
+                4               & 0.9                               & 0.3                               & 0.9            \\
+                5               & 0.8                               & 0.1                               & 0.8            \\ \hline
+                \end{tabular}
+            \end{table}
+            The threshold in this case is the maximum of the values of the second row, that is $0.8$. Since it is less or equal than the worst 
+            object's score in the buffer, the algorithm halts. We have found that also with TA the best players are four and five. 
+        \item We decide to use TA algorithm with the given scoring function and $k=2$. The steps are the same as the previous point, except for 
+            the scoring function. After accessing the first row we have the following buffer: 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Score} \\ \hline
+                4               & 0.9                               & 0.3                               & 1.2            \\
+                1               & 0.0                               & 0.6                               & 0.6            \\ \hline
+                \end{tabular}
+            \end{table}
+            The threshold in this case is the sum of the values of the first row, that is $1.5$. Since it is greater than $0.6$ we have to do
+            another iteration. If we read the second row we obtain the following buffer. 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Score} \\ \hline
+                4               & 0.9                               & 0.3                               & 1.2            \\
+                5               & 0.8                               & 0.1                               & 0.9            \\ \hline
+                \end{tabular}
+            \end{table}
+            The threshold in this case is the sum of the values of the first row, that is $1.3$. Since it is greater than $0.9$ we have to do
+            another iteration. If we read the third row we obtain the following buffer. 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Score} \\ \hline
+                4               & 0.9                               & 0.3                               & 1.2            \\
+                5               & 0.8                               & 0.1                               & 0.9            \\ \hline
+                \end{tabular}
+            \end{table}
+            The threshold in this case is the sum of the values of the first row, that is $1.0$. Since it is greater than $0.9$ we have to do
+            another iteration. If we read the fourth row we obtain the following buffer. 
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|cc|c}
+                \hline
+                \textbf{Player} & \textbf{$\boldsymbol{R_1}$ (def)} & \textbf{$\boldsymbol{R_2}$ (reb)} & \textbf{Score} \\ \hline
+                4               & 0.9                               & 0.3                               & 1.2            \\
+                5               & 0.8                               & 0.1                               & 0.9            \\ \hline
+                \end{tabular}
+            \end{table}
+            The threshold in this case is the sum of the values of the first row, that is $0.9$. Since it is equal to $0.9$ the algorithm halts. 
+            We found that the best player for this scoring function are four and five. 
+        \item It is possible to draw the points with coordinates $(R_1,R_2)$. 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.35\linewidth]{images/skyline.png}
+            \end{figure}
+            We access the first row and since the window has no elements we add it to it. We check for every tuple if it dominates the inserted one. 
+            Only the tuples three and one are not dominated by the tuple four, so the final window contains the points four, three and one. Graphically
+            we have that the skyline of the given dataset is the following. 
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.35\linewidth]{images/skylinesol.png}
+            \end{figure}
+        \item Players zero and five are dominated only by player four, so they are part of the 2-skyband. Players one, three and four
+            are part of the skyline, so they are obviously also part of the 2-skyband. 
+            The 3-skyband is made of the players one, three, four, six and seven according to the definition. 
     \end{enumerate}
 
     \newpage 
     \section{Ranking and skyline queries}
         Consider the following three ranked lists reporting statistics about European soccer teams: 
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=0.4\linewidth]{images/rank2.png}
-        \end{figure}
+            \begin{tabular}{|cc|cc|cc|}
+            \hline
+            \textbf{Goals} & \textbf{Team} & \textbf{Possession} & \textbf{Team} & \textbf{Passes} & \textbf{Team} \\ \hline
+            75         & PSG      & 63.2         & BMU      & 89.9         & PSG      \\
+            73         & BMU      & 62.1         & BAR      & 88.9         & MCY      \\
+            70         & ATA      & 61.8         & PSG      & 88.4         & BAR      \\
+            68         & MCY      & 61.6         & MCY      & 87.5         & BMU      \\
+            68         & BDO      & 59.0         & LIV      & 86.6         & BDO      \\
+            66         & LIV      & 58.5         & BDO      & 84.4         & LAZ      \\
+            63         & BAR      & 55.7         & ATA      & 83.9         & LIV      \\
+            60         & LAZ      & 50.1         & LAZ      & 83.4         & ATA      \\ \hline
+            \end{tabular}
+        \end{table}
         \begin{enumerate}
-            \item Apply an algorithm that does not use random access to determine the best team according to the scoring function $S(team)=\max{ team.Goals,team.Possession,team.Passes}$. 
-            \item On this dataset, could you do better than the previous algorithm, in terms of access cost,  with an algorithm that also uses random access? 
-            \item Apply now the Threshold Algorithm to determine the best team according to the same scoring function as in one. 
-            \item Apply now the Threshold Algorithm to determine the best team according to the following scoring function $S(team) = team.Goals + team.Possession + team.Passes $. 
+            \item Apply an algorithm that does not use random access to determine the best team according to the scoring function:
+                \[S(\textnormal{team})=\max\{\textnormal{team.Goals},\textnormal{team.Possession},\textnormal{team.Passes}\}\]
+            \item On this dataset, could you do better than the previous algorithm, in terms of access cost, with an algorithm that also uses random access? 
+            \item Apply now the TA to determine the best team according to the same scoring function as in one. 
+            \item Apply now the TA to determine the best team according to the following scoring function:
+                \[S(\textnormal{team}) = \textnormal{team.Goals} + \textnormal{team.Possession} + \textnormal{team.Passes}\]
             \item Determine the skyline of the dataset. 
         \end{enumerate}
     \subsection*{Solution}
         \begin{enumerate}
-            \item We can use either $B_0$ or NRA. Both will find the result after scanning the first item in every list and determining PSG as the top team. With NRA, the 
-                threshold point $T$ will be $(75.0,63.2,89.9)$ with a maximum score of $89.9$, while PSG has both an upper and a lower bound of $89.9$, therefore meeting the 
-                stopping condition.
+            \item Since the scoring function is MAX we can use the $B_0$ algorithm. Find the best team means that we have $k=1$, so we 
+                need to make only one sorted access. By accessing the first row we obtain the following buffer. 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|ccc|c}
+                    \hline
+                    \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
+                    PSG             & 75             & ?                   & 89.9            & 89.9           \\
+                    BMU             & ?              & 63.2                & ?               & 0.8            \\ \hline
+                    \end{tabular}
+                \end{table}
+                The maximum score is given to PSG, that is the best team according to the MAX scoring function. 
             \item No algorithm could do better than reading at least the top scores on each list. 
-            \item The best team is again the PSG. 
-            \item The best team is again the PSG. We found the same top team as before, but this is just a coincidence for this dataset, since the scoring function has 
-                changed. 
-            \item The skyline points are PSG, BMU, and BAR. 
+            \item We have again $k=1$. We make a sorted access to the first row to compute the threshold value and 
+                the objects to insert in the buffer. 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|ccc|c}
+                    \hline
+                    \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
+                    PSG             & 75             & ?                   & 89.9            & 89.9           \\
+                    BMU             & ?              & 63.2                & ?               & 0.8            \\ \hline
+                    \end{tabular}
+                \end{table}
+                The threshold point has a value that is the MAX of the scores in the first row, that is $89.9$. We now make random 
+                accesses to complete the data in the buffer (remember that the algorithm searches the missing data when it inserts a 
+                new object in the buffer). 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|ccc|c}
+                    \hline
+                    \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
+                    PSG             & 75             & 61.8                & 89.9            & 89.9           \\ \hline
+                    \end{tabular}
+                \end{table}
+                Note that the passes for PSG are accessed before via random access, and later via sorted access. So at each iteration (except for 
+                the third column) the algorithm makes a sorted access and two random accesses. Since the threshold has the same value as the score 
+                of PSG, the algorithm halts and returns PSG as the best team. 
+            \item We have to apply again TA with $k=1$, but with a different scoring function, so the result may change. The check for the 
+                first row is the same as the previous point, except for the score.
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|ccc|c}
+                    \hline
+                    \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
+                    PSG             & 75             & 61.8                & 89.9            & 226.7           \\ \hline
+                    \end{tabular}
+                \end{table}
+                The threshold is the sum of the values in the first row $228.1$. The threshold is greater than PSG score, so we need to make another 
+                iteration. In the next row we find: BMU (223.7), BAR (213.5), and MCY (218.5). All these scores are lower than PSG one, so the buffer 
+                remains the same. The threshold point has a value of $224$, that is less than PSG score, so the algorithm halts. The best team with 
+                SUM is again PSG. 
+            \item It is possible to represent the dataset in a graph with coordinates (Goals, Possession, Passes). By inspecting the ordered table we 
+                add PSG to the window and all the other teams that are not dominated by it. The only teams not dominated by PSG are BMU and BAR. We have 
+                found that the skyline of the dataset is composed by three teams: PSG, BMU, and BAR. 
         \end{enumerate}
 
+    \newpage 
+
+    \section{Ranking and skyline queries}
+        Consider the following two ranked lists of hotels: 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{cc|cc}
+            \hline
+            \textbf{Rating} & \textbf{Hotel} & \textbf{Stars} & \textbf{Hotels} \\ \hline
+            0.8             & C              & 0.8            & F               \\
+            0.4             & G              & 0.6            & E               \\
+            0.4             & F              & 0.5            & G               \\
+            0.3             & D              & 0.4            & A               \\
+            0.3             & A              & 0.2            & D               \\
+            0.2             & E              & 0.2            & C               \\
+            0.1             & B              & 0.2            & B               \\ \hline
+            \end{tabular}
+        \end{table}
+        \begin{enumerate}
+            \item Apply FA and TA to determine the top hotel according to the scoring function: 
+                \[\textnormal{MAX}(o) = \max\{\textnormal{Rating}(o), \textnormal{Stars}(o)\}\] 
+            \item Indicate the number of sorted accesses and random accesses executed on each source. 
+            \item Could FA make fewer sorted accesses than TA?
+            \item Could FA make fewer random accesses than TA?
+            \item TA is instance optimal: can any algorithm cost overall less than TA?
+        \end{enumerate}
+    \subsection*{Solution}
+        \begin{enumerate}
+            \item For the FA we have to make sorted access until we found $k$ objects in all tables. 
+                In this case we need to find only one element that is in both columns. To do so we need 
+                three sorted accesses, and we obtain the following buffer. 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cc|c}
+                    \hline
+                    \textbf{Hotel} & \textbf{Rating} & \textbf{Stars} & \textbf{Score} \\ \hline
+                    F     & 0.4    & 0.8   & 1.2   \\
+                    C     & 0.8    & ?     & 0.8   \\
+                    G     & 0.4    & 0.5   & 0.9   \\
+                    E     & ?      & 0.6   & 0.6   \\ \hline
+                    \end{tabular}
+                \end{table}
+                We need to find the missing values with two random accesses, and we have
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cc|c}
+                    \hline
+                    \textbf{Hotel} & \textbf{Rating} & \textbf{Stars} & \textbf{Score} \\ \hline
+                    F     & 0.4    & 0.8   & 1.2   \\
+                    C     & 0.8    & 0.2   & 1.0   \\
+                    G     & 0.4    & 0.5   & 0.9   \\
+                    E     & 0.2    & 0.6   & 0.8   \\ \hline
+                    \end{tabular}
+                \end{table}
+                The best hotel according to the given scoring function is F. 
+
+                The TA checks rows until the value of the threshold is greater than the worst score in the top-$k$. After accessing the first row 
+                we have:
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cc|c}
+                    \hline
+                    \textbf{Hotel} & \textbf{Rating} & \textbf{Stars} & \textbf{Score} \\ \hline
+                    F     & 0.4    & 0.8   & 1.2   \\ \hline
+                    \end{tabular}
+                \end{table}
+                With a threshold of $1.6$. After accessing the second row we have the same buffer, and a threshold value of $1.0$, that is less than F's score, so 
+                the algorithm halts. The best hotel found is again F. 
+            \item With FA we have made six sorted accesses (three for Rating, and three for Stars) and two random accesses (one for Rating, and one for Stars), so the total is eight. 
+                With TA we have made four sorted accesses (two for Rating, and two for Stars) and four random accesses (two for Rating, and two for Stars), so the total is eight. 
+            \item No, because FA stops its sorted access phase when all potential top-$k$ objects (according to any possible scoring function) have been seen, so at least $k$ objects 
+                are no worse than the threshold according to any scoring function. 
+            \item Yes, in this exercise we have an example. 
+            \item Yes, it is possible. 
+        \end{enumerate}
+    
+    \newpage 
+
+    \section{Ranking and skyline queries}
+        Consider the following lists reporting statistics about soccer players.
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{cc|cc}
+            \hline
+            \textbf{Goals} & \textbf{Player} & \textbf{Assists} & \textbf{Player} \\ \hline
+            25             & LEW             & 17               & DEB             \\
+            21             & RON             & 15               & SAN             \\
+            19             & MES             & 12               & MES             \\
+            18             & MBA             & 6                & NEY             \\
+            15             & ILI             & 5                & MBA             \\
+            14             & SAN             & 5                & ILI             \\
+            13             & NEY             & 3                & RON             \\
+            8              & DEB             & 3                & LEW             \\ \hline
+            \end{tabular}
+        \end{table}
+        \begin{enumerate}
+            \item Apply the TA to determine the top-$2$ players according to the scoring function: 
+                \[S(\textnormal{player})=\textnormal{player.Goals}+\textnormal{player.Assists}\]
+            \item Reuse as much as possible the answer of the previous question to indicate the 
+                reached depth and the number of sorted and random accesses to determine, with TA,
+                the top-$1$ player according to the same scoring function as the previous point.
+            \item Discuss whether any algorithm could attain a lower execution cost than the cost 
+                incurred by TA to determine the top-$1$ player. 
+            \item Apply now the TA to determine the top-$2$ players according to the scoring function: 
+                \[S(\textnormal{player})=\left\lvert \textnormal{player.Goals}-\textnormal{player.Assists} \right\rvert\]
+            \item Determine the skyline of the dataset. 
+        \end{enumerate}
+    \subsection*{Solution}
+        \begin{enumerate}
+            \item The execution of the TA algorithm needs four rounds to stop on the given dataset. At the fourth 
+                round we have the following buffer. 
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cc|c}
+                    \hline
+                    \textbf{Player} & \textbf{Goals} & \textbf{Assists} & \textbf{Score} \\ \hline
+                    MES             & 19             & 12               & 31             \\
+                    SAN             & 14             & 15               & 29             \\ \hline
+                    \end{tabular}
+                \end{table}
+                With a threshold value of $24$. We found that the best two players for the given scoring function
+                are MES and SAN. 
+            \item The procedure is the same as the previous point, but it stops at the third round since the threshold 
+                condition is already verified at this step. The buffer is the following.
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{c|cc|c}
+                    \hline
+                    \textbf{Player} & \textbf{Goals} & \textbf{Assists} & \textbf{Score} \\ \hline
+                    MES             & 19             & 12               & 31             \\ \hline
+                    \end{tabular}
+                \end{table}
+                With a threshold of $31$. We have found that the best player is MES. 
+            \item FA would stop at depth three as well, but only needs four random accesses to find the top player. 
+            \item The given function is not monotone, so the TA can return wrong results. In this case the algorithm 
+                will fail, returning DEB instead of RON. 
+            \item After sorting the dataset we insert MES in the window. The only players that are not dominated by him
+                are: SAN, LEW, and DEB. So, we have that the skyline is composed by these three players. 
+        \end{enumerate}
 \end{document}
