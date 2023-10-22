@@ -867,20 +867,9 @@
         \end{figure}
         No other augmenting path exists. The set $S^{*} = \{1, 2, 3, 5\}$, highlighted in blue, contains all the nodes that can be reached in $\overline{G}$ from the 
         source one. $S^{*}$ induces in the network $G$ the cut $\delta_G(S^{*})$ of minimum total capacity $k(S^{*})=33$ which is highlighted in red. Note that, 
-        according to strong duality, the value φ4 = 9 of the feasible flow x4
-        is equal to the total capacity k(S
-        ∗
-        ) of
-        the cut δG(S
-        ∗
-        ) = {(2, 4),(3, 6),(5, 4),(5, 7)} induced by S
-        ∗
-        .
+        according to strong duality, the value $\varphi_4 = 9$ of the feasible flow $x_4$ is equal to the total capacity $k(S^{*})$ of by the cut 
+        $\delta_G(S^{*}) = \{(2, 4),(3, 6),(5, 4),(5, 7)\}$ induced by $S^{*}$.
         
-
-
-
-
     \newpage 
 
     \section{Maximum flow and minimum cut}
@@ -891,8 +880,49 @@
         \end{figure}
         find a maximum (feasible) flow from node 1 to node 7, and determine a corresponding minimum (capacity) cut.
     \subsection*{Solution}
+        We apply Ford-Fulkerson's algorithm. In the following figures, on the left we report the current feasible flow in the network $G$ (with on each arc the quantity 
+        of product $x_{ij}$ flowing through it and its capacity $k_{ij}$) and on the right the incremental (residual) network $\overline{G}$ associated to the current 
+        feasible flow.
 
-
+        We start from the null feasible flow $\underline{x}_0=0$ of value $\varphi_0 = 0$. Since all arcs are empty, $\overline{G}$ is equivalent to $G$.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/maxcut1.png}
+        \end{figure}
+        Along the augmenting path $\left\langle (1, 3),(3, 5),(5, 6),(6, 7)\right\rangle $ we can send up to $\delta = 4$ additional units of product. $\delta$ is given 
+        by arc $(6, 7)$ which has the smallest capacity $k_{ij}$ of all arcs on the path. Adding these $\delta=4$ units of product to the feasible flow $\underline{x}_0$, 
+        we obtain the following feasible flow $\underline{x}_1$ (on the left) of value $\varphi_1 = 0 + 4 = 4$. The associated incremental (residual) network is reported 
+        on the right.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/maxcut2.png}
+        \end{figure}
+        Along the augmenting path $\left\langle (1, 2),(2, 5),(5, 7)\right\rangle $ we can send up to $\delta = 3$ additional units of product. $\delta$ is given by arc 
+        $(2, 5)$ which has the smallest residual capacity $\underline{k}_{ij}$ of all arcs on the path. Adding these $\delta = 3$ units of product to the feasible flow 
+        $\underline{x}_1$, we obtain the following feasible $\underline{x}_2$ of value $\varphi_2 = 4 + 3 = 7$. The associated incremental (residual) network is reported 
+        on the right.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/maxcut3.png}
+        \end{figure}
+        Along the augmenting path $\left\langle (1, 2),(2, 4),(4, 7) \right\rangle $ we can send up to $\delta = 1$ additional units of product, where $\delta$ is given 
+        by arc $(4, 7)$. We obtain the following feasible flow $\underline{x}_3$ (on the left) of value $\varphi_3 = 7 + 1 = 8$. The associated incremental (residual) 
+        network is reported on the right.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/maxcut4.png}
+        \end{figure}
+        Along the augmenting path $\left\langle (1, 2),(2, 4),(4, 5),(5, 7) \right\rangle $ we can send up to $\delta = 1$ additional units of product, where $\delta$ is 
+        given by arc $(4, 5)$ (or $(5, 7)$). We obtain the following feasible flow $\underline{x}_4$ (on the left) of value $\varphi_4 = 8 + 1 = 9$. The associated 
+        incremental (residual) network is reported on the right.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/maxcut5.png}
+        \end{figure}
+        Since no other augmenting path exists (no path from node 1 to node 7 in the incremental/residual network $\overline{G}$), the algorithm halts. The set 
+        $S^{*} = \{1, 2, 3, 4, 5, 6\}$, highlighted in blue, contains all the nodes that can be reached from the source 1 in $\overline{G}$. $S^{*}$ induces the 
+        cut $\delta(S^{*})$ of minimum total capacity $k(S^{*}) = 9$ which is highlighted in red. Note that, according to strong duality, the value $\varphi_4=9$ of the 
+        feasible flow $\underline{x}_4$ is equal to the total capacity $k(S^{*})$ of the cut $\delta(S^{*}) = \{(4, 7),(5, 7),(6, 7)\}$ induced by $S^{*}$.
 
     \newpage
 
@@ -900,9 +930,34 @@
         In maximum flow problems, how can we deal with capacities on both nodes and arcs? Find a maximum flow from node 1 to node 7 in the network of the previous exercise, 
         with a node capacity of 2 on node 6.
     \subsection*{Solution}
-
-
-
+        The capacities on nodes can be easily reduced to capacities on arcs. Indeed, each node $i$ with a capacity $c_i$ can be substituted with two auxiliary nodes, 
+        which are connected with an arc whose capacity is equal to $c_i$ and where all entering arcs entering the left node and all exiting arcs exit from the right node.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/max.png}
+        \end{figure}
+        The network is modified as follows. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/max1.png}
+        \end{figure}
+        We send $\delta=4$ additional units along the path \[\left\langle (1, 3),(3, 5),(5, 7) \right\rangle\]
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/max2.png}
+        \end{figure}
+        We send $\delta = 2$ additional units along the augmenting path \[\left\langle (1, 3),(3, 5),(5, 6),(6, 6^{'}),(6^{'}, 7)\right\rangle\]
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/max3.png}
+        \end{figure}
+        We send $\delta = 1$ additional units along the augmenting path \[\left\langle (1, 2),(2, 4),(4, 7) \right\rangle\]
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/max4.png}
+        \end{figure}
+        No other augmenting path exists. The minimum cut induced by $S^{*} = \{1, 2, 3, 4, 5, 6\}$ is highlighted in red. It has a total capacity $k(S^{*}) = \varphi = 7$.
+  
     \newpage 
 
     \section{Indirect application of maximum flows}
@@ -912,24 +967,53 @@
         same project. Determine whether it is possible to complete the three projects within the time constraints and, if it is possible, find a feasible workforce plan. 
         Describe how this problem can be reduced to the problem of finding a maximum flow in an appropriate network.
     \subsection*{Solution}
+        We build a network with nodes $m_1, m_2, m_3, m_4$ associated to the four months and nodes $P_1, P_2, P_3$ associated to the three projects.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.2\linewidth]{images/indflow.png}
+        \end{figure}
+        For each pair of month-node mi and project-node $P_j$, the arc $(m_i, P_j)$ is included in the network if man/hours of month $i$ can be allocated to project $P_j$. 
+        For instance, since project $P_1$ can only begin after month $1$ and must be completed within month $3$, there are only two arcs entering in $P_1$, namely $(m_2, P_1)$ 
+        and $(m_3, P_1)$. Thus, we obtain the following bipartite oriented graph.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.2\linewidth]{images/inflow1.png}
+        \end{figure}
+        All arcs outgoing from $s$ have capacity 8, since there are 8 engineers available. All arcs connecting month-nodes to project-nodes have capacity 6, as no more than 6 engineers 
+        can work on the same project at the same time. All arcs entering in $t$ have a capacity that is equivalent to the number of man/months needed to complete the corresponding 
+        project $P_j$. All arcs outgoing from $s$ have capacity 8, since there are 8 engineers available. All arcs connecting month/nodes to project-nodes have capacity 6, as no more 
+        than 6 engineers can work on the same project at the same time. All arcs entering in $t$ have a capacity that is equivalent to the number of man/months needed to complete the 
+        corresponding project $P_j$.
 
+        Since all capacities are integer, the maximum flow will be integer as well. To check whether all projects can be completed within the given time limits, it suffices to check 
+        whether the network admits a feasible flow of value $8 + 10 + 12 = 30$.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        A feasible flow of maximum value $30$ can be found by applying Ford-Fulkerson algorithm. We can start from the feasible flow $\underline{x}_0 = 0$ of value $\varphi_0 = 0$ 
+        and use the following augmenting paths:
+        \begin{itemize}
+            \item $\left\langle (s, m_3),(m_3, P_1),(P_1, t) \right\rangle$ with $\delta = 6$, yielding a feasible flow of value $\varphi_1 = 6$.
+            \item $\left\langle (s, m_2),(m_2, P_1),(P_1, t) \right\rangle$ with $\delta = 2$, yielding a feasible flow of value $\varphi_2 = 8$.
+            \item $\left\langle (s, m_1),(m_1, P_3),(P_3, t) \right\rangle$ with $\delta = 6$, yielding a feasible flow of value $\varphi_3 = 14$.
+            \item $\left\langle (s, m_2),(m_2, P_3),(P_3, t) \right\rangle$ with $\delta = 6$, yielding a feasible flow of value $\varphi_4 = 20$.
+            \item $\left\langle (s, m_4),(m_4, P_2),(P_2, t) \right\rangle$ with $\delta = 6$, yielding a feasible flow of value $\varphi_5 = 26$.
+            \item $\left\langle (s, m_3),(m_1, P_2),(P_2, t) \right\rangle$ with $\delta = 2$, yielding a feasible flow of value $\varphi_6 = 28$.
+            \item $\left\langle (s, m_3),(m_3, P_2),(P_2, t) \right\rangle$ with $\delta = 2$, yielding a feasible flow of value $\varphi_7 = 30$.
+        \end{itemize}
+        The resulting feasible flow $\underline{x}_7$ of value $\varphi_7 = 30$ is as follows.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/inflow2.png}
+        \end{figure}
+        And the associated residual network $\overline{G}_7$ is the following. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/inflow3.png}
+        \end{figure}
+        Note that in $\overline{G}_7$ only node $m_4$ can be reached from node $s$, hence $S^{*} = \{s, m_4\}$.
+        
+        Since the cut $\delta G(S^{*}) = \{(s, m_1),(s, m_2),(s, m_3),(m_4, P_2)\}$ has a total capacity of $k(S^{*}) =8 + 8 + 8 + 6 = 30$ which is equal to the value $\varphi_7 = 30$ of the feasible flow 
+        $\underline{x}_7$, weak duality implies that the feasible flow $\underline{x}_7$ is of maximum value and the cut $\delta G(S^{*})$ is of minimum total capacity (among all the cuts separating the source 
+        $s$ from the sink $t$).
 
 \newpage
 
