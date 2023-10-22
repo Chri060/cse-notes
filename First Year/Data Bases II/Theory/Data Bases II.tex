@@ -27,7 +27,7 @@
   basicstyle={\small\ttfamily},
   numbers=none,
   numberstyle=\tiny\color{gray},
-  keywordstyle=\color{gray},
+  keywordstyle=\color{blue},
   commentstyle=\color{dkgreen},
   stringstyle=\color{mauve},
   breaklines=true,
@@ -36,7 +36,7 @@
 }
 \lstset{emph={%  
     FETCH,SKYLINE,OF,DIFF%
-    },emphstyle={\color{gray}}%
+    },emphstyle={\color{blue}}%
 }%
 
 
@@ -618,12 +618,13 @@
     \end{itemize}
 
     \section{Timestamps}
-    Locking is also named pessimistic concurrency control because it assumes that collisions will arise. In reality collisions are rare. So, it is possible to use optimistic 
-    concurrency control methods like timestamps, which are identifier that defines a total ordering of the events of a system. Each transaction has a timestamp representing the time 
+    Locking is also named pessimistic concurrency control because it assumes that collisions will arise but in reality collisions are rare. 
+    
+    So, it is possible to use optimistic concurrency control methods like timestamps, which are identifier that defines a total ordering of the events of a system. Each transaction has a timestamp representing the time 
     at which the transaction begins so that transactions can be ordered: the smaller is the index the older is the transaction. A schedule is accepted only if it reflects the serial 
     ordering of the transactions induced by their timestamps. The timestamps are given by a system's function on request. The syntax of a timestamp is the following: 
     \[\textnormal{event-id}.\textnormal{node-id}\]
-    The algorithm's synchronization is based on send-receive of messages, and it is called Lamport method. It is based on the following rule: it is not possible to receive a  message 
+    The algorithm's synchronization is based on send-receive of messages, and it is called Lamport method: it is not possible to receive a message 
     from the future, if this happens the bumping rule is used to bump the timestamp of the receive event beyond the timestamp of the send event.     
     \begin{example}
         An example of timestamps assignation at two different nodes can be the following. 
@@ -643,7 +644,7 @@
         \item If $ts<\textnormal{RTM}(x)$ or $ts<\textnormal{WTM}(x)$ the request is rejected, and the  transaction is killed. 
         \item Else, access is granted, and we set $\textnormal{WTM}(x)=ts$. 
     \end{itemize}
-    The problem that arise using this technique is that too many transactions are killed. 
+    The previous rules cause too many transaction killings. 
     \begin{example}
         Let us assume $\textnormal{RTM}(x)=7$ and $\textnormal{WTM}(x)=4$ and the following schedule: 
         \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x)\]
@@ -674,7 +675,7 @@
     \end{proof}
     Basic TS-based control considers only committed transactions in the schedule, aborted transactions are not considered. If aborts occur, dirty reads may happen. To cope with dirty 
     reads, a variant of basic TS must be used: a transaction $T_i$ that issues $r_{ts}(x)$ or $w_{ts}(x)$ such that $ts>\textnormal{WTM}(x)$ has its read or write operation delayed until the
-    transaction $T^{'}$ that wrote the value of $x$ has committed or aborted. This is similar to long duration write locks, so it introduces delays. 
+    transaction $T^{'}$ that wrote the value of $x$ has committed or aborted. This is similar to long duration write locks. 
     \begin{table}[H]
         \centering
         \begin{tabular}{c|cc}
@@ -689,11 +690,11 @@
     To reduce the number of killings it is possible to use the Thomas rule, that changes the rule for the write operations: 
     \begin{itemize}
         \item If $ts<\textnormal{RTM}(x)$ the request is rejected and the transaction is killed. 
-        \item Else, if $ts<\textnormal{WTM}(x)$ then our write is obsolete: it can be skipped. 
+        \item If $ts<\textnormal{WTM}(x)$ then our write is obsolete: it can be skipped. 
         \item Else, access is granted, and we set $\textnormal{WTM}(x)=ts$. 
     \end{itemize}
 
-    \section{Multi-version concurrency control}
+    \section{Multi-version timestamps}
     The idea of multi-version is that writes generate new versions, and that reads access the right version. Writes generate new copies, each one with a new WTM, so each object $x$ 
     always has $N \geq 1$ active versions. There is a unique global RTM($x$). Old versions are discarded when there are no transactions that need their values. 
     In theory, it is possible to use the following rule: 
@@ -706,7 +707,7 @@
         \item $w_{ts}(x)$: 
             \begin{itemize}
                 \item If $ts < \textnormal{RTM}(x)$ the request is rejected. 
-                \item Else a new version is created for timestamp $ts$ ($N$ is incremented). $\textnormal{WTM}_1(x), \dots, \textnormal{WTM}_N(x)$ are the new versions, kept sorted from oldest to youngest.
+                \item Else a new version is created for timestamp $ts$ ($N$ is incremented). 
             \end{itemize}
     \end{itemize}
     \begin{example}
@@ -741,7 +742,6 @@
             \begin{itemize}
                 \item If $ts < \textnormal{RTM}(x)$ or $ts < \textnormal{WTM}_N(x)$ the request is rejected. 
                 \item Else a new version is created for timestamp $ts$ ($N$ is incremented)
-                \item $\textnormal{WTM}_1(x), \dots, \textnormal{WTM}_N(x)$ are the new versions, kept sorted from oldest to youngest. 
             \end{itemize}
     \end{itemize}
     \begin{example}
@@ -764,27 +764,27 @@
             \end{tabular}
         \end{table}
     \end{example}
+    \subsection{Isolation level introduced with TS-multi}
+    The realization of TS-multi gives the opportunity to introduce into the DBMS another isolation level called snapshot isolation. In this level only WTM($x$) is used. The rule 
+    used in this level states that every transaction reads the version consistent with its timestamp, and defers writes to the end. If the scheduler detects that the writes of a
+    transaction conflict with writes of other concurrent transactions after the snapshot timestamp, it aborts. Snapshot isolation does not guarantee serializability: it is possible 
+    to have a new anomaly called write skew (non-determinism). 
+    
+    \section{Concurrency classes sets}
     The final structure for the sets is the following. 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.75\linewidth]{images/set.png}
-        \caption{Set structure for concurrency classification}
+        \includegraphics[width=1\linewidth]{images/set.png}
     \end{figure}
-    The realization of TS-Multi gives the opportunity to introduce into the DBMS another isolation level called snapshot isolation. In this level only WTM($x$) is used. The rule 
-    used in this level states that every transaction reads the version consistent with its timestamp, and defers writes to the end. If the scheduler detects that the writes of a
-    transaction conflict with writes of other concurrent transactions after the snapshot timestamp, it aborts. Snapshot isolation does not guarantee serializability: it is possible 
-    to have a new anomaly called write skew (the order of the operation can change in different executions changing the final result). 
     
 \newpage 
 
 \chapter{Ranking}
     \section{Introduction}
-    Data are: available in large quantities, represented under many models, queried with many languages, and processed with many algorithms. We can use ranking to get the best
-    result out of the data. To do this we have to use the so called multi-objective optimization, that consist in the simultaneous optimization of different criteria. A general 
-    multi-objective problem can be formulated as follows: given $N$ objects described by $d$ attributes, we need to find the best $k$ objects. 
+    It is possible to create ranking to get the best result out of the data using the multi-objective optimization (simultaneous optimization of different criteria). 
     
-    This problem is relevant in many fields, for instance: search engines, e-commerce, recommender systems, and Machine Learning. 
-
+    A general multi-objective problem can be formulated as follows: given $N$ objects described by $d$ attributes, we need to find the best $k$ objects. 
+    
     The main approaches to solve the multi-objective optimization are: 
     \begin{itemize}
         \item Ranking queries: selects the top $k$ objects according to a given scoring function.
@@ -792,11 +792,9 @@
     \end{itemize}
 
     \section{History}
-    Rank aggregation is the problem of combining several ranked lists of objects in a robust way to produce a single consensus ranking of the objects. 
-
-    In the $13^{\textnormal{th}}$ century started this problem was introduced with the elections polls. Borda proposed to give a number of penalty points equivalent to the position 
+    In the $13^{\textnormal{th}}$ century this problem was introduced with the elections polls. Borda proposed to give a number of penalty points equivalent to the position 
     of the electors in a voter's ranking, so the winner will be the candidate with the lowest overall penalty. Condorcet, instead, proposed to consider as winner the candidate who 
-    defeats every other candidate in pairwise majority rule election. The winner with two methods can be different. 
+    defeats every other candidate in pairwise majority rule election.
     \begin{example}
         Given ten voters and three candidates with the following votes: 
         \begin{table}[H]
@@ -815,7 +813,7 @@
             \item $B: 3 \cdot 6+2 \cdot 4 = 26$
             \item $C: 2 \cdot 6+1 \cdot 4 = 16$ (winner)
         \end{itemize}
-        While for Condorcet we have that $A$ beats both $B$ and $C$ in pairwise majority, so it is the winner. So, the winner is different and depends on the method used. 
+        While for Condorcet we have that $A$ wins in pairwise majority. So, the winner depends on the method used. 
     \end{example}
 
     In 1950 Arrow proposed the axiomatic approach. He defined the aggregation as axioms and understood that a small set of natural requirements cannot be simultaneously achieved by 
@@ -837,9 +835,9 @@
     And it is possible to find efficient approximation for $F(R_1, R_2)$. 
 
     \section{Opaque rankings}
-    The technique that works on opaque rankings are those which use only the position of the elements in the ranking and no other associated score. The algorithm called MedRank is
-    based on the notion of median and provides an approximation of the Foot-rule optimal aggregation. The inputs of this algorithm are: an integer $k$ and a ranked list 
-    $R_1,\dots,R_m$ of $N$ elements. The output is the top k elements according to median ranking. The idea of the algorithm is the following: 
+    The opaque rankings consider only the position and no other associated score. The algorithm called MedRank is based on the notion of 
+    median and provides an approximation of the foot-rule optimal aggregation. The inputs of this algorithm are: an integer $k$, and a ranked list 
+    $R_1,\dots,R_m$ of $N$ elements. The output is the top $k$ elements according to median ranking. The idea of the algorithm is the following: 
     \begin{enumerate}
         \item Use sorted accesses in each list, one element at a time, until there are $k$ elements that occur in more than $m/2$ lists.
         \item These are the top $k$ elements. 
@@ -848,8 +846,8 @@
         The maximum number of sorted accesses made on each list is also called the \emph{depth reached} by the algorithm. 
     \end{definition}
     \begin{example}
-        Suppose we have to sort the hotels based on three rankings criteria: price, rating, and distance. Using the MedRank algorithm we can make e one sorted access at a time in 
-        each ranking and then look for hotels that appear in at least two rankings. We assume that price, rating and distance are opaque, so only the rank's position matters. The 
+        Suppose we have to sort the hotels based on three rankings criteria: price, rating, and distance. Using the MedRank algorithm we can make one sorted access at a time in 
+        each ranking and then look for hotels that appear in at least two rankings. We assume that price, rating and distance are opaque. The 
         ranks of hotels are the following:
         \begin{table}[H]
             \centering
@@ -882,21 +880,20 @@
         An algorithm is \emph{optimal} if its execution cost is never worse than any other algorithm on any input.
     \end{definition}
     MedRank is not optimal, but it is instance optimal. This means that among the algorithms that access the lists in sorted order, this is the best possible algorithm on every 
-    input instance. In other words, its cost cannot be arbitrarily worse than any other algorithm on any problem instance. The instance optimality is a form of optimality aimed 
-    at when standard optimality is unachievable. 
+    input instance. 
     \begin{definition}
-        Let $\textbf{A}$ be a family of algorithms, $\textbf{I}$ a set of problem instances. Let cost be a cost metric applied to an algorithm-instance pair. Algorithm 
-        $A^{*}$ is instance-optimal with respect to $\textbf{A}$ and $\textbf{I}$ for the cost metric cost if there exist constants $k_1$ and $k_2$ such that, for all 
-        $A \in \textbf{A}$ and $I \in \textbf{I}$: 
+        Let $\boldsymbol{A}$ be a family of algorithms, $\boldsymbol{I}$ a set of problem instances. Let cost be a cost metric applied to an algorithm-instance pair. Algorithm 
+        $A^{*}$ is instance-optimal with respect to $\boldsymbol{A}$ and $\boldsymbol{I}$ for the cost metric cost if there exist constants $k_1$ and $k_2$ such that, for all 
+        $A \in \boldsymbol{A}$ and $I \in \boldsymbol{I}$: 
         \[\textnormal{cost}(A^{*}, I) \leq k_1 \textnormal{cost}(A, I) + k_2\]
     \end{definition}
     If $A^{*}$ is instance-optimal, then any algorithm can improve with respect to $A^{*}$ by only a constant factor $r$, which is therefore called the optimality ratio of $A^{*}$. 
     Instance optimality is a much stronger notion than optimality in the average or worst case. 
 
     \section{Ranking queries}
-    Ranking queries, also called top-$k$ queries, aim to retrieve only the $k$ best answers from a potentially very large result set. Ranking is based on ordering objects based on their relevance.
+    Ranking queries, also called top-$k$ queries, aim to retrieve only the $k$ best ansoftwareers from a potentially very large result set. Ranking is based on ordering objects based on their relevance.
 
-    Assume a scoring function $S$ that assigns to each tuple $t$ a numerical score for ranking tuples. The algorithm needs this inputs: cardinality $k$, dataset $R$, scoring function $S$. The output is 
+    Assume a scoring function $S$ that assigns to each tuple $t$ a numerical score for ranking tuples. The algorithm needs these inputs: cardinality $k$, dataset $R$, and a scoring function $S$. The output is 
     the $k$ highest-scored tuples with respect to $S$. The idea is the following: 
     \begin{enumerate}
         \item For all tuples $t$ in $R$ compute $S(t)$. 
@@ -910,7 +907,7 @@
             \begin{lstlisting}[language=SQL]
 ORDER BY
             \end{lstlisting}
-        \item Limiting the output cardinality to $k$ tuples. This is taken care (since 2008) of by 
+        \item Limiting the output cardinality to $k$ tuples. This is taken care of by 
             \begin{lstlisting}[language=SQL]
 FETCH FIRST k ROWS ONLY
             \end{lstlisting}
@@ -929,9 +926,9 @@ b)  SELECT *
     ORDER BY 0.8*Price+0.2*Miles
         \end{lstlisting}
         The values 0.8 and 0.2, also called weights, are a way to normalize our preferences on price and mileage.
-        Query a will likely miss some relevant answers (near-miss). Query b will return all Audi/A4 in the dataset (information overload).
+        The first query will likely miss some relevant ansoftwareers (near-miss). The second query will return all Audi/A4 in the dataset (information overload).
     \end{example}
-    Only the first $k$ tuples become part of the result. If more than one set of $k$ tuples satisfies the ordering directive, any of such sets is a valid answer 
+    Only the first $k$ tuples become part of the result. If more than one set of $k$ tuples satisfies the ordering directive, any of such sets is a valid ansoftwareer 
     (non-deterministic semantics). 
 
     To evaluate a top-$k$ query it is possible to consider two basic aspects: 
@@ -940,7 +937,7 @@ b)  SELECT *
         \item Access paths: no index, indexes on all/some ranking attributes. 
     \end{itemize}
     In the simplest case, that is a top-$k$ selection query with only one relation, if the input is sorted according to $S$ it is possible to read only the first $k$ tuples; 
-    if the tuples are not sorted we need to perform an in-memory sort (through an $heap$), that has a complexity of $O(N\log{k})$. 
+    If the tuples are not sorted we need to perform an in-memory sort (through the heap), that has a complexity of $O(N\log{k})$. 
     \begin{example}
         Consider the two-dimensional attribute space (Price, Mileage) of the previous example: 
         \begin{figure}[H]
@@ -956,16 +953,16 @@ b)  SELECT *
         that the best choice also varies. 
         The target of a query is not necessarily $(0,0)$, rather it can be any point $q=(q_1,q_2)$. 
     \end{example}
-    In general, in order to determine the goodness of a tuple $t$, we compute its distance from the target point $q$: the lower the distance from $q$, the better $t$. 
+    In general, in order to determine the goodness of a tuple $t$, we compute its distance from the target point $q$: the lower the distance from $q$, the better. 
     If we consider the distances the model become: 
     \begin{itemize}
         \item An $m$-dimensional $(m \geq 1)$ space $A = (A_1,A_2,\dots,A_m)$ of ranking attributes. 
         \item A relation $R(A_1,A_2,\dots,A_m,B_1,B_2,\dots)$, where $B_1,B_2,\dots$ are other attributes.
-        \item A target (query) point $q = (q_1,q_2,\dots,q_m)$, $q \in A$. 
+        \item A target point $q = (q_1,q_2,\dots,q_m)$, $q \in A$. 
         \item A function $d: A \times A \rightarrow \mathbb{R}^{+}$, measuring the distance between points in $A$. 
     \end{itemize}
     \begin{definition}
-        The top-$k$ query is called $k$-\emph{nearest neighbors} if given a point $q$, a relation $R$, an integer$k \geq 1$, and a distance function $d$ it determines the $k$ tuples 
+        The top-$k$ query is called $k$-\emph{nearest neighbors} if given a point $q$, a relation $R$, an integer $k \geq 1$, and a distance function $d$ it determines the $k$ tuples 
         in $R$ that are closest to $q$ according to $d$. 
 
         The distance function called $L_p$-\emph{norms} is defined as:
@@ -998,7 +995,7 @@ FETCH FIRST k ROWS ONLY
         where $p_1,p_2,\dots,p_m$ are the scoring criteria. 
     \end{definition}
 
-    In the top-$k \: 1-1$ join queries all the joins are on a common key attribute. It is possible to have two main scenarios: 
+    In the top-$k$ $1-1$ join queries all the joins are on a common key attribute. It is possible to have two main scenarios: 
     \begin{itemize}
         \item There is an index for retrieving tuples according to each preference. 
         \item The relation is spread over several sites, each providing information only on part of the objects.
@@ -1073,24 +1070,24 @@ FETCH FIRST 1 ROW ONLY
     The most common scoring functions are: 
     \begin{itemize}
         \item Average (SUM), that weighs preferences equally
-            \[SUM(o) \equiv SUM(p(o)) = p_1(o) + p_2(o) + \dots + p_m(o)\]
+            \[\textnormal{SUM}(o) \equiv \textnormal{SUM}(p(o)) = p_1(o) + p_2(o) + \dots + p_m(o)\]
         \item Weighted sum (WSUM), that weighs the preferences differently
-            \[WSUM(o) \equiv WSUM(p(o)) = w_1p_1(o) + w_2p_2(o) + \dots + w_mp_m(o)\]
+            \[\textnormal{WSUM}(o) \equiv \textnormal{WSUM}(p(o)) = w_1p_1(o) + w_2p_2(o) + \dots + w_mp_m(o)\]
         \item Minimum (MIN), that considers the worst partial score
-            \[MIN(o) \equiv MIN(p(o)) = \min\{p_1(o),p_2(o),\dots, p_m(o)\}\]
+            \[\textnormal{MIN}(o) \equiv \textnormal{MIN}(p(o)) = \min\{p_1(o),p_2(o),\dots, p_m(o)\}\]
         \item Maximum (MAX), that considers the best partial score
-            \[MAX(o) \equiv MAX(p(o)) = \max\{p_1(o),p_2(o),\dots, p_m(o)\}\]       
+            \[\textnormal{MAX}(o) \equiv \textnormal{MAX}(p(o)) = \max\{p_1(o),p_2(o),\dots, p_m(o)\}\]       
     \end{itemize}
     Note that even with the minimum scoring function we always want to retrieve the $k$ objects with the highest global scores.
 
     It is possible to define e iso-score curves in the score space, which are set of points with the same global score. 
     \begin{example}
-        In the previous graph we have that the iso-score curves for the maximum function is: 
+        In the previous graph we have that the iso-score curves for the maximum function are: 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.3\linewidth]{images/iso.png}
         \end{figure}
-        In the previous graph we have that the iso-score curves for the minimum function is: 
+        In the previous graph we have that the iso-score curves for the minimum function are: 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.3\linewidth]{images/isomin.png}
@@ -1098,7 +1095,7 @@ FETCH FIRST 1 ROW ONLY
     \end{example}
 
     \subsection{B-zero algorithm}
-    It is possible to efficiently compute the result of a top-k 1-1 join query using a maximum scoring function $S$ it is possible to use the $B_0$ algorithm. The inputs
+    It is possible to efficiently compute the result of a top-k 1-1 join query using a maximum scoring function $S$ using the $B_0$ algorithm. The inputs
     of this algorithm are: an integer $k \geq 1$, and a ranked list $R_1,\dots,R_m$. The idea is: 
     \begin{enumerate}
         \item Make $k$ sorted accesses on each list and store objects and partial scores in a buffer $B$. 
@@ -1138,8 +1135,9 @@ FETCH FIRST 1 ROW ONLY
     \end{example}
 
     \subsection{A-zero algorithm}
-    The A-zero algorithm, also called Fagin's algorithm, works with every monotonic scoring function and not only with maximum. The inputs
-    of this algorithm are: an integer $k$, and a monotone function $S$ combining ranked lists $R_1,\dots,R_m$. The idea of this algorithm is: 
+    The A-zero algorithm, also called Fagin's algorithm, works with every monotonic scoring function. The inputs
+    of this algorithm are: an integer $k$, and a monotone function $S$ combining ranked lists $R_1,\dots,R_m$. The output is the top $k$ (object-score) tuples. 
+    The idea of this algorithm is: 
     \begin{enumerate}
         \item Extract the same number of objects by sorted accesses in each list until there are at least $k$ objects in common. 
         \item For each extracted object, compute its overall score by making random accesses wherever needed. 
@@ -1181,12 +1179,12 @@ FETCH FIRST 1 ROW ONLY
         \end{table}
     \end{example}
     The main drawback of this algorithm is that it is dependent from the accesses, so the specificity of some scoring function is not exploited
-    at all, and the memory requirements can become prohibitive because of the buffer that keeps the accessed objects. It is possible to make 
+    at all, and the memory requirements can become prohibitive. It is possible to make 
     some improvements, but only changing the stopping condition can really improve the complexity. 
 
     \subsection{Threshold algorithm}
     The inputs of the threshold algorithm are: an integer $k$, and a monotone function $S$ combining ranked lists $R_1,\dots,R_m$. 
-    The idea of this algorithm is: 
+    The output is the top $k$ (object, score) tuples. The idea of this algorithm is: 
     \begin{enumerate}
         \item Do sorted access in parallel in each list $R_i$. 
         \item For each object $o$, do random accesses in the other lists $R_j$, thus extracting score $s_j$. 
@@ -1236,7 +1234,7 @@ FETCH FIRST 1 ROW ONLY
     \end{example}
     In general, TA performs much better than FA, since it can adapt to the specific scoring function. In order to characterize the 
     performance of TA, we consider the middleware cost: 
-    \[\textnormal{cost} = SA*c_{SA} + RA*c_{RA}\]
+    \[\textnormal{cost} = SA \cdot c_{SA} + RA \cdot c_{RA}\]
     where:
     \begin{itemize}
         \item $SA$ is the total number of sorted accesses.
@@ -1246,17 +1244,17 @@ FETCH FIRST 1 ROW ONLY
     \end{itemize}
 
     \subsection{No random access algorithm}
-    The NRA applies when random accesses cannot be executed. It returns the top-$k$ objects, but their 
-    scores might be uncertain. The idea at the base of this algorithm is to maintain, for each selected object
-    $o$ a lower bound $S^{-}(o)$ and an upper bound $S^{+}(o)$ on its score. So, we need an unlimited buffer to 
-    store the objects like in the $B_0$ algorithm, sorted by decreasing lower bound values. This algorithm 
+    The NRA returns the top-$k$ objects, but their scores might be uncertain. The idea at the base of this algorithm is to maintain, for each selected object
+    $o$ a lower bound and an upper bound on its score. So, we need an unlimited buffer to 
+    store the objects, sorted by decreasing lower bound values. This algorithm 
     stops when the new object upper bound is less or equal to the worst lower bound of the best objects. The inputs are: 
     an integer $k \geq 1$, a monotone function $S$ combining ranked lists $R_1, \dots, R_m$ and the output is the ranking
     without the score of the objects. The idea is the following: 
     \begin{enumerate}
         \item Make sorted access to each list. 
         \item Store in $B$ each retrieved object $o$ and maintain $S^{-}(o)$ and $S^{+}(o)$ and a threshold $\tau$. 
-        \item Repeat from step one as long as $S^{-}(B[k]) < \max\{ \max\{S^{+}(B[i]), i > k\}, S(\tau) \}$
+        \item Repeat from step one as long as:
+            \[S^{-}(B[k]) < \max\{ \max\{S^{+}(B[i]), i > k\}, S(\tau) \}\]
     \end{enumerate}
     \begin{example}
         Given the following tables based on three different criterions: 
@@ -1264,7 +1262,7 @@ FETCH FIRST 1 ROW ONLY
             \centering
             \begin{tabular}{cccccccc}
             \multicolumn{1}{l}{$R_1$}                 & \multicolumn{1}{l}{}                & \multicolumn{1}{l}{$\:\:\:\:\:\:$} & \multicolumn{1}{l}{$R_2$}                & \multicolumn{1}{l}{}                & \multicolumn{1}{l}{$\:\:\:\:\:\:$} & \multicolumn{1}{l}{$R_3$}                & \multicolumn{1}{l}{}                \\ \cline{1-2} \cline{4-5} \cline{7-8} 
-            \multicolumn{1}{|c}{\textbf{Identifier}} & \multicolumn{1}{c|}{\textbf{Score}} & \multicolumn{1}{c|}{\textbf{}}     & \multicolumn{1}{c}{\textbf{Identifier}} & \multicolumn{1}{c|}{\textbf{Score}} & \multicolumn{1}{c|}{\textbf{}}     & \multicolumn{1}{c}{\textbf{Identifier}} & \multicolumn{1}{c|}{\textbf{Score}} \\ \cline{1-2} \cline{4-5} \cline{7-8} 
+            \multicolumn{1}{|c}{\textbf{ID}} & \multicolumn{1}{c|}{\textbf{Score}} & \multicolumn{1}{c|}{\textbf{}}     & \multicolumn{1}{c}{\textbf{ID}} & \multicolumn{1}{c|}{\textbf{Score}} & \multicolumn{1}{c|}{\textbf{}}     & \multicolumn{1}{c}{\textbf{ID}} & \multicolumn{1}{c|}{\textbf{Score}} \\ \cline{1-2} \cline{4-5} \cline{7-8} 
             \multicolumn{1}{|c}{$o_1$}               & \multicolumn{1}{c|}{1.0}            & \multicolumn{1}{c|}{}              & \multicolumn{1}{c}{$o_2$}               & \multicolumn{1}{c|}{0.8}            & \multicolumn{1}{c|}{}              & \multicolumn{1}{c}{$o_7$}               & \multicolumn{1}{c|}{0.6}            \\  
             \multicolumn{1}{|c}{$o_7$}               & \multicolumn{1}{c|}{0.9}            & \multicolumn{1}{c|}{}              & \multicolumn{1}{c}{$o_3$}               & \multicolumn{1}{c|}{0.75}           & \multicolumn{1}{c|}{}              & \multicolumn{1}{c}{$o_2$}               & \multicolumn{1}{c|}{0.6}            \\  
             \multicolumn{1}{|c}{$o_2$}               & \multicolumn{1}{c|}{0.7}            & \multicolumn{1}{c|}{}              & \multicolumn{1}{c}{$o_4$}               & \multicolumn{1}{c|}{0.5}            & \multicolumn{1}{c|}{}              & \multicolumn{1}{c}{$o_3$}               & \multicolumn{1}{c|}{0.5}            \\  
@@ -1362,20 +1360,18 @@ FETCH FIRST 1 ROW ONLY
     \section{Skyline queries}
     The objective of the skyline queries is to find good objects according to several perspectives, that are based on the notion of dominance. 
     \begin{definition}
-        A tuple $t$ \emph{dominates} a tuple $s$ ($t \prec s$) if and only if: 
-        \begin{itemize}
-            \item $t$ in nowhere worse than $s$: $\forall i, 1 \leq i \leq m \rightarrow t[A_i] \leq s[A_i]$.
-            \item And better at least once: $\exists j, 1 \leq j \leq m \land t[A_j] < s[A_j]$.
-        \end{itemize}
+        A tuple $t$ \emph{dominates} a tuple $s$ ($t \prec s$) if and only if $t$ in nowhere worse than $s$: 
+        \[\forall i, 1 \leq i \leq m \rightarrow t[A_i] \leq s[A_i]\] 
+        and better at least once: 
+        \[\exists j, 1 \leq j \leq m \land t[A_j] < s[A_j]\]
+
 
         The \emph{skyline} of a relation is the set of its non dominated tuples
     \end{definition}
-    The convention on the skyline queries is the inverse of the one on top-$k$ queries: lower values are better than higher values. A tuple $t$ is in the skyline if
-    and only if  it is the top-1 result with respect to at least one monotone scoring function. This means that the skyline is the set of potentially optimal tuples.  
-
-    Note that there is no scoring function that returns the same points that are in the skyline. 
-
-    A possible syntax for the skyline queries is the following (they are not part of the skyline): 
+    The convention on the skyline queries is that lower values are better than higher values. A tuple $t$ is in the skyline if
+    and only if  it is the top-$1$ result with respect to at least one monotone scoring function. This means that the skyline is the set of potentially optimal tuples. 
+    Note that there is no scoring function that returns the same points that are in the skyline. A possible non-standard syntax for the 
+    skyline queries is the following: 
     \begin{lstlisting}[language=SQL]
 SELECT <attributes>
 FROM R1,R2,...,Rn
@@ -1388,7 +1384,7 @@ ORDER BY <conditions>
     This query can be easily translated into a standard query, but the result is too slow and cannot be used in practice. 
 
     \subsection{Block nested loop algorithm}
-    The input of the block nested loop algorithm is a dataset $D$ of multidimensional points, and the output is the skyline if $D$.
+    The input of the block nested loop algorithm is a dataset $D$ of multidimensional points, and the output is the skyline of $D$.
     \begin{algorithm}[H]
         \caption{Block nested loop algorithm}
             \begin{algorithmic}[1]
@@ -1402,10 +1398,10 @@ ORDER BY <conditions>
                 \State \Return $W$
             \end{algorithmic}
     \end{algorithm}
-    The complexity is $O(n^2)$, where $n=\left\lvert D \right\rvert $, that is very inefficient for large datasets. 
+    The complexity is $O(n^2)$, where $n=\left\lvert D \right\rvert $. The complexity of this algorithm is very inefficient for large datasets. 
 
     \subsection{Sort filter skyline algorithm}
-    The input of the sort filter skyline algorithm is a dataset $D$ of multidimensional points, and the output is the skyline if $D$.
+    The input of the sort filter skyline algorithm is a dataset $D$ of multidimensional points, and the output is the skyline of $D$.
     \begin{algorithm}[H]
         \caption{Sort filter skyline algorithm}
             \begin{algorithmic}[1]
@@ -1419,7 +1415,7 @@ ORDER BY <conditions>
                 \State \Return $W$
             \end{algorithmic}
     \end{algorithm}
-    Where S is the list of sorted point in $D$ by a monotone function. The initial sorting is useful for large datasets, thus this algorithm performs much better than the
+    Where $S$ is the list of sorted point in $D$ by a monotone function. The initial sorting is useful for large datasets, thus this algorithm performs much better than the
     previous one, although the complexity is still $O(n^2)$. 
     \begin{example}
         Given the following unordered dataset: 
@@ -1458,8 +1454,7 @@ ORDER BY <conditions>
         \item The computation is not so efficient. 
         \item They are agnostic with respect to user preferences
     \end{itemize}
-    It is possible to extend the skyline queries adding the constraint of set of tuples dominated by less than $k$ tuples. This method is called $k$-skyband, and it is 
-    possible to note that skyline queries are a particular instance of this ($1$-skyband). 
+    It is possible to extend the skyline queries adding the constraint of set of tuples dominated by less than $k$ tuples. This method is called $k$-skyband.
 
     \section{Comparison between ranking and skyline}
     \begin{table}[H]
@@ -1479,23 +1474,22 @@ ORDER BY <conditions>
 \chapter{Architectures and JPA}
     \section{Introduction}
     \begin{definition}
-        The \emph{architecture} is defined as a mix of hardware, software, and network resources. 
+        The \emph{architecture} is the union of hardware, software, and network resources. 
     \end{definition}
-    It is possible to classify the architectures based on the following parameters: 
+    The actual architectures are: 
     \begin{itemize}
-        \item Type and functionality of hardware resources.
-        \item Topology of links connecting hardware resources.
-        \item Structure of software modules and relationship between each other. 
+        \item Distributed web-based and mobile. 
+        \item Service oriented. 
+        \item Cloud and virtualized. 
+        \item Application service provisioning. 
     \end{itemize}
     \begin{chronology}[10]{1959}{2010}{\columnwidth}
         \event[1960]{1969}{One-tier architectures}
         \event[1970]{1980}{Client-Server architectures}
         \event{1980}{Distributed architectures based on RPC}
         \event{1990}{Object oriented distributed architectures}
-        \event[1995]{2000}{Internet and Web-based architectures}
+        \event[1995]{2000}{Internet and Web-based architectures}   
     \end{chronology}
-    Nowadays we have: distributed web-based and mobile architectures, service oriented architectures, cloud and virtualized architectures, and application service 
-    provisioning.
 
     \section{Client-server architecture}
     \begin{figure}[H]
@@ -1503,17 +1497,17 @@ ORDER BY <conditions>
         \includegraphics[width=0.4\linewidth]{images/cs.png}
         \caption{Client-server architecture}
     \end{figure}
-    The hardware used by this type of architecture is: 
+    The hardware used by this the client-server architecture is: 
     \begin{itemize}
         \item Server for data management. 
         \item Client for presentation layout. 
     \end{itemize}
     The software used by this type of architecture is: 
     \begin{itemize}
-        \item Client SW sends requests to the server by means of SQL queries. Client SW contains both business and presentation logic. 
-        \item Server SW processes the query and responds sending the result set back to the client. Server SW only deals with data. 
+        \item Client software sends requests to the server by means of SQL queries. The software in the client contains both business and presentation logic. 
+        \item Server software processes the query and responds sending the result set back to the client. The software in the server deals with data. 
     \end{itemize}
-    The network topology is based on a LAN with one or more servers and $N$ clients. 
+    The network topology is based on a local are network with one or more servers and $N$ clients. 
 
     \section{Three-tier architecture}
     \begin{figure}[H]
@@ -1521,12 +1515,11 @@ ORDER BY <conditions>
         \includegraphics[width=0.5\linewidth]{images/tt.png}
         \caption{Three-tier architecture}
     \end{figure}
-    The hardware used by this type of architecture is: 
+    The hardware used by the three-tier architecture is: 
     \begin{itemize}
         \item Server for data management. 
         \item Client for presentation layout. 
-        \item Middle tier to achieve a better separation between the client and the server, since the middle tier: centralizes connections to the data server, masks data 
-            model to the clients, and can be replicated to scale up. 
+        \item Middle tier to achieve a better separation between the client and the server. 
     \end{itemize}
     This architecture has several variants, depending on the software features of the middle tier. 
     
@@ -1536,7 +1529,7 @@ ORDER BY <conditions>
         \includegraphics[width=0.5\linewidth]{images/ttph.png}
         \caption{Web pure HTML three-tier architecture}
     \end{figure}
-    In this architecture the client is a standard Web browser, and it has to cope with the presentation layout only (thin client). The middle tier: 
+    In the pure HTML architecture the client is a standard web browser, and it has to cope with the presentation layout only (thin client). The middle tier: 
     \begin{itemize}
         \item Includes a Web server that exploits HTTP.
         \item Hosts the business logic for dynamically generating content from the raw data of the data tier. 
@@ -1549,20 +1542,19 @@ ORDER BY <conditions>
         \includegraphics[width=0.5\linewidth]{images/ttria.png}
         \caption{Rich internet applications three-tier architecture}
     \end{figure}
-    The Rich internet applications architecture is the fusion of web and desktop applications. The technology used to enable this fusion is the client side scripting 
-    with JavaScript. In this case the client is called fat because it has standard communication protocol (HTTP, Web Socket), language (ECMAScript) and API (DOM, HTML5). 
+    The rich internet application architecture is the fusion of web and desktop applications (with JavaScript). 
+    In this case the client is called fat because it has standard communication protocol (HTTP, Web Socket), language (ECMAScript) and API (DOM, HTML5). 
     The features of this architecture are: 
     \begin{itemize}
         \item New interface event types, also specific to touch and mobile apps.
         \item Asynchronous interaction (AJAX).
         \item Client-side persistent data.
-        \item Disconnected/offline applications.
+        \item Offline applications.
         \item Native multimedia and 3D support.
     \end{itemize}
 
     \section{Java enterprise edition}
-    Java enterprise edition is a platform aimed at the development, release and maintenance of three-tier Web applications.     Java enterprise edition features: 
-    component based development, container services, and declarative development.
+    Java enterprise edition is a platform aimed at the development, release and maintenance of three-tier web applications.
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\linewidth]{images/jee.png}
@@ -1570,27 +1562,18 @@ ORDER BY <conditions>
     \end{figure}
     The main elements of this platform are: 
     \begin{itemize}
-        \item JDBC: this API was the first industry standard for database independent connectivity between the Java programming language and databases. The JDBC API makes it possible to do three things:
-            \begin{itemize}
-                \item Establish a connection with a database or access any tabular data source. 
-                \item Send SQL statements
-                \item Process the results
-            \end{itemize}
-            JDBC is still important, but it is superseded by JTA/JPA. 
-        \item Servlet, that are the Java technology for Web application development (in the presentation tier) and:
-            \begin{itemize}
-                \item Offer a component-based, platform independent method for building Web-based applications. 
-                \item Have access to other Java APIs, including the JDBC API to access enterprise databases. 
-                \item Are executed within a container, which provides such services as concurrency and lifecycle management. 
-            \end{itemize}
-        \item Jakarta Enterprise Beans: EJB is the technology used in  the server-side component architecture of JEE. They enables development of distributed, transactional, secure and portable applications based 
-            on Java technology. EJB components execute within a container, that offers services for lifecycle management, transaction management, replication and scaling. EJB components can be used by the Web front
-            end to interact with the business functions and data access services. 
-        \item Java Persistence API, that is the specification of an interface for mapping relational data to object oriented data in Java. It is intergrated in both Java Standard Edition and Java Enterprise Edition. 
-            It comprises: the API implementation package javax.persistence, the Java compatible query language Java Persistence Query Language (JPQL), and the specification of the metadata for defining object
-            relational mappings (ORMs). 
-        \item Java Transaction API: it is an API for managing transactions in Java. It allows a component to start, commit and rollback transactions in a resource agnostic way. With JTA, Java components can manage 
-            multiple resources in a single transaction with a unique interaction model. Transactional properties can be expressed declaratively method by method or programmatically. 
+        \item JDBC: this API was the first industry standard for database independent connectivity between Java and the database. Thanks to this API we can:
+            establish a connection with a database, send SQL statements, and process the results. 
+        \item Servlet, that are the Java technology for the presentation tier in web application. The servlets: 
+            offer a component-based, platform independent method for building web-based applications, have access to other Java APIs to access enterprise databasesa 
+            and are executed within a container for concurrency control and lifecycle management. 
+        \item Jakarta Enterprise Beans: it is the technology used in the server. They enable the development of distributed, transactional, secure and portable applications. 
+            EJB components can be used by the web front-end to interact with the business functions and data access services. 
+        \item Java Persistence API: it is the specification of an interface for mapping relational data to object oriented data in Java. 
+            It comprises: the API implementation package javax.persistence, the Java compatible query language Java Persistence Query Language, and the specification of the metadata for defining object
+            relational mappings. 
+        \item Java Transaction API: it is an API for managing transactions in Java. It allows a component to start, commit and rollback transactions in a resource agnostic way. 
+            With this technology, Java components can manage multiple resources in a single transaction with a unique interaction model.
     \end{itemize}
 
     \section{JPA: object relational mapping}
