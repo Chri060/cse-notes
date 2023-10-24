@@ -146,8 +146,7 @@
 
     \section{Schedule classification}
         Classify the following schedule with respect to CSR and VSR classes:  
-        \[r_5(x) r_3(y) w_3(y) r_6(t) r_5(t) w_5(z) w_4(x) r_3(z) w_1(y) \dots\]
-        \[\dots r_6(y) w_6(t) w_4(z) w_1(t) w_3(x) w_1(x) r_1(z) w_2(t) w_2(z)\]
+        \[r_5(x) r_3(y) w_3(y) r_6(t) r_5(t) w_5(z) w_4(x) r_3(z) w_1(y) r_6(y) w_6(t) w_4(z) w_1(t) w_3(x) w_1(x) r_1(z) w_2(t) w_2(z)\]
     \subsection*{Solution}
         Since CSR contains VSR we check with the conflict graph. To do so we first divide the schedule based on the resources: 
         \begin{itemize}
@@ -173,7 +172,6 @@
         For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
         \begin{table}[H]
             \centering
-            \resizebox{\columnwidth}{!}{%
             \begin{tabular}{c|cccccccccccc}
                     & \textit{1} & \textit{2}      & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7}                        & \textit{8}      & \textit{9}              & \textit{10} & \textit{11} & \textit{12}             \\ \hline
             \textit{S} &            &                 &            &            &            & $w_3$      &                                   &                 &                         &             &             &                         \\
@@ -181,8 +179,7 @@
             \textit{X} & $r_1$      &                 &            & $r_5$      &            &            &                                   & $\searrow_1w_3$ &                         &             &             &                         \\
             \textit{Y} &            & $r_2\searrow_2$ & $w_3$      &            &            &            &                                   &                 &                         & $r_4$       &             &                         \\
             \textit{Z} &            &                 &            &            &            &            &                                   &                 &                         &             & $w_5$       & $r_5\downharpoonleft_5$
-            \end{tabular}%
-            }
+            \end{tabular}
         \end{table}
         $S$ clearly cannot be in strict 2PL. The contradictions are:
         \begin{itemize}
@@ -215,14 +212,12 @@
         For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
         \begin{table}[H]
             \centering
-            \resizebox{\columnwidth}{!}{%
             \begin{tabular}{c|ccccccccccccccc}
                        & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
             \textit{X} & $r_4$      & $r_2\searrow _2$          & $w_4$      &                              &            &            & $w_3$      &            &            &             &             &             &             &             &             \\
             \textit{Y} &            &                           &            & $w_2\downharpoonleft_2$      & $w_4$      & $r_3$      &            &            &            &             &             &             &             &             &             \\
             \textit{Z} &            &                           &            &                              &            &            &            & $w_4$      & $r_3$      & $r_6$       & $r_8$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
             \end{tabular}%
-            }
         \end{table}
         It is therefore clear that the schedule cannot be in 2PL-strict, due to $T_2$ and $T_4$: $T_2$ ends after 4, but $T_4$ wants to write $X$ at 3, and $T_2$ would thus be 
         required to release $X$ earlier, which is impossible if $T_2$ has to keep all locks until after 4.
@@ -253,14 +248,12 @@
         For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
         \begin{table}[H]
             \centering
-            \resizebox{\columnwidth}{!}{%
             \begin{tabular}{c|cccccccccc}
                     & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} \\ \hline
             \textit{A} & $r_1$      & $r_2\searrow _1$          & $w_2$      &            &            &            &            & $w_3$      &            &             \\
             \textit{B} &            &                           &            &            & $w_1\downharpoonleft_1$      & $w_2$      & $r_3$      &            &            &             \\
             \textit{C} &            &                           &            & $r_1$      &            &            &            &            & $w_2$      & $w_3$      
             \end{tabular}%
-            }
         \end{table}
         The schedule is not strict 2PL.
 
@@ -287,14 +280,12 @@
         For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
         \begin{table}[H]
             \centering
-            \resizebox{\columnwidth}{!}{%
             \begin{tabular}{c|ccccccccccc}
                        & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11}          \\ \hline
             \textit{X} & $r_1\searrow_1$       & $w_2$      &            &                                  & $r_3$      & $r_4$      &            &            &            & $w_4$       &                    \\
             \textit{Y} &                       &            &            & $w_1\downharpoonleft_1$          &            &            &            & $w_2$      & $r_3$      &             & $w_4$                \\
             \textit{Z} &                       &            & $r_1$      &                                  &            &            & $w_3$      &            &            &             &                     
             \end{tabular}%
-            }
         \end{table}
         The schedule is not strict 2PL.
 
@@ -375,7 +366,7 @@
         We need to construct the graph with the given constraints, that is: 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.75\linewidth]{images/Ob1.png}
+            \includegraphics[width=0.6\linewidth]{images/Ob1.png}
         \end{figure}
         We have to check all the nodes where the sender has a lower value than the receiver. In this case we have that the update is sent to the 
         other distributed node. The interesting cases are highlighted in the image. So, we now have to add the nodes: 
@@ -387,7 +378,7 @@
         If the numbered node is not present we can add it to the graph of the distributed node. We obtain the following graphs: 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.75\linewidth]{images/Ob2.png}
+            \includegraphics[width=0.6\linewidth]{images/Ob2.png}
         \end{figure}
         We have to check if other messages are sent. We have:
         \begin{itemize}
@@ -396,9 +387,9 @@
         So the updated graph is: 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.75\linewidth]{images/Ob3.png}
+            \includegraphics[width=0.6\linewidth]{images/Ob3.png}
         \end{figure}
-        We have found find a cycle, so there is a deadlock. 
+        We have found a cycle, so there is a deadlock. 
 
     \newpage
 
@@ -420,7 +411,7 @@
         The graph is the following: 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.75\linewidth]{images/Ob4.png}
+            \includegraphics[width=0.6\linewidth]{images/Ob4.png}
         \end{figure}
         \begin{enumerate}
             \item We have to add the nodes (connections are distributed): 
