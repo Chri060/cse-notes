@@ -937,7 +937,7 @@
             \item $P(A \lor B)=P(A)+P(B)-P(A \land B)$.
         \end{itemize}
     \end{theorem}
-    Some useful formulas are: 
+    From the axioms it is possible to derive some other formula such as: 
     \begin{enumerate}
         \item $P(\overline{A})=1-P(A)$.
         \item $P(A)=P(A \land B)+P(\overline{A} \land B)$
@@ -952,7 +952,7 @@
             \item $P(A=v_1 \lor A=v_2 \lor A=v_3 \lor \dots \lor A=v_k)=1$. 
         \end{itemize}
     \end{theorem}
-    Some useful formulas are: 
+    With those new axioms it is possible to derive other formulas that are useful with multivalued variable:
     \begin{enumerate}
         \item $P(A=v_1 \lor A=v_2 \lor \dots \lor A=v_i)=\sum_{j=1}^{i}{P(A=v_j)}$.
         \item $\sum_{j=1}^{k}{P(A=v_j)}=1$. 
@@ -962,7 +962,7 @@
     \begin{definition}
         The \emph{conditional probability} of $A$ given $B$ is the fraction of possible worlds in which $B$ is true that also have $A$ true. 
     \end{definition}
-    The inference can be obtained using these formulas: 
+    The inference can be done mainly using the following rules: 
     \begin{itemize}
         \item Chain rule: $P(A \land B)=P(A|B)P(B)$
         \item Bayes theorem: $P(A|B)=\dfrac{P(B|A)P(A)}{P(B)}$.
@@ -975,33 +975,30 @@
         Given two random variables $A$ and $B$, the \emph{joint distribution} of $A$ and $B$ is the distribution of $A$ and $B$ together: $P(A,B)$
     \end{definition}
     It is possible to represent a joint distribution of $M$ (binary) variables with the following steps:
-    \begin{itemize}
+    \begin{enumerate}
         \item Make a truth table listing all combination of values ($2^M$ entries).
         \item For each combination compute how probable it is. 
         \item Check that all probabilities sum up to one. 
-    \end{itemize}
+    \end{enumerate}
 
     \section{Probabilistic reasoning}
-    Graphical models describe a factorization for the join distribution, and the process which possibly generates the data. They can be used for backward reasoning via Bayes' theorem.
-    These models are graph-based algorithms for calculation and computation. The graphs can be: 
-    \begin{itemize}
-        \item Directed graphs (useful for designing models).
-        \item Undirected graphs (good for some domains).
-        \item Factor graphs (useful for inference and learning).
-    \end{itemize}
+    The graphical models are used to describe factorization for the join distribution. The graphical models are used for backward reasoning mainly using the 
+    Bayes' theorem. The models used to compute the probability are graph-based algorithms. The graph used by these algorithms can of three types: directed, undirected, 
+    and factor. 
+
     \begin{example}
         A fiendish murder has been committed. There are two suspects: the butler and the cook. There are three possible murder weapons: a butcher's knife, a pistol, and a 
         fireplace poker. 
 
         We know that the butler has served family well for many years, and the cook, hired recently, rumors of dodgy history, so we can say that: 
-        \[P(Culprit=butler)=20\% \:\:\:\:\:\:\:\:\:\:\:\: P(Culprit=cook)=80\%\]
+        \[\textnormal{P}(\textnormal{Culprit}\rightarrow butler)=20\% \:\:\:\:\:\:\:\:\:\:\:\: \textnormal{P}(\textnormal{Culprit}\rightarrow cook)=80\%\]
         Culprit is a binary random variable which probabilities add to $100\%$. 
 
         The butler is ex-army, and keeps a gun in a locker drawer. The cook has access to a lot of knives. The butler is older, and getting frail. We know that the weapons are: 
-        \[Weapon=\{pistol,knife,poker\}\]
+        \[\textnormal{Weapon}=\{pistol,knife,poker\}\]
         And given the evidence we can state that: 
-        \[P(Weapon|Culprit=butler)=\begin{bmatrix} 80\% & 10\% & 10\% \end{bmatrix}\]
-        \[P(Weapon|Culprit=cook)=\begin{bmatrix} 5\% & 65\% & 30\% \end{bmatrix}\]
+        \[\textnormal{P}(\textnormal{Weapon}|\textnormal{Culprit}\rightarrow butler)=\begin{bmatrix} 80\% & 10\% & 10\% \end{bmatrix}\]
+        \[\textnormal{P}(\textnormal{Weapon}|\textnormal{Culprit}\rightarrow cook)=\begin{bmatrix} 5\% & 65\% & 30\% \end{bmatrix}\]
         
         Using the chain rule we can finally compute the joint distribution, that is: 
         \begin{table}[H]
@@ -1019,25 +1016,25 @@
         If at a certain point we discover the weapon, we can use the Bayes' theorem to compute who is the culprit. 
     \end{example}
 
-    \section{Density estimation and its complexity}
+    \section{Density estimation}
     To compute the probability for logic expression we can use the sum: 
     \[P(E)=\sum_{row \backsim E}P(row)\]
-    To compute the inference (that is probabilistic reasoning) we can use the formula: 
+    To compute the inference we can use the formula: 
     \[P(E_1|E_2)=\dfrac{P(E_1 \land E_2)}{E_2}=\dfrac{\sum_{row \backsim E_1 \land E_2}P(row)}{\sum_{row \backsim E_2}P(row)}\]
     \begin{example}
         Given the following truth table: 
         \begin{table}[H]
             \centering
-            \begin{tabular}{|c|c|c|c|}
+            \begin{tabular}{ccc|c}
             \hline
-            $A$ & $B$ & $C$ & $P(A,B,C)$ \\ \hline
-            0   & 0   & 0   & 0.30       \\ \hline
-            0   & 0   & 1   & 0.05       \\ \hline
-            0   & 1   & 0   & 0.10       \\ \hline
-            0   & 1   & 1   & 0.05       \\ \hline
-            1   & 0   & 0   & 0.05       \\ \hline
-            1   & 0   & 1   & 0.10       \\ \hline
-            1   & 1   & 0   & 0.25       \\ \hline
+            $\boldsymbol{A}$ & $\boldsymbol{B}$ & $\boldsymbol{C}$ & $\boldsymbol{\textnormal{\textbf{P}}(A,B,C)}$ \\ \hline
+            0   & 0   & 0   & 0.30       \\ 
+            0   & 0   & 1   & 0.05       \\ 
+            0   & 1   & 0   & 0.10       \\ 
+            0   & 1   & 1   & 0.05       \\ 
+            1   & 0   & 0   & 0.05       \\ 
+            1   & 0   & 1   & 0.10       \\ 
+            1   & 1   & 0   & 0.25       \\ 
             1   & 1   & 1   & 0.10       \\ \hline
             \end{tabular}
         \end{table}
@@ -1058,7 +1055,7 @@
         A \emph{density estimator} learns a mapping from a set of attributes to a probability distribution over the attributes space: 
         \[M:\{0,1\}^I \rightarrow [0,1]\]
     \end{definition}
-    We can use likelihood for evaluating density estimation. Given a record $x$, a density estimator $M$ tells you how likely it is $\widehat{P}(x|M)$. Given a dataset with $N$ 
+    We can use likelihood for evaluating density estimation: given a record $x$, a density estimator $M$ tells you how likely it is $\widehat{P}(x|M)$. Given a dataset with $N$ 
     records, a density estimator can tell how likely data is under the assumption that all records were independently generated from it: 
     \[\widehat{P}(\textnormal{dataset})=\widehat{P}(x_1,x_2,\dots,x_N)=\prod_{n=1}^{N}\widehat{P}(x|M)\]
     Since likelihood can get too small we usually use log-likelihood:
@@ -1075,23 +1072,22 @@
         Given four variables $A,B,C,D$. For the naïve Bayes estimator model they are all independent thanks to the assumptions. This means that: 
         \[P(A,\overline{B},C,\overline{D}) = P(A)P(\overline{B})P(C)P(\overline{D})\]
     \end{example}
-    To learn a naïve Bayes estimator we have to suppose that $x[1],x[2],\dots,x[n]$ are independently distributed. We can construct any row of the implied joint distribution on 
-    demand with the formula: 
+    To learn a naïve Bayes estimator we have to suppose that $x[1],x[2],\dots,x[n]$ are independently distributed. With this hypothesis it is possible to 
+    construct any row of the implied joint distribution on demand: 
     \[\widehat{P}(x[1]=u_1,x[2]=u_2,\dots,x[I]=u_I) = \prod_{k=1}^{I} \widehat{P}(x[k]=u_k)\]
-    And we can do inference.
     \begin{table}[H]
         \centering
         \begin{tabular}{c|c|c|}
         \cline{2-3}
                                                    & \textbf{Joint estimator} & \textbf{Naïve estimator} \\ \hline
-        \multicolumn{1}{|c|}{\textbf{Modelling}}   & Anything                 & Boring distributions     \\ \cline{1-1}
-        \multicolumn{1}{|c|}{\textbf{Attributes}}  & Few Boolean              & Many multivalued         \\ \cline{1-1}
+        \multicolumn{1}{|c|}{\textbf{Modelling}}   & Anything                 & Boring distributions     \\ 
+        \multicolumn{1}{|c|}{\textbf{Attributes}}  & Few Boolean              & Many multivalued         \\ 
         \multicolumn{1}{|c|}{\textbf{Overfitting}} & Yes                      & Quite robust             \\ \hline
         \end{tabular}
     \end{table}
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.75\linewidth]{images/naive-joint.png}
+        \includegraphics[width=0.35\linewidth]{images/naive-joint.png}
         \caption{Comparison between a joint and a naïve estimator}
     \end{figure}
 
@@ -1099,12 +1095,12 @@
 
 \chapter{Graphical models}
     \section{Introduction}
-    In the real world the random variables are usually correlated. So, to overcome this problem we can describe a probability distribution via: 
+    In the real world the random variables are usually correlated. To overcome this fact it is possible to represent a probability distribution via: 
     \begin{itemize}
         \item Conditional independence assumptions that apply on a subset of them. 
         \item A set of conditional probabilities with their priors. 
     \end{itemize}
-    These models are called graphical models. 
+    The models based on these rules are called graphical models. 
 
     \section{Bayesian network}
     A Bayesian network is a method to describe the joint probability distribution of a set of variables. It can be represented as a 
@@ -1113,13 +1109,12 @@
         Given the following Bayesian network:
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.4\linewidth]{images/insurance.png}
+            \includegraphics[width=0.25\linewidth]{images/insurance.png}
         \end{figure}
         We can see that the random variables "age", "income", and "occupation" are independent while "buy X" and 
         "Interested in insurance" are conditional probability distributions. 
     \end{example}
-    Let $x_1,x_2,\dots,x_n$ be a set of variables. We have that a Bayesian network can tell any combination probability. The full joint 
-    distribution will require: 
+    Let $x_1,x_2,\dots,x_n$ be a set of variables. We have that a Bayesian network can tell any combination probability in which the full joint distribution will require: 
     \[2^N-1 \textnormal{ parameters}\] 
     To represent the probabilities in the network we need only the priors and conditional parameters. We simply multiply the number of
     nodes for $2^k$, where $k$ is the number of incoming edges, and we obtain the numbers of parameters needed. 
@@ -1127,7 +1122,7 @@
         Given the following Bayesian network:
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.4\linewidth]{images/insurance.png}
+            \includegraphics[width=0.25\linewidth]{images/insurance.png}
         \end{figure}
         In this case we have that the full joint distribution will need: 
         \[2^N-1=2^5-1=31 \textnormal{ parameters}\]
@@ -1153,48 +1148,62 @@
     \begin{definition}
         A \emph{prior probability} is a probability with zero incoming edges. 
     \end{definition}
-    A node is independent of its ancestors given its parent. 
+    Note that in a Bayesian network a node is independent of its ancestors given its parent. 
     \begin{example}
         The event “Grass is wet” ($W=true$) has two possible causes: either the water “Sprinkler” is on ($S=true$) or it is “Raining”
         ($R=true$). The related Bayesian network is the following.
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.4\linewidth]{images/sprinkler.png}
+            \includegraphics[width=0.25\linewidth]{images/sprinkler.png}
         \end{figure}
         Where the probabilities for cloudy are: 
         \begin{table}[H]
             \centering
-            \begin{tabular}{c|cc|}
-            \cline{2-3}
-                                              & $true$ & $false$ \\ \hline
-            \multicolumn{1}{|c|}{$P(cloudy)$} & 0.5    & 0.5     \\ \hline
+            \begin{tabular}{cc}
+            \hline
+            \textbf{Cloudy} & \textbf{P(C)} \\ \hline
+            0      & 0.5  \\
+            1      & 0.5  \\ \hline
             \end{tabular}
         \end{table}
         Where the probabilities for sprinkler are: 
         \begin{table}[H]
             \centering
-            \begin{tabular}{c|cc|}
-            \cline{2-3}
-                                                 & $P(C)=true$ & $P(C)=false$ \\ \hline
-            \multicolumn{1}{|c|}{$P(sprinkler)$} & 0.5         & 0.9          \\ \hline
+            \begin{tabular}{ccc}
+            \hline
+            \textbf{Sprinkler} & \textbf{Cloudy} & \textbf{P(S$|$C)} \\ \hline
+            0         & 0      & 0.1  \\
+            0         & 1      & 0.5  \\
+            1         & 0      & 0.9  \\
+            1         & 1      & 0.5  \\ \hline
             \end{tabular}
         \end{table}
         Where the probabilities for raining are: 
         \begin{table}[H]
             \centering
-            \begin{tabular}{c|cc|}
-            \cline{2-3}
-                                               & $P(C)=true$ & $P(C)=false$ \\ \hline
-            \multicolumn{1}{|c|}{$P(raining)$} & 0.5         & 0.2          \\ \hline
+            \begin{tabular}{ccc}
+            \hline
+            \textbf{Raining} & \textbf{Cloudy} & \textbf{P(R$|$C)} \\ \hline
+            0       & 0      & 0.8    \\
+            0       & 1      & 0.5    \\
+            1       & 0      & 0.2    \\
+            1       & 1      & 0.5    \\ \hline
             \end{tabular}
         \end{table}
         Where the probabilities for the wet grass are: 
         \begin{table}[H]
             \centering
-            \begin{tabular}{c|cccc|}
-            \cline{2-5}
-                                         & $S=t,R=t$ & $S=t,R=f$ & $S=f,R=t$ & $S=f,R=f$ \\ \hline
-            \multicolumn{1}{|c|}{$P(W)$} & 0.99                      & 0.9                        & 0.9                       & 0                                 \\ \hline
+            \begin{tabular}{cccc}
+            \hline
+            \textbf{Wet} & \textbf{Sprinkler} & \textbf{Raining} & \textbf{P(W$|$S,R)} \\ \hline
+            0            & 0                  & 0                & 1                   \\
+            0            & 0                  & 1                & 0.1                 \\
+            0            & 1                  & 0                & 0.1                 \\
+            0            & 1                  & 1                & 1                   \\
+            1            & 0                  & 0                & 0                   \\
+            1            & 0                  & 1                & 0.9                 \\
+            1            & 1                  & 0                & 0.9                 \\
+            1            & 1                  & 1                & 0.99                \\ \hline
             \end{tabular}
         \end{table}
         With all these values it is possible to compute all the probabilities with the formula: 
@@ -1207,10 +1216,31 @@
                         &= P(W|S,R)P(S|C)P(R|C)P(C)
         \end{aligned}
         \]
-        \begin{figure}[H]
+        With this formula we can compute all the joint probabilities.
+        \begin{table}[H]
             \centering
-            \includegraphics[width=0.9\linewidth]{images/probabilities.png}
-        \end{figure}
+            \begin{tabular}{cccc|c}
+            \hline
+            \textbf{C} & \textbf{S} & \textbf{W} & \textbf{R} & \textbf{P(C,S,W,R)} \\ \hline
+            0          & 0          & 0          & 0          & 0.04                \\
+            0          & 0          & 0          & 1          & 0                   \\
+            0          & 0          & 1          & 0          & 0.001               \\
+            0          & 0          & 1          & 1          & 0.009               \\
+            0          & 1          & 0          & 0          & 0.036               \\
+            0          & 1          & 0          & 1          & 0.324               \\
+            0          & 1          & 1          & 0          & 0.0009              \\
+            0          & 1          & 1          & 1          & 0.0891              \\
+            1          & 0          & 0          & 0          & 0.125               \\
+            1          & 0          & 0          & 1          & 0                   \\
+            1          & 0          & 1          & 0          & 0.0125              \\
+            1          & 0          & 1          & 1          & 0.1125              \\
+            1          & 1          & 0          & 0          & 0.125               \\
+            1          & 1          & 0          & 1          & 0.1125              \\
+            1          & 1          & 1          & 0          & 0.00125             \\
+            1          & 1          & 1          & 1          & 0.12375             \\ \hline
+            \end{tabular}
+        \end{table}
+
     \end{example}
     Explaining away is known in statistics as Berkson's paradox, or selection bias, and it describes two variable which become dependent 
     because you observe a third one. In general, the independencies in a Bayesian network can be: 
@@ -1253,10 +1283,9 @@
         \item Top-Down: we can compute the probability of an event given another event; this is predictive use of Bayesian Networks as “generative” models.
     \end{itemize}
     The most interesting property of Bayesian Networks is that they can be used to reason about causality on a solid mathematical basis. 
-
     We can have Bayesian Networks with both real and discrete nodes. Using these we can obtain a rich toolbox for probabilistic modeling. 
 
-    \section{Inference in Bayesian networks}
+    \section{Introduction}
     The inference on a Bayesian network has an exponential complexity of $O(\left\lvert X_i \right\rvert^N)$. To reduce the complexity is possible to do: 
     \begin{itemize}
         \item Variable elimination.
@@ -1267,8 +1296,270 @@
     \end{itemize}
     The first three methods are exact, while the last two are approximate. 
 
-    \subsection{Variable elimination}
+    \section{Variable elimination}
     We can use the factored representation of joint probability to do marginalization efficiently by pushing sums in as far as possible. As we perform innermost 
     sums we create new terms.
+    \begin{example}
+        Given the following Bayesian network:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.25\linewidth]{images/bn.png}
+        \end{figure}
+        We have that: 
+        \begin{align*}
+            P(X_5)  =& \sum_{X_1}\sum_{X_2}\sum_{X_3}\sum_{X_4}\sum_{X_6}P(X_1)P(X_2|X_1)P(X_3|X_1)P(X_4|X_2)P(X_5|X_3)P(X_6|X_5,X_2)          \\
+                    =& \sum_{X_1}\sum_{X_2}\sum_{X_3}\sum_{X_6}P(X_1)P(X_2|X_1)P(X_3|X_1)P(X_5|X_3)P(X_6|X_5,X_2)\sum_{X_4}P(X_4|X_2)          \\ 
+                    =& \sum_{X_1}\sum_{X_2}\sum_{X_3}P(X_1)P(X_2|X_1)P(X_3|X_1)P(X_5|X_3)\mu_1(X_2)\sum_{X_6}P(X_6|X_5,X_2)\\
+                    =& \sum_{X_2}\sum_{X_3}P(X_5|X_3)\mu_1(X_2)\mu_2(X_5,X_2)\sum_{X_1}P(X_1)P(X_2|X_1)P(X_3|X_1)     \\
+                    =& \sum_{X_3}P(X_5|X_3)\sum_{X_2}\mu_1(X_2)\mu_2(X_5,X_2)\mu_3(X_2,X_3)\\
+                    =& \sum_{X_3}P(X_5|X_3)\mu_4(X_3,X_5)\\
+                    =& \mu_5(X_5)
+        \end{align*}
+    \end{example}
+    The variable elimination procedure is based on dynamic programming. To apply this technique we have to divide the main problem in many small problems by using the 
+    factorization of the joint distribution. This factorization allows us to determine in which order variable elimination is efficient and to determine the functions for 
+    $\mu$. 
+    
+    To automate this process we will use the factor graphs models, that is a form of graphical model in which the box notation indicates terms that depends on some variables. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.25\linewidth]{images/fg.png}
+        \caption{A simple example of a factor graph}
+    \end{figure}
+    The main properties of this type of graph are: 
+    \begin{itemize}
+        \item It is a bipartite graph. 
+        \item Each circle node represents a random variable $X_i$. 
+        \item Each box node represents a factor $f_k$, which is a function $f_k(X_{C_k})$. 
+        \item The joint probability distribution is given as: 
+            \[P(X_1,X_2,\dots,X_N)=\prod_{k=1}^K{f_k(X_{C_k})}\]
+    \end{itemize}
+    To transform a Bayesian network into a factor graph we need to apply the moralization. In the general case this operation requires to create a link between the 
+    parents, maintaining the maximum number of independence properties
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/mor.png}
+        \caption{An example of moralization}
+    \end{figure}
+    For the transformation in factor graph we have to join unlinked parents into a single factor. 
+    \begin{example}
+        Given the following Bayesian network: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.25\linewidth]{images/bn.png}
+        \end{figure}
+        
+        The correspondent factor graph is: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.25\linewidth]{images/bnf.png}
+        \end{figure}
+    \end{example}
+    \begin{definition}
+        A graph is a \emph{perfect map} if and only if every independence property of a distribution is reflected in the graph and vice versa. 
+    \end{definition}
+    Note that: 
+    \begin{itemize}
+        \item Not all distributions can be represented as a directed/undirected graphs.
+        \item Not all directed graphs can be represented as undirected graphs.
+        \item Not all undirected graphs can be represented as directed graphs.
+    \end{itemize}
+    \begin{example}
+        The chain can be represented as a factor graph as follows: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.3\linewidth]{images/bnf.png}
+        \end{figure}
+        \begin{itemize}
+            \item $f_1(X_1)=P(X_1)$
+            \item $f_2(X_1,X_2)=P(X_1|X_2)$
+            \item $f_3(X_2,X_3)=P(X_3|X_2)$
+            \item $f_4(X_3,X_4)=P(X_4|X_3)$
+            \item $f_5(X_4,X_5)=P(X_5|X_4)$
+            \item $f_5(X_5,X_6)=P(X_6|X_5)$
+        \end{itemize}
+    \end{example}
+    Note that the factor graphs are not unique: every Bayesian network can be written in different ways. 
 
-\end{document}
+    The inputs of the variable elimination algorithm are: a list $F$ of factors, and a tuple $C_0$ of output variables to keep. The output is a single factor $m$, 
+    over variables $X_{C_0}$.
+    \begin{algorithm}[H]
+        \caption{Variable elimination algorithm}
+            \begin{algorithmic}[1]
+                \State define all variables present in $F$ as $V\leftarrow\textnormal{vars}(F)$
+                \State define all variables to be eliminated as $E\leftarrow V-C_0$
+                \For {all $i \in E$}
+                    \State call eliminate$\_$single$\_$variable$(F,i)$
+                \EndFor
+                \For {all remaining factors}
+                    \State $m \leftarrow \prod_{f \in F}f$
+                \EndFor
+            \end{algorithmic}
+    \end{algorithm}
+    The function eliminate$\_$single$\_$variable$(F,i)$ of the previous algorithm takes as inputs the list $F$ of factors and the variable with identifier $i$. 
+    The output is the list $F$ of factors. 
+    \begin{algorithm}[H]
+        \caption{eliminate$\_$single$\_$variable$(F,i)$}
+            \begin{algorithmic}[1]
+                \State find relevant subset $f \subset F$ of factors over $i$ as $f \leftarrow\{C|i\in C\}$
+                \State define the remaining clique as $C_t \leftarrow \textnormal{vars}(f)-\{i\}$
+                \State compute the temporary factor as $\mu(X_{C_t})=\sum_{X_i}\prod_{f \in F}f$
+                \State remove old factors $f$ and append new temporary factor $t$ to $F$
+                \State \Return $F$
+            \end{algorithmic}
+    \end{algorithm}
+    \begin{example}
+        Given the following Bayesian network: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.25\linewidth]{images/bn.png}
+        \end{figure}
+        We can compute the factor graph with moralization, obtaining: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.25\linewidth]{images/bnf1.png}
+        \end{figure}
+        Compute the marginal $P(X_1,X_6)=\mu(X_1,X_6)$. The input of the algorithm will be: 
+        \begin{itemize}
+            \item $F=\{f_1,f_2,f_3,f_4,f_5,f_6\}$
+            \item $C_0=\{X_1,X_6\}$
+        \end{itemize}
+        At the first step the algorithm defines all the variables present in $F$, that is: 
+        \[V=\{X_1,X_2,X_3,X_4,X_5,X_6\}\]
+        At the second step it computes the set of variables to be eliminated: 
+        \[E=V-C_0=\{X_1,X_2,X_3,X_4,X_5,X_6\}-\{X_1,X_6\}=\{X_2,X_3,X_4,X_5\}\]
+        Now we have to eliminate all the single variables that are contained in the set $E$ with the function 
+        eliminate$\_$single$\_$variable. 
+        \begin{itemize}
+            \item eliminate$\_$single$\_$variable($F,4$). For the first step we check the connected functions: 
+                \[f=\{f_4\}\]
+                The clique containing the node $X_4$ (except itself) is: 
+                \[C_t=\{X_2\}\]
+                The temporary factor appended to $F$ is: 
+                \[\mu_1(X_2)=\sum_{X_4}P(X_4|X_2)\]
+                So, the set now become: 
+                \[F=\{f_1,f_2,f_3,f_5,f_6,\mu_1\}\]
+                We now remove the factors $f$ from $E$, that is now $E=\{X_2,X_3,X_5\}$.
+            \item eliminate$\_$single$\_$variable($F,3$). For the first step we check the connected functions: 
+                \[f=\{f_3,f_5\}\]
+                The clique containing the node $X_3$ (except itself) is: 
+                \[C_t=\{X_1,X_5\}\]
+                The temporary factor appended to $F$ is: 
+                \[\mu_2(X_1,X_5)=\sum_{X_3}P(X_3|X_1)P(X_5|X_3)\]
+                So, the set now become: 
+                \[F=\{f_1,f_2,f_6,\mu_1,\mu_2\}\]
+                We now remove the factors $f$ from $E$, that is now $E=\{X_2,X_5\}$.
+            \item eliminate$\_$single$\_$variable($F,5$). For the first step we check the connected functions: 
+                \[f=\{f_6,\mu_2\}\]
+                The clique containing the node $X_5$ (except itself) is: 
+                \[C_t=\{X_1,X_2,X_6\}\]
+                The temporary factor appended to $F$ is: 
+                \[\mu_3(X_1,X_2,X_6)=\sum_{X_5}\mu_2(X_1,X_5)P(X_6|X_2,X_5)\]
+                So, the set now become: 
+                \[F=\{f_1,f_2,\mu_1,\mu_3\}\]
+                We now remove the factors $f$ from $E$, that is now $E=\{X_2\}$.
+            \item eliminate$\_$single$\_$variable($F,2$). For the first step we check the connected functions: 
+                \[f=\{f_2,\mu_1,\mu_3\}\]
+                The clique containing the node $X_2$ (except itself) is: 
+                \[C_t=\{X_1,X_6\}\]
+                The temporary factor appended to $F$ is: 
+                \[\mu_4(X_1,X_6)=\sum_{X_2}\mu_1(X_2)P(X_2|X_1)\mu_3(X_1,X_2,X_6)\]
+                So, the set now become: 
+                \[F=\{f_1,\mu_4\}\]
+                We now remove the factors $f$ from $E$, that is now $E=\varnothing$.
+        \end{itemize}
+        After all these iterations we have that: 
+        \begin{itemize}
+            \item $F=\{f_1,\mu_4\}$
+            \item $C_0=\{X_1,X_6\}$
+        \end{itemize}
+        The last steps require to multiply all the elements in $f$: 
+        \[P(X_1,X_6)=\mu_4 \cdot f_1=P(X_1)\mu_4(X_1,X_6)\]
+    \end{example}
+    Note that the order of the variables used as input for the function liminate$\_$single$\_$variable can be chosen with 
+    a heuristic function (we can choose the nodes ordered by ascending numbers of connections).
+    \begin{example}
+        Given the following Bayesian network. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.3\linewidth]{images/sprinkler.png}
+        \end{figure}
+        And the following truth tables. 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{cc}
+            \hline
+            \textbf{Cloudy} & \textbf{P(C)} \\ \hline
+            0      & 0.5  \\
+            1      & 0.5  \\ \hline
+            \end{tabular}
+        \end{table}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{ccc}
+            \hline
+            \textbf{Sprinkler} & \textbf{Cloudy} & \textbf{P(S$|$C)} \\ \hline
+            0         & 0      & 0.1  \\
+            0         & 1      & 0.5  \\
+            1         & 0      & 0.9  \\
+            1         & 1      & 0.5  \\ \hline
+            \end{tabular}
+        \end{table}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{ccc}
+            \hline
+            \textbf{Raining} & \textbf{Cloudy} & \textbf{P(R$|$C)} \\ \hline
+            0       & 0      & 0.8    \\
+            0       & 1      & 0.5    \\
+            1       & 0      & 0.2    \\
+            1       & 1      & 0.5    \\ \hline
+            \end{tabular}
+        \end{table}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{cccc}
+            \hline
+            \textbf{Wet} & \textbf{Sprinkler} & \textbf{Raining} & \textbf{P(W$|$S,R)} \\ \hline
+            0            & 0                  & 0                & 1                   \\
+            0            & 0                  & 1                & 0.1                 \\
+            0            & 1                  & 0                & 0.1                 \\
+            0            & 1                  & 1                & 1                   \\
+            1            & 0                  & 0                & 0                   \\
+            1            & 0                  & 1                & 0.9                 \\
+            1            & 1                  & 0                & 0.9                 \\
+            1            & 1                  & 1                & 0.99                \\ \hline
+            \end{tabular}
+        \end{table}
+        We want to compute $P(W)$. To do so we start by transforming the Bayesian network into a factor graph where we put 
+        $f_1(C)=P(C),f_2(S,C)=P(S|C),f_3(R,C)=P(R|C),f_4(W,S,R)=P(W|S,R)$.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.25\linewidth]{images/sprinklerfg.png}
+        \end{figure} 
+        After applying the variable elimination algorithm we obtain the following graph: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.15\linewidth]{images/fg1.png}
+        \end{figure} 
+        With the corresponding truth table.
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{cc}
+            \hline
+            \textbf{Wet} & \textbf{$\boldsymbol{\mu_3}$(W)} \\ \hline
+            0      & 0.22915  \\
+            1      & 0.77085  \\ \hline
+            \end{tabular}
+        \end{table}
+    \end{example}
+    The variable elimination has good properties such as: it is very simple to implement, does exactly what you would do on paper, and its complexity with optimal 
+    ordering complexity is $O(N2^K)$. But it also has some drawbacks: finding the optimal ordering is an $\mathcal{NP}$-hard problem, it computes only one marginal 
+    at the time, and requires $N$ executions to compute all marginals.
+
+    \section{Belief propagation}
+
+
+
+
+    \end{document}
