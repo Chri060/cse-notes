@@ -1,6 +1,6 @@
 \documentclass[12pt, a4paper]{report}
 \usepackage{style}
-
+\usepackage{makecell}
 
 \title{Software Engineering II \\ \textit{Theory}}
 \author{Christian Rossi}
@@ -132,7 +132,7 @@
             \item Preventive: concerns activities aimed at increasing the system's maintainability. 
         \end{itemize}
     \end{enumerate}
-    \begin{figure}
+    \begin{figure}[H]
         \centering
         \includegraphics[width=0.75\linewidth]{images/effort.png}
         \caption{Effort in each phase}
@@ -605,12 +605,12 @@ fact {
             \item Testers (check if requirements are met).
             \item Project managers (control the development process).
         \end{itemize}
-        \begin{figure}
+        \begin{figure}[H]
             \centering
             \includegraphics[width=1\linewidth]{images/RASD.png}
             \caption{IEEE standard for RASD}
         \end{figure}
-        \par
+         
         The target qualities for a good RASD are: 
         \begin{itemize}
             \item Completeness:
@@ -646,4 +646,111 @@ fact {
                 \item Facilitates referencing of requirements in future documentation.
             \end{itemize}
         \end{itemize}   
+
+        \newpage 
+        
+        \chapter{Software design}
+        \section{Software architecture}
+            \begin{definition}
+                The \emph{architecture} of a software system defines that system in terms of computational's components ad interactions among those components.
+
+                The \emph{software architecture} of a system is the set of structures needed to reason about the system. 
+                These structures comprise software elements, relations among them, and properties of both. 
+            \end{definition}
+            The set of structures relevant to the software are: 
+            \begin{itemize}
+                \item Component-and-connector structures: describes how the system is structured as a set of elements that have runtime behavior (components) and interactions (connectors).
+                    These structure allow us to study runtime properties such as availability and performance and how the structures works together. 
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.75\linewidth]{images/component1.png}
+                        \caption{UML component diagrams for component and connector structure}
+                    \end{figure}
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.75\linewidth]{images/component2.png}
+                        \caption{UML sequence diagrams for component and connector structure}
+                    \end{figure}
+                \item Module structures: show how a system is structured as a set of code or data units that have to be procured or constructed, together with their relations. Modules 
+                    constitute implementation units that can be used as the basis for work splitting. The typical relations among these models are: uses, is-a (generalization), is-part-of.
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{images/modular1.png}
+                        \caption{UML composite structure diagram for module structure}
+                    \end{figure}
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{images/modular2.png}
+                        \caption{UML class diagram for module structure}
+                    \end{figure}
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{images/modular3.png}
+                        \caption{UML package diagram for module structure}
+                    \end{figure}
+                \item Allocation structures: define how the elements from component and connector or module structures map onto things that are not software. The typical 
+                    allocation structures are deployment structure, implementation structure, and work assignment structure. The deployment structure captures the topology 
+                    of a system's hardware, and it is used to specify the distribution of components and identify performance bottlenecks.
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{images/allocation1.png}
+                        \caption{UML deployment diagrams and deployment structure}
+                    \end{figure}
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{images/allocation2.png}
+                        \caption{UML deployment diagrams and deployment structure}
+                    \end{figure}
+            \end{itemize}
+
+            \subsection{Summary}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|ccc}
+                \hline
+                \textbf{Structures}    & \textbf{Elements}                              & \textbf{Relations}                                                    & \textbf{Useful for}                                                                           \\ \hline
+                Component diagrams     & \makecell{Components\\offering services}       & \makecell{Provided and\\required interfaces}                          & \makecell{Performance analysis\\Robustness analysis\\Resource allocation\\Project planning}   \\ \hline
+                Sequence diagrams      & \makecell{Processes\\Threads}                  & \makecell{Synchronous and\\asynchronous\\messages}                     & \makecell{Analysis of\\resource contention\\Parallelismopportunities}                         \\ \hline
+                \end{tabular}
+                \caption{Component and connectors diagrams and usage}
+                \label{tab:my-table0}
+            \end{table}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|ccc}
+                \hline
+                \textbf{Structures}                                     & \textbf{Elements}                 & \textbf{Relations}                                                    & \textbf{Useful for}                                                               \\ \hline
+                \makecell{Composite structures \\ Package diagrams}     & \makecell{Modules\\Packages}      & \makecell{Is a submodule of\\Uses}                                    & \makecell{Resource allocation\\Project planning\\Encapsulation}                   \\ \hline
+                Class diagrams                                          & Classes                           & \makecell{Is-a\\Is part of}                                           & \makecell{Object-oriented development\\Planning for extensions}                   \\ \hline
+                Layered structures                                      & -                                 & \makecell{Can use\\Provides abstraction}                              & Incremental development                                                           \\ \hline
+                Data model                                              & Data entities                     & \makecell{One-to-one\\One-to-many\\Many-to-one\\Many-to-many\\Is-a}   & \makecell{Engineering global data\\structures for\\consistency and\\performance}  \\ \hline
+                \end{tabular}
+                \caption{Modular structures diagrams and usage}
+                \label{tab:my-table1}
+            \end{table}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{c|ccc}
+                \hline
+                \textbf{Structures}         & \textbf{Elements}                                                         & \textbf{Relations}    & \textbf{Useful for}                                                   \\ \hline
+                Deployment diagrams         & \makecell{Components\\Hardware and software\\execution environment}       & Allocated to          & \makecell{Performance\\Security\\Robustness analysis}                 \\ \hline
+                Implementation structures   & \makecell{Modules\\File structures}                                       & Stored in             & \makecell{Configuration control\\Integration\\Test activities}        \\ \hline
+                Work assignment             & \makecell{Modules\\Organizational units}                                  & Assigned to           & \makecell{Project management\\Development efficiency}                 \\ \hline
+                \end{tabular}
+                \caption{Allocation structures diagrams and usage}
+                \label{tab:my-table2}
+            \end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
 \end{document}
