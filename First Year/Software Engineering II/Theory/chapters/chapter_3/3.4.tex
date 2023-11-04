@@ -1,0 +1,60 @@
+\section{Family relations example}
+
+Now, let's explore a family relationship tree. 
+To begin, we must define a generic individual, which can be either male or female.        
+\begin{lstlisting}[language=alloy]
+abstract sig Person {
+    father: lone Man
+    mother: lone Woman
+}
+sig Man extends Person {
+    wife: lone Woman
+}
+sig Woman extends Person {
+    husband: lone Man
+}
+\end{lstlisting}
+We establish that each "Person" can have at most one father and one mother (indicated by the keyword "lone"), as we require a root for the family tree. 
+The person at the root should have no parents, possibly due to them being unknown. 
+The "Person" signature is declared as "abstract" because it needs to be specialized into one of the subsequent signatures, either "Man" or "Woman". 
+Signatures, denoted by the "sig" keyword, represent sets of elements. 
+Before this keyword, we can specify the number of entities required ("lone", "one", or "some").
+\begin{definition}
+    The \emph{fields} of a signature are relations whose domain is a subset of the signature. 
+    
+    The keyword \emph{extends} is used to declare a subset of signature. 
+\end{definition}
+To obtain the set of grandfathers of a given individual, we can define a function like this:
+\begin{lstlisting}[language=alloy]
+fun grandpas[p:Person]:set Person {
+    p.(mother+father).father
+}
+pred ownGrandpa[p:Person] {
+    p in p.grandpas[p]
+}
+\end{lstlisting}
+We've additionally created a predicate that verifies if a person is within the set of grandfathers returned by the "grandpas" function. 
+However, the issue at hand is that we haven't imposed constraints on relations. 
+To address this, we need to define two new operators for binary relations:
+\begin{itemize}
+    \item Transitive closure: \textasciicircum $r=r+r.r+r.r.r+\dots$
+    \item Reflex transitive closure: $*r=iden+$\textasciicircum$r$
+\end{itemize}
+We can now specify that no one can be their own father or mother:
+\begin{lstlisting}[language=alloy]
+fact {
+    no p:Person | p in p.^(mother+father)
+}
+\end{lstlisting}
+We must also establish a constraint that if X is the husband of Y, then Y is the wife of X:
+\begin{lstlisting}[language=alloy]
+fact {
+    all m:Man,w:Woman | m.wife=w iff w.husband=m
+}
+fact {
+    wife = ~husband
+}
+\end{lstlisting}
+The two statements are equivalent, with the second being expressed using the transpose operator.
+A fact can encompass multiple constraints, meaning that the previous constraints can be consolidated into a single fact.
+It's worth noting that facts are global, while predicates need to be invoked explicitly.

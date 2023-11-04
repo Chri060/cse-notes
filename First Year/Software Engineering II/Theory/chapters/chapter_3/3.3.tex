@@ -1,0 +1,103 @@
+\section{Address book example}
+
+Let's consider the task of creating a basic address book model. 
+This address book contains a collection of addresses associated with their respective names.
+In this scenario, there are three primary entities:
+\begin{itemize}
+    \item "Name": represents names of individuals.
+    \item "Addr": represents addresses.
+    \item "Book": signifies the context of the address book.
+\end{itemize}
+The relationship here is established through the entity "Addr", which links "Name" to "Addr" within the context of "Book". 
+We use the "lone" keyword to indicate that each "Name" can be linked to at most one "Addr". To summarize the preceding descriptions:
+\begin{lstlisting}[language=alloy]
+sig Name {}
+sig Addr {}
+sig Book {
+    addr: Name -> lone Addr
+}
+\end{lstlisting}
+This specification creates the following relationships: 
+\begin{itemize}
+    \item Sets are unary relations.
+    \item Scalars are sets consisting of a single element.
+    \item The ternary relation involves these three predicates.
+\end{itemize}
+A new predicate can be defined using the "pred" keyword.
+\begin{lstlisting}[language=alloy]
+pred show {}
+run show for 3 but exactly 1 Book
+\end{lstlisting}
+In the second line, it specifies that we should find a maximum of three elements for each "Book". 
+The previously defined predicate "show" is currently empty and always returns true.
+We can now create a predicate with specific arguments. 
+For instance:
+\begin{lstlisting}[language=alloy]
+pred show [b:Book]{
+    # b.addr > 1
+}
+run show for 3 but exactly 1 Book
+\end{lstlisting}
+In the previous example, the consistent predicate imposes a restriction on the quantity of "Address" relations within a given "Book". 
+In the following example, the consistent predicate enforces a constraint on the number of distinct "Address" entries that appear within the "Book"
+\begin{lstlisting}[language=alloy]
+pred show [b:Book]{
+    # b.addr > 1
+    # Name.(b.addr) > 1
+}
+run show for 3 but exactly 1 Book
+\end{lstlisting}
+In the subsequent example, the inconsistent predicate utilizes the "some" keyword, indicating the existence of an element. 
+In this scenario, there is only one "Book" so the tool will report that no instances can be identified.
+\begin{lstlisting}[language=alloy]
+pred add [b:Book]{
+    # b.addr > 1
+    some n:Name | # n.(b.addr) > 1
+}
+run show for 3 but exactly 1 Book
+\end{lstlisting}
+All the preceding predicates are considered static as they do not modify the signature. 
+In Alloy, dynamic predicates are used for dynamic analysis. 
+For instance, we can create a predicate that introduces an "Address" and a "Name" to a "Book" as follows:
+\begin{lstlisting}[language=alloy]
+pred add [b,b':Book, n:Name,a:Addr]{
+    b'.addr=b.addr + n -> a
+}
+pred showAdd [b,b':Book, n:Name,a:Addr]{
+    add[b,b',n,a]
+    #Name.(b'.addr) > 1
+}
+run showAdd
+\end{lstlisting}
+We can now define a predicate for the "Book" deletions.  
+\begin{lstlisting}[language=alloy]
+pred del [b,b':Book, n:Name]{
+    b'.addr=b.addr - n -> Addr
+}
+\end{lstlisting}
+We can verify whether performing a delete operation after an add operation restores us to the initial state or not by employing an "assertion". 
+\begin{lstlisting}[language=alloy]
+assert delRevertsAdd{
+    all b1,b2,b3:Book,n:Name,a:Addr
+    add[b1,b2,n,a] and del[b2,b3,n]
+    implies b1.addr=b3.addr
+}
+\end{lstlisting}
+During the assertion verification process, Alloy looks for counterexamples. 
+In this instance, we will encounter a counterexample, causing the assertion to evaluate as false.
+To rectify the assertion, we should amend it as follows:
+\begin{lstlisting}[language=alloy]
+assert delUndoesAdd{
+    all b1,b2,b3:Book,n:Name,a:Addr |
+    no n.(b1.addr) and add[b1,b2,n,a] and del[b1,b2,n]
+    implies b1.addr=b3.addr
+}
+\end{lstlisting}
+In some cases, we may need to retrieve specific signatures. 
+To accomplish this, we can leverage Alloy functions. 
+For instance, we can define a function that searches for a particular "Book" and returns a set of "Address":        
+\begin{lstlisting}[language=alloy]
+fun lookup[b:Book,n:Name]: set Addr{
+    n.(n.addr)
+}
+\end{lstlisting}
