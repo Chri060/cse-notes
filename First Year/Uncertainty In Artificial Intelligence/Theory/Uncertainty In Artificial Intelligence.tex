@@ -1551,5 +1551,34 @@
     Finding the optimal ordering is an $\mathcal{NP}$-hard problem, it can compute only one marginal at a time, and computing all marginals necessitates $N$ executions, which can be inefficient for more extensive networks.
 
     \section{Belief propagation}
+    Belief propagation, also called message passing, is similar to variable elimination. 
+    This algorithm can be run in parallel at each node, where it computes the message set to the variable from the factor and from the variable to the factor. 
+    It is based on two steps: compute messages and then compute probabilities from the obtained messages. 
+    Circular dependencies can be solved if the graph is a tree or polytree (tree with no root). 
 
-    \end{document}
+    Note that messages correspond to $\mu$ factors in the variable elimination algorithm. 
+    Leaves $\mu$ factors are always 1.
+    Since to start the algorithm we need the values of messages from a previous state, we can start from the leaves. 
+
+    As we said, belief propagation can be written as a parallel procedure that follows these steps: 
+    \begin{enumerate}
+        \item Initialize all messages as one $\mu_{f_s\rightarrow X_i}= 1$ and $\mu_{X_i \rightarrow f_s}= 1$. 
+        \item Update all messages: 
+            \[\mu_{f_s\rightarrow X_i}^{new}(X_i)=\sum_{X_s \backslash X_i}f_s(X_i,X_s)\prod_{X_j \in new(X_i), j \neq i}\mu_{X_i \rightarrow f_s}^{old}(X_j)\]
+            \[\mu_{X_i \rightarrow f_s}^{new}(X_i)=\prod_{f_l \in new(X_i),f_l \neq f_s}\mu_{f_l \rightarrow X_i}^{old}(X_i)\]
+        \item Update believes: 
+            \[b_{f_s}(X_s)=f_s(X_s) \prod_{j \in f_s}\mu_{X_j \rightarrow f_s}(X_j)\]
+            \[b_{X_i}(X_i)=\prod_{f_s \in new(i)}\mu_{f_s \rightarrow X_i}(X_i)\]
+    \end{enumerate}
+    We iterate this procedure until convergence. 
+    \begin{example}
+        SLIDE 61 in poi
+    \end{example}
+
+
+
+
+
+
+
+\end{document}
