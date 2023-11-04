@@ -1,0 +1,241 @@
+\section{Simplex method}
+
+The idea of the simplex method is that, given a linear program in standard form: 
+\begin{align*}
+    \min                      \:&\: z=c^Tx              \\
+    \textnormal{such that }     &\: Ax=b                \\
+                                &\: x \geq 0
+\end{align*}
+we will examine a sequence of basic feasible solutions with non-increasing objective function values until an optimal solution is reached, or the  linear program is 
+found to be unbounded. 
+
+\subsection*{Optimality test}
+Because a basic feasible solution is characterized by $x_B=B^{-1}b,x_N=0$, we can express the objective function in terms of only the non-basic variables as follows:
+\[c^Tx=c_B^TB^{-1}b+\left(c_N^T-c_B^TB^{-1}N\right)x_N\]
+\newpage
+\begin{definition}
+    \[\overline{c}^T=c^T-C_B^TB^{-1}A=\left[c^T-C_B^TB^{-1}B,c^T-C_B^TB^{-1}N\right]\]
+    is the \emph{vector of reduced costs} with respect to the basis $B$. 
+\end{definition}
+$\overline{c}_j$ represents the change in the objective function value if non-basic $x_j$ is increased from 0 to 1 while keeping all other non-basic variables at 0. 
+The solution value changes by:
+\[\Delta z=\theta \cdot \overline{c}_j\]
+
+Consider a linear program $\min\{c^Tx|Ax=b,x\geq 0\}$ and a feasible basis $B$. 
+\begin{proposition}
+    If $\overline{c}_N \geq 0$, then the basic feasible solution $(x_B^T,x_N^T)$, where $x_B=B^{-1}b \geq 0$ and $x_N = 0$, with a cost of  $c_B^TB^{-1}b$ is a global optimum. 
+\end{proposition}
+\begin{proof}
+    If $\overline{c}_N \geq 0$, it implies that: 
+    \[c^Tx=c_B^TB^{-1}b+\overline{c}_N^Tx_N \geq c_B^TB^{-1}b \:\: \forall x \geq 0, Ax=b\]
+\end{proof}
+This optimality condition is sufficient, but in general, it's not necessary.
+\begin{example}
+    Consider the following linear program: 
+    \begin{align*}
+        \min                      \:&\: -x_1-x_2          \\
+        \textnormal{such that }     &\: x_1-x_2+s_1=1  \\
+                                    &\: x_1+x_2+s_2=3  \\
+                                    &\: x_1,x_2,s_1,s_2 \geq 0
+    \end{align*}
+    The matrices associated with the given constraints are:
+    \[
+    A=
+    \begin{bmatrix}
+        1 & -1 & 1 & 0  \\
+        1 & 1 & 0 & 1 
+    \end{bmatrix}
+    \:\:\:\:\:\:
+    b=
+    \begin{bmatrix}
+        -1 \\
+        -1 \\
+        0  \\
+        0
+    \end{bmatrix}
+    \]
+    Consider the solution with $x_B=(x_1,s_2)=(1,2)$, $x_n=(x_2,s_1)$, and $z=-1$. 
+    We have:
+    \[
+    B=
+    \begin{bmatrix}
+        1 & 0  \\
+        1 & 1  
+    \end{bmatrix}
+    \:\:\:\:\:\:
+    N=
+    \begin{bmatrix}
+        -1 & 1  \\
+        1  & 0  
+    \end{bmatrix}
+    \]
+    Therefore, we have:
+    \[c_B^T=c_N^T=\begin{bmatrix} -1 & 0 \end{bmatrix} \:\:\:\:\:\: B^{-1}=
+    \begin{bmatrix}
+        1  & 0  \\
+        -1 & 1  
+    \end{bmatrix}
+    \]
+    The reduced costs for $x_2,s_1$ are: 
+    \[\overline{c}_N^T=c_N^T-c_B^TB^{-1}N=\begin{bmatrix} -2 & 0 \end{bmatrix}\]
+    Since $\overline{c}_2=-2<0$, increasing $x_2$ to 1 will improve the solution by $-2$. 
+\end{example}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection*{Vertex selection}
+\begin{example}
+    Given the following linear problem: 
+    \begin{align*}
+        \min                      \:&\: -x_1-3x_2          \\
+        \textnormal{such that }     &\: x_1+x_2+s_1 = 6  \\
+                                    &\: 2x_1+x_2+s_2 = 8  \\
+                                    &\: x_1,x_2,s_1,s_2 \geq 0
+    \end{align*}
+    Moving from vertex one to vertex five is done in the following way: 
+    \begin{itemize}
+        \item In vertex one, $x_1 = 0, X_2=0 \implies s_1 = 6, s_2 = 8$ with $x_B = (s_1, s_2), x_N = (x_1, x_2)$.
+        \item In vertex five, $x_2=0,s_2=0 \implies x_1=4,s_1=2$ with $x_B = (x_1, s_1), x_N = (x_2, s_2)$.
+    \end{itemize}
+    Thus, $x_1$ enters the basis $B$ and $s_2$ exits the basis $B$. 
+
+    By expressing the basic variables in terms of the non-basic variables, we obtain: 
+    \[s_1=6-x_1-x_2\]
+    \[s_2=8-2x_1-x_2\]
+    Now we increase $x_1$ while keeping $x_2=0$. 
+    Since $s_1=6-x_1 \geq 0$ implies $x_1 \leq 6$ and $s_2=8-2x_1 \geq 0$ implies $x_1 \leq 4$, the upper limit on the increase of $x_1$ is: 
+    \[x_1 \leq \min\{6,4\}=4\]
+    We move from vertex one to vertex five by letting $x_1$ enter the basis and $s_2$ exit the basis ($s_1=2$ and $s_2=0$). 
+\end{example}
+Note that when moving from the current vertex to an adjacent vertex, we substitute one column of $B$ with one column of $N$. 
+
+Give a basis $B$, the system: 
+\[Ax=b \Leftrightarrow \sum_{j=1}^{m}a_{ij}x_i=b_j \:\:\:\:\:\: \textnormal{for }i=1,\dots,m\]
+Can be expressed in canonical form: 
+\[x_B+B^{-1}N_{x_N}=B^{-1}b \Leftrightarrow x_B+\overline{N}_{x_N}=\overline{b}\]
+Which emphasizes the basic feasible solution $(x_B,x_N)=(B^{-1}b,0)$. 
+This amounts to pre-multiply the system by $B^{-1}$: 
+\[B^{-1}Bx_B+B^{-1}Nx_N=B^{-1}b \implies Ix_B+\overline{N}x_N=\overline{b}\]
+In the canonical form: 
+\[x_{B_i}+\sum_{j=1}^{n-m}\overline{a}_{ij}x_{N_j}=\overline{b}_i \:\:\:\:\:\: \textnormal{for }i=1,\dots,m\]
+The basic variables are expressed in terms of non-basic variables: $x_B=\overline{b}-\overline{N}_{x_N}$. 
+If we increase the value of a non-basic $x_s$ (from value 0) while keeping all other non-basic variables to 0, the system becomes: 
+\[x_{B_i}+\overline{a}_{is}x_s=\overline{b}_i \Leftrightarrow x_{B_i}=\overline{b}_i-\overline{a}_{is}x_s \:\:\:\:\:\: \textnormal{for }i=1,\dots,m\]
+To guarantee $x_{B_i} \geq 0$ for each $i$, we need to satisfy: 
+\[\overline{b}_i-\overline{a}_{is}x_s \geq 0 \implies x_s \geq \dfrac{\overline{b}_i}{\overline{a}_{is}} \:\:\:\:\:\: \textnormal{for }\overline{a}_{is} \geq 0\]
+The value of $x_s$ can be increased up to: 
+\[\theta^{*}=\min_{i=1,\dots,m}{\left[\dfrac{\overline{b}_i}{\overline{a}_{is}} \textnormal{ such that }\overline{a}_{is} \geq 0\right]}\]
+The value of $x_r$ where $r=\textnormal{argmin}_{i=1,\dots,m}{\left[\frac{\overline{b}_i}{\overline{a}_{is}} \textnormal{ such that }\overline{a}_{is} \geq 0\right]}$ decreases to 0 and exits the basis. 
+
+\subsection*{Change of basis}
+Let $B$ be a feasible basis and $x_s$ (in $x_N$) a non-basic with reduced cost $\overline{c}_ < 0$.
+Increase $x_s$, as much as possible  while keeping the other non-basic variables equal to 0.
+The basic variable $x_r$ (in $x_B$) such that $x_r>0$ imposes the tightest upper bound $\theta^{*}$ on the increase of $x_s$.
+If $\theta^{*} > 0$, the new basic feasible solution has a better objective function value.
+The new basis differs with respect to the previous one by a single column (adjacent vertices).
+To go from the canonical form of the current basic feasible solution:
+$B^{-1}Bx_B+B^{-1}Nx_N=B^{-1}b$
+to that of an adjacent basic feasible solution, it is not necessary to compute $B^{-1}$ from scratch.
+$B^{-1}$ of the new basis $B$ can be obtained by applying to the inverse of the previous basis (which differs with respect to a single column) a unique pivoting operation.
+
+The pivoting operation is the same as the one used in the Gaussian elimination method to solve systems of linear equations. Given $Ax=b$, the steps are the following: 
+\begin{enumerate}
+    \item Select a coefficient $\overline{a}_{rs} \neq 0$ (the pivot). 
+    \item Divide the $r$-th row by $\overline{a}_{rs}$. 
+    \item For each row $i$ with $i \neq r$ and $\overline{a}_{rs} \neq 0$, subtract the resulting $r$-th row multiplied by $\overline{a}_{rs}$. 
+\end{enumerate}
+Note that this procedure does not affect the feasible solutions. 
+
+\subsection*{Tableau representation}
+A system with non-negativity constraint can be represented as a table in the following way: 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cc}
+                              & $x_1 \dots x_n$            \\ \hline
+    \multicolumn{1}{|c|}{0}   & \multicolumn{1}{c|}{$c^T$} \\ \hline
+    \multicolumn{1}{|c|}{$b$} & \multicolumn{1}{c|}{$A$}   \\ \hline
+    \end{tabular}
+\end{table}
+If we consider a basis $B$ and a partition $A=\left[B|N\right]$, with $0=c^Tx-z$, we have the following representation: 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cccc}
+                              & $x_1 \dots x_n$              & $x_{m+1}\dots x_n$           & $z$                                                                                                                                                                      \\ \hline
+    \multicolumn{1}{|c|}{0}   & \multicolumn{1}{c|}{$c^T_B$} & \multicolumn{1}{c|}{$c^T_N$} & \multicolumn{1}{c|}{$-1$}                                                                                                                                                \\ \hline
+    \multicolumn{1}{|c|}{$b$} & \multicolumn{1}{c|}{$A$}     & \multicolumn{1}{c|}{$N$}     & \multicolumn{1}{c|}{$\begin{matrix}0\\\vdots\\0\end{matrix}$} \\ \hline
+    \end{tabular}
+\end{table}
+By pivoting operations we put the tableau in canonical for with respect to $B$:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cccc}
+                                                                &                                           & $x_1 \dots x_n$                       & $x_{m+1}\dots x_n$                                \\ \cline{2-4}
+    $-z$                                                        & \multicolumn{1}{|c|}{$-z_0$}              & \multicolumn{1}{c|}{$0 \dots 0$}      & \multicolumn{1}{c|}{$\overline{c}_N^T$}           \\ \cline{2-4}
+    $\begin{matrix}X_{B[1]}\\\vdots\\X_{B[m]}\end{matrix}$      & \multicolumn{1}{|c|}{$\overline{b}$}      & \multicolumn{1}{c|}{$I$}              & \multicolumn{1}{c|}{$\overline{N}$}               \\ \cline{2-4}
+    \end{tabular}
+\end{table}
+\begin{example}
+    17-18
+\end{example}
+
+\subsection*{Algorithm}
+\begin{algorithm}[H]
+    \caption{Simplex algorithm (LP with minimization)}
+        \begin{algorithmic}[1]
+            \State Let $B[1],\dots,B[m]$ be the column indices of the initial feasible basis $B$
+            \State Construct the initial tableau $\overline{A}=\{\overline{a}[i,j]|0 \leq i \leq m, 0 \leq j \leq n\}$ in canonical form with respect to $B$
+            \State unbounded $\leftarrow$ false
+            \State optimal $\leftarrow$ false
+            \While{optimal=false and unbounded=false}
+                \If{$\overline{a}[i,j] \geq 0 \: \forall j=1,\dots,m$}
+                    \State optimal $\leftarrow$ true
+                \Else
+                    \State Select a non-basic variable $x_s$ with $\overline{a}[0,s] < 0$
+                    \If{$\overline{a}[i,s] \geq 0 \: \forall j=1,\dots,m$}
+                        \State unbounded $\leftarrow$ true
+                    \Else 
+                        \State $r \leftarrow \textnormal{argmin}\left[ \dfrac{\overline{a}[i,0]}{\overline{a}[i,s]} \textnormal{ with } 1 \leq i \leq m \textnormal{ and } \overline{a}[i,s]>0\right]$
+                        \State $pivot(r,s)$
+                        \State $B[r] \leftarrow s$
+                    \EndIf
+                \EndIf
+            \EndWhile
+        \end{algorithmic}
+\end{algorithm}
+
+\subsection*{Degenerate basic feasible solution and convergence}
+\begin{definition}
+    A basic feasible solution $x$ is \emph{degenerate} if it contains at least one basic variable $x_j=0$.
+\end{definition}
+This implies that a solution $x$ with more than $n-m$ zeros corresponds to several distinct bases. 
+In the presence of degenerate basic feasible solutions, a basis change may not decrease the objective function value. 
+In this case one can cycle through a sequence of degenerate basis associated to the same vertex. 
+Several anti-cycling rules have been proposed for the choice of the variables that enter and exit the bases (indices $r$ and $s$). 
+One is the Bland's rule: Among all candidate variables to enter/exit the basis always select the one with smallest index. 
+\begin{proposition}
+ Simplex algorithm with Bland's rule terminates after at most $\binom{n}{m}$ iterations. 
+\end{proposition}
+In some pathological cases the number of iterations grows exponentially with respect to $n$ or $m$. 
+However, the Simplex algorithm is overall very efficient and extensive experimental campaigns showed a number of iterations that grows linearly with respect to $m$ and very slowly with respect to $n$. 
+
+\subsection*{Two-phase simplex method}
+SLIDE 23-26
+
+\subsection*{Polynomial-time algorithms for linear programming}
+During the years threw were developed also polynomial-time algorithms for linear programming, for instance: 
+\begin{itemize}
+    \item Ellipsoid method (Khachiyan 1979), that is theoretically important. 
+    \item Interior point methods (Karmarkar 1984), that has very efficient variants for some types of instances. 
+\end{itemize}
