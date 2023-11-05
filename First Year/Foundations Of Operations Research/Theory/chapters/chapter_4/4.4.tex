@@ -81,85 +81,72 @@ This optimality condition is sufficient, but in general, it's not necessary.
     Since $\overline{c}_2=-2<0$, increasing $x_2$ to 1 will improve the solution by $-2$. 
 \end{example}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \subsection*{Vertex selection}
 \begin{example}
-    Given the following linear problem: 
+    Consider the following linear problem:
     \begin{align*}
         \min                      \:&\: -x_1-3x_2          \\
         \textnormal{such that }     &\: x_1+x_2+s_1 = 6  \\
                                     &\: 2x_1+x_2+s_2 = 8  \\
                                     &\: x_1,x_2,s_1,s_2 \geq 0
     \end{align*}
-    Moving from vertex one to vertex five is done in the following way: 
+    Moving from vertex one to vertex five occurs as follows:
     \begin{itemize}
         \item In vertex one, $x_1 = 0, X_2=0 \implies s_1 = 6, s_2 = 8$ with $x_B = (s_1, s_2), x_N = (x_1, x_2)$.
         \item In vertex five, $x_2=0,s_2=0 \implies x_1=4,s_1=2$ with $x_B = (x_1, s_1), x_N = (x_2, s_2)$.
     \end{itemize}
-    Thus, $x_1$ enters the basis $B$ and $s_2$ exits the basis $B$. 
+    As a result, $x_1$ enters the basis $B$ while $s_2$ exits the basis $B$.
 
-    By expressing the basic variables in terms of the non-basic variables, we obtain: 
+    By expressing the basic variables in terms of the non-basic variables, we obtain:
     \[s_1=6-x_1-x_2\]
     \[s_2=8-2x_1-x_2\]
-    Now we increase $x_1$ while keeping $x_2=0$. 
+    Now, we increase $x_1$ while keeping $x_2 = 0$.
     Since $s_1=6-x_1 \geq 0$ implies $x_1 \leq 6$ and $s_2=8-2x_1 \geq 0$ implies $x_1 \leq 4$, the upper limit on the increase of $x_1$ is: 
     \[x_1 \leq \min\{6,4\}=4\]
     We move from vertex one to vertex five by letting $x_1$ enter the basis and $s_2$ exit the basis ($s_1=2$ and $s_2=0$). 
 \end{example}
-Note that when moving from the current vertex to an adjacent vertex, we substitute one column of $B$ with one column of $N$. 
+Note that when transitioning from the current vertex to an adjacent one, we substitute one column of the basis matrix $B$ with one column of the non-basis matrix $N$.
 
-Give a basis $B$, the system: 
+Given a basis $B$, the system:
 \[Ax=b \Leftrightarrow \sum_{j=1}^{m}a_{ij}x_i=b_j \:\:\:\:\:\: \textnormal{for }i=1,\dots,m\]
 Can be expressed in canonical form: 
 \[x_B+B^{-1}N_{x_N}=B^{-1}b \Leftrightarrow x_B+\overline{N}_{x_N}=\overline{b}\]
-Which emphasizes the basic feasible solution $(x_B,x_N)=(B^{-1}b,0)$. 
-This amounts to pre-multiply the system by $B^{-1}$: 
+This form emphasizes the basic feasible solution as $(x_B,x_N)=(B^{-1}b,0)$. 
+This involves pre-multiplying the system by $B^{-1}$: 
 \[B^{-1}Bx_B+B^{-1}Nx_N=B^{-1}b \implies Ix_B+\overline{N}x_N=\overline{b}\]
 In the canonical form: 
 \[x_{B_i}+\sum_{j=1}^{n-m}\overline{a}_{ij}x_{N_j}=\overline{b}_i \:\:\:\:\:\: \textnormal{for }i=1,\dots,m\]
 The basic variables are expressed in terms of non-basic variables: $x_B=\overline{b}-\overline{N}_{x_N}$. 
-If we increase the value of a non-basic $x_s$ (from value 0) while keeping all other non-basic variables to 0, the system becomes: 
+If we increase the value of a non-basic variable $x_s$ (starting from 0) while keeping all other non-basic variables at 0, the system becomes: 
 \[x_{B_i}+\overline{a}_{is}x_s=\overline{b}_i \Leftrightarrow x_{B_i}=\overline{b}_i-\overline{a}_{is}x_s \:\:\:\:\:\: \textnormal{for }i=1,\dots,m\]
-To guarantee $x_{B_i} \geq 0$ for each $i$, we need to satisfy: 
+To ensure that $x_{B_i} \geq 0$ for each $i$, we need to satisfy: 
 \[\overline{b}_i-\overline{a}_{is}x_s \geq 0 \implies x_s \geq \dfrac{\overline{b}_i}{\overline{a}_{is}} \:\:\:\:\:\: \textnormal{for }\overline{a}_{is} \geq 0\]
 The value of $x_s$ can be increased up to: 
 \[\theta^{*}=\min_{i=1,\dots,m}{\left[\dfrac{\overline{b}_i}{\overline{a}_{is}} \textnormal{ such that }\overline{a}_{is} \geq 0\right]}\]
 The value of $x_r$ where $r=\textnormal{argmin}_{i=1,\dots,m}{\left[\frac{\overline{b}_i}{\overline{a}_{is}} \textnormal{ such that }\overline{a}_{is} \geq 0\right]}$ decreases to 0 and exits the basis. 
 
 \subsection*{Change of basis}
-Let $B$ be a feasible basis and $x_s$ (in $x_N$) a non-basic with reduced cost $\overline{c}_ < 0$.
-Increase $x_s$, as much as possible  while keeping the other non-basic variables equal to 0.
-The basic variable $x_r$ (in $x_B$) such that $x_r>0$ imposes the tightest upper bound $\theta^{*}$ on the increase of $x_s$.
-If $\theta^{*} > 0$, the new basic feasible solution has a better objective function value.
-The new basis differs with respect to the previous one by a single column (adjacent vertices).
-To go from the canonical form of the current basic feasible solution:
+Consider a feasible basis $B$ and a non-basic variable $x_s$ (part of $x_N$) with a reduced cost $\overline{c}_ < 0$.
+To improve the objective function value, we aim to increase $x_s$ as much as possible while keeping all other non-basic variables at zero.
+Among the basic variables $x_r$ (in $x_B$) where $x_r>0$, one imposes the strictest upper limit, denoted as $\theta^{*}$ on the increase of $x_s$.
+If $\theta^{*} > 0$, the resulting basic feasible solution yields a superior objective function value.
+This new basis differs from the previous one by just a single column, representing adjacent vertices in the solution space.
+Transitioning from the canonical form of the current basic feasible solution:
 $B^{-1}Bx_B+B^{-1}Nx_N=B^{-1}b$
-to that of an adjacent basic feasible solution, it is not necessary to compute $B^{-1}$ from scratch.
-$B^{-1}$ of the new basis $B$ can be obtained by applying to the inverse of the previous basis (which differs with respect to a single column) a unique pivoting operation.
+to that of an adjacent basic feasible solution doesn't require computing $B^{-1}$ from scratch.
+The inverse matrix $B^{-1}$ of the new basis $B$ can be obtained by applying a unique pivoting operation to the inverse of the previous basis, which differs by just one column.
 
-The pivoting operation is the same as the one used in the Gaussian elimination method to solve systems of linear equations. Given $Ax=b$, the steps are the following: 
+The pivoting operation aligns with the Gaussian elimination method used to solve systems of linear equations. 
+For a given system $Ax=b$, the steps are as follows:
 \begin{enumerate}
-    \item Select a coefficient $\overline{a}_{rs} \neq 0$ (the pivot). 
+    \item Select a non-zero coefficient $\overline{a}_{rs}$ as the pivot.
     \item Divide the $r$-th row by $\overline{a}_{rs}$. 
-    \item For each row $i$ with $i \neq r$ and $\overline{a}_{rs} \neq 0$, subtract the resulting $r$-th row multiplied by $\overline{a}_{rs}$. 
+    \item For each row $i$ where $i \neq r$ and $\overline{a}_{rs} \neq 0$, subtract the resulting $r$-th row multiplied by $\overline{a}_{rs}$. 
 \end{enumerate}
-Note that this procedure does not affect the feasible solutions. 
+It's important to note that this procedure preserves the feasibility of the solutions.
 
 \subsection*{Tableau representation}
-A system with non-negativity constraint can be represented as a table in the following way: 
+A system with non-negativity constraints can be represented as a table in the following manner:
 \begin{table}[H]
     \centering
     \begin{tabular}{cc}
@@ -168,7 +155,7 @@ A system with non-negativity constraint can be represented as a table in the fol
     \multicolumn{1}{|c|}{$b$} & \multicolumn{1}{c|}{$A$}   \\ \hline
     \end{tabular}
 \end{table}
-If we consider a basis $B$ and a partition $A=\left[B|N\right]$, with $0=c^Tx-z$, we have the following representation: 
+If we consider a basis $B$ and a partition $A=\left[B|N\right]$, with $0=c^Tx-z$, the representation becomes:
 \begin{table}[H]
     \centering
     \begin{tabular}{cccc}
@@ -177,7 +164,7 @@ If we consider a basis $B$ and a partition $A=\left[B|N\right]$, with $0=c^Tx-z$
     \multicolumn{1}{|c|}{$b$} & \multicolumn{1}{c|}{$A$}     & \multicolumn{1}{c|}{$N$}     & \multicolumn{1}{c|}{$\begin{matrix}0\\\vdots\\0\end{matrix}$} \\ \hline
     \end{tabular}
 \end{table}
-By pivoting operations we put the tableau in canonical for with respect to $B$:
+By performing pivoting operations, we transform the tableau into canonical form with respect to $B$:
 \begin{table}[H]
     \centering
     \begin{tabular}{cccc}
@@ -187,7 +174,57 @@ By pivoting operations we put the tableau in canonical for with respect to $B$:
     \end{tabular}
 \end{table}
 \begin{example}
-    17-18
+    For the linear program:
+    \begin{align*}
+        \min                      \:&\: -x_1-x_2          \\
+        \textnormal{such that }     &\: 6x_1+4x_2+x_3=24  \\
+                                    &\: 3x_1-2x_2+x_4=6  \\
+                                    &\: x_1,x_2,x_3,x_4 \geq 0
+    \end{align*}
+    The corresponding tableau is: 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccccc}
+                                   &                         & $x_1$ & $x_2$ & $x_3$ & $x_4$                  \\ \cline{2-6} 
+        \multicolumn{1}{c|}{$-z$}  & \multicolumn{1}{c|}{0}  & -1    & -1    & 0     & \multicolumn{1}{c|}{0} \\ \cline{2-6} 
+        \multicolumn{1}{c|}{$x_3$} & \multicolumn{1}{c|}{24} & 6     & 4     & 1     & \multicolumn{1}{c|}{0} \\
+        \multicolumn{1}{c|}{$x_4$} & \multicolumn{1}{c|}{6}  & 3     & -2    & 0     & \multicolumn{1}{c|}{1} \\ \cline{2-6} 
+        \end{tabular}
+    \end{table}
+    Now we pivot the tableau with respect to 3 to derive an expression for $x_1$ from the pivot row and substituting it in all other rows.
+    We have that $x_1$ enters the basis and $x_4$ exits the basis. 
+    The tableau after these changes looks like this:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccccc}
+                                   &                         & $x_1$ & $x_2$ & $x_3$ & $x_4$                    \\ \cline{2-6} 
+        \multicolumn{1}{c|}{$-z$}  & \multicolumn{1}{c|}{2}  & 0     & -5/3  & 0     & \multicolumn{1}{c|}{1/3} \\ \cline{2-6} 
+        \multicolumn{1}{c|}{$x_3$} & \multicolumn{1}{c|}{12} & 0     & 8     & 1     & \multicolumn{1}{c|}{-2}  \\
+        \multicolumn{1}{c|}{$x_1$} & \multicolumn{1}{c|}{2}  & 1     & -2/3  & 0     & \multicolumn{1}{c|}{1/3} \\ \cline{2-6} 
+        \end{tabular}
+    \end{table}
+    In this case, only $x_2$ can enter the basis, and $x_3$ is the only one that can exit.
+    The optimal solution can be found in subsequent tableaux, and the final result is:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccccc}
+                                   &                            & $x_1$ & $x_2$ & $x_3$ & $x_4$                         \\ \cline{2-6} 
+        \multicolumn{1}{c|}{$-z$}  & \multicolumn{1}{c|}{9/2}   & 0     & 0     & 5/24  & \multicolumn{1}{c|}{-1/12}    \\ \cline{2-6} 
+        \multicolumn{1}{c|}{$x_2$} & \multicolumn{1}{c|}{3/2}   & 0     & 1     & 1/8   & \multicolumn{1}{c|}{-1/4}     \\
+        \multicolumn{1}{c|}{$x_1$} & \multicolumn{1}{c|}{3}     & 1     & 0     & 1/12  & \multicolumn{1}{c|}{1/6}      \\ \cline{2-6} 
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccccc}
+                                   &                         & $x_1$ & $x_2$ & $x_3$ & $x_4$                    \\ \cline{2-6} 
+        \multicolumn{1}{c|}{$-z$}  & \multicolumn{1}{c|}{6}  & 1/2   & 0     & 1/4   & \multicolumn{1}{c|}{0}   \\ \cline{2-6} 
+        \multicolumn{1}{c|}{$x_2$} & \multicolumn{1}{c|}{6}  & 3/2   & 1     & 1/4   & \multicolumn{1}{c|}{0}   \\
+        \multicolumn{1}{c|}{$x_4$} & \multicolumn{1}{c|}{18} & 6     & 0     & 1/2   & \multicolumn{1}{c|}{1}   \\ \cline{2-6} 
+        \end{tabular}
+    \end{table}
+    With all reduced costs greater than or equal to zero, the optimal basic solution is: 
+    \[x^{*T}=(0,6,0,18) \textnormal{ with } z^{*}=-6\]
 \end{example}
 
 \subsection*{Algorithm}
@@ -219,23 +256,123 @@ By pivoting operations we put the tableau in canonical for with respect to $B$:
 \begin{definition}
     A basic feasible solution $x$ is \emph{degenerate} if it contains at least one basic variable $x_j=0$.
 \end{definition}
-This implies that a solution $x$ with more than $n-m$ zeros corresponds to several distinct bases. 
-In the presence of degenerate basic feasible solutions, a basis change may not decrease the objective function value. 
-In this case one can cycle through a sequence of degenerate basis associated to the same vertex. 
-Several anti-cycling rules have been proposed for the choice of the variables that enter and exit the bases (indices $r$ and $s$). 
-One is the Bland's rule: Among all candidate variables to enter/exit the basis always select the one with smallest index. 
+This property implies that a solution $x$ with more than $n - m$ zero values corresponds to multiple distinct bases. 
+When degenerate basic feasible solutions are present, changing the basis may not necessarily result in a decrease in the objective function value.
+In such cases, it is possible to cycle through a sequence of degenerate bases associated with the same vertex.
+To manage these scenarios, various anti-cycling rules have been proposed to select the variables that enter and exit the bases (indices $r$ and $s$). 
+One such rule is Bland's rule, which dictates choosing the variable with the smallest index among all candidates to enter or exit the basis.
+\newpage
 \begin{proposition}
- Simplex algorithm with Bland's rule terminates after at most $\binom{n}{m}$ iterations. 
+    The Simplex algorithm, when using Bland's rule, terminates after a maximum of $\binom{n}{m}$ iterations.
 \end{proposition}
-In some pathological cases the number of iterations grows exponentially with respect to $n$ or $m$. 
-However, the Simplex algorithm is overall very efficient and extensive experimental campaigns showed a number of iterations that grows linearly with respect to $m$ and very slowly with respect to $n$. 
+In some exceptional cases, the number of iterations may grow exponentially with respect to the values of $n$ or $m$. 
+However, in general, the Simplex algorithm is highly efficient, and extensive experimental studies have shown that the number of iterations increases linearly with respect to $m$ and very slowly with respect to $n$. 
 
 \subsection*{Two-phase simplex method}
-SLIDE 23-26
+The two-phase Simplex method differs from the standard simplex method in that it first addresses an auxiliary problem aiming to minimize the sum of artificial variables. 
+Once this auxiliary problem is solved and the final tableau is reorganized, the second phase, which resembles the standard Simplex method, begins.
+
+Consider a linear program ($P$): 
+\begin{align*}
+    \min                      \:&\:z=c^T            \\
+    \textnormal{such that }     &\: Ax=b            \\
+                                &\: x \geq 0
+\end{align*}
+where $b \geq 0$. 
+An auxiliary linear program, equipped with artificial variables $y_i$, $i=1,\dots,m$, is formulated as ($P_A$): 
+\begin{align*}
+    \min                      \:&\: \sum_{i=1}^{m}y_i               \\
+    \textnormal{such that }     &\: Ax+ly=b                         \\
+                                &\: x \geq 0, x \geq 0
+\end{align*}
+The initial basic feasible solution $y=b \geq 0$ and $x=0$ is obvious. 
+Two possibilities arise:
+\begin{enumerate}
+    \item If $v^{*}>0$, then ($P$) is infeasible.
+    \item If $v^{*}=0$, where $t^{*}=0$ and $x^{*}$ represents a basic feasible solution of ($P$). 
+        In this case: 
+        \begin{itemize}
+            \item If $y_i$ is non-basic for all $i$ within $1 \leq i \leq m$, the corresponding columns and be removed to obtain a tableau in canonical form with respect to a basis, with the row for $z$ determined by substitution.
+            \item In the case of a basic $y_i$ (indicating a degenerate basic feasible solution), a pivot operation is performed, exchanging $y_i$ with any non-basic variable $x_j$.
+        \end{itemize}
+\end{enumerate}
+\begin{example}
+    Consider the following linear program: 
+    \begin{align*}
+        \min                      \:&\: x_1+x_2+10x_3           \\
+        \textnormal{such that }     &\: x_2+4x_3=2   \\
+                                    &\: -2x_1+x_2-6x_3=2        \\
+                                    &\: x_1,x_2,x_3 \geq 0
+    \end{align*}
+    In standard form, it can be expressed as:
+    \begin{align*}
+        \min                      v &=  y_1+y_2                 \\
+        \textnormal{such that }     &\: x_2+4x_3+y_1=2          \\
+                                    &\: -2x_1+x_2-6x_3+y_2=2    \\
+                                    &\: x_1,x_2,x_3,y_1,y_2     \geq 0
+    \end{align*}
+    To obtain the canonical form of $v=y_1+y_2$, we can express $y_1$ and $y_2$ in terms of $x_1,x_2,x_3$. 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccccccc}
+                                   &                         & $x_1$ & $x_2$ & $x_3$                   & $y_1$ & $y_2$                  \\ \cline{2-7} 
+        \multicolumn{1}{c|}{$-v$}  & \multicolumn{1}{c|}{-4} & 2     & -2    & \multicolumn{1}{c|}{2}  & 0     & \multicolumn{1}{c|}{0} \\ \cline{2-7} 
+        \multicolumn{1}{c|}{$y_1$} & \multicolumn{1}{c|}{2}  & 0     & 1     & \multicolumn{1}{c|}{4}  & 1     & \multicolumn{1}{c|}{0} \\
+        \multicolumn{1}{c|}{$y_2$} & \multicolumn{1}{c|}{2}  & -2    & 1     & \multicolumn{1}{c|}{-6} & 0     & \multicolumn{1}{c|}{1} \\ \cline{2-7} 
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccccccc}
+                                   &                        & $x_1$ & $x_2$ & $x_3$                    & $y_1$ & $y_2$                  \\ \cline{2-7} 
+        \multicolumn{1}{c|}{$-v$}  & \multicolumn{1}{c|}{0} & 2     & 0     & \multicolumn{1}{c|}{10}  & 2     & \multicolumn{1}{c|}{0} \\ \cline{2-7} 
+        \multicolumn{1}{c|}{$x_2$} & \multicolumn{1}{c|}{2} & 0     & 1     & \multicolumn{1}{c|}{4}   & 1     & \multicolumn{1}{c|}{0} \\
+        \multicolumn{1}{c|}{$y_2$} & \multicolumn{1}{c|}{0} & -2    & 0     & \multicolumn{1}{c|}{-10} & -1    & \multicolumn{1}{c|}{1} \\ \cline{2-7} 
+        \end{tabular}
+    \end{table}
+    Following the pivot operations, we have identified the optimal solution for this auxiliary problem:
+    \[x^{*}=(0,2,0), y^{*}=(0,0)\]
+    This optimal solution yields an objective value of $v^{*}=0$. 
+
+    To achieve this result, we selected the coefficient $-2$ from the row associated with $y_2$ as the pivot.
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccccccc}
+                                   &                        & $x_1$ & $x_2$ & $x_3$                  & $y_1$ & $y_2$                     \\ \cline{2-7} 
+        \multicolumn{1}{c|}{$-v$}  & \multicolumn{1}{c|}{0} & 0     & 0     & \multicolumn{1}{c|}{0} & 1     & \multicolumn{1}{c|}{1}    \\ \cline{2-7} 
+        \multicolumn{1}{c|}{$x_2$} & \multicolumn{1}{c|}{2} & 0     & 1     & \multicolumn{1}{c|}{4} & 1     & \multicolumn{1}{c|}{0}    \\
+        \multicolumn{1}{c|}{$x_1$} & \multicolumn{1}{c|}{0} & 1     & 0     & \multicolumn{1}{c|}{5} & 1/2   & \multicolumn{1}{c|}{-1/2} \\ \cline{2-7} 
+        \end{tabular}
+    \end{table}
+    Hence, this represents an optimal basic feasible solution for ($P_A$), and the corresponding values $x=(0,2,0)$ form a basic feasible solution for ($P$).
+    In the context of the original linear program, the objective function is given as:
+    \[z=x_1+x_2+10x_3\]
+    It's important to note that this expression is not in canonical form, primarily because $x_3$ is considered a non-basic variable. 
+    However, by performing the following substitution:
+    \[
+        \begin{cases}
+            x_2=2-4x_3 \\
+            x_1=-5x_3
+        \end{cases}
+        \implies
+        z=2+x_3
+    \]
+    Now, we derive the tableau that corresponds to the initial basic feasible solution for ($P$):
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccccc}
+                                   &                         & $x_1$ & $x_2$ & $x_3$                  \\ \cline{2-5} 
+        \multicolumn{1}{c|}{$-z$}  & \multicolumn{1}{c|}{-2} & 0     & 0     & \multicolumn{1}{c|}{1} \\ \cline{2-5} 
+        \multicolumn{1}{c|}{$x_2$} & \multicolumn{1}{c|}{2}  & 0     & 1     & \multicolumn{1}{c|}{4} \\
+        \multicolumn{1}{c|}{$x_1$} & \multicolumn{1}{c|}{0}  & 1     & 0     & \multicolumn{1}{c|}{5} \\ \cline{2-5} 
+        \end{tabular}
+    \end{table}
+    Since the basic feasible solution is already optimal, there is no need for a phase two.
+\end{example}
 
 \subsection*{Polynomial-time algorithms for linear programming}
-During the years threw were developed also polynomial-time algorithms for linear programming, for instance: 
+Over the years, polynomial-time algorithms for linear programming have been developed, including:
 \begin{itemize}
-    \item Ellipsoid method (Khachiyan 1979), that is theoretically important. 
-    \item Interior point methods (Karmarkar 1984), that has very efficient variants for some types of instances. 
+    \item The Ellipsoid method (Khachiyan, 1979), which holds significant theoretical importance.
+    \item Interior point methods (Karmarkar, 1984), known for their highly efficient variants when dealing with certain types of problem instances. 
 \end{itemize}
