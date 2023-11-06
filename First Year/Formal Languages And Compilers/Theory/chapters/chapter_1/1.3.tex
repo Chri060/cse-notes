@@ -1,0 +1,97 @@
+\section{Operations on languages}
+
+Operations are typically defined on a language by extending the string operation to all its phrases. 
+\begin{definition}[Reflection]
+    The \emph{reflection} $L^R$ of a language $L$ is the finite set of strings that are the reflection of a sentence of $L$: 
+    \[L^R = \{ x | \exists y \left( y \in L \land x=y^R \right)\}\]
+\end{definition}
+\begin{definition}[Prefix]
+    The set of \emph{prefixes} of a language $L$ is defined as: 
+    \[Prefixes(L)=\{y | y \neq \varepsilon \land \exists x \exists z \left( x \in L \land x=yx \land z \neq \varepsilon \right)\}\]
+\end{definition}
+A language is prefix-free if none of the proper prefixes of its sentences is in the language. 
+\begin{definition}[Concatenation]
+    Given languages $L^{'}$ and $L^{''}$ we have that \emph{concatenation} is defined as: 
+        \[L^{'}L^{''}=\{ xy | x \in L^{'} \land y \in L^{''} \}\]
+\end{definition}
+\begin{definition}[Repetition]
+    The \emph{repetition} is redefined as: 
+    \[L^m=L^{m-1}L \:for \: m \geq 1 \:\:\:\:\:\: L^0=\{ \varepsilon \}\]
+\end{definition}
+The identity now became: 
+\[\varnothing ^0 = \{ \varepsilon \} \:\:\:\:\:\: L.\varnothing=\varnothing .L=\varnothing \:\:\:\:\:\: L.\{\varepsilon\}=\{\varepsilon\} .L=L\]
+The power operator allows one to define concisely the language of strings whose length is not greater than a given integer $K$. 
+\begin{definition}[Set operations]
+    Since a language is a set, the classical set operation of union ($\cup$), intersection ($\cap$), difference ($ \setminus $), inclusion ($ \subseteq $), strict inclusion 
+    ($ \subset $), and equality ($=$). 
+\end{definition}
+\begin{definition}[Universal language]
+    The \emph{universal language} is defined as the set of all the strings, over an alphabet $\Sigma$, of any length including zero: 
+    \[L_{universal}=\Sigma ^0 \cup \Sigma ^1 \cup \Sigma ^2 \cup \dots \]
+\end{definition}
+\begin{definition}[Complement]
+    The \emph{complement} of a language $L$ over an alphabet $\Sigma$, denoted by $\lnot L$, is the set difference: 
+        \[ \lnot L = L_{universal} - L\]
+\end{definition}
+That is, the set of the strings over the alphabet $\Sigma$ that are not in $L$. Note that: 
+\[L_{universal} = \lnot \varnothing\]
+The complement of a finite language is always infinite. The complement of an infinite one is not necessarily finite.   
+
+Given a set A and a relation $R \subseteq A \times A$, $(a_1, a_2) \in R$ is also denoted as $a_1Ra_2$. $R^{*}$ is a relation defined by:
+\begin{itemize}
+    \item $xR^{*}x \:\: \forall x \in A$ (reflexive property). 
+    \item $x_1Rx_2 \land x_2Rx_3 \land \dots x_{n-1}Rx_n \implies x_1R^{*}x_n$ (transitive property). 
+\end{itemize}
+\begin{example}
+    Given $R = \{(a, b), (b, c)\}$, the transitive closure will be: 
+    \[R^{*} = \{(a, a), (b, b), (c, c), (a, b), (b, c), (a, c) \}\]
+\end{example}
+Given a set A and a relation $R \subseteq A \times A$, $(a_1, a_2) \in R$ is also denoted as $a_1Ra_2$. $R^{+}$ is a relation defined by: 
+$x_1Rx_2 \land x_2Rx_3 \land \dots x_{n-1}Rx_n \implies x_1R^{*}x_n$ (transitive property). 
+
+\begin{example}
+    Given $R = \{(a, b), (b, c)\}$, the transitive closure will be: 
+    \[R^{+} = \{ (a, b), (b, c), (a, c)\}\]
+\end{example}
+\begin{definition}[Star operator]
+    The \emph{star operator} (also called Kleene star) is the reflexive transitive closure under the concatenation operation. It is defined as the union of all the powers of the 
+    base language: 
+    \[L^{*}=\bigcup_{h=0\dots\infty}L^h=L^0 \cup L^1 \cup L^2 \cup \dots = \varepsilon \cup L^1 \cup L^2 \cup \dots\]
+\end{definition}
+\begin{example}
+    Given the language $L=\{ab,ba\}$ we have that the star operation gives the following language: 
+    \[L^{*}=\{\varepsilon, ab, ba, abab, abba, baab, baba, \dots\}\]
+    It is possible to see that $L$ is finite and $L^{*}$ is infinite. 
+\end{example}
+Every string of the star language $L^{*}$ can be chopped into substrings in $L$. The star language $L^{*}$ can be equal to the base language $L$. If we take $\Sigma$ as the base 
+language, then $\Sigma^{*}$ contains all the strings built on that alphabet (it is the universal language of alphabet $\Sigma$). We often say that $L$ is a language on alphabet
+$\Sigma$ by writing $L \subseteq \Sigma$. 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cc}
+    \hline
+    \textbf{Property}                                      & \textbf{Meaning}            \\ \hline
+    $L \subseteq L^{*}$                                    & Monotonicity                \\
+    if $x \in L^{*} \land y \in L^{*}$ then $xy \in L^{*}$ & Closure by concatenation    \\
+    $(L^{*})^{*}=L^{*}$                                    & Idempotence                 \\
+    $(L^{*})^R=(L^R)^{*}$                                  & Commutativity with reversal \\ \hline
+    \end{tabular}
+\end{table}
+Furthermore, if $L^{*}$ is finite we have $\varnothing^{*}=\{\varepsilon\}$ and that $\{\varepsilon\}^{*}=\{\varepsilon\}$. 
+\begin{definition}[Cross operator]
+    The \emph{cross operator} is the transitive closure under the concatenation operation. It is defined as the union of all the powers of the 
+    base language except the first power $L^0$: 
+    \[L^{+}=\bigcup_{h=1\dots\infty}L^h=L^1 \cup L^2 \cup \dots\]
+\end{definition}
+\begin{example}
+    Given the language $L=\{ab,ba\}$ we have that the star operation gives the following language: 
+    \[L^{*}=\{ab, ba, abab, abba, baab, baba, \dots\}\]
+\end{example}
+\begin{definition}[Language quotient]
+    The \emph{quotient operator} shortens the phrases of $L_1$ by cutting off a suffix that belongs to $L_2$:
+    \[L=L_1/L_2=\{y|\exists x \in L_1 \exists y \in L_2 (x=yz)\}\]
+\end{definition}
+\begin{example}
+    Given the languages $L_1=\{a^{2n}b^{2n}|n>0\}$ and $L_2=\{b^{2n+1}|n \geq 0\}$ the quotient language is: 
+    \[L=L_1/L_2=\{aab,aaaab,aaaabbb\}\]
+\end{example}

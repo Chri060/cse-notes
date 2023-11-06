@@ -1,0 +1,45 @@
+\section{Recognition algorithms and automata}
+
+To check if a string is valid for a specified language, we need a recognition algorithm, a type of algorithm producing a yes/no answer, commonly referred to in 
+computational complexity studies as a decision algorithm. For the string membership problem, the input domain is a set of strings of alphabet $\Sigma$. The 
+application of a recognition algorithm $\alpha$ to a given string $x$ is denoted as $\alpha(x)$. We say string $x$ is recognized or accepted if $\alpha(x)=yes$, 
+otherwise it is rejected. The language recognized, $L(\alpha)$, is the set of accepted strings:
+\[L(\alpha)=\{x \in \Sigma^{*}|\alpha(x)=yes\}\]
+The algorithm is usually assumed to terminate for every input, so that the membership problem is decidable. However, it may happen that, for some string $x$,the 
+algorithm does not terminate. In such case we say that the membership problem for $L$ is semi-decidable, or also that $L$ is recursively enumerable. In practice, 
+we do not have to worry about such decidability issues because in language processing the only language families of concern are decidable. 
+
+\subsection*{A general automaton}
+An automaton or abstract machine is an ideal computer featuring a very small set of simple instructions. In its more general form a recognizer it is composed by three 
+parts: input tape, control unit, and (auxiliary) memory. The control unit has a limited store, to be represented as a finite set of states;the auxiliary memory, on the 
+other hand, has unbounded capacity. The upper tape contains the given input or source string, which can be read but not changed. Each case of the tape contains a 
+terminal character; the cases to the left and right of the input contain two delimiters, the start of text mark $\vdash$ and the end of text mark or terminator $\dashv$.
+A peculiarity of automata is that the auxiliary memory is also a tape containing symbols of another alphabet. The automaton examines the source by performing a series
+of moves; the choice of a move depends on the current two symbols (input  and  memory) and on the current state. A move may have some of the following effects:
+\begin{itemize}
+    \item Shift the input head left or right by one position. 
+    \item Overwrite the current memory symbol with another one, and shift the memory head left or right by one position. 
+    \item Change the state of the control unit.
+\end{itemize}
+\begin{definition}
+    A machine is \emph{unidirectional} if the input head only moves from left to right. 
+\end{definition}
+At any time the future behavior of the machine depends on a three-tuple, called configuration: the suffix of the input string still to be read, the contents of the 
+memory tape and the position of the head. 
+\begin{definition}
+    The \emph{initial configuration} has: the input head positioned on character $a_1$, the control unit in an initial state, and the memory containing a specific 
+    symbol.
+\end{definition}
+Then the machine performs a computation. If for a configuration at most one move can be applied, the change of configuration is deterministic. A non-deterministic
+automaton is essentially a manner of representing an algorithm that in some situation may explore alternative paths. 
+\begin{definition}
+    A configuration is \emph{final} if the control is in a state specified as final, and the input head is on the terminator. 
+\end{definition}
+The source string $x$ is accepted if the automaton, starting in the initial configuration with $x\dashv$ as input, performs a computation leading to a final configuration. 
+The language accepted or recognized by the machine is the set of accepted strings.
+
+Notice a computation terminates either when the machine has entered a final con-figuration or when in the current configuration no move can be applied. In the latter 
+case the source string is not accepted by that computation. 
+\begin{definition}
+    Two automata accepting the same language are called \emph{equivalent}.
+\end{definition}
