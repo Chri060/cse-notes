@@ -1,0 +1,33 @@
+\section{Triggers application}
+
+Triggers introduce robust data management capabilities in a seamless and reusable fashion. 
+This system empowers databases to incorporate business and management rules that would otherwise be scattered across various applications. 
+Nevertheless, comprehending the interplay between triggers can be intricate, as certain database management system  providers leverage triggers to execute internal functions.
+
+\subsection*{View materialization}
+A view is a virtual table defined through a query stored in the database catalog and subsequently utilized in queries as if it were a conventional table. 
+When a view is referenced in a "select" query, the query processor revises the query by employing the view definition, ensuring that the executed query solely involves the base tables linked to the view.   
+If the queries involving a view significantly outnumber the updates to the base tables that alter the view's contents, view materialization can be considered.  
+Certain systems offer the "create materialized view" command, which enables the DBMS to automatically materialize the view. 
+Alternatively, materialization can be implemented through the use of triggers.
+
+\subsection*{Design principles}
+The design principles encompass the following guidelines:
+\begin{enumerate}
+    \item Employ triggers to ensure that specific operations trigger related actions.
+    \item Avoid defining triggers that replicate functionality already inherent in the DBMS. 
+    \item Keep trigger code concise. 
+        If your trigger's logic extends beyond 60 lines of code, consider placing the majority of the code within a stored procedure and invoke the procedure from the trigger.
+    \item Utilize triggers exclusively for centralized, global operations intended to be executed for the triggering statement, regardless of the issuing user or database application.
+    \item Minimize the use of recursive triggers unless absolutely necessary, as triggers may inadvertently trigger one another until the DBMS exhausts its memory.
+    \item Exercise caution when implementing triggers, as they are executed for every user each time the relevant trigger event occurs.
+\end{enumerate}
+
+\subsection*{Summary}
+All prominent relational DBMS vendors offer varying degrees of support for triggers. 
+However, it's important to note that most products provide support for only a subset of the SQL-99 trigger standard, and they may not fully adhere to some of the more intricate aspects of the execution model. 
+Additionally, certain trigger implementations rely on proprietary programming languages, making portability across different DBMS platforms a challenging endeavor.
+
+It's crucial to emphasize that the central management of semantics within the database, under the control of the DBMS and not replicated across all applications, is imperative. 
+This ensures the enforcement of data properties that cannot be explicitly specified through integrity constraints. 
+As triggers often operate in the background, their behavior should always be well-documented, as it tends to be somewhat concealed from users and developers

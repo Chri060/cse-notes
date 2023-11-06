@@ -1,0 +1,14 @@
+\section{Concurrency control in practice}
+
+Conflict-serializability checking would be efficient if we knew the graph from the beginning, but usually we don't. Therefore, a scheduler must rather work online. 
+So, it is not feasible to maintain the conflict graph, update it, and check its acyclicity at each operation request. At the same time, the assumption that concurrency control 
+can work only with the commit-projection of the schedule is unrealistic because aborts do occur. We need some simple online decision criterion for the scheduler, which must 
+avoid as many anomalies as possible, and have negligible overhead. 
+    
+When dealing with online concurrency control, it is important also to consider arrival sequences. The concurrency control system maps an arrival sequence into an effective a 
+posteriori schedule. To implement this online scheduling we use two main families of techniques:
+\begin{itemize}
+    \item Pessimistic (locks): if a resource is taken, make the requester wait or pre-empt the holder.
+    \item Optimistic (timestamps and versions): serve as many requests as possible, possibly using out-of-date versions of the data. 
+\end{itemize}
+Usually, commercial systems take the best of both worlds. 

@@ -1,0 +1,49 @@
+\section{View-serializability}
+
+\begin{definition}
+    $r_i(x)$ \emph{reads-from} $w_j(x)$ when  $w_j(x)$  precedes  $r_i(x)$ and there is no  $w_k(x)$ in $S$ between  $r_i(x)$  and  $w_j(x)$. 
+    
+    $w_i(x)$ in a schedule $S$ is a \emph{final write} if it is the last write on $x$ that occurs in $S$. 
+
+
+    Two schedules are said to be \emph{view-equivalent} ($S_i \approx_V S_j$) if they have:
+    \begin{enumerate}
+        \item The same operations. 
+        \item The same reads-from relationships.
+        \item The same final writes. 
+    \end{enumerate}
+\end{definition}
+
+A schedule is view-serializable (VSR) if it is view-equivalent to a serial schedule of the same transactions. The value written by $w_j(x)$ could be uncommitted when $r_i(x)$ 
+reads it, but we are sure that it will be committed (commit-projection hypotesis).
+\begin{example}
+    The following schedules are given:
+    \begin{itemize}
+        \item $S_1: w_0(x) r_2(x) r_1(x) w_2(x) w_2(z)$
+        \item $S_2: w_0(x) r_1(x) r_2(x) w_2(x) w_2(z)$
+        \item $S_3: w_0(x) r_1(x) w_1(x) r_2(x) w_1(z)$
+        \item $S_4: w_0(x) r_1(x) w_1(x) w_1(z) r_2(x)$
+        \item $S_5: r_1(x) r_2(x) w_1(x) w_2(x)$
+        \item $S_6: r_1(x) r_2(x) w_2(x) r_1(x)$
+        \item $S_7: r_1(x) r_1(y) r_2(z) r_2(y) w_2(y) w_2(z) r_1(z)$
+    \end{itemize}
+    We have that only $S_2$ and $S_3$ are serial. $S_1$ is view-equivalent to serial schedule $S_2$ (so it is view-serializable). 
+    $S_3$ is not view-equivalent to $S_2$ (different operations) but is view-equivalent to serial schedule $S_4$, so it is also view-serializable. 
+
+    $S_5$ corresponds to a lost update, $S_6$ corresponds to a non-repeatable read, and $S_7$ corresponds to a phantom update. All these schedules are non view-serializable. 
+    
+    The following schedules are given:
+    \begin{itemize}
+        \item $S_a: w_0(x) r_1(x) w_0(z) r_1(z) r_2(x) w_0(y) r_3(z) w_3(z) w_2(y) w_1(x) w_3(y)$
+        \item $S_b: w_0(x) w_0(z) w_0(y) r_2(x) w_2(y) r_1(x) r_1(z) w_1(x) r_3(z) w_3(z) w_3(y)$
+        \item $S_c: w_0(x) w_0(z) w_0(y) r_2(x) w_2(y) r_3(z) w_3(z) w_3(y) r_1(x) r_1(z) w_1(x)$
+    \end{itemize}
+    $S_a$ and $S_b$ are view-equivalent because all the reads-from relationship and final writes are the same. In fact, we have: 
+    \begin{itemize}
+        \item Reads-from: $r_1(x)$ from $w_0(x)$, $r_1(z)$ from $w_0(z)$, $r_2(x)$ from $w_0(x)$, $r_3(z)$ from $w_0(z)$.
+        \item Final writes: $w_1(x)$, $w_3(y)$, $w_3(z)$.
+    \end{itemize}
+    $S_a$ and $S_c$ are not view-equivalent because not all the reads-from relationship are the same. 
+\end{example}
+Deciding if a generic schedule is in VSR is a NP-complete problem. Therefore, we need to find a stricter definition that is easier to check. The new definition may lead to 
+rejecting some schedule that would be acceptable under view-serializability but not under the stricter criterion.

@@ -1,0 +1,56 @@
+\section{Opaque rankings}
+
+The opaque rankings consider only the position and no other associated score. The algorithm called MedRank is based on the notion of 
+median and provides an approximation of the foot-rule optimal aggregation. The inputs of this algorithm are: an integer $k$, and a ranked list 
+$R_1,\dots,R_m$ of $N$ elements. The output is the top $k$ elements according to median ranking. The idea of the algorithm is the following: 
+\begin{enumerate}
+    \item Use sorted accesses in each list, one element at a time, until there are $k$ elements that occur in more than $m/2$ lists.
+    \item These are the top $k$ elements. 
+\end{enumerate}
+\begin{definition}
+    The maximum number of sorted accesses made on each list is also called the \emph{depth reached} by the algorithm. 
+\end{definition}
+\begin{example}
+    Suppose we have to sort the hotels based on three rankings criteria: price, rating, and distance. Using the MedRank algorithm we can make one sorted access at a time in 
+    each ranking and then look for hotels that appear in at least two rankings. We assume that price, rating and distance are opaque. The 
+    ranks of hotels are the following:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|c|c}
+        \textbf{Price} & \textbf{Rating} & \textbf{Distance} \\ \hline
+        Ibis           & Crillon         & Le Roch           \\
+        Etap           & Novotel         & Lodge In          \\
+        Novotel        & Sheraton        & Ritz              \\
+        Mercure        & Hilton          & Lutetia           \\
+        Hilton         & Ibis            & Novotel           \\
+        Sheraton       & Ritz            & Sheraton          \\
+        Crillon        & Lutetia         & Mercure           \\
+        $\dots$        & $\dots$         & $\dots$          
+        \end{tabular}
+    \end{table}
+    If we use MedRank with $k=3$, we will obtain the following rank: 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cc}
+        \hline
+        \textbf{Top k hotels}       & \textbf{Median rank}          \\ \hline
+        Novotel                     & median$\{2,3,5\}=3$           \\ 
+        Hilton                      & median$\{4,5,?\}=5$           \\ 
+        Ibis                        & median$\{1,5,?\}=5$           \\ \hline
+        \end{tabular}
+    \end{table}
+    The depth in this case is equal to five. 
+\end{example}
+\begin{definition}
+    An algorithm is \emph{optimal} if its execution cost is never worse than any other algorithm on any input.
+\end{definition}
+MedRank is not optimal, but it is instance optimal. This means that among the algorithms that access the lists in sorted order, this is the best possible algorithm on every 
+input instance. 
+\begin{definition}
+    Let $\boldsymbol{A}$ be a family of algorithms, $\boldsymbol{I}$ a set of problem instances. Let cost be a cost metric applied to an algorithm-instance pair. Algorithm 
+    $A^{*}$ is instance-optimal with respect to $\boldsymbol{A}$ and $\boldsymbol{I}$ for the cost metric cost if there exist constants $k_1$ and $k_2$ such that, for all 
+    $A \in \boldsymbol{A}$ and $I \in \boldsymbol{I}$: 
+    \[\textnormal{cost}(A^{*}, I) \leq k_1 \textnormal{cost}(A, I) + k_2\]
+\end{definition}
+If $A^{*}$ is instance-optimal, then any algorithm can improve with respect to $A^{*}$ by only a constant factor $r$, which is therefore called the optimality ratio of $A^{*}$. 
+Instance optimality is a much stronger notion than optimality in the average or worst case. 

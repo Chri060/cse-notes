@@ -1,0 +1,76 @@
+\section{Multi-version timestamps}
+
+The idea of multi-version is that writes generate new versions, and that reads access the right version. Writes generate new copies, each one with a new WTM, so each object $x$ 
+always has $N \geq 1$ active versions. There is a unique global RTM($x$). Old versions are discarded when there are no transactions that need their values. 
+In theory, it is possible to use the following rule: 
+\begin{itemize}
+    \item $r_{ts}(x)$ is always accepted. A copy $x_k$ is selected for reading such that:
+        \begin{itemize}
+            \item If $ts \geq \textnormal{WTM}_N(x)$, then $k=N$.
+            \item Else take $k$ such that $\textnormal{WTM}_k(x) \leq ts < \textnormal{WTM}_{k+1}(x)$. 
+        \end{itemize}
+    \item $w_{ts}(x)$: 
+        \begin{itemize}
+            \item If $ts < \textnormal{RTM}(x)$ the request is rejected. 
+            \item Else a new version is created for timestamp $ts$ ($N$ is incremented). 
+        \end{itemize}
+\end{itemize}
+\begin{example}
+    Let us assume $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$ and the following schedule: 
+    \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x) r_{12}(x) w_{14}(x) w_{13}(x)\]
+    Using the multi-version we obtain: 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccc}
+        \textbf{Request} & \textbf{Response}         & \textbf{New value}  \\ \hline
+        $r_6(x)$         & $\checkmark$              & -                   \\
+        $r_8(x)$         & $\checkmark$              & $\textnormal{RTM}(x)=8$          \\
+        $r_9(x)$         & $\checkmark$              & $\textnormal{RTM}(x)=9$          \\
+        $w_8(x)$         & $\tikzxmark$              & $T_8$ killed        \\
+        $w_{11}(x)$      & $\checkmark$              & $\textnormal{WTM}_2(x)=11,\:N=2$ \\
+        $r_{10}(x)$      & $\checkmark$ on $x_{(1)}$ & $\textnormal{RTM}(x)=10$         \\
+        $r_{12}(x)$      & $\checkmark$ on $x_{(2)}$ & $\textnormal{RTM}(x)=12$         \\
+        $w_{14}(x)$      & $\checkmark$              & $\textnormal{WTM}_3(x)=14,\:N=3$ \\
+        $w_{13}(x)$      & $\checkmark$              & $\textnormal{WTM}_4(x)=14,\:N=4$
+        \end{tabular}
+    \end{table}
+\end{example}
+
+In practice, it is possible to use the following rule: 
+\begin{itemize}
+    \item $r_{ts}(x)$ is always accepted. A copy $x_k$ is selected for reading such that:
+        \begin{itemize}
+            \item If $ts \geq \textnormal{WTM}_N(x)$, then $k=N$. 
+            \item Else take $k$ such that $\textnormal{WTM}_k(x) \leq ts < \textnormal{WTM}_{k+1}(x)$. 
+        \end{itemize}
+    \item $w_{ts}(x)$:
+        \begin{itemize}
+            \item If $ts < \textnormal{RTM}(x)$ or $ts < \textnormal{WTM}_N(x)$ the request is rejected. 
+            \item Else a new version is created for timestamp $ts$ ($N$ is incremented)
+        \end{itemize}
+\end{itemize}
+\begin{example}
+    Let us assume $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$ and the following schedule: 
+    \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x) r_{12}(x) w_{14}(x) w_{13}(x)\]
+    Using the multi-version we obtain: 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccc}
+        \textbf{Request} & \textbf{Response}         & \textbf{New value}  \\ \hline
+        $r_6(x)$         & $\checkmark$              & -                   \\
+        $r_8(x)$         & $\checkmark$              & $\textnormal{RTM}(x)=8$          \\
+        $r_9(x)$         & $\checkmark$              & $\textnormal{RTM}(x)=9$          \\
+        $w_8(x)$         & $\tikzxmark$              & $T_8$ killed        \\
+        $w_{11}(x)$      & $\checkmark$              & $\textnormal{WTM}_2(x)=11,\:N=2$ \\
+        $r_{10}(x)$      & $\checkmark$ on $x_{(1)}$ & $\textnormal{RTM}(x)=10$         \\
+        $r_{12}(x)$      & $\checkmark$ on $x_{(2)}$ & $\textnormal{RTM}(x)=12$         \\
+        $w_{14}(x)$      & $\checkmark$              & $\textnormal{WTM}_3(x)=14,\:N=3$ \\
+        $w_{13}(x)$      & $\tikzxmark$              & $T_{13}$ killed
+        \end{tabular}
+    \end{table}
+\end{example}
+\subsection*{Isolation level introduced with TS-multi}
+The realization of TS-multi gives the opportunity to introduce into the DBMS another isolation level called snapshot isolation. In this level only WTM($x$) is used. The rule 
+used in this level states that every transaction reads the version consistent with its timestamp, and defers writes to the end. If the scheduler detects that the writes of a
+transaction conflict with writes of other concurrent transactions after the snapshot timestamp, it aborts. Snapshot isolation does not guarantee serializability: it is possible 
+to have a new anomaly called write skew (non-determinism). 

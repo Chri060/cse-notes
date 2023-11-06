@@ -1,0 +1,67 @@
+\section{Anomalies in concurrent transactions}
+
+The anomalies caused by incorrect scheduling are: 
+\begin{itemize}
+    \item Lost update: an update is applied from a state that ignores a preceding update, which is lost.
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|c}
+            \textbf{Transaction $t_1$}    & \textbf{Transaction $t_2$} \\ \hline
+            $r_1(x)$                      &                            \\
+            $x=x+1$                       &                            \\
+                                            & $r_2(x)$                   \\
+                                            & $x=x+1$                    \\
+                                            & $w_2(x)$                   \\
+                                            & commit                     \\
+            $w_1(x)$                      &                            \\
+            commit                        &                           
+            \end{tabular}
+        \end{table}
+    \item Dirty read: an uncommitted value is used to update the data. 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|c}
+            \textbf{Transaction $t_1$} & \textbf{Transaction $t_2$} \\ \hline
+            $r_1(x)$                   &                            \\
+            $x=x+1$                    &                            \\
+            $w_1(x)$                   &                            \\
+                                    & $r_2(x)$                   \\
+                                    & commit                     \\
+            abort                      &                           
+            \end{tabular}
+        \end{table}
+    \item Non-repeatable read: someone else updates a previously read value.
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|c}
+            \textbf{Transaction $t_1$}  & \textbf{Transaction $t_2$} \\ \hline
+            $r_1(x)$                    &                            \\
+                                        & $r_2(x)$                   \\
+                                        & $x=x+1$                    \\
+                                        & $w_2(x)$                   \\
+                                        & commit                     \\
+            $r_1(x)$                    &                            \\
+            commit                      & \multicolumn{1}{l}{}      
+            \end{tabular}
+        \end{table}
+    \item Phantom update: someone else updates data that contributes to a previously valid constraint. 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|c}
+            \textbf{Transaction $t_1$} & \textbf{Transaction $t_2$} \\ \hline
+            $r_1(x)$                   &                            \\
+                                        & $r_2(y)$                   \\
+            $r_1(y)$                   &                            \\
+                                        & $y=y-100$                  \\
+                                        & $r_2(z)$                   \\
+                                        & $z=z+100$                  \\
+                                        & $w_2(y)$                   \\
+                                        & $w_2(z)$                   \\
+                                        & commit                     \\
+            $r_1(z)$                   &                            \\
+            $s=x+y+z$                  &                            \\
+            commit                     &                           
+            \end{tabular}
+        \end{table}
+    \item Phantom insert: someone else inserts data that contributes to a previously read datum.
+\end{itemize}

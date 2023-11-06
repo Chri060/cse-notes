@@ -1,0 +1,42 @@
+\section{Locking}
+
+The method called locking is the most used in commercial systems. A transaction is well-formed with respect to locking if: 
+\begin{itemize}
+    \item Read operations are preceded by $r\_lock$ (shared) and followed by unlock. 
+    \item Write operations are preceded by $w\_lock$ (exclusive) and followed by unlock. 
+\end{itemize}
+In both cases unlocking can be delayed with respect to the end of the operations. So, every object can be: free, r-locked or w-locked. 
+
+Transactions that first read and then write an object may acquire a $w\_lock$ already when reading or acquire a $r\_lock$ first and then upgrade it into a $w\_lock$ (escalation).
+
+The lock manager receives requests from the transactions and grants resources according to the conflict table: 
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cccc}
+    \textbf{}                              & \multicolumn{3}{c}{\textbf{Resource status}}                                                                                                                                                                                                   \\ \cline{2-4} 
+    \multicolumn{1}{c|}{\textbf{Request}}  & \multicolumn{1}{c|}{\textit{FREE}}                                          & \multicolumn{1}{c|}{\textit{R\_LOCKED}}                                            & \multicolumn{1}{c|}{\textit{W\_LOCKED}}                                     \\ \hline
+    \multicolumn{1}{|c|}{\textit{r\_lock}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ R\_LOCKED\end{tabular}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ R\_LOCKED($n++$)\end{tabular}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\tikzxmark\\ W\_LOCKED\end{tabular}} \\ \hline
+    \multicolumn{1}{|c|}{\textit{w\_lock}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ W\_LOCKED\end{tabular}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\tikzxmark\\ R\_LOCKED\end{tabular}}        & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\tikzxmark\\ W\_LOCKED\end{tabular}} \\ \hline
+    \multicolumn{1}{|c|}{\textit{unlock}}  & \multicolumn{1}{c|}{ERROR}                                                  & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ $n--$\end{tabular}}            & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}\checkmark\\ FREE\end{tabular}}      \\ \hline
+    \end{tabular}
+\end{table}
+
+\begin{example}
+    Given a schedule with three transactions and the following operations: 
+    \[r_1(x)w_1(x)r_2(x)r_3(y)w_1(y)\]
+    We have the following locks: 
+    \begin{itemize}
+        \item $r_1(x)$: $r_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $r-locked$ with $n_x=1$. 
+        \item $w_1(x)$: $w_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $w-locked$. 
+        \item $r_2(x)$: $r_1\_lock(x)$ request $\rightarrow$ No, because $x$ is $w-locked$ $\rightarrow$ $T_2$ waits. 
+        \item $r_3(y)$: $r_3\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $r-locked$ with $n_y=1$ and then $T_3$ unlocks $y$. 
+        \item $w_1(y)$: $w_1\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $w-locked$ and then $x$ and $y$ are freed. 
+    \end{itemize}
+    So, the schedule a posteriori will become: 
+    \[r_1(x)w_1(x)r_3(y)w_1(y)r_2(x)\]
+    and we have that the transaction two is delayed. 
+\end{example}
+The locking system is implemented via lock tables, which are hash tables indexing the lockable items via hashing and where each locked item has a linked list associated with it. 
+Every node in the linked list represents the transaction which requested for lock, the lock mode and the current status. Every new lock request for the data item is appended to 
+the list.
