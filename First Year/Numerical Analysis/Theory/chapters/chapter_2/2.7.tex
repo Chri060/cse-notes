@@ -1,0 +1,108 @@
+\section{Fixed point method}
+
+Given a function $\phi:[a,b] \rightarrow \mathbb{R}$, the objective is to find $\alpha \in [a,b]$ such that $\alpha=\phi(\alpha)$. 
+If such $\alpha$ exists, it is referred to as a fixed point of $\phi$, and it can be computed using the following formula:
+\[x^{(k+1)}=\phi(x^{(k)}) \:\:\:\:\:\: k \geq 0\]
+This algorithm is known as fixed point iteration, and $\phi$ is termed iteration function.
+\begin{proposition}
+    Let us suppose that $\phi(x)$ is continuous in $[a,b]$ and such that $\phi(x) \in [a,b]$ for every $x \in [a,b]$; then, there exists at least a fixed point $\alpha \in [a,b]$.
+        
+    Moreover, if 
+    \[\exists L < 1 \textnormal{ such that } \left\lvert \phi(x_1)-\phi(x_2) \right\rvert \leq L\left\lvert x_1-x_2 \right\rvert  \:\:\:\:\:\: \forall x_1,x_2\in [a,b]\]
+    then there exists a unique fixed point $\alpha \in [a,b]$ of $\phi$ and the sequence converges to $\alpha$, for any choice of initial guess $x^{(0)}\in [a,b]$.
+\end{proposition}
+\begin{proof}[of the first proposition]
+    The function $g(x)=\phi(x)-x$ is continuous in $[a,b]$ and, thanks to assumption made on the range of $\phi$, it holds $g(a)=\phi(a)-a\geq 0$ and $g(b)=\phi(b)-b\geq 0$.
+    By applying the theorem of zeros of continuous functions, we can conclude that $g$ has at least one zero in $[a,b]$. 
+\end{proof}
+\begin{proof}[of the second proposition]
+    Indeed, should two different fixed points $\alpha_1$ and $\alpha_2$ exist, then: 
+    \[\left\lvert \alpha_1-\alpha_2 \right\rvert = \left\lvert \phi(\alpha_1)-\phi(\alpha_2) \right\rvert \leq L \left\lvert \alpha_1-\alpha_2 \right\rvert < 
+    \left\lvert \alpha_1-\alpha_2 \right\rvert\]
+    which cannot be. 
+    We prove now that the sequence $x^{(k)}$ converges to the unique fixed point $\alpha$ when $k \rightarrow \infty$, for any choice of initial guess $x^{(0)} \in [a,b]$. 
+    It holds: 
+    \[\dfrac{\left\lvert x^{(k)}-\alpha \right\rvert}{\left\lvert x^{(0)}-\alpha \right\rvert} \leq L^k\]
+    Passing to the limit as $k \rightarrow \infty$, we obtain $\lim_{k \rightarrow \infty}{\left\lvert x^{(k)}-\alpha \right\rvert}=0$, which is the desired result. 
+\end{proof}
+
+In practical applications, selecting an interval $[a,b]$ a priori that satisfies the assumptions of the previous proposition can be challenging.
+In such scenarios, the Ostrowski theorem provides a valuable local convergence result.
+\begin{theorem}
+    Let $\alpha$ be a fixed point of a function $\phi$ which is continuous and continuously differentiable in a suitable neighborhood $\mathcal{J}$ of $\alpha$. 
+    If $\left\lvert \phi^{'}(\alpha) \right\rvert < 1$, then there exists $\delta > 0$ for which $\{x^{(k)}\}$ converges to $\alpha$, for every $x^{(0)}$ such that $\left\lvert x^{(0)}-\alpha \right\rvert < \delta$. 
+    Moreover, it holds: 
+    \[\lim_{k \rightarrow \infty}\dfrac{x^{(k+1)}-\alpha}{x^{(k)}-\alpha}=\phi^{'}(\alpha)\]
+\end{theorem}
+
+To satisfy the conditions of the Ostrowski theorem, the following hypothesis is considered:
+\[\exists \delta | \left\lvert \phi^{'}(\alpha) \right\rvert < 1 \:\:\:\:\:\: \forall x \left\lvert x - \alpha \right\rvert < \delta\]
+We can refer to this interval as $I_{\delta}$. 
+When a point $x$ is chosen within this interval, it guarantees that $\phi(x)\in I_{\delta}$. 
+\begin{proof}
+    Let us take $\left\lvert \phi(x)-\alpha \right\rvert$, where it is satisfied the relation $\left\lvert x- \alpha \right\rvert < \delta$. 
+    We have:
+    \[\left\lvert \phi(x)-\alpha \right\rvert=\left\lvert \phi(x)-\phi(\alpha) \right\rvert \leq \left\lvert \phi^{'}(\xi)(x-\alpha) \right\rvert \]
+    So, we have that $\xi$ is between $x$ and $alpha$, and so it holds $\xi \in I_{\delta}$. 
+    At the meantime we have by hypothesis that: 
+    \[\left\lvert \phi^{'}(\xi) \right\rvert < 1\]
+    Now we can write:
+    \[\left\lvert \phi^{'}(\xi)(x-\alpha) \right\rvert = \left\lvert \phi^{'}(\xi) \right\rvert \left\lvert x-\alpha \right\rvert \leq \left\lvert x-\alpha \right\rvert < \delta\]
+    In the end we found that: 
+    \[\left\lvert \phi(x)-\alpha \right\rvert < \delta\]
+    So we have proved that $\phi(x) \in I_{\delta}$. 
+\end{proof}
+\begin{proof}[of Ostrowski]
+    Thanks to the Lagrange theorem, for any $k \geq 0$, there exists a point $\xi_k$ between $x^{(k)}$ and $\alpha$ such that: 
+    \[\left\lvert x^{(x)}-\alpha\right\rvert=\left\lvert\phi(x^{(x)})-\phi(\alpha)\right\rvert=\left\lvert\phi^{'}(\xi_k)(x^{(x)}-\alpha)\right\rvert\]
+    We've determined that $\xi_k$ lies between $x^{(k)}$ and $x^{(k+1)}$. 
+    Thus, if $x^{(k)} \in I_{\delta}$, as shown in the previous proof, we also have $x^{(k+1)} \in I_{\delta}$ and $\xi_k \in I_{\delta}$. 
+    Consequently, we can derive:
+    \[\dfrac{\left\lvert x^{(k+1)}-\alpha\right\rvert }{\left\lvert x^{(k)}-\alpha\right\rvert }=\left\lvert \phi^{'}(\xi_k)\right\rvert \]
+    Since $\xi_k \rightarrow \alpha$, we can establish the convergence formula.
+\end{proof}
+The fixed-point iteration converges at least linearly. 
+When $\left\lvert\phi^{'}(\alpha)\right\rvert>1$, if $x^{(k)}$ is sufficiently close to $\alpha$ such that 
+$\left\lvert \phi^{'}(x^{(k)}) \right\rvert > 1$, then $\left\lvert \alpha - x^{(k+1)} \right\rvert > \left\lvert \alpha - x^{(k)} \right\rvert$. 
+In such cases, the sequence cannot converge to the fixed point.
+Conversely, when $\left\lvert\phi^{'}(\alpha)\right\rvert=1$, no definite conclusion can be drawn because either convergence or divergence could occur, depending on the properties of the iteration function $\phi^{'}(x)$. 
+\begin{proposition}
+    Assume that all hypothesis of Ostrowski's theorem are satisfied. In addition, assume that $\phi$ is twice continuously differentiable and that $\phi^{'}(\alpha)=0$ and 
+    $\phi^{''}(\alpha) \neq 0$. Then, the fixed point iteration converge with order two and:
+    \[\lim_{k \rightarrow \infty}\dfrac{x^{(k+1)}-\alpha}{\left(x^{(k)}-\alpha\right)^2}=\dfrac{1}{2}\phi^{''}(\alpha)\]
+\end{proposition}
+Given a simple zero such that $f(\alpha)=0$ we can use the fixed point method to derive the Newton method: 
+\[\phi_N(x)=x-\dfrac{f(x)}{f^{'}(x)}\]
+If we derive the previous function we obtain:
+\[\phi^{'}_N(x)=\dfrac{f(x)f^{''}(x)}{\left[f^{'}(x)\right]^2}\]
+And we can say that: 
+\[\phi^{'}_N(\alpha)=\dfrac{f(\alpha)f^{''}(\alpha)}{\left[f^{'}(\alpha)\right]^2}=0\]
+\begin{proof}
+    We can note that the denominator is not null (the zero is simple, so the first derivative is not null). We assumed that $f(\alpha)=0$, and we can say nothing about 
+    $f^{''}(\alpha)$. But since we have 
+    \[\phi^{'}_N(\alpha)=\dfrac{f(\alpha)f^{''}(\alpha)}{\left[f^{'}(\alpha)\right]^2}=\dfrac{0 \cdot n}{n}=\dfrac{0}{n}=0\]
+    We have that the function evaluated in $\alpha$ is zero. 
+\end{proof}
+
+The stopping criterion for the fixed point iteration method is as follows:
+\[\left\lvert x^{(k+1)}-x^{(k)} \right\rvert \leq \epsilon_s\]
+\begin{proof}
+    For the case where the derivative is not null, we have: 
+    \[\left\lvert x^{(k+1)} - \alpha \right\rvert = \left\lvert \phi(x^{(k)}) - \phi(\alpha) \right\rvert \leq \left\lvert \phi^{'}(\xi_k)\right\rvert \left\lvert x^{(k)} - \alpha\right\rvert \]
+    Then I add and subtract $x^{(k+1)}$: 
+    \[\left\lvert \phi^{'}(\xi_k)\right\rvert \left\lvert x^{(k)}-\alpha + x^{(k+1)} - x^{(k+1)}\right\rvert\]
+    Applying the triangular inequality we obtain: 
+    \[\left\lvert \phi^{'}(\xi_k)\right\rvert\left\lvert x^{(k)}-\alpha+x^{(k+1)}-x^{(k+1)}\right\rvert\leq\left\lvert\phi^{'}(\xi_k)\right\rvert\left\lvert x^{(k+1)}-\alpha \right\rvert\left\lvert x^{(k)}-x^{(k+1)}\right\rvert\]
+    From where we can derive: 
+    \[\left(1-\left\lvert\phi^{'}(\xi_k)\right\rvert\right)\left\lvert x^{k+1}-\alpha\right\rvert\leq\left\lvert\phi^{'}(\xi_k)\right\rvert\left\lvert x^{(k+1)}-x^{(k)}\right\rvert\]
+    That is: 
+    \[\left\lvert x^{(k+1)}-\alpha\right\rvert\leq\dfrac{\phi^{'}(\xi_k)}{1-\left\lvert\phi^{'}(\xi_k)\right\rvert}\left\lvert x^{(k+1)}-x^{(k)}\right\rvert\]
+\end{proof}
+\begin{proof}
+    For the case where the derivative is null, we have: 
+    \[\left\lvert x^{(k+1)}-\alpha\right\rvert\leq\left\lvert x^{(k+1)}-\alpha+x^{(k)}-x^{(k)}\right\rvert\leq\left\lvert x^{(k+1)}-x^{(k)}\right\rvert\left\lvert\phi{x^{(k+1)}}-\phi(\alpha)\right\rvert\]
+    That is less or equal than:
+    \[\left\lvert x^{(k+1)}-x^{(k)}\right\rvert+\left\lvert\phi^{'}(\xi_k)\right\rvert\left\lvert x^{(k+1)}-\alpha\right\rvert\]
+    But for hypothesis we have that $\phi^{'}(\alpha)=0$ we obtain: 
+    \[\left\lvert x^{(k+1)}-\alpha\right\rvert\leq\left\lvert x^{(k+1)}-x^{(k)}\right\rvert\]
+\end{proof}

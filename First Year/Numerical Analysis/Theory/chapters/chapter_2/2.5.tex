@@ -1,0 +1,54 @@
+\section{Newton method}
+
+The bisection method relies solely on the sign of the function $f$ at the endpoints of sub-intervals. 
+However, a more efficient approach can be developed by leveraging both the function values and its derivative.
+For a differentiable function $f$, we can use the tangent line at a point $x^{(k)}$: 
+\[y(x)=f(x^{(k)})+f^{'}(x^{(k)})(x-x^{(k)})\]
+This equation represents the tangent to the curve $(x,f(x))$ at the point $x^{(k)}$. 
+Assuming that $x^{(k+1)}$ is a point where $f(x^{(k+1)})=0$, we can derive:
+\[x^{(k+1)}=x^{(k)}-\dfrac{f(x^{(k)})}{f^{'}(x^{(k)})} \:\:\:\:\:\: k \geq 0\]
+provided $f^{'}(x^{(k)}) \neq 0$. 
+
+This method is commonly known as Newton's method and involves locally approximating the zero of $f$ by replacing $f$ with its tangent line.
+Notably, this method converges in a single step when $f$ is linear.
+
+However, the Newton method doesn't converge for all possible initial values $x^{(0)}$, but only for those values sufficiently close to $\alpha$. 
+To determine an appropriate initial value when the value of $\alpha$ is unknown, one can employ a few iterations of the bisection method or visually inspect the graph of $f$. 
+
+\subsection*{Modified Newton method}
+If $f$ is twice continuously differentiable $\left(f \in C^2(\mathbb{R}),f^{'}(\alpha) \neq 0\right)$, and $x^{(0)}$ is chosen sufficiently close to $\alpha$, the Newton method exhibits quadratic convergence.
+In cases where $\alpha$  has a multiplicity $m$ greater than one, the Newton method converges linearly. 
+To mitigate this linear convergence, a modified Newton method can be used:
+\[x^{(k+1)}=x^{(k)}-m\dfrac{f(x^{(k)})}{f^{'}(x^{(k)})} \:\:\:\:\:\: k \geq 0\]
+assuming $f^{'}(x^{(k)}) \neq 0$.
+
+\subsection*{Quasi-Newton method}
+Another variant of this method is the quasi-Newton method, which approximates the derivative using finite differences:
+\[f^{'}(x^{(k)}) \simeq \dfrac{f(x^{(k)}+h)-f(x^{(k)})}{h}\]
+
+\subsection*{Algorithm}
+The inputs for this algorithm consist of a function $f \in C^1(\mathbb{R})$ and an initial guess $x^{(0)} \in \mathbb{R}$. 
+The output of the algorithm is an approximate value for the zero of the function.
+\begin{algorithm}[H]
+    \caption{Algorithm for the basic Newton method}
+        \begin{algorithmic}[1]
+            \For {$k=0,1,\dots,n$}
+                \State $x^{(k+1)}=x^{(k)}-\dfrac{f(x^{(k)})}{f^{'}(x^{(k)})}$
+                \If {$k>k_{max} \lor \left\lvert x^{(k)}-x^{(k-1)} \right\rvert \leq \epsilon_s \lor \left\lvert f\left(x^{(k+1)}\right) \right\rvert \leq \epsilon_r$}
+                    \State \Return $x^{(k+1)}$
+                \EndIf
+            \EndFor
+        \end{algorithmic}
+\end{algorithm}
+
+\subsection*{Summary}
+The advantages of the Newton method are as follows:
+\begin{itemize}
+    \item Rapid convergence. 
+    \item Applicable to zeros with even multiplicity.
+\end{itemize}
+However, there are certain disadvantages:
+\begin{itemize}
+    \item Demands computation of the derivative.
+    \item Requires careful selection of the initial guess $x^{(0)}$. 
+\end{itemize}

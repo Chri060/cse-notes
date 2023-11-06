@@ -1,0 +1,87 @@
+\section{Systems of nonlinear equations}
+
+\subsection*{Newton method}
+Let's consider a system of nonlinear equations in the form:
+\[\begin{cases}
+    f_1(x_1,x_2,\dots,x_n)=0 \\
+    f_2(x_1,x_2,\dots,x_n)=0 \\
+    \vdots                   \\
+    f_n(x_1,x_2,\dots,x_n)=0 
+\end{cases}\]
+where $f_1,\dots,f_n$ are nonlinear functions. 
+By defining $f=(f_1,\dots,f_n)^T$ and $x=(x_1,\dots,x_n)^T \in \mathbb{R}^d$, we can represent the system compactly as:
+\[f(x)=0\]
+To extend Newton's method to systems of equations, we replace the first derivative of the scalar function $f$ with the Jacobian matrix $J_f$ of the vector function $f$.
+The components of the Jacobian matrix are defined as:
+\[(J_f)_{ij}=\dfrac{\partial f_1}{\partial x_1} \:\:\:\:\:\: i,j=1,\dots,n\]
+
+\subsection*{Algorithm}
+The input of the algorithm is the initial guess $x^{(0)}$. 
+\begin{algorithm}[H]
+    \caption{Algorithm for the Newton method for systems}
+        \begin{algorithmic}[1]
+            \For {$k=0,1,\dots,n$}
+                \State $\textnormal{solve  } J_{F}(x^{(k)})\delta x^{(k)}=-F(x^{(k)})$
+                \State $x^{(k+1)} \leftarrow x^{(k)}+\delta x^{(k)}$
+                \If {$\left\lVert \delta x^{(k+1)} \leq \epsilon \right\rVert \lor \left\lVert F(x^{(k+1)}) \leq \epsilon_r \right\rVert$}
+                    \State \Return $x^{(k+1)}$
+                \EndIf
+            \EndFor
+        \end{algorithmic}
+\end{algorithm}
+
+\subsection*{Broyden method}
+Computing the Jacobian matrix $J_f$ can be computationally expensive, especially when dealing with a large number of equations $d$. 
+To simplify the computation of this matrix, one can use the finite difference approximation, as follows:
+\[(J_f)_{ij} \approx \dfrac{f_i(x_1^{k},\dots,x_{j-1}^{k},x_{j+h}^{k},x_{j+1}^{k},\dots,x_{d}^{k})-f(x_{k})}{h}\]
+However, this method can also be computationally costly.
+There are alternative methods for approximating the Jacobian that are less expensive, known as quasi-Newton methods. 
+One of the most important quasi-Newton methods used for this purpose is called the Broyden method.
+
+The secant method can be adapted for solving systems of nonlinear equations while maintaining a super-linear rate of convergence. 
+
+
+This adaptation involves replacing the Jacobian matrix $J_f(x^{(k)})$ of Newton's method, where $k \geq 0$ with suitable matrices $B_k$. 
+These matrices are recursively defined, starting from an initial matrix $B_0$ that approximates of $J_f(x^{(0)})$.
+
+The starting point is to replace the identity matrix $I_k$ with a matrix $B_k$ that satisfies the equation: 
+\[B_k\left(x_k-x_{k-1}\right)=F(x_k)-F(x_{k-1})(S)\]
+Since there are infinitely many matrices that satisfy the previous equation, Broyden's idea was to select $B_k$ in a way that fulfills condition $(S)$ and minimizes the expression:
+\[\min{\left\lVert B_k-B_{k-1} \right\rVert_F^2}\]
+
+\subsection*{Algorithm}
+The algorithm takes as input the initial guess $x^{(0)} \in \mathbb{R}^n$ and a given $B_0 \in \mathbb{R}^{n \times n}$ (commonly set to $I$). 
+\begin{algorithm}[H]
+    \caption{Algorithm for the Broyden method for systems}
+        \begin{algorithmic}[1]
+            \For {$k=0,1,\dots,n$}
+                \State $\textnormal{solve  } B_k\delta x^{(k)}=-F(x^{(k)})$
+                \State $x^{(k+1)} \leftarrow x^{(k)}+\delta x^{(k)}$
+                \State $\delta F^{(k)} \leftarrow F(x^{(k+1)})+F(x^{(k)})$
+                \State $B_{k+1}=B_k+\dfrac{\left(\delta F^{(k)}-B_k\delta x^{(k)}\right)}{{\left\lVert \delta x^{(k)} \right\rVert}^{2}}\delta x^{(k)^T}$
+                \If {$\left\lVert \delta x^{(k+1)} \leq \epsilon \right\rVert \lor \left\lVert F(x^{(k+1)}) \leq \epsilon_r \right\rVert$}
+                    \State \Return $B_{k+1}$
+                \EndIf
+            \EndFor
+        \end{algorithmic}
+\end{algorithm}
+
+We do not need the sequence  $\{B_k\}$ to converge to the Jacobian matrix $J_f(\alpha)$. 
+Instead, it can be proven that:
+\[\lim_{k\rightarrow\infty}\dfrac{\Vert\left(B_k-J_f(\alpha)\right)\left(x^{(k)}-\alpha\right)\Vert}{\Vert x^{(k)}-\alpha\Vert}=0\]
+This property ensures that $B_k$ serves as a useful approximation of $J_f(\alpha)$ along the error direction $x_{(k)}-\alpha$. 
+The Broyden method exhibits a convergence rate of approximately $q \simeq 1.6$, making it super-linear.
+
+As the Newton method for systems of nonlinear equations requires the inverse of the Jacobian for computation, it's more efficient to directly compute the inverse rather than the normal matrix. 
+The matrix obtained with the Broyden formula always has a rank of one, allowing us to find the inverse using the Sherman-Morrison formula:
+\[\left(A+uw^{T}\right)=A^{-1}-\dfrac{Auw^TA^{-1}}{1+w^TAu}\]
+Here, $A \in \mathbb{R}^{n \times n}$ represents an invertible square matrix, and $u,v \in \mathbb{R}^{n}$ are column vectors. 
+With this approach, we can compute the approximation of the Jacobian using the Broyden method:
+\[B_{k+1}^{-1}=B_{k}^{-1}+\dfrac{\delta x^{(k)}-B_k^{-1}\delta f_k}{\delta x^{(k)}B_k^{-1}\delta f_k}\left(\delta x^{(k)}\right)B_k^{-1}\]
+
+\subsection*{Bad Broyden method}
+The flawed version of the Broyden method computes the difference between two steps using the secant condition: $x_k-x_{k+1}=B_k^{-1}\left[ F(x_k)-F(x_{k-1}) \right]$. 
+It then constructs the approximation of the Jacobian directly by imposing the secant condition and minimizing:
+\[\min{\left\lVert B_k^{-1}-B_{k-1}^{-1} \right\rVert_{F}^{2}}\]
+With these formulas, the Broyden method becomes:
+\[B_{k+1}^{-1}=B_{k}^{-1}+\dfrac{\delta x^{(k)}-B_k^{-1}\delta f^{(k)}}{{\left\lVert\delta f^{(k)} \right\rVert}^2}\left[ \delta f^{(k)} \right]^T\]

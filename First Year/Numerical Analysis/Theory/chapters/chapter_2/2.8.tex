@@ -1,0 +1,30 @@
+\section{Aitken method}
+
+We have the following relation:
+\[x^{(k+1)}-\alpha=\phi(x^{(k+1)})-\phi(\alpha)=\lambda_k\left( x^{(k+1)}-\alpha \right)\]
+We know that $\lambda_k$ is the first derivative of $\phi$ at a certain point $\xi$. 
+If we know $\lambda_k$, we can express $\alpha$ as: 
+\[\alpha=\dfrac{\phi(x^{(k)})-\lambda_k x^{k}}{1-\lambda_k}\]
+Additionally, the quantity:
+\[A_k=\dfrac{\phi(\phi(x^{(k)}))-\phi(x^{(k)})}{\phi(x^{(k)})-x^{(k)}}\]
+provides a good approximation of $\lambda_k$, so we can replace $\lambda_k$ with $A_k$. 
+By substituting, we obtain the formula used in the Aitken method.
+\begin{theorem}
+    Let $\phi(x)=x-f(x)$ and $f(\alpha)$ be a simple zero. 
+    Let $\phi^{(k)}$ converge to the first order to $\alpha$, then $\phi_A$ converge to the second order. 
+    If $\phi(x)$ converges with order $p$ and $f(x)$ is still a simple zero, then $\phi_A$ converges with order $2p-1$. 
+\end{theorem}
+Occasionally, $\phi_A$ converges even when $\phi$ does not.
+
+\subsection*{Algorithm}
+\begin{algorithm}[H]
+    \caption{Algorithm for the Aitken method}
+        \begin{algorithmic}[1]
+            \For {$k=0,1,\dots,n$}
+                \State $x^{(k+1)}=x^{(k)}-\dfrac{\left[ \phi(x^{(k)})-x^{(k)} \right]^2}{\phi(\phi(x^{(k)}))-2\phi(x^{(k)})+x^{(k)}}$
+                \If {stopping criterion is satisfied}
+                    \State \Return $x^{(k+1)}$
+                \EndIf
+            \EndFor
+        \end{algorithmic}
+\end{algorithm}
