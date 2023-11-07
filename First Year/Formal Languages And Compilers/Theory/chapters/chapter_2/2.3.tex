@@ -1,34 +1,68 @@
-\section{Erroneous grammars and useless rules}
+\section{Erroneous grammars}
 
-When writing a grammar attention should be paid that all non-terminals are defined and that each one effectively contributes to the production of some sentence. 
-In fact, some rules may turn out to be unproductive. 
 \begin{definition}
-    A grammar $G$ is called \emph{clean} (or reduced) under the following conditions:
-    \begin{enumerate}
-        \item Every non-terminal $A$ is reachable from the axiom.
-        \item Every non-terminal $A$ is well-defined.
-    \end{enumerate}
+    A grammar $G$ is called \emph{clean} (or reduced) if and only if for every nonterminal $A$: 
+    \begin{itemize}
+        \item $A$ is reachable from the axiom $S$, and hence contribute to the generation of the language.
+            That is, there exists a derivation: 
+            \[S \overset{*}{\implies} \alpha A \beta\]
+        \item $A$ is defined, that is, it generates a non-empty language: 
+            \[L_A(G) \neq \varnothing\]
+    \end{itemize}
 \end{definition}
-It is often straightforward to check by inspection whether a grammar is clean. The following algorithm formalizes the checks. The algorithm operates in two phases, 
-first pinpointing the undefined non-terminals, then the unreachable ones. Lastly the rules containing non-terminals of either type can be canceled. The phases are: 
+Note that the rule $L_A(G) \neq \varnothing$ includes also the case when no derivation from $A$ terminates with a terminal string $s$.
+
+The process of grammar cleaning involves a two-step algorithm:
 \begin{enumerate}
-    \item Compute the set $DEF\subseteq V$ of well-defined non-terminals. The set $DEF$ is initialized with the non-terminals of terminal rules, those having a 
-        terminal string as right part:
-        \[DEF:=\{A|( A \rightarrow u ) \in P,with u \in \Sigma^{*}\}\]
-        Then the next transformation is applied until convergence is reached:
-        \[DEF:=DEF \cup B|( B \rightarrow D_1D_2\dots D_n)\in P\]
-        where every $D_i$ is a terminal or a non-terminal symbol present in $DEF$. At each iteration two outcomes are possible:
-        \begin{itemize}
-            \item A new non non-terminal is found having as right part a string of symbols that are well-defined non-terminals or terminals. 
-            \item The termination condition is reached
-        \end{itemize}
-        The non-terminals belonging to the complement set $V-DEF$ are undefined and should be eliminated.
-    \item A non-terminal is reachable from the axiom, if, and only if, there exists a path in the following graph, which represents a relation between non-terminals,
-        called product:
-        \[A \rightarrow^{produce} B\]
-        saying that $A$ produces $B$ if, and only if, there exists a rule $A \rightarrow \alpha B \beta$, where $A,B$ are non-terminals and $\alpha,\beta$ are any strings.
-        Clearly $C$ is reachable from $S$ if, and only if, in this graph there exists an oriented path from $S$ to $C$. The unreachable non-terminals are the complement
-        with respect to $V$. They should be eliminated because they do not contribute to the generation of any sentence.
+    \item Establish the set UNDEF, which comprises undefined nonterminals.
+    \item Identify the set of unreachable nonterminals.
 \end{enumerate}
-Quite often the following requirement is added to the above clearness conditions: $G$ should not permit circular deviations $A \implies^{+} A$. This is done to avoid 
-ambiguity. We observe that a grammar, although clean, may still contain redundant rules. 
+
+\subsection*{Phase one}
+We define the set DEF as follows:
+\[\textnormal{DEF}:=\{A|( A \rightarrow u ) \in P,\textnormal{with } u \in \Sigma^{*}\}\]
+We initiate the process by examining the terminal rules. 
+Then, we apply the following update iteratively until a fixed point is reached:
+\[\textnormal{DEF}:=\textnormal{DEF} \cup \{B|( B \rightarrow D_1D_2\dots D_n)\in P \land \forall i(D_i \in\textnormal{DEF} \cup \Sigma)\}\]
+During each iteration, two cases may occur:
+\begin{enumerate}
+    \item New nonterminals are discovered, and they have all their right-hand side symbols defined as nonterminals or terminals.
+    \item No new nonterminals are found, and the algorithm terminates.
+\end{enumerate}
+At this stage, the nonterminals in UNDEF are removed.
+
+\subsection*{Phase two}
+The produce relation, denoted as $A$ produce $B$, holds if and only if there exists a production rule $(A \rightarrow \alpha B \beta) \in P$, where $A \neq B$ and $\alpha,\beta$ can be any strings.
+
+We can now state that a nonterminal $C$ is reachable from the start symbol $S$ if and only if there exists a path in the graph of the produce relation from $S$ to $C$. 
+Nonterminals that are not reachable from the start symbol can be eliminated.
+
+\subsection*{Additional requirement}
+In addition to the above cleanliness conditions, a third requirement is often added:
+\begin{enumerate}
+    \item [3.] $G$ must not allow for circular deviations because they are non-essential and may introduce ambiguity.
+\end{enumerate} 
+A circular derivation occurs when given $A \overset{+}{\implies} A$, the derivation $A \overset{+}{\implies} x$ is possible, and also $A \overset{+}{\implies} A \overset{+}{\implies} x$ (and many others) are possible.
+
+It's important to note that even if a grammar is clean, it can have redundant rules that lead to ambiguity.
+\begin{example}
+    Examples of unclean grammars are as follows:
+    \[
+    \begin{cases}
+        S \rightarrow aASb \\
+        A \rightarrow b
+    \end{cases} 
+    \begin{cases}
+        S \rightarrow a \\
+        A \rightarrow b
+    \end{cases} 
+    \begin{cases}
+        S \rightarrow aASb \\
+        A \rightarrow S|b
+    \end{cases} 
+    \]
+    In the first case, the axiomatic rule does not produce any phrase. 
+    In the second case, $A$ is not reachable. 
+    In the third case, the grammar is circular on $S$ and $A$.
+\end{example}
+\newpage

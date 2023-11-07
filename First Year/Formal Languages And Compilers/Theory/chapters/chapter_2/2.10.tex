@@ -1,6 +1,57 @@
-\section{Grammar transformations and normal forms}
+\section{Grammar normal forms and transformations}
 
-The grammars can be transformed in the following ways: 
-\begin{itemize}
-    \item 
-\end{itemize}
+Grammars normal forms constrain the rules without reducing the family of generated languages. 
+They are useful for both proving properties and for language design. 
+
+Let us see some transformations useful both to obtain an equivalent normal form and design the syntax analyzers.
+
+\subsection*{Nonterminal expansion}
+The expansion of a nonterminal is used to eliminate it from the rules where it appears. 
+\begin{example}
+    Consider the grammar: 
+    \[
+    \begin{cases}
+        A \rightarrow \alpha B \gamma \\
+        B \rightarrow \beta_1|\beta_2|\dots|\beta_n
+    \end{cases}    
+    \]
+    With the expansion of the nonterminal $B$ we obtain: 
+    \[A \rightarrow \alpha\beta_1\gamma|\alpha\beta_2\gamma|\dots|\alpha\beta_n\gamma\]
+\end{example}
+
+\subsection*{Elimination of the axiom from right parts}
+It is always possible to obtain right part of rules as strings by simply introducing a new axiom $S_0$ and the rule $S_0 \rightarrow S$.
+
+\subsection*{Normal form without nullable nonterminals}
+A non-terminal A is nullable if it can derive the empty string. 
+
+Consider the set Null $\subseteq V$ of nullable non-terminals. 
+It is composed of the following logical clauses, to be applied until a fixed point is reached:
+\[A \in \textnormal{Null} \implies
+\begin{cases}
+    (A \rightarrow \varepsilon) \in P\\
+    (A \rightarrow A_1A_2\dots A_n) \in P \:\:\:\:\:\: \textnormal{with } A_i \in V \backslash \{A\} \\
+    \forall 1 \leq i \leq n \:\:\:\:\:\: \textnormal{with } A_i \in \textnormal{Null}
+\end{cases}    
+\]
+The construction of the non-nullable form consist in:
+\begin{enumerate}
+    \item Compute the Null set. 
+    \item For each rule within $P$ add as alternatives those obtained by deleting, in the right part, the nullable non-terminals. 
+    \item Remove all empty rules, except for $A=S$. 
+    \item Clean the grammar and remove any circularity. 
+\end{enumerate}
+The normal form without nullable nonterminals needs that no nonterminal other than the axiom is nullable. 
+In that case the axiom is nullable only if the empty string $\varepsilon$ is in the language. 
+
+
+
+
+
+
+
+
+
+
+
+

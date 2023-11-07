@@ -1,8 +1,49 @@
 \section{Recursion and language infinity}
 
-An essential property of most technical languages is to be infinite. We study how this property follows from the form of grammar rules. In order to generate an 
-unbound number of strings, the grammar must be able to derive strings of unbound length. To this end, recursive rules are necessary, as next argued. An $n \geq 1$ 
-steps derivation $A \implies^{n}xAy$ is called recursive (immediately recursive if $n=1$); similarly non-terminal $A$ is called recursive. If $x$ is empty, the recursion 
-is termed left.
+Recursive grammars are essential for generating infinite languages.
+\begin{definition}
+    A derivation $A\overset{n}{\implies}xAy$ is \emph{recursive} if $n \geq 1$. 
 
-Let $G$ be a grammar clean and avoid of circular deviations. The language $L ( G )$ is infinite if, and only if, $G$ has a recursive derivation.
+    If $n=1$ the derivation $A\overset{n}{\implies}xAy$ is called \emph{immediately recursive}. 
+
+    The symbol $A$ in the derivation $A\overset{n}{\implies}xAy$ is called \emph{recursive nonterminal}. 
+
+    If $x=\varepsilon$, the derivation $A\overset{n}{\implies}xAy$ is called \emph{left recursive}.
+
+    If $y=\varepsilon$, the derivation $A\overset{n}{\implies}xAy$ is called \emph{right recursive}.
+\end{definition}
+It's important to note that a grammar can be recursive without being circular.
+
+The necessary and sufficient condition for language $L(G)$ to be infinite is that, assuming $G$ is clean and devoid of circular derivations, $G$ allows for recursive derivations.
+\begin{proof}[necessary condition]
+    If no recursive derivation was possible, then every derivation would have a limited length, hence $L(G)$ would be finite. 
+\end{proof}
+\begin{proof}[sufficient condition]
+    The derivation $A\overset{n}{\implies}xAy$ implies the derivation $A\overset{+}{\implies}x^mAy^m$ for any $m \geq 1$ with $x,y \in \Sigma^{*}$ not both empty. 
+    Furthermore, $G$ clean implies: 
+    \begin{itemize}
+        \item $S\overset{*}{\implies}uAv$, which means $A$ is reachable from $S$. 
+        \item $A\overset{+}{\implies}w$, which means derivation from $A$ terminates successfully. 
+    \end{itemize}
+    Therefore, there exist nonterminals that generate an infinite language.
+\end{proof}
+\begin{property}
+    A grammar lacks recursive derivations if and only if the graph of the produce relation is acyclic.
+\end{property}
+\begin{example}
+    Consider the following grammar:
+    \[
+    \begin{cases}
+        S \rightarrow aBc \\
+        B \rightarrow ab | Ca \\
+        C \rightarrow c
+    \end{cases}
+    \]
+    The corresponding graph of the produce relation is shown below:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/produce.png}
+    \end{figure}
+    This graph is acyclic, which indicates that the grammar is not recursive.
+\end{example}
+\newpage

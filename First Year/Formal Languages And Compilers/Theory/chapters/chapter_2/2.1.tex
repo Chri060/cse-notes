@@ -1,33 +1,56 @@
 \section{Context-free generative grammars}
 
-Regular expressions are very practical for describing lists but fall short of the capacity needed to define other frequently occurring constructs. 
-For defining other useful languages, regular or not, we move to the formal model of generative grammars.  A generative grammar or syntax is a set of multiple 
-rules that can be repeatedly applied in order to generate all and only the valid strings. 
+Regular expressions are highly effective in describing lists, but they have limitations when it comes to defining other commonly encountered constructs. 
+To define more useful languages, whether regular or not, we transition to the formal framework of generative grammars. 
+Grammars provide a more robust method for defining languages using rewriting rules.
 \begin{definition}
     A \emph{context-free grammar} $G$ is defined by four entities: 
     \begin{enumerate}
-        \item $V$ non-terminal alphabet, is the set of non-terminal symbols.
+        \item $V$ nonterminal alphabet, is the set of nonterminal symbols.
         \item $\Sigma$ terminal alphabet, is the set of the symbols of which phrases or sentences are made.
         \item $P$ is the set of rules or productions.
-        \item $S \in V$ is the specific non-terminal, called the axiom ($S$), from which derivations start. 
+        \item $S \in V$ is the specific nonterminal, called the axiom ($S$), from which derivations start. 
     \end{enumerate}
 \end{definition}
-A rule of set $P$ is an order pair $X \rightarrow \alpha$, with $X \in V$ and $\alpha \in (V \cup \Sigma)^{*}$. Two or more rules: 
-\[X \rightarrow \alpha_1 \:\:\:\: X \rightarrow \alpha_2 \:\:\:\: \dots \:\:\:\: X \rightarrow \alpha_n\]
-with the same left part $X$ can be concisely groped in:
-\[X \rightarrow \alpha_1 | \alpha_2 | \dots | \alpha_n\]
-We say that the strings $\alpha_1,\alpha_2,\dots,\alpha_n$ are the alternative of $X$. 
 
-In professional practice, different styles are used to represent terminals and non-terminals. We usually adopt these conventions: 
+A grammar rule is expressed as:
+\[X \rightarrow \alpha\]
+Here, $X \in V$ and $\alpha \in (V \cup \Sigma)^{*}$
+If multiple rules share the same nonterminal $X$, we can succinctly represent the rule as:
+\[X \rightarrow \alpha_1 | \alpha_2 | \dots | \alpha_n\]
+In this case, we say that the strings $\alpha_1,\alpha_2,\dots,\alpha_n$  are the alternatives for the nonterminal $X$. 
+
+In practice, various conventions are employed to distinguish between terminals and nonterminals. 
+The following conventions are commonly adopted:
 \begin{itemize}
     \item Lowercase Latin letters $\{a,b,\dots\}$ for terminal characters. 
-    \item Uppercase Latin letters $\{A,B,\dots\}$ for non-terminal symbols. 
+    \item Uppercase Latin letters $\{A,B,\dots\}$ for nonterminal symbols. 
     \item Lowercase Latin letters $\{r,s,\dots,z\}$ for strings over the alphabet $\Sigma$. 
     \item Lowercase Greek letters $\{r,s,\dots,z\}$ for both terminals and non. 
-    \item $\sigma$ only for non-terminals. 
+    \item $\sigma$ only for nonterminals. 
 \end{itemize}
-The classification of grammar rule forms is the following. 
-\begin{figure}[H]
+The rules are categorized into the following types:
+\begin{table}[H]
     \centering
-    \includegraphics[width=1\linewidth]{images/grammars.png}
-\end{figure}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lll}
+    \hline
+    \multicolumn{1}{c}{\textbf{Type}} & \multicolumn{1}{c}{\textbf{Description}}                    & \multicolumn{1}{c}{\textbf{Structure}} \\ \hline
+    Terminal                          & The right part contains only terminals, or the empty string & $\rightarrow u|\varepsilon$            \\
+    Empty                             & The right part is empty                                     & $\rightarrow \varepsilon$              \\
+    Axiomatic                         & The left part is the axiom                                  & $S \rightarrow$                        \\
+    Recursive                         & The left part occurs in the right part                      & $A \rightarrow \alpha A \beta$         \\
+    Left-recursive                    & The left part is prefix of the right part                   & $A \rightarrow A \beta$                \\
+    Right-recursive                   & The left part is suffix of the right part                   & $A \rightarrow \alpha A$               \\
+    Left-right-recursive              & The conjunction of the two previous cases                   & $A \rightarrow A \beta A$              \\
+    Copy                              & The right part is a single nonterminal                      & $A \rightarrow B$                      \\
+    Linear                            & At most one nonterminal in the right part                   & $\rightarrow uBv|w$                    \\
+    Right-linear                      & Linear and the nonterminal is a suffix                      & $\rightarrow uB|w$                     \\
+    Left-linear                       & Linear and the nonterminal is a prefix                      & $\rightarrow Bv|w$                     \\
+    Homogeneous normal                & It has $n$ nonterminals or just one terminal                & $\rightarrow A_1 \dots A_n | a$        \\
+    Chomsky normal                    & It has two nonterminals or just one terminal                & $\rightarrow BC|a$                     \\
+    Greibach normal                   & It has one terminal possibly followed by nonterminals       & $\rightarrow a \sigma|b$               \\
+    Operator normal                   & The strings does not have adjacent nonterminals             & $\rightarrow AaB$                      \\ \hline
+    \end{tabular}%
+    }
+\end{table}
