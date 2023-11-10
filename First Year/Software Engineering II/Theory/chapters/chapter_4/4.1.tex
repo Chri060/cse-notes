@@ -1,59 +1,89 @@
-\section{Structure of a RASD document}
+\section{Software architecture}
 
-The Requirements and Specifications Document (RASD) serves several purposes:
+\begin{definition}
+    The \emph{architecture} of a software system defines the system in terms of computational components and the interactions among these components.
+
+    In the context of a software system, the \emph{software architecture} represents the set of structures necessary to reason about the system. 
+    These structures include software elements, their relationships, and properties associated with both.
+\end{definition}
+There are three fundamental structures relevant to software architecture:
 \begin{itemize}
-    \item Communication: it conveys an understanding of the requirements, encompassing the application domain and the system under development.
-    \item Contractual: it can be legally binding, serving as a formal agreement between stakeholders.
-    \item Baseline for project planning and estimation: it provides a foundation for project planning and estimation, covering aspects like size, cost, and schedule.
-    \item Baseline for software evaluation: it supports system testing, verification, and validation activities. 
-        It contains the information necessary to verify if the delivered system aligns with the requirements.
-    \item Baseline for change control: it establishes a foundation for managing changes in requirements as the software evolves.
+    \item Component-and-connector structures: these structures describe how the system is organized as a set of elements with runtime behavior (components) and their interactions (connectors). 
+        They allow us to study runtime properties, such as availability and performance, as well as how these structures collaborate.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/component1.png}
+            \caption{UML component diagrams for component and connector structure}
+        \end{figure}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/component2.png}
+            \caption{UML sequence diagrams for component and connector structure}
+        \end{figure}
+    \item Module structures: illustrate how a system is structured as a set of code or data units that need to be procured or constructed, along with their relationships. 
+        Modules serve as implementation units and form the basis for work division.
+        Typical relationships among these modules include "uses," "is-a" (generalization), and "is-part-of."
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/modular1.png}
+            \caption{UML composite structure diagram for module structure}
+        \end{figure}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/modular2.png}
+            \caption{UML class diagram for module structure}
+        \end{figure}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/modular3.png}
+            \caption{UML package diagram for module structure}
+        \end{figure}
+    \item Allocation structures: these structures define how the elements from component and connector or module structures map to entities that are not software. 
+        Common allocation structures include deployment structure, implementation structure, and work assignment structure. 
+        The deployment structure captures the system's hardware topology, specifying the distribution of components and identifying performance bottlenecks.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/allocation1.png}
+            \caption{UML deployment diagrams and deployment structure}
+        \end{figure}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/allocation2.png}
+            \caption{UML deployment diagrams and deployment structure}
+        \end{figure}
 \end{itemize}
-The RASD document is utilized by various stakeholders, including:
-\begin{itemize}
-    \item Customers and Users: they are interested in a high-level description of system functionalities and requirements.
-    \item System analyst and requirement analysts: these individuals use the RASD to specify how the system interacts with other systems.
-    \item Developers and programmers: they refer to the RASD for implementation details.
-    \item Testers: they use the RASD to check if the system meets its requirements.
-    \item Project managers: they rely on the RASD to control the development process.
-\end{itemize}
-\begin{figure}[H]
+
+\subsection*{Summary}
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{images/RASD.png}
-    \caption{IEEE standard for RASD}
-\end{figure}
-    
-A well-crafted RASD should possess the following qualities:
-\begin{itemize}
-    \item Completeness:
-        \begin{itemize}
-            \item Regarding goals: all requirements must satisfy the goals within specified domain assumptions.
-            \item Regarding inputs: software behavior should be specified for all possible inputs.
-            \item Structural completeness. 
-        \end{itemize}
-    \item Pertinence: 
-        \begin{itemize}
-            \item Each requirement or domain assumption should be necessary for achieving a goal.
-            \item Each goal should be genuinely needed by the stakeholders.
-            \item The RASD should not contain items unrelated to requirement definitions.
-        \end{itemize}
-    \item Consistency: there should be no contradictions in the formulation of goals, requirements, and assumptions.
-    \item Unambiguity: 
-        \begin{itemize}
-            \item Clear and well-defined vocabulary.
-            \item Unambiguous assertions. 
-            \item Verifiability of requirements.
-            \item Clear delineation of responsibilities between the software and its environment.
-        \end{itemize}
-    \item Feasibility: the goals and requirements must be achievable within the allocated budget and schedules.
-    \item Comprehensibility: the RASD should be easily understandable by the target audience.
-    \item Good structuring: every item must be defined before it is used.
-    \item Modifiability: the document should be adaptable, and the impact of modifications should be assessable.
-    \item Traceability: 
-        \begin{itemize}
-            \item Indication of the sources of goals, requirements, and assumptions.
-            \item Linking requirements and assumptions to underlying goals.
-            \item Facilitating referencing of requirements in future documentation.
-        \end{itemize}
-\end{itemize}   
-This structured RASD document ensures effective communication and clarity while serving as a contractual and foundational reference throughout the software development process.
+    \begin{tabular}{|c|ccc|}
+    \hline
+    \textbf{Structures}    & \textbf{Elements}                              & \textbf{Relations}                                                    & \textbf{Useful for}                                                                           \\ \hline
+    Component diagrams     & \makecell{Components\\offering services}       & \makecell{Provided and\\required interfaces}                          & \makecell{Performance analysis\\Robustness analysis\\Resource allocation\\Project planning}   \\ \hline
+    Sequence diagrams      & \makecell{Processes\\Threads}                  & \makecell{Synchronous and\\asynchronous\\messages}                     & \makecell{Analysis of\\resource contention\\Parallelism opportunities}                         \\ \hline
+    \end{tabular}
+    \caption{Component and connectors diagrams and usage}
+\end{table}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|ccc|}
+    \hline
+    \textbf{Structures}                                     & \textbf{Elements}                 & \textbf{Relations}                                                    & \textbf{Useful for}                                                               \\ \hline
+    \makecell{Composite structures \\ Package diagrams}     & \makecell{Modules\\Packages}      & \makecell{Is a submodule of\\Uses}                                    & \makecell{Resource allocation\\Project planning\\Encapsulation}                   \\ \hline
+    Class diagrams                                          & Classes                           & \makecell{Is-a\\Is part of}                                           & \makecell{Object-oriented development\\Planning for extensions}                   \\ \hline
+    Layered structures                                      & -                                 & \makecell{Can use\\Provides abstraction}                              & Incremental development                                                           \\ \hline
+    Data model                                              & Data entities                     & \makecell{One-to-one\\One-to-many\\Many-to-one\\Many-to-many\\Is-a}   & \makecell{Engineering global data\\structures for\\consistency and\\performance}  \\ \hline
+    \end{tabular}
+    \caption{Modular structures diagrams and usage}
+\end{table}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|ccc|}
+    \hline
+    \textbf{Structures}         & \textbf{Elements}                                                         & \textbf{Relations}    & \textbf{Useful for}                                                   \\ \hline
+    Deployment diagrams         & \makecell{Components\\Hardware/software\\execution environment}       & Allocated to          & \makecell{Performance\\Security\\Robustness analysis}                 \\ \hline
+    Implementation structures   & \makecell{Modules\\File structures}                                       & Stored in             & \makecell{Configuration control\\Integration\\Test activities}        \\ \hline
+    Work assignment             & \makecell{Modules\\Organizational units}                                  & Assigned to           & \makecell{Project management\\Development efficiency}                 \\ \hline
+    \end{tabular}
+    \caption{Allocation structures diagrams and usage}
+\end{table}
