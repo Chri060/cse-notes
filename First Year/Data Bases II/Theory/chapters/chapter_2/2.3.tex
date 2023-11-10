@@ -3,19 +3,21 @@
 \begin{definition}
     A \emph{model} is an abstraction of a system, object or process, which purposely disregards details to simplify the investigation of relevant properties. 
 \end{definition}
-Concurrency theory builds upon a model of transaction and concurrency control principles that help understanding the real systems. Real systems exploit implementation level 
-mechanisms which help achieve some desirable properties postulated by the theory. 
+Concurrency theory is founded on a model of transaction and concurrency control principles that aids in comprehending real systems.
+Actual systems leverage implementation-level mechanisms to attain desirable properties postulated by the theory.
 \begin{definition}
     An \emph{operation} consist in a reading or in a writing of a specific datum by a specific transaction. 
 
     A \emph{schedule} is a sequence of operations performed by concurrent transactions that respects the order of operations of each transaction. 
 \end{definition}
-The transactions can be: serial, interleaved or nested. The number of serial schedules for $n$ transaction is equal to: 
+
+Transactions can be categorized as serial, interleaved, or nested. 
+The number of serial schedules for $n$ transactions is given by:
 \[N_S=n!\]
-While the total number of distinct schedules given the number of transaction $n$ is equal to: 
+Meanwhile, the total number of distinct schedules, given the number of transactions $n$, is expressed as:
 \[N_D=\dfrac{\left( \sum_{i=1}^nk_i \right)!}{\prod_{i=1}^n \left( k_i! \right)}\]
 \begin{example}
-    Given two transaction $T_1$ and $T_2$ we have six possible different schedules, where only two are serial:
+    For two transactions, $T_1$ and $T_2$, there are six possible schedules, with only two being serial:
     \begin{enumerate}
         \item $r_1(x) w_1(x) r_2(z) w2(z)$
         \item $r_2(z) w_2(z) r_1(x) w_1(x)$
@@ -24,16 +26,16 @@ While the total number of distinct schedules given the number of transaction $n$
         \item $r_1(x) r_2(z) w_2(z) w_1(x)$
         \item $r_2(z) r_1(x) w_1(x) w_2(z)$
     \end{enumerate}
-    The first two are serial, the third and the fourth are nested, and the last two interleaved.
+    The first two are serial, the third and fourth are nested, and the last two are interleaved.
 \end{example}
-The concurrency control has to reject all the schedules that causes anomalies. 
+Concurrency control must reject all schedules that lead to anomalies.
 \begin{definition}
     The \emph{scheduler} is a component that accepts or rejects operations requested by the transactions. 
 
     The \emph{serial schedule} is a schedule in which the actions of each transaction occur in a contiguous sequence.
 \end{definition}
-A serializable schedule leaves the database in the same state as some serial schedule of the same transactions, so it is correct. To introduce other classes we have to initially
-make two assumptions: 
+A serializable schedule leaves the database in the same state as some serial schedule of the same transactions, making it correct. 
+To introduce other classes, two initial assumptions are made:
 \begin{itemize}
     \item The transactions are observed a posteriori. 
     \item Commit-projection: consider only the committed transactions. 

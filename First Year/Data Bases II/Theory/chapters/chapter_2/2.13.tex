@@ -1,24 +1,25 @@
 \section{Multi-version timestamps}
 
-The idea of multi-version is that writes generate new versions, and that reads access the right version. Writes generate new copies, each one with a new WTM, so each object $x$ 
-always has $N \geq 1$ active versions. There is a unique global RTM($x$). Old versions are discarded when there are no transactions that need their values. 
-In theory, it is possible to use the following rule: 
+The concept of multi-versioning involves generating new versions with each write operation, and reads access the relevant version.
+Each write produces new copies, each with a new Write Timestamp (WTM($x$)), ensuring that each object $x$ always has $N \geq 1$ active versions.
+A unique global Read Timestamp (RTM($x$)) is maintained, and old versions are discarded when there are no transactions requiring their values.
+In theory, the following rules can be applied:
 \begin{itemize}
-    \item $r_{ts}(x)$ is always accepted. A copy $x_k$ is selected for reading such that:
+    \item $r_{ts}(x)$ is always accepted. A copy $x_k$ is selected for reading, where:
         \begin{itemize}
             \item If $ts \geq \textnormal{WTM}_N(x)$, then $k=N$.
-            \item Else take $k$ such that $\textnormal{WTM}_k(x) \leq ts < \textnormal{WTM}_{k+1}(x)$. 
+            \item Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq ts < \textnormal{WTM}_{k+1}(x)$. 
         \end{itemize}
     \item $w_{ts}(x)$: 
         \begin{itemize}
-            \item If $ts < \textnormal{RTM}(x)$ the request is rejected. 
-            \item Else a new version is created for timestamp $ts$ ($N$ is incremented). 
+            \item If $ts < \textnormal{RTM}(x)$, the request is rejected. 
+            \item  Otherwise, a new version is created for timestamp $ts$ (incrementing $N$).
         \end{itemize}
 \end{itemize}
 \begin{example}
-    Let us assume $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$ and the following schedule: 
+    Assuming  $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$, consider the schedule:
     \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x) r_{12}(x) w_{14}(x) w_{13}(x)\]
-    Using the multi-version we obtain: 
+    Using multi-versioning, the results are:
     \begin{table}[H]
         \centering
         \begin{tabular}{ccc}
@@ -36,23 +37,23 @@ In theory, it is possible to use the following rule:
     \end{table}
 \end{example}
 
-In practice, it is possible to use the following rule: 
+In practice, the rule set is modified slightly:
 \begin{itemize}
-    \item $r_{ts}(x)$ is always accepted. A copy $x_k$ is selected for reading such that:
+    \item $r_{ts}(x)$ is always accepted. A copy $x_k$ is selected for reading, where:
         \begin{itemize}
             \item If $ts \geq \textnormal{WTM}_N(x)$, then $k=N$. 
-            \item Else take $k$ such that $\textnormal{WTM}_k(x) \leq ts < \textnormal{WTM}_{k+1}(x)$. 
+            \item  Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq ts < \textnormal{WTM}_{k+1}(x)$. 
         \end{itemize}
     \item $w_{ts}(x)$:
         \begin{itemize}
-            \item If $ts < \textnormal{RTM}(x)$ or $ts < \textnormal{WTM}_N(x)$ the request is rejected. 
-            \item Else a new version is created for timestamp $ts$ ($N$ is incremented)
+            \item If $ts < \textnormal{RTM}(x)$ or $ts < \textnormal{WTM}_N(x)$, the request is rejected. 
+            \item  Otherwise, a new version is created for timestamp $ts$ (incrementing $N$).
         \end{itemize}
 \end{itemize}
 \begin{example}
-    Let us assume $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$ and the following schedule: 
+    Assuming $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$, consider the schedule:
     \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x) r_{12}(x) w_{14}(x) w_{13}(x)\]
-    Using the multi-version we obtain: 
+    Using multi-versioning, the results are:
     \begin{table}[H]
         \centering
         \begin{tabular}{ccc}
@@ -69,8 +70,10 @@ In practice, it is possible to use the following rule:
         \end{tabular}
     \end{table}
 \end{example}
+
 \subsection*{Isolation level introduced with TS-multi}
-The realization of TS-multi gives the opportunity to introduce into the DBMS another isolation level called snapshot isolation. In this level only WTM($x$) is used. The rule 
-used in this level states that every transaction reads the version consistent with its timestamp, and defers writes to the end. If the scheduler detects that the writes of a
-transaction conflict with writes of other concurrent transactions after the snapshot timestamp, it aborts. Snapshot isolation does not guarantee serializability: it is possible 
-to have a new anomaly called write skew (non-determinism). 
+The implementation of TS-multi opens the door to introducing another isolation level in the database management system (DBMS), known as snapshot isolation.
+In this level, only Write Timestamp (WTM($x$)) is utilized.
+The rule applied in snapshot isolation dictates that every transaction reads the version consistent with its timestamp and defers writes until the end. 
+If the scheduler detects conflicts between the writes of a transaction and the writes of other concurrent transactions after the snapshot timestamp, it aborts.
+It's essential to note that while snapshot isolation provides certain guarantees, it does not ensure serializability, and a new anomaly known as write skew (non-determinism) can occur.

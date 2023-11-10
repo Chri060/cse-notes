@@ -1,16 +1,17 @@
 \section{Locking}
 
-The method called locking is the most used in commercial systems. A transaction is well-formed with respect to locking if: 
+The prevalent method in commercial systems is the use of locking. 
+A transaction is considered well-formed concerning locking if:
 \begin{itemize}
-    \item Read operations are preceded by $r\_lock$ (shared) and followed by unlock. 
-    \item Write operations are preceded by $w\_lock$ (exclusive) and followed by unlock. 
+    \item Read operations are preceded by r\_lock (shared) and followed by unlock. 
+    \item Write operations are preceded by w\_lock (exclusive) and followed by unlock. 
 \end{itemize}
-In both cases unlocking can be delayed with respect to the end of the operations. So, every object can be: free, r-locked or w-locked. 
+In both cases, unlocking can be delayed with respect to the completion of the operations. 
+Consequently, every object can be in one of three states: free, r\_locked, or w\_locked.
 
-Transactions that first read and then write an object may acquire a $w\_lock$ already when reading or acquire a $r\_lock$ first and then upgrade it into a $w\_lock$ (escalation).
+Transactions that first read and then write an object may acquire a w\_lock already when reading or acquire a r\_lock first and then upgrade it into a w\_lock (escalation).
 
-The lock manager receives requests from the transactions and grants resources according to the conflict table: 
-
+The lock manager receives requests from transactions and allocates resources based on the conflict table:
 \begin{table}[H]
     \centering
     \begin{tabular}{cccc}
@@ -23,20 +24,20 @@ The lock manager receives requests from the transactions and grants resources ac
 \end{table}
 
 \begin{example}
-    Given a schedule with three transactions and the following operations: 
+    Consider a schedule with three transactions and the following operations:
     \[r_1(x)w_1(x)r_2(x)r_3(y)w_1(y)\]
-    We have the following locks: 
+    The resulting locks are as follows:
     \begin{itemize}
-        \item $r_1(x)$: $r_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $r-locked$ with $n_x=1$. 
-        \item $w_1(x)$: $w_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $w-locked$. 
-        \item $r_2(x)$: $r_1\_lock(x)$ request $\rightarrow$ No, because $x$ is $w-locked$ $\rightarrow$ $T_2$ waits. 
-        \item $r_3(y)$: $r_3\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $r-locked$ with $n_y=1$ and then $T_3$ unlocks $y$. 
-        \item $w_1(y)$: $w_1\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $w-locked$ and then $x$ and $y$ are freed. 
+        \item $r_1(x)$: $r_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $r\_locked$ with $n_x=1$. 
+        \item $w_1(x)$: $w_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $w\_locked$. 
+        \item $r_2(x)$: $r_1\_lock(x)$ request $\rightarrow$ No, because $x$ is $w\_locked$ $\rightarrow$ $T_2$ waits. 
+        \item $r_3(y)$: $r_3\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $r\_locked$ with $n_y=1$ and then $T_3$ unlocks $y$. 
+        \item $w_1(y)$: $w_1\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $w\_locked$ and then $x$ and $y$ are freed. 
     \end{itemize}
-    So, the schedule a posteriori will become: 
+    The resulting a posteriori schedule becomes:
     \[r_1(x)w_1(x)r_3(y)w_1(y)r_2(x)\]
-    and we have that the transaction two is delayed. 
+    Here, transaction two is delayed. 
 \end{example}
-The locking system is implemented via lock tables, which are hash tables indexing the lockable items via hashing and where each locked item has a linked list associated with it. 
-Every node in the linked list represents the transaction which requested for lock, the lock mode and the current status. Every new lock request for the data item is appended to 
-the list.
+The locking system is implemented via lock tables, which are hash tables indexing lockable items via hashing. 
+Each locked item has an associated linked list, with each node representing the transaction that requested the lock, the lock mode, and the current status. 
+Each new lock request for the data item is appended to the list.
