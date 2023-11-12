@@ -1,13 +1,36 @@
-\section{Top-down and bottom-up constructions}
+\section{Introduction}
 
-Consider a grammar $G$. If a source string is in the language $L(G)$, a syntax analyzer or parser scans the string and computes a derivation or syntax tree; 
-otherwise it stops and prints the configuration where the error was detected (diagnosis); afterwards it may resume parsing and skip the substrings contaminated 
-by the error (error recovering), in order to offer as much diagnostic help as possible with a single scan of the source string. If the source string is ambiguous, 
-the result of the analysis is a set of trees, also called tree forest. 
+To systematically construct a bottom-up syntax analyzer we have: 
+\begin{enumerate}
+    \item Construction of the pilot graph: the pilot drives the PDA. In each macro-state the pilot incorporates all the information about any possible phrase form that
+        reaches the $m$-state (with lookahead). 
+    \item The $m$ states are used to build a few analysis threads in the stack, which correspond to possible derivations: computations of the machine network, or paths 
+        with $\varepsilon$-arcs at each machine change, labeled with the scanned string. 
+    \item Verification of determinism conditions on the pilot graph: shift-reduce conflicts, reduce-reduce conflicts, and convergence conflicts. 
+    \item If the determinism test is passed, the PDA can analyze the string deterministically.
+    \item The PDA uses the information stored in the pilot graph and in the slack. 
+\end{enumerate}
+\begin{definition}
+    The \emph{set of initials} is the set of chars found starting from state $q_A$ of machine $M_A$ of the net $M$.
+    
+    An \emph{item} is: 
+    \[\left\langle q_B,a\right\rangle \textnormal{ in } Q \times (\Sigma \cup \{\dashv\})\]
 
-We know the same syntax tree corresponds to many derivations. Depending on the derivation being leftmost or rightmost and on the order it is constructed, we obtain 
-two important parser classes: 
+    The function \emph{closure} computes a kind of closure of a set $C$ of items with look-ahead. 
+
+    The \emph{shift operation} is defined as: 
+    \[
+    \begin{cases}
+        \theta(\left\langle p_A,\rho\right\rangle,X)=\left\langle q_A,\rho\right\rangle \textnormal{ if the arc } p_a \rightarrow^X q_a \textnormal{ exists} \\
+        \textnormal{the empty set otherwise}
+    \end{cases}    
+    \]
+\end{definition}
+
+The pilot is a DFA, named $\mathcal{P}$, defined by the following entities:
 \begin{itemize}
-    \item Top-down analysis: constructs the leftmost derivation by starting from the axiom.
-    \item Bottom-up analysis constructs the rightmost derivation but in the reversed order.
+    \item The set $R$ of $m$-states. 
+    \item The pilot alphabet is the union $\Sigma\cup V$ of the terminal and non-terminal alphabets, to be also named the grammar symbols.
+    \item The initial $m$-state, $I_0$, is the set $I_0=closure(\left\langle 0_S,\dashv \right\rangle )$. 
+    \item The $m$-state set $R={I_0,I_1,\dots}$ and the state-transition function $\theta:R \times (\Sigma \cup V) \rightarrow R$ are computed starting from $I_0$. 
 \end{itemize}
