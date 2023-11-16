@@ -1,0 +1,158 @@
+\section{Query optimization}
+
+The database management system's architecture includes a crucial component known as the optimizer. 
+This optimizer plays a key role in processing SQL queries: it takes a query, conducts lexical, syntactic, and semantic analyses, and then generates an internal program using data access methods.
+ince there can be multiple ways to execute the same query, the optimizer is responsible for selecting the most efficient approach.
+The optimization process involves several steps:
+\begin{enumerate}
+    \item Lexical, syntactic and semantic analysis of the query.
+    \item Translation into an internal representation(similar to algebraic expressions). 
+    \item Algebraic optimization.
+    \item Cost-based optimization.
+    \item Code generation.
+\end{enumerate}
+
+\subsection{Relation profiles}
+Every commercial DBMS possesses quantitative information about the relations in the database, known as relation profiles. 
+These profiles include:
+\begin{itemize}
+    \item The cardinality (number of tuples) card$(T)$ of each table $T$.
+    \item The dimension in bytes size$(T)$ of each tuple in table $T$.
+    \item The dimension in bytes size$(A_j, T)$ of each attribute $A_j$ in table $T$.
+    \item The number of distinct values val$(A_j, T)$ of each attribute $A_j$ in table $T$.
+    \item The minimum and maximum values min$(A_j, T)$ and max$(A_j, T)$ of each attribute $A_j$ in table $T$.
+\end{itemize}
+Relation profiles are derived from the data stored in tables and are periodically updated using system primitives. 
+Cost-based optimization relies on the approximate values obtained from these relation profiles.
+The selectivity of a predicate, representing the probability that any row satisfies a given predicate, is a crucial metric.
+If val$(A) = N$ and the values are uniformly distributed, the selectivity of the predicate $A = v$ is $\frac{1}{N}$.
+If no data on distribution is available, then the distribution is always assumed uniform.
+
+\subsection{Internal representation of queries}
+The optimizer creates a representation for a query that accounts for the physical structure used to implement tables and any present indexes. 
+This internal representation utilizes a tree structure, where leaves correspond to physical data structures and intermediate nodes represent data access operations. 
+Operations on intermediate nodes include sequential scans, orderings, indexed accesses, and joins.
+
+\paragraph*{Scan operation}
+A scan operation sequentially accesses all tuples of a table, performing algebraic or extra algebraic operations such as projection, selection, ordering, insertions, deletions, and modifications.
+
+\paragraph*{Indexed access operation}
+As already seen, indexes are structures of the database that allow to access the tuples of a table in a more efficient way than a sequential scan. 
+The DBMS chooses the corresponding index when a query involves a single supported predicate. 
+For queries with conjunctions or disjunctions of predicates, the DBMS optimizes the use of indexes.
+
+\paragraph*{Join operation}
+The \texttt{JOIN} operation is acknowledged as the most resource-intensive task for a DBMS due to the potential for a substantial increase in the number of tuples in the result. 
+To address this challenge, the optimizer employs one of three techniques:
+\begin{enumerate}
+\item Nested-loop, based on scanning: 
+    \begin{itemize}
+        \item A scan is executed on a table (referred to as the external table), and for each tuple, a scan is performed on the other table (referred to as the internal table).
+        \item The matching process is efficient when there is an index on the join attribute of the internal table.
+    \end{itemize}
+\item Merge-Scan, based on ordering:
+    \begin{itemize}
+        \item This technique necessitates that both tables are sorted based on the join attribute.
+        \item Two synchronized scans traverse the tuples of each table in parallel, and the matching is carried out.
+    \end{itemize}
+\item Hash-join, based on hashing
+    \begin{itemize}
+        \item This technique requires that both tables are hashed using the join attribute.
+        \item The tuples of the internal table are hashed and stored in a hash table, while the tuples of the external table are scanned, and the matching is performed.
+    \end{itemize}
+\end{enumerate}
+
+\paragraph*{Equality}
+The expense associated with an equality lookup is contingent upon the type of structure that represents the table:
+\begin{itemize}
+    \item Sequential structures with no index:
+        \begin{itemize}
+            \item Equality lookups are not supported, resulting in a cost equivalent to a full scan.
+            \item Sequentially ordered structures might incur a reduced cost.
+        \end{itemize}
+    \item Hash or Tree structures:
+        \begin{itemize}
+            \item Equality lookups are supported if $A$ is the search key attribute of the structure.
+            \item The cost depends on the storage type (primary or secondary) and the search key type (unique or not).
+        \end{itemize}
+\end{itemize}
+
+\paragraph*{Range}
+The cost associated with a range lookup is contingent upon the type of structure representing the table:
+\begin{itemize}
+    \item Sequential structures (primary):
+        \begin{itemize}
+            \item Range lookups are not supported, resulting in a cost equivalent to a full scan.
+            \item Sequentially ordered structures may incur a reduced cost.
+        \end{itemize}
+    \item Hash structures(primary and secondary):
+        \begin{itemize}
+            \item Range lookups are not supported, leading to a cost equivalent to a full scan.
+        \end{itemize}
+    \item Tree structures (primary and secondary):
+        \begin{itemize}
+            \item Range lookups are supported if $A$ serves as the search key attribute of the structure.
+            \item The cost depends on the storage type (primary or secondary) and the search key type (unique or non-unique).
+        \end{itemize}
+    \item B+ tree structures (primary and secondary):
+        \begin{itemize}
+            \item Range lookups are supported if $A$ is the search key attribute of the structure.
+        \end{itemize}
+\end{itemize}
+
+\paragraph*{Conjunction}
+In the presence of indexes, the DBMS opts for the most selectively supported predicate for data access. 
+Subsequently, the remaining predicates are assessed later in main memory through a sequential scan.
+
+\paragraph*{Disjunction}
+If any of the predicates lack index support, a sequential scan is executed. 
+However, if indexes are available for all predicates, the DBMS utilizes them to assess each predicate individually. 
+The results are then merged, and duplicates are subsequently removed.
+
+\paragraph*{Sort}
+Various methods facilitate the optimal sorting of a table's tuples. 
+However, a significant challenge arises from the necessity for the DBMS to load the entire data into the buffer, a task that may exceed the available memory capacity.
+Sorting can occur either in main memory (utilizing ad-hoc algorithms like quick sort or merge sort) or on disk (employing external sorting algorithms).
+The latter approach is chosen when the data surpasses the main memory's capacity, following this procedure:
+\begin{enumerate}
+    \item Split the data into chunks, each of a size equal to the main memory.
+    \item Load a chunk into the main memory.
+    \item Sort the data in the main memory.
+    \item Store the sorted data back on disk.
+    \item Merge sorted chunks using at least three pages:
+        \begin{itemize}
+            \item Two for progressively loading data from two sorted chunks.
+            \item One as an output buffer to store the sorted data.
+        \end{itemize}
+    \item Save the result on disk.
+    \item Repeat from step two until all chunks are merged.
+\end{enumerate}
+
+\subsection{Cost-based Optimization}
+Cost-based optimization poses a challenge in decision-making within an optimization problem, involving:
+\begin{itemize}
+        \item Determining which data access operations to execute.
+        \item Deciding in which order to perform the operations.
+        \item Choosing which option to select if there are multiple choices for a given operation.
+        \item Establishing how to sort the data if sorting is required in the query.
+\end{itemize}
+To address this challenge, the DBMS leverages data profiles and approximate cost formulas. 
+A decision tree is constructed, where:
+\begin{itemize}
+    \item Each internal node represents a decision point (a choice between two or more options).
+    \item Each leaf node represents a specific plan (a sequence of operations).
+\end{itemize}
+Assigning a cost to each plan allows the identification of the optimal one using operations research techniques like branch and bound. 
+Optimizers must efficiently handle such problems within a reasonable timeframe.
+
+\subsection{Approaches to Query Evaluation}
+The query is evaluated by the DBMS according to two techniques. 
+
+\paragraph*{Compile and store}
+The query undergoes compilation and is stored in the DBMS for later execution.
+The internal code is retained in the DBMS along with indications of dependencies on specific versions of the catalog used during compilation.
+Upon relevant changes in the catalog, the compilation of the query is invalidated, leading to the recompilation of the query.
+
+\paragraph*{Compile and go}
+The query is compiled and executed immediately, without storing the compiled code.
+Although the code is not stored permanently, it may persist in the DBMS for a period to be potentially reused by subsequent executions.

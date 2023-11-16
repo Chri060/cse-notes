@@ -1,19 +1,20 @@
 \section{Skyline queries}
 
-The objective of the skyline queries is to find good objects according to several perspectives, that are based on the notion of dominance. 
+Skyline queries aim to identify superior objects across multiple perspectives, relying on the concept of dominance.
 \begin{definition}
     A tuple $t$ \emph{dominates} a tuple $s$ ($t \prec s$) if and only if $t$ in nowhere worse than $s$: 
     \[\forall i, 1 \leq i \leq m \rightarrow t[A_i] \leq s[A_i]\] 
-    and better at least once: 
+    And is better at least once: 
     \[\exists j, 1 \leq j \leq m \land t[A_j] < s[A_j]\]
 
-
-    The \emph{skyline} of a relation is the set of its non dominated tuples
+    The \emph{skyline} of a relation is the set of its non-dominated tuples.
 \end{definition}
-The convention on the skyline queries is that lower values are better than higher values. A tuple $t$ is in the skyline if
-and only if  it is the top-$1$ result with respect to at least one monotone scoring function. This means that the skyline is the set of potentially optimal tuples. 
-Note that there is no scoring function that returns the same points that are in the skyline. A possible non-standard syntax for the 
-skyline queries is the following: 
+The convention on the skyline queries is that lower values are better than higher values.
+The convention is that lower values are considered better. 
+A tuple is part of the skyline if it is the top-1 result with respect to at least one monotone scoring function. 
+
+\paragraph*{Query syntax}
+The syntax for skyline queries can be expressed as follows:
 \begin{lstlisting}[style=SQL]
 SELECT <attributes>
 FROM R1,R2,...,Rn
@@ -25,8 +26,9 @@ ORDER BY <conditions>
 \end{lstlisting}
 This query can be easily translated into a standard query, but the result is too slow and cannot be used in practice. 
 
-\subsection*{Block nested loop algorithm}
-The input of the block nested loop algorithm is a dataset $D$ of multidimensional points, and the output is the skyline of $D$.
+\subsection{Block Nested Loop algorithm}
+The Block Nested Loop Algorithm takes a dataset $D$ of multidimensional points as input and outputs the skyline of $D$. 
+Its complexity is $O(n^2)$, making it inefficient for large datasets.
 \begin{algorithm}[H]
     \caption{Block nested loop algorithm}
         \begin{algorithmic}[1]
@@ -40,10 +42,10 @@ The input of the block nested loop algorithm is a dataset $D$ of multidimensiona
             \State \Return $W$
         \end{algorithmic}
 \end{algorithm}
-The complexity is $O(n^2)$, where $n=\left\lvert D \right\rvert $. The complexity of this algorithm is very inefficient for large datasets. 
 
-\subsection*{Sort filter skyline algorithm}
-The input of the sort filter skyline algorithm is a dataset $D$ of multidimensional points, and the output is the skyline of $D$.
+\subsection{Sort Filter Skyline algorithm}
+The Sort Filter Skyline Algorithm also takes a dataset $D$ of multidimensional points as input and outputs the skyline of $D$. 
+It performs better than the Block Nested Loop Algorithm, especially for large datasets, but still has a complexity of $O(n^2)$.
 \begin{algorithm}[H]
     \caption{Sort filter skyline algorithm}
         \begin{algorithmic}[1]
@@ -57,10 +59,8 @@ The input of the sort filter skyline algorithm is a dataset $D$ of multidimensio
             \State \Return $W$
         \end{algorithmic}
 \end{algorithm}
-Where $S$ is the list of sorted point in $D$ by a monotone function. The initial sorting is useful for large datasets, thus this algorithm performs much better than the
-previous one, although the complexity is still $O(n^2)$. 
 \begin{example}
-    Given the following unordered dataset: 
+    Consider the following unordered dataset: 
     \begin{table}[H]
         \centering
         \begin{tabular}{lcc}
@@ -84,16 +84,13 @@ previous one, although the complexity is still $O(n^2)$.
         \multicolumn{1}{l|}{Hilton}   & 0.175         & 0.3                
         \end{tabular}
     \end{table}
-    The algorithm adds Novotel to the window, and the other hotel that is not dominated by Novotel is Ibis, so the skyline is composed by Novotel and Ibis. 
+    The skyline, consisting of Novotel and Ibis, is identified by the algorithm.
 \end{example}
 
-\subsection*{Summary}
-The main aspects of the skyline queries are: 
-\begin{itemize}
-    \item They are effective in identifying potentially interesting objects if nothing is known about the preferences of a user. 
-    \item They are very simple to use. 
-    \item They return too many objects. 
-    \item The computation is not so efficient. 
-    \item They are agnostic with respect to user preferences
-\end{itemize}
-It is possible to extend the skyline queries adding the constraint of set of tuples dominated by less than $k$ tuples. This method is called $k$-skyband.
+\subsection{Summary}
+Skyline queries are effective in identifying potentially interesting objects when user preferences are unknown. 
+They are simple to use but return a large number of objects, and their computation is not highly efficient. 
+Skyline queries are agnostic with respect to user preferences.
+
+\paragraph*{K-skyband} 
+To enhance skyline queries, the concept of $k$-skyband is introduced, where the result includes a set of tuples dominated by fewer than $k$ tuples.

@@ -1,0 +1,82 @@
+\section{Introduction}
+
+\begin{definition}
+    \emph{Reliability} is defined as the ability of an item to perform a required function under stated conditions for a stated time length.
+\end{definition}
+In the realm of databases, reliability control ensures the foundational attributes of transactions:
+\begin{itemize}
+    \item Atomicity: guaranteeing the all-or-nothing execution of a transaction.
+    \item Durability: ensuring that once a transaction is committed, its effects are permanent.
+\end{itemize}
+The Database Management System (DBMS) implements a specific architecture for reliability control, with key components residing in stable memory and log management.
+
+\paragraph*{Reliability manager}
+Within the DBMS, the reliability manager executes transactional commands such as \texttt{commit} and \texttt{abort}, which are carried out by the transaction manager. 
+Additionally, it coordinates read and write access to data and log pages, managing recovery after system failures.
+
+\paragraph*{Memory persistence}
+Durability implies a form of memory whose content endures indefinitely, abstracted over existing storage technology levels:
+\begin{itemize}
+    \item Main memory: non-persistent.
+    \item Mass memory: persistent but subject be loss.
+    \item Stable memory: incapable of loss, with a failure probability of zero.
+\end{itemize}
+While achieving a zero probability of failure is impractical, the goal is to minimize the failure probability to a negligible value. 
+Techniques such as replication and write protocols are employed for this purpose. 
+The discipline addressing stable memory failure is known as disaster recovery.
+Stable memory can be guaranteed via:
+\begin{itemize}
+    \item On-line replication: the data is replicated on multiple disks (e.g., RAID disk architecture).
+    \item Off-line replication: the data is replicated on backup units
+\end{itemize}
+
+\subsection{Main memory management}
+The objective of main memory management is to reduce data access time without compromising memory stability. 
+This is achieved through buffers that cache data in faster memory and deferred writing onto secondary storage.
+A buffer page can contain multiple rows and includes:
+\begin{itemize}
+    \item Transaction counter: indicates the number of transactions accessing it.
+    \item Dirty flag: indicates whether the page has been modified and needs alignment with secondary storage.
+\end{itemize}
+On dedicated DBMS servers, up to 80\% of the memory is allocated to the buffer.
+
+\paragraph*{Buffer management primitives}
+The primitives used for buffer management are: 
+\begin{itemize}
+    \item \texttt{fix}: responds to a transaction's request to load a page into the buffer, returning a reference to the page and incrementing the transaction counter.
+    \item \texttt{unfix}: unloads a page from the buffer, decrementing the transaction counter.
+    \item \texttt{force}: moves a page from the buffer to secondary storage.
+    \item \texttt{set\_dirty}: sets the dirty flag of a page.
+    \item \texttt{flush}: moves pages from the buffer to secondary storage when they are no longer needed.
+\end{itemize}
+
+\paragraph*{Buffer management policies}
+The policies used for buffer management are: 
+\begin{itemize}
+    \item Write policies: asynchronous page writing to disk concerning transactions:
+        \begin{itemize}
+            \item \texttt{force}: pages are always transferred at commit.
+            \item \texttt{no\_force}: transfer of pages can be delayed by the buffer manager.
+        \end{itemize}
+    \item De-allocation policies:
+        \begin{itemize}
+            \item \texttt{steal}: discards and flushes a page in an active transaction to disk.
+            \item \texttt{no\_steal}: puts the transaction on a waitlist, managing the request when the page is no longer needed.
+        \end{itemize}
+    \item Pre-fetch Policies: loads pages likely to be read into the buffer before they are needed.
+    \item Pre-flushing Policies: de-allocates pages likely to be written from the buffer before they are needed.
+\end{itemize}
+
+\paragraph*{Fix primitive}
+The execution of a \texttt{fix} primitive involves the following steps:
+\begin{enumerate}
+    \item If the page is in the buffer, increment the transaction counter and return a reference to the page.
+    \item Select a free page in the buffer (FIFO or LRU policy).
+    \item If found, increment the transaction counter and return a reference to the page.
+    \item If the dirty flag is true, flush the current page to disk before loading the new page.
+    \item If no page is found, select a page to be discarded, with one of two policies:
+        \begin{itemize}
+            \item \texttt{steal} policy: load the new page, increment the transaction counter, and return a reference to the page.
+            \item \texttt{no\_steal} put the transaction in a waitlist.
+        \end{itemize}
+\end{enumerate}
