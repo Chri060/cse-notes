@@ -1,0 +1,414 @@
+\section{Syntax analysis of nondeterministic grammars}
+\subsection{Syntax Analysis of Nondeterministic Grammars}
+
+The \textbf{Earley} method \textit{(also called \textbf{tabular} method)} deals with any grammar type, including ambiguous and non-deterministic ones.
+It works by building in parallel all the possible derivations of the string prefix scanned so far, without having to implement a look-ahead;
+furthermore, it does not need a stack since a vector of sets is used to store the current state of the parsing process.
+
+\bigskip
+While analysing a string \(x = x_1 x_2 \,\ldots\, x_n\) or \(x = \varepsilon\) of length \(|x| = n \geq 0\), the algorithm uses a vector \(E\left[ 0 \,\ldots\, n \right]\) of \(n+1\) elements.
+Every element \(E[i]\) is a set of \textbf{pairs} \(\langle q_\oplus, j\rangle\), where:
+
+\begin{itemize}
+  \item \(q_\oplus\) is a state of machine \(M_\oplus\)
+  \item \(j\) is an \textbf{integer pointer} that indicates element \(E[i]\), with \(0 \leq i \leq j \leq n\), preceding or corresponding to \(E[j]\) and containing a \textbf{pair} \(\langle 0_\oplus, j \rangle\)
+        \begin{itemize}
+          \item \(0_\oplus\) belongs to the same machine as \(q_\oplus\)
+          \item \(j\) marks the position in the input string \(x\) from where the current derivation of \(\oplus\) started, and it's represented by \(\uparrow\)
+          \item if \(j = i\), the string is empty \(\varepsilon\)
+        \end{itemize}
+\end{itemize}
+
+A pair has the form \(\langle q_\oplus, j \rangle\) and it's called:
+\begin{itemize}
+  \item \textbf{Initial} if \(q_\oplus = 0_\oplus\)
+  \item \textbf{Final} if \(q_\oplus \in F_\oplus\)
+  \item \textbf{Axiomatic} if \(\oplus = S\)
+\end{itemize}
+
+\subsubsection{Earley's Method}
+
+Initially, the Earley vector is initialized by setting all element \(E[1],\,\ldots\,, E[n]\) to the empty set, \textit{(\(E[i] = \emptyset \, \forall 1 \leq i < n\))} and the first element \(E[0]\) is set to the set containing the \textbf{initial pair} \(\langle 0_S, 0 \rangle\);
+in this pair, the state \(0_S\) is the initial state of the machine \(M_S\) of the start symbol \(S\), and the integer pointer \(0\) indicates the position in the input string from where the current derivation of \(S\) started.
+As parsing proceeds, when the current character is \(x_i\), the current element \(E[i]\) will be filled with one or more pairs;
+the final Earley vector will contain all the possible derivations of the input string.
+
+Three different operations can be applied to the current element of the vector \(E[i]\):
+\textbf{closure}, \textbf{terminal shift} and \textbf{nonterminal shift}.
+They resemble the operations of the similar ELR(1) parser and are presented in the next subparagraphs.
+
+\subparagraph*{Closure}
+Applies to a pair with a state from where an \textbf{arc} with a \textbf{nonterminal label \(\oplus\) originates}.
+Suppose that the pair \(\langle p, j \rangle\) is in the element \(E[i]\) and that the net has an arc \(p \xrightarrow{\oplus} q\) with a nonterminal label \(\oplus\) and a \textit{(non relevant)} destination state \(q\).
+The operation \textbf{adds a new pair} \(\langle 0_\oplus, i \rangle\) to the same element \(E[i]\):
+the \textbf{state} of this pair is the initial one \(0_\oplus\) of machine \(M_\oplus\) of that nonterminal \(\oplus\), and the \textbf{pointer} has value \(i\), which means that the pair is created at step \(i\) starting from a pair already in the element \(E[i]\).
+
+The effect of this operation is to add the current element \(E[i]\) to all the pairs with the initial states of the machines that can recognize a substring starting from the next character \(x_{i+1}\) and ending at the current character \(x_i\).
+
+\subparagraph*{Terminal Shift}
+Applies to a pair with a \textbf{state} from where a \textbf{terminal shift arc originates}.
+Suppose that arc \(\langle p, j \rangle\) is in element \(E[i-1]\) and that the net has arc \(p \xrightarrow{x_i} q\) labelled by the current token \(x_i\).
+The operation \textbf{writes into element} \(E[i]\) the \textbf{pair} \(\langle q, j \rangle\), where the state is the destination of the arc and the point equals that of the pair in \(E[i-1]\), to which the terminal shift arc is attached.
+The next token will be \(x_{i+1}\) \textit{(the first one after the current)}.
+
+\subparagraph*{Nonterminal Shift}
+This operation is triggered by the presence of a \textbf{final pair} \(\langle f_\oplus, j \rangle\) in the current element \(E[i]\), where \(f_\oplus \in F_\oplus\) is a \textbf{final state of machine }\(M_\oplus\) of \textbf{nonterminal} \(\oplus\);
+such a pair is called \textbf{enabling}.
+In order to shift, it's necessary to locate the element \(E[j]\) and shift the corresponding nonterminal:
+the parser searches for a pair \(\langle p, l \rangle\) such that the net contains an arc \(p \xrightarrow{\oplus} q\), with a label that matches the machine of state \(f_\oplus\) in the enabling pair.
+The pointer \(l\) is in the interval \(\left[ 0, j \right]\).
+
+The operation \textbf{will certainly find at least one such pair} and the nonterminal shift applies to it.
+Then the operation writes the pair \(\langle q, l\rangle\) into \(E[i]\); if more than one pair is found, the operation is applied to all of them.
+
+\paragraph{Earley's Algorithm}
+
+The algorithm for \EBNF grammars makes use of two procedures, called \texttt{completion} and \texttt{terminalshift}.
+The input string is denoted by \(x = x_1 x_2 \,\ldots\, x_n\), where \(|x| = n \geq 0\) \textit{(if \(n = 0\), then \(x = \varepsilon\))}.
+
+The codes for the two procedures are presented in Code~\ref{lst:earley-completion} and Code~\ref{lst:earley-terminalshift}, respectively.
+
+\begin{lstlisting}[caption={\texttt{completion} procedure}, label={lst:earley-completion}]
+completion(E, i) // $0 \leq i \leq n$
+  do
+    for each pair $\langle p, j\rangle \in$ E[i] and $\oplus, q \in V, Q$ such that $p \smash{\xrightarrow{\oplus}} q$ do
+      add pair $\langle 0_\oplus, j\rangle$ to E[i]
+    end
+    for each pair $\langle f, j \rangle \in$ E[i] and $\oplus, q \in V, Q$ such that $f \in F_\oplus$ do
+      for each pair $\langle p, l \rangle \in$ E[j] and $q \in Q$ such that $p \smash{\xrightarrow{\oplus}} q$ do
+        add pair $\langle q, l \rangle$ to E[i]
+      end
+    end
+  while any pair is added
+\end{lstlisting}
+
+The completion procedure adds new pairs to the current vector element \(E[i]\) by applying the closure and nonterminal shifts as long as new pairs are added.
+The outer loop \textit{(\texttt{do-while})} is executed at least once because the closure operation is always applied.
+Finally, note that this operation processes the nullable nonterminals by applying to them a combination of closures and nonterminal shifts.
+
+\begin{lstlisting}[caption={\texttt{terminalshift} procedure}, label={lst:earley-terminalshift}]
+terminalshift(E, i, x_i) // $1 \leq i \leq n$
+  for each pair $\langle p, j \rangle \in$ E[i-1] and $q \in Q$ such that $p \smash{\xrightarrow{x_i}} q$ do
+    add pair $\langle q, j \rangle$ to E[i]
+  end
+\end{lstlisting}
+
+The \texttt{terminalshift} procedure adds to the current vector element \(E[i]\) all the pairs that can be reached from the pairs in \(E[i-1]\) by a terminal shift, scanning token \(x_i\), \(1 \leq 1 \leq n\).
+It may fail to add any pair to the element, that will remain empty;
+a nonterminal that exclusively generates the empty string \(\varepsilon\) never undergoes a terminal shift.
+Finally, notice that the procedure works correctly even when the element \(E[i]\), or its predecessor \(E[i-1]\), is empty.
+
+The full algorithm for the Earley parser is presented in Code~\ref{lst:earley-algorithm}.
+
+\begin{lstlisting}[caption={Earley's Algorithm}, label={lst:earley-algorithm}]
+// analyse terminal string x for acceptance
+// define the Earley vector E[0..n] of sets of pairs
+
+E[0] := { $\langle 0_S, 0 \rangle$ } // initial pair
+for i := 1 to n do
+  E[i] := $\emptyset$ // initialize all elements of E
+end
+completion(E, 0) // apply closure to initial pair
+i := 1
+while (i <= n and E[i-1] != $\emptyset$) do
+  // while the vector is not finished and the previous element is not empty
+  terminalshift(E, i, x_i) // put into the current element E[i]
+  completion(E, i) // complete the current element E[i]
+  i := i + 1
+end
+\end{lstlisting}
+
+The algorithm can be summarized into the following steps:
+\begin{enumerate}
+  \item the initial pair \(\langle 0_S, 0 \rangle\) is added to the first element \(E[0]\) of the vector.
+  \item the elements \(E[1]\) to \(E[n]\) \textit{(if present)} are initialized to the empty set
+  \item \(E[0]\) is completed
+  \item if \(n \geq 1\) (if the string \(x\) is not empty), the algorithm puts pairs in the current element \(E[i]\) through \texttt{terminalshift} and finishes element \(E[i]\) through \texttt{completion}.
+        \begin{itemize}
+          \item if \texttt{terminalshift} fails to add any pair to \(E[i]\), the element remains empty
+        \end{itemize}
+  \item the loop iterates as far as the last element \(E[n]\), terminating when the vector is finished or the previous element \(E[i-1]\) is empty
+\end{enumerate}
+
+\begin{property}[Acceptance condition]
+  When the Earley algorithm terminates, the string \(x\) is accepted if and only if the last element \(E[n]\) of vector \(E\) contains a final axiomatic pair \(\langle f_S, 0 \rangle\), with \(f_S \in F_S\)
+\end{property}
+
+\subparagraph*{Complexity of Earley's Algorithm}
+Assuming that each basic operation has cost \(\mathcal{O}(1)\), that the grammar is fixed and \(x\) is a string, the overall complexity of the algorithm can be calculated by considering the following contributes:
+
+\begin{enumerate}
+  \item A vector element \(E[i]\) contains several pairs \(\langle q, j \rangle\) that are linearly limited by \(i\), as the number of states in the machine net is constant and \(j \leq i\). As such, the number of pairs in \(E[i]\) is bounded by \(n\): \[ |E(i)| = \mathcal{O}(n) \]
+  \item For a pair \(\langle p, j \rangle\) checked in the element \(E[i-1]\), the terminal shift operation adds one pair to \(E[i]\). As such, for the whole \(E[i-1]\), the \texttt{terminalshift} operation needs no more than \(n\) steps: \[ \texttt{terminalshift} = \mathcal{O}(n) \]
+  \item The \texttt{completion} procedure iterates the operations of closure and nonterminal shift as long as they can add some new pair. Two operations can be performed on the whole set \(E[i]\):
+        \begin{enumerate}
+          \item for a pair \(\langle q, j\rangle\) checked in \(E[i]\), the closure adds to \(E[i]\) a number of pairs limited by the number \(|Q|\) of states in the machine net, or \(\mathcal{O}(1)\). For the whole \(E[i]\), the closure operation needs no more than \(n\) steps: \[ \texttt{closure} = \mathcal{O}(n) \times \mathcal{O}(1) = \mathcal{O}(n) \]
+          \item for a final pair \(\langle f, j \rangle\) checked in \(E[i]\), the nonterminal shift first searches pairs \(\langle p, l\rangle\) for a certain \(p\) through \(E[j]\), with size \(\mathcal{O}(n)\), and then adds to \(E[i]\) as many pairs as it found, which are no more than \(E[j] = \mathcal{O}(n)\). For the whole set \(E[i]\), the \texttt{completion} procedure needs no more than \(\mathcal{O}(n^2)\) steps: \[ \texttt{completion} = \mathcal{O}(n) + \mathcal{O}(n^2) = \mathcal{O}(n^2) \]
+        \end{enumerate}
+  \item By summing up the numbers of basic operations performed in the outer loop for \(i = 1 \dots n\), the overall complexity of the algorithm is: \[ \texttt{terminalshift} \times n + \texttt{completion} \times (n+1) = \mathcal{O}(n) \times n + \mathcal{O}(n^2) \times (n + 1) = \mathcal{O}(n^3) \]
+\end{enumerate}
+
+As such, the following property holds:
+
+\begin{property}[Complexity of Earley's Algorithm]
+  The asymptotic time complexity of the Earley algorithm in the worst case is \(\mathcal{O}(n^3)\), where \(n\) is the length of the string analysed.
+\end{property}
+
+\subsubsection{Syntax Tree Construction}
+
+The next procedure, \texttt{buildtree} \textit{(or BT)} builds the syntax tree of an accepted string \(x\) by using the Earley vector \(E\) as a guide, under the assumption that the grammar is unambiguous.
+The tree is represented by a parenthesized string, where two matching parentheses delimit a subtree rooted at some nonterminal node.
+
+Given an \EBNF grammar \(G = \left( V, \Sigma, P, S \right)\), machine net \(\mathcal{M}\), and a string \(x\) of length \(n \geq 0\) that belongs to language \(L(G)\), suppose that its Earley vector \(E\) with \(n+1\) elements is available.
+Function \texttt{buildtree} is recursive and has four formal parameters:
+
+\begin{itemize}
+  \item nonterminal \(\oplus \in V\), root of the tree to be built
+  \item state \(f\), final for the machine \(M_\oplus \in \mathcal{M}\)
+        \begin{itemize}
+          \item \(f\) is the end of the computation path in \(M_\oplus\) that corresponds to analysing the substring generated by \(\oplus\)
+        \end{itemize}
+  \item two non negative integers \(i\) and \(j\)
+        \begin{itemize}
+          \item \(i\) and \(j\) always respect the condition \(0 \leq i \leq j \leq n\)
+          \item they respectively represent the start and end of the substring generated by \(\oplus\)
+                \[ \begin{cases}
+                    \oplus \xRightarrow[G]{+} x_{j+1} \,\ldots\, x_i \quad & \text{if} \ j < i \\[1.5ex]
+                    \oplus \xRightarrow[G]{+} \varepsilon \quad            & \text{if} \ j = i \\
+                  \end{cases}  \]
+        \end{itemize}
+\end{itemize}
+
+Grammar \(G\) admits derivation \(S \overset{+}{\Rightarrow} x_1 \,\ldots\, x_2\) or \(S \xRightarrow{+} \varepsilon\) and the Earley algorithm accepts \(E\);
+as such, the element \(E[n]\) of the vector \(E\) contains a final axiomatic pair \(\langle f_S, 0 \rangle\), with \(f_S \in F_S\).
+
+To build the tree of string \(x\) with root node \(S\), procedure \texttt{buildtree} is called with parameters \((S, f_S, 0, n)\);
+then it builds recursively all the subtrees and will assemble them in the final tree.
+The code is shown in Code~\ref{lst:buildtree}.
+
+\begin{lstlisting}[caption={\texttt{buildtree} procedure}, label={lst:buildtree}]
+// $\oplus$ is a nonterminal, f is a final state f of $M_\oplus,$ i and j are integers
+// return as a parenthesized string the syntax tree rooted at node S
+// node $\oplus$ will contain a list C of terminal and nonterminals child nodes
+// either list C will remain empty, or it will be filled from right to left
+buildtree($\oplus$, f, i, j)
+  C := $\varepsilon$ // set to empty the list C of child nodes of $\oplus$
+  q := f // set to f the state q in machine $M_\oplus$
+  k := i // set to i the index k of vector E
+  // walk back the sequence of terminals and nonterminals in $M_\oplus$
+  while q != $0_\oplus$ do // q is not initial
+    // check if node $\oplus$ has terminal x_k as its current child leaf
+    if $\exists$ h = k - 1 and $\exists$ p $\in$ $Q_\oplus$ such that $\langle$ p, j $\rangle \in$ E[h]
+      and net has p $\smash{\xrightarrow{x_k}}$ q then:
+        C := C $\cup$ x_k // add x_k to the list C of child nodes of $\oplus$
+    end
+    // check if node $\oplus$ has nonterminal Y as its current child leaf
+    if $\exists$ Y $\in$ V and $\exists$ e $\in$ F_Y and $\exists$ h, j (j <= h <= k <= i)
+      and $\exists$ p $\in$ $Q_\oplus$ such that
+        ($\langle$ p, j $\rangle \in$ E[k] and $\langle$ e, h $\rangle$ $\in$ E[h] and net has p $\smash{\xrightarrow{Y}}$ q)
+      then:
+        // recursively built the subtree of node Y
+        // concatenate the result to the list C of child nodes of $\oplus$
+        C := C $\cup$ buildtree(Y, q, k, j)
+    end
+  q := p // shift the current state q to the previous state p
+  k := h // shift the current index k to the previous index h
+  end
+
+  return (C)x // return the parenthesized string of the tree rooted at $\oplus$
+\end{lstlisting}
+
+Essentially, \texttt{buildtree} walks back on a computation path in machine \(M_\oplus\) and jointly scans back the Earley vector \(E\) from \(E[n]\) to \(E[0]\);
+during the walk, it recovers the terminal and nonterminal shift operations to identify the \textbf{children of the same node} \(\oplus\).
+In this way, the procedure reconstructs in reverse order the shift operations performed by the Earley parser.
+
+The \texttt{while} loop runs zero or more times, recovering .\textbf{one shift per iteration}
+The \textbf{first} condition in the loop recovers a \textbf{terminal shift} appending the related leaf to the tree, while the \textbf{second} one recovers a \textbf{nonterminal shift} and recursively calls itself to build the subtree of the related nonterminal node.
+State \texttt{e} is final for machine \(M_Y\), and inequality \(0 \leq h \leq k \leq i\) is guaranteed by the definition of the Earley vector \(E\).
+If the parent nonterminal \(\oplus\) immediately generates the \textbf{empty string} \textit{(as there exists a rule \(\oplus \rightarrow \varepsilon\))}, the \textbf{leaf \(\varepsilon\) is the only child} and the loop does not run again.
+
+Function \texttt{buildtree} uses two local variables in the \texttt{while} loop the current state \(q\) of the machine \(M_\oplus\) and the current index \texttt{k} of the Earley vector element \(E[k]\), both updated at each iteration:
+initially, \(q\) is \textbf{final}; at the end of the algorithm, \(q\) is the \textbf{initial} state \(0_\oplus\) of the machine \(M_\oplus\).
+At each iteration, the current state \(q\) is shifted to the previous state \(p\) and the current index \(k\) is shifted from \(i\) to \(j\), through jumps of different lengths.
+Sometimes \(k\) may stay in the same position: this happens if and only if the function processes a series of nonterminals that end up generating the \textbf{empty string \(\varepsilon\)}.
+
+The two \texttt{if} conditions are \textbf{mutually exclusive} if the grammar is \textbf{not ambiguous}:
+the first one is true if the child is a leaf; the other is true if the child has its own subtree.
+
+\subparagraph*{Computation complexity of \texttt{buildtree}}
+
+Assuming that the grammar is unambiguous, clean and devoid of circular derivations, for a string of length \(n\) the number of tree nodes is linearly bounded by \(n\).
+The basic operations are those of checking the state or the pointer of a pair, and of concatenating a leaf or a node to the tree; both of them are executed in constant time.
+
+The total complexity can be estimated as follows:
+
+\begin{enumerate}[label=\arabic*, ref=(\arabic*)]
+  \item A vector element \(E[k]\) contains a number of pairs of magnitude \(\mathcal{O}(n)\)
+  \item There are between \(0\) and \(k\) elements of \(E\)
+        \item\label{enum:buildree-contition-1} Checking the condition of the first \texttt{if} statement requires a constant time \textit{(\(\mathcal{O}(1)\))}; the possible enlisting of one leaf takes a constant time \textit{(\(\mathcal{O}(1)\))}. Processing the whole \(E[k-1]\) takes a time of magnitude
+        \[ \mathcal{O}(n) \times \mathcal{O}(1) + \mathcal{O}(1) = \mathcal{O}(n) \]
+        \item\label{enum:buildree-contition-2} Checking the condition of the second \texttt{if} statement requires a linear time \textit{(\(\mathcal{O}(n)\))}, due to the search process; the possible enlisting of one node takes a constant time \textit{(\(\mathcal{O}(1)\))}. Processing the whole \(E[k]\) takes a time of magnitude
+        \[ \mathcal{O}(n) \times \mathcal{O}(n) + \mathcal{O}(1) = \mathcal{O}\left( n^2 \right)  \]
+\end{enumerate}
+
+Finally, since the total number of terminal plus nonterminal shifts to be recovered \textit{(\ref{enum:buildree-contition-1} and \ref{enum:buildree-contition-2})} is linearly bounded by the numbers of nodes to be built, the total complexity of the algorithm is:
+\[ \left(\textit{\ref{enum:buildree-contition-1}} \ + \ \textit{\ref{enum:buildree-contition-2}} \right) \times \ \textit{\# of nodes} \ = \left( \mathcal{O}(n) + \mathcal{O}\left( n^2 \right) \right) \times \mathcal{O}(n) = \mathcal{O}\left( n^3 \right) \]
+
+\subparagraph*{Computational complexity reduction via Earley vector ordering}
+
+Since the \texttt{buildtree} procedure does not write the Early vector, it's possible to reduce its complexity by reordering the vector \(E\) in a way that the \texttt{while} loop runs fewer times.
+
+Suppose that each element \(E[k]\) is ranked according to the value of its pointer:
+this operation is done in \((n+1) \mathcal{O}\left( n \log{(n)} \right) = \mathcal{O}\left( n^2 \log{(n)} \right)\).
+
+Now the second \texttt{if} statement requires a time \(\mathcal{O}(n)\) to find a pair with final state \(e\) and pointer \(h\) in the stack, while searching the related pair with a fixed pointer \(j\) takes \(\mathcal{O}(n)\) time.
+Similarly the first \texttt{if} statement will only require a time \(\mathcal{O}\left( \log{(n)} \right)\).
+
+The total time complexity of the algorithm is:
+
+\begin{align*}
+   & E \ \textit{sorting} \ + \ \left(\textit{\ref{enum:buildree-contition-1}} \ + \ \textit{\ref{enum:buildree-contition-2}} \right) \times \ \textit{\# of nodes} \ \\
+   & \quad = \mathcal{O}\left( n^2 \log{(n)} \right) + \left( \mathcal{O}(\log{(n)}) + \mathcal{O}\left( n \log{(n)} \right) \right) \times \mathcal{O}(n)            \\
+   & \quad = \mathcal{O}\left( n^2 \log{(n)} \right)
+\end{align*}
+
+\subparagraph*{Optimization via look-ahead}
+
+The items in the sets \(E[k], \ \forall \, k\) of the Earley vector can be extended by including a look-ahead, computed in the same way as ELR(1) parsers:
+by siding a look-ahead each time, the Earley algorithm avoids putting into each set the items that correspond to choices that cannot succeed.
+
+This technique may cause an increase in the number of items in the vector itself for some grammars, and as such its use is not always beneficial.
+
+\subparagraph*{Application of the algorithm to ambiguous grammars}
+
+Ambiguous grammars deserve interest in the processing of natural languages:
+the difficult part is representing all the possible syntax trees related to a string, the number of which can grow exponentially with respect to its length.
+
+This can be done by using a \textbf{Shared Packed Parse Forest} \textit{(SPPF)}, a graph type more general than the tree built that still takes a worst-case cubic time for building.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The Earley method (also called tabular method) deals with any grammar type, even ambiguous, but we fully apply it only to non-deterministic grammars. 
+
+It builds in parallel all the possible derivations of the string prefix scanned so far. 
+Earley is similar to ELR, but it does not use the stack; instead, it uses a vector of sets, which efficiently represents stacks that have common parts.
+
+It simulates a non-deterministic pushdown analyzer, but with a polynomial time complexity. 
+
+The Earley algorithm has variants without or with look-ahead, but here for simplicity look-ahead is not used. 
+
+\subsection*{Algorithm}
+The algorithm builds a vector $E[0\dots n]$ of $n=\left\lvert x \right\rvert$ elements. 
+Each element $E[i]$ is a set of items (or pairs) $\left\langle s,j \right\rangle $ like the items in the LR stack, but without look-ahead. 
+We define the move types that are found in the steps of the algorithm: 
+\begin{itemize}
+    \item Terminal shift: scanning: there are at most $n$ shifts, one per each character in $x$. 
+    \item Closure: same as the closure in LR. 
+    \item Non-terminal shift: same as the non-terminal shift in LR. 
+    \item Completion: closure and non-terminal shift, possibly repeated two or more times.
+\end{itemize}
+\begin{algorithm}[H]
+    \caption{Early method algorithm}
+        \begin{algorithmic}[1]
+            \State $E[0] \leftarrow \{\left\langle 0_S,0 \right\rangle \}$
+            \For {$i=1 \textnormal{ to } n$}
+                \State $E[i] \leftarrow \varnothing$
+            \EndFor
+            \State $Completion(E,0)$
+            \State $i \leftarrow 1$
+            \While {$i \leq n \land E[i-1] \neq \varnothing$}
+                \State $TerminalShift(E,i)$
+                \State $Completion(E,i)$
+                \State $i++$
+            \EndWhile 
+        \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+    \caption{TerminalShift(E, i)}
+        \begin{algorithmic}[1]
+            \For {each pair $\left\langle p,j \right\rangle \in E[i-1]$ and $q \in Q$ such that $p \overset{x_i}{\rightarrow}q$}
+                \State add pair $\left\langle q,j \right\rangle$ to element $E[i]$
+            \EndFor
+        \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+    \caption{Completion(E, i)}
+        \begin{algorithmic}[1]
+            \While {some pair has been added}
+                \For {each pair $\left\langle p,j \right\rangle \in E[i]$ and $X,q \in V$ such that $p \overset{X}{\rightarrow}q$}
+                    \State add pair $\left\langle 0_X,i \right\rangle$ to element $E[i]$
+                \EndFor
+                \For {each pair $\left\langle f,j \right\rangle \in E[i]$ and $X \in V$ such that $f \in F_X$}
+                    \For {each pair $\left\langle p,l \right\rangle \in E[j]$ and $q \in Q$ such that $p \overset{X}{\rightarrow}q$}
+                        \State add pair $\left\langle q,l \right\rangle$ to element $E[i]$
+                    \EndFor
+                \EndFor
+            \EndWhile 
+        \end{algorithmic}
+\end{algorithm}
+A string $x$ is accepted if and only if $\left\langle f_S,0 \right\rangle \in E{n}$
+
+
+
+
+
+
