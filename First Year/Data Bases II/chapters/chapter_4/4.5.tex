@@ -1,8 +1,8 @@
 \section{JPA: Object Relational Mapping}
 
 The technique of bridging the gap between the object model and the relational model is known as object-relational mapping. 
-\begin{definition}
-    The challenge of mapping one model to the other lies in the concepts in one model for which there is no logical equivalent in the other, referred to as \emph{impedance mismatch}.
+\begin{definition}[\textit{Impedance mismatch}]
+    The challenge of mapping one model to the other lies in the concepts in one model for which there is no logical equivalent in the other, referred to as impedance mismatch.
 \end{definition}
 The automatic transformation of a model into another in managed by an element called mediator. 
 The principal distinctions between the object-oriented model and the relational one are as follows:
@@ -25,28 +25,33 @@ The Java Persistence API addresses the gap between object-oriented domain models
 \paragraph*{Features}
 Key features of the Java Persistence API include:
 \begin{itemize}
-    \item POJO Persistence: objects being persisted need not possess any special characteristics; any existing non-final object with a default constructor can be persisted.
-    \item Non-intrusiveness: the persistence API exists as a separate layer from the persistent objects.
-    \item Object queries: a powerful query framework offers the ability to query across entities and their relationships without having to use concrete foreign keys or database columns.
+    \item \textit{POJO Persistence}: objects being persisted need not possess any special characteristics; any existing non-final object with a default constructor can be persisted.
+    \item \textit{Non-intrusiveness}: the persistence API exists as a separate layer from the persistent objects.
+    \item \textit{Object queries}: a powerful query framework offers the ability to query across entities and their relationships without having to use concrete foreign keys or database columns.
 \end{itemize}
 
-\begin{definition}
-    The \emph{entity} is a class (Java bean) representing a collection of persistent objects mapped onto a relational table. 
-
-    The \emph{persistence unit} is the set of all classes that are persistently mapped to one database (analogous to the notion of db schema). 
-
-    The \emph{persistence context} is the set of all managed objects of the entities defined in the persistence unit (analogous to the notion of db instance). 
-
-    The \emph{managed entity} is an entity part of a persistence context for which the changes of the state are tracked. 
-
-    The \emph{entity manager} is the interface for interacting with a persistence context. 
-    
-    The \emph{client} is a component that can interact with a persistence context, indirectly through an entity manager.
+\begin{definition}[\textit{Entity}]
+    The entity is a class (Java bean) representing a collection of persistent objects mapped onto a relational table. 
+\end{definition}
+\begin{definition}[\textit{Persistence unit}]
+    The persistence unit is the set of all classes that are persistently mapped to one database (analogous to the notion of db schema). 
+\end{definition}
+\begin{definition}[\textit{Persistence context}]
+    The persistence context is the set of all managed objects of the entities defined in the persistence unit (analogous to the notion of db instance). 
+\end{definition}
+\begin{definition}[\textit{Managed entity}]
+    The managed entity is an entity part of a persistence context for which the changes of the state are tracked. 
+\end{definition}
+\begin{definition}[\textit{Entity manager}]
+    The entity manager is the interface for interacting with a persistence context. 
+\end{definition}
+\begin{definition}[\textit{Client}]    
+    The client is a component that can interact with a persistence context, indirectly through an entity manager.
 \end{definition}
 Entities are accessed through the entity manager interface of the Java Persistence API.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\linewidth]{images/jpa.png}
+    \includegraphics[width=0.75\linewidth]{images/jpa.png}
     \caption{Structure of the Java Persistence API}
 \end{figure}
 
@@ -84,10 +89,10 @@ In such scenarios, the persistence provider has the capability to automatically 
 This functionality, known as identifier generation, is defined by the \texttt{@GeneratedValue} annotation. 
 There are four available ID generation strategies that applications can opt for:
 \begin{enumerate}
-    \item Auto. 
-    \item Table: identifiers are generated based on a generator table.
-    \item Sequence: the identifiers are generated using sequences. 
-    \item Identity: the identifiers are generated using primary keys identity columns. 
+    \item \texttt{Auto}. 
+    \item \texttt{Table}: identifiers are generated based on a generator table.
+    \item \texttt{Sequence}: the identifiers are generated using sequences. 
+    \item \texttt{Identity}: the identifiers are generated using primary keys identity columns. 
 \end{enumerate}
 \begin{example}
     An identifier can be generated as follows: 
@@ -101,14 +106,8 @@ private String city;
 }
     \end{lstlisting}
 \end{example}
-
 Attributes can be qualified  with properties that guide the mapping between Plain Old Java Objects (POJO) and relational tables. 
-These properties include:
-\begin{itemize}
-    \item Large objects.
-    \item Enumerated types: Java enumerations and strings. 
-    \item Temporal types.
-\end{itemize}
+These properties include: large objects, enumerated types, and temporal types. 
 
 \paragraph*{Fetch policies}
 The fetch policy can be either lazy (retrieve the item when needed) or eager (retrieve the item as soon as possible).
@@ -130,7 +129,6 @@ private byte[] photo;
 }
     \end{lstlisting}
 \end{example}
-
 Entities are ordinarily mapped to tables with corresponding names, and their fields are mapped to columns with identical names by default.
 However, it is possible to alter this behavior using certain annotations.
 In cases where an entity should not be persisted, it can be designated with the \texttt{@Transient} annotation.
@@ -152,20 +150,20 @@ private BigDecimal discount;
 \subsection{Mapping}
 In any object model, relationships exhibit four key characteristics:
 \begin{itemize}
-    \item Directionality: each of the two entities involved may possess an attribute that facilitates access to the other entity.
+    \item \textit{Directionality}: each of the two entities involved may possess an attribute that facilitates access to the other entity.
         If two entities are mutually connected, it forms a bidirectional relationship; otherwise, it constitutes a unidirectional relationship.
         Multiple references are possible.
-    \item Role: each entity within the relationship plays a role in one direction of access. 
+    \item \textit{Role}: each entity within the relationship plays a role in one direction of access. 
         Entities are categorized as source and target based on the relationship's direction.
-    \item Cardinality: this refers to the number of instances of entities on each side of the relationship.
+    \item \textit{Cardinality}: this refers to the number of instances of entities on each side of the relationship.
         Four cardinality possibilities exist: 
         \begin{itemize}
-            \item Many-to-one: many source entities to one target entity.
-            \item One-to-many: one source entity to many target entities.
-            \item One-to-one: one source entity to one target entity.
-            \item Many-to-many: many source entities to many target entities.
+            \item \textit{Many-to-one}: many source entities to one target entity.
+            \item \textit{One-to-many}: one source entity to many target entities.
+            \item \textit{One-to-one}: one source entity to one target entity.
+            \item \textit{Many-to-many}: many source entities to many target entities.
         \end{itemize}
-    \item Ownership: in a relationship, one of the two entities is deemed the owner.
+    \item \textit{Ownership}: in a relationship, one of the two entities is deemed the owner.
         In the database, relationships are implemented through a foreign key column (referred to as the join column in JPA) that points to the key of the referenced table. 
         The entity with a foreign key column is considered the owner of the relationship, and its side is termed the owning side.
 \end{itemize}
@@ -333,7 +331,6 @@ em.persist(emp);
     If an Address instance has been set on the Employee instance and not persisted explicitly or implicitly via cascading, an error occurs.
 \end{example}
 The \texttt{cascade} attribute is used to specify when operations should automatically cascade across relationships, accepting values such as: \texttt{persist}, \texttt{refresh}, \texttt{remove}, \texttt{merge}, and \texttt{detach}.
-
 If all the previous operations are desired, the \texttt{all} operator can be used.
 \begin{example}
     Activation of manual cascading of type persist: 
@@ -347,8 +344,8 @@ Address address;
 \end{example}
 It's important to note that cascade settings are unidirectional and must be set on both sides for bidirectional behavior.
 
+\paragraph*{Cascade remove}
 JPA also supports an additional remove cascading called \texttt{orphanRemoval}. 
 This is utilized in \texttt{@OneToOne} and \texttt{@OneToMany} annotations for privately owned parent-child relationships where each child entity is associated only with one parent entity through just one relationship
 This operation causes the child entity to be removed when the parent-child relationship is broken by removing the parent, setting to null the attribute holding the related entity, or in the one-to-many case, by removing the child entity from the parent's collection.
-
 The distinction between the attribute \texttt{CascadeType.REMOVE} and the mode \texttt{orphanRemoval}  is that if the value of an entity is manually set to null, only \texttt{orphanRemoval} will automatically remove the linked entities from the database.

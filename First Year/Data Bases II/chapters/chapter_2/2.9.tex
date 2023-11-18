@@ -1,10 +1,11 @@
 \section{Deadlocks}
 
 A deadlock arises when concurrent transactions hold and request resources held by other transactions.
-\begin{definition}
-    A \emph{lock graph} is a bipartite graph in which nodes are resources or transactions and arcs are lock requests or lock assignments. 
-
-    A \emph{wait-for graph} is a graph in which nodes are transactions and arcs are waits for relationships. 
+\begin{definition}[\textit{Lock graph}]
+    A lock graph is a bipartite graph in which nodes are resources or transactions and arcs are lock requests or lock assignments. 
+\end{definition}
+\begin{definition}[\textit{Wait-for graph}]
+    A wait-for graph is a graph in which nodes are transactions and arcs are waits for relationships. 
 \end{definition}
 A deadlock is indicated by a cycle in the wait-for graph of transactions.
 \begin{figure}[H]
@@ -14,19 +15,19 @@ A deadlock is indicated by a cycle in the wait-for graph of transactions.
 \end{figure}
 It is possible to solve deadlocks in three different ways: 
 \begin{itemize}
-    \item Timeout: a transaction is terminated and restarted after a specified waiting time, determined by the system manager.
-    \item Deadlock prevention: kills transactions that could cause cycles. 
+    \item \textit{Timeout}: a transaction is terminated and restarted after a specified waiting time, determined by the system manager.
+    \item \textit{Deadlock prevention}: kills transactions that could cause cycles. 
         It is implemented in two ways: 
         \begin{enumerate}
-            \item Resource-based prevention puts restrictions on lock requests. 
+            \item \textit{Resource-based prevention} puts restrictions on lock requests. 
                 The idea is that every transaction requests all resources at once, and only once. 
                 The main problem is that it's not easy for transactions to anticipate all requests. 
-            \item Transaction-based prevention puts restrictions on transactions' IDs. 
+            \item \textit{Transaction-based prevention} puts restrictions on transactions' IDs. 
                 Assigning IDs to transactions incrementally allows to give an age to each one. 
                 It is possible to choose to kill the holding transaction (preemptive) or the requesting one (non-preemptive). 
                 The main problem is that the number of killings is too big. 
         \end{enumerate}
-    \item Deadlock detection: it can be implemented with various algorithms and used for distributed resources. 
+    \item \textit{Deadlock detection}: it can be implemented with various algorithms and used for distributed resources. 
 \end{itemize}
 
 \paragraph*{Dependency graph}
@@ -48,7 +49,7 @@ The Obermarck's algorithm needs the following assumptions:
 \end{itemize}
 The goal of this algorithm is to detect a potential deadlock looking only at the local view of a node. 
 Nodes exchange information and update their local graph based on the received information. 
-Node $A$ sends its local info to a node $B$ only if: it contains a transaction $T_i$ that is waited for from another remote transaction and waits for a transaction $T_j$ active on $B$ and $i>j$.
+Node $A$ sends its local info to a node $B$ only if it contains a transaction $T_i$ that is waited for from another remote transaction and waits for a transaction $T_j$ active on $B$ and $i>j$.
 \begin{example}
     Consider the given distributed dependency graph:
     \begin{figure}[H]
@@ -103,7 +104,7 @@ Four variants based on different conventions regarding message conditions and re
 In practical scenarios, the likelihood of encountering deadlocks ($n^{-2}$) is considerably lower than the probability of conflicts ($n^{-1}$).
 Various techniques are employed to minimize the occurrence of deadlocks:
 \begin{itemize}
-    \item Update lock: the most frequent deadlock occurs when two concurrent transactions start by reading the same resources and then decide to write and try to upgrade their lock to write on the resource. 
+    \item \textit{Update lock}: the most frequent deadlock occurs when two concurrent transactions start by reading the same resources and then decide to write and try to upgrade their lock to write on the resource. 
     To avoid this situation, systems offer the update lock, that is used by transactions that will read and then write. 
     The lock table become: 
     \begin{table}[H]
@@ -111,12 +112,12 @@ Various techniques are employed to minimize the occurrence of deadlocks:
         \begin{tabular}{ccccc}
         \textbf{}                                     & \multicolumn{4}{c}{\textbf{Resource status}}                                                                                                        \\ \cline{2-5} 
         \multicolumn{1}{c|}{\textbf{Request}}         & \textit{FREE}                     & \textit{SHARED}                   & \textit{UPDATE}                   & \multicolumn{1}{c|}{\textit{EXCLUSIVE}} \\ \hline
-        \multicolumn{1}{|c|}{\textit{Shared lock}}    & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\tikzxmark$}       \\ \hline
-        \multicolumn{1}{|c|}{\textit{Update lock}}    & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$}       \\ \hline
-        \multicolumn{1}{|c|}{\textit{Exclusive lock}} & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$}       \\ \hline
+        \multicolumn{1}{|c|}{\textit{Shared lock}}    & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c|}{$\tikzxmark$}       \\ 
+        \multicolumn{1}{|c|}{\textit{Update lock}}    & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$}       \\ 
+        \multicolumn{1}{|c|}{\textit{Exclusive lock}} & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$}       \\ \hline
         \end{tabular}
     \end{table}
-    \item Hierarchical lock: locks can be specified with different granularity. 
+    \item \textit{Hierarchical lock}: locks can be specified with different granularity. 
         The objective of this is to lock the minimum amount of data and recognize conflicts as soon as possible.
         The method used to do so consists in asking locks on hierarchical resources by requesting resources top-down until the right level is obtained and releasing locks bottom-up. 
         This is done by using five locking modes: shared, exclusive, ISL (intention of locking a sub-element of the current element in shared mode), IXL (intention of locking a sub-element of the current element in exclusive mode), and SIXL (lock of the element in shared mode with intention of locking a sub-element in exclusive mode). 
@@ -125,12 +126,12 @@ Various techniques are employed to minimize the occurrence of deadlocks:
         \centering
         \begin{tabular}{ccccccc}
         \textbf{}                             & \multicolumn{6}{c}{\textbf{Resource status}}                                                                                                                                                                            \\ \cline{2-7} 
-        \multicolumn{1}{c|}{\textbf{Request}} & \multicolumn{1}{c|}{\textit{FREE}} & \multicolumn{1}{c|}{\textit{ISL}} & \multicolumn{1}{c|}{\textit{IXL}} & \multicolumn{1}{c|}{\textit{SL}}  & \multicolumn{1}{c|}{\textit{SIXL}} & \multicolumn{1}{c|}{\textit{XL}}  \\ \hline
-        \multicolumn{1}{|c|}{\textit{ISL}}    & \multicolumn{1}{c|}{$\checkmark$}  & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\checkmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ \hline
-        \multicolumn{1}{|c|}{\textit{IXL}}    & \multicolumn{1}{c|}{$\checkmark$}  & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ \hline
-        \multicolumn{1}{|c|}{\textit{SL}}     & \multicolumn{1}{c|}{$\checkmark$}  & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\tikzxmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ \hline
-        \multicolumn{1}{|c|}{\textit{SIXL}}   & \multicolumn{1}{c|}{$\checkmark$}  & \multicolumn{1}{c|}{$\checkmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ \hline
-        \multicolumn{1}{|c|}{\textit{XL}}     & \multicolumn{1}{c|}{$\checkmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$} & \multicolumn{1}{c|}{$\tikzxmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ \hline
+        \multicolumn{1}{c|}{\textbf{Request}} & \multicolumn{1}{c}{\textit{FREE}} & \multicolumn{1}{c}{\textit{ISL}} & \multicolumn{1}{c}{\textit{IXL}} & \multicolumn{1}{c}{\textit{SL}}  & \multicolumn{1}{c}{\textit{SIXL}} & \multicolumn{1}{c|}{\textit{XL}}  \\ \hline
+        \multicolumn{1}{|c|}{\textit{ISL}}    & \multicolumn{1}{c}{$\checkmark$}  & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\checkmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ 
+        \multicolumn{1}{|c|}{\textit{IXL}}    & \multicolumn{1}{c}{$\checkmark$}  & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c}{$\tikzxmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ 
+        \multicolumn{1}{|c|}{\textit{SL}}     & \multicolumn{1}{c}{$\checkmark$}  & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\tikzxmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\
+        \multicolumn{1}{|c|}{\textit{SIXL}}   & \multicolumn{1}{c}{$\checkmark$}  & \multicolumn{1}{c}{$\checkmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c}{$\tikzxmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ 
+        \multicolumn{1}{|c|}{\textit{XL}}     & \multicolumn{1}{c}{$\checkmark$}  & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c}{$\tikzxmark$} & \multicolumn{1}{c}{$\tikzxmark$}  & \multicolumn{1}{c|}{$\tikzxmark$} \\ \hline
         \end{tabular}
     \end{table}
     \begin{example}
@@ -139,9 +140,9 @@ Various techniques are employed to minimize the occurrence of deadlocks:
             \centering
             \begin{tabular}{cc}
             \textbf{P1}                 & \textbf{P2}               \\ \hline
-            \multicolumn{1}{|c|}{$t1$}  & \multicolumn{1}{c|}{$t5$} \\ \hline
-            \multicolumn{1}{|c|}{$t2$}  & \multicolumn{1}{c|}{$t6$} \\ \hline
-            \multicolumn{1}{|c|}{$t3$}  & \multicolumn{1}{c|}{$t7$} \\ \hline
+            \multicolumn{1}{|c|}{$t1$}  & \multicolumn{1}{c|}{$t5$} \\ 
+            \multicolumn{1}{|c|}{$t2$}  & \multicolumn{1}{c|}{$t6$} \\ 
+            \multicolumn{1}{|c|}{$t3$}  & \multicolumn{1}{c|}{$t7$} \\ 
             \multicolumn{1}{|c|}{$t4$}  & \multicolumn{1}{c|}{$t8$} \\ \hline
             \end{tabular}
         \end{table}
@@ -151,7 +152,7 @@ Various techniques are employed to minimize the occurrence of deadlocks:
         We can see that they are not in a read-write conflict (because they are independent of the order). 
         Without hierarchical locking both transactions needs to operate on the same table, so the concurrency will be almost useless in this case. 
         But with this technique, calling $X$ the table, we have that the transaction acquires the following locks: 
-        \[T_1:\:IXL(root)\:SIXL(P1)\:XL(t3)\:ISL(P2)\:SL(t8)\]
-        \[T_2:\:IXL(root)\:ISL(P1)\:SL(t2)\:SL(t4)\:IXL(P2)\:XL(t5)\:XL(t6)\]
+        \[T_1:\:\textnormal{IXL}(root)\:\textnormal{SIXL}(P1)\:\textnormal{XL}(t3)\:\textnormal{ISL}(P2)\:\textnormal{SL}(t8)\]
+        \[T_2:\:\textnormal{IXL}(root)\:\textnormal{ISL}(P1)\:\textnormal{SL}(t2)\:\textnormal{SL}(t4)\:\textnormal{IXL}(P2)\:\textnormal{XL}(t5)\:\textnormal{XL}(t6)\]
     \end{example}
 \end{itemize}

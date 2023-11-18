@@ -1,19 +1,17 @@
 \section{View-serializability}
 
-\begin{definition}
-    $r_i(x)$ \emph{reads-from} $w_j(x)$ when  $w_j(x)$  precedes  $r_i(x)$ and there is no  $w_k(x)$ in $S$ between  $r_i(x)$  and  $w_j(x)$. 
-    
-    $w_i(x)$ in a schedule $S$ is a \emph{final write} if it is the last write on $x$ that occurs in $S$. 
-
-    Two schedules are said to be \emph{view-equivalent} ($S_i \approx_V S_j$) if they have:
-    \begin{enumerate}
-        \item The same operations. 
-        \item The same reads-from relationships.
-        \item The same final writes. 
-    \end{enumerate}
+\begin{definition}[\textit{Read from}]
+    The operation $r_i(x)$ reads-from $w_j(x)$ when  $w_j(x)$  precedes  $r_i(x)$ and there is no  $w_k(x)$ in $S$ between  $r_i(x)$  and  $w_j(x)$. 
+\end{definition}   
+\begin{definition}[\textit{Final write}]
+    The operation $w_i(x)$ in a schedule $S$ is a final write if it is the last write on $x$ that occurs in $S$. 
 \end{definition}
-
-A schedule is view-serializable (VSR) if it is view-equivalent to a serial schedule of the same transactions. 
+\begin{definition}[\textit{View equivalence}]
+    Two schedules are said to be view-equivalent ($S_i \approx_V S_j$) if they have the same: operations, reads-from relationships and final writes.
+\end{definition}
+\begin{definition}[\textit{View serializable}]
+    A schedule is view-serializable (VSR) if it is view-equivalent to a serial schedule of the same transactions. 
+\end{definition}
 The value written by $w_j(x)$ could be uncommitted when $r_i(x)$ reads it, but we are certain that it will be committed (commit-projection hypothesis).
 \begin{example}
     Consider the following schedules:
@@ -46,6 +44,7 @@ The value written by $w_j(x)$ could be uncommitted when $r_i(x)$ reads it, but w
     \end{itemize}
     However, $S_a$ and $S_c$ are not view-equivalent because not all the reads-from relationships are the same.
 \end{example}
+
 Deciding if a generic schedule is in VSR is an $\mathcal{NP}$-complete problem. 
 Therefore, a more stringent definition is needed, which is easier to check.
 This new definition may result in rejecting some schedules that would be acceptable under view-serializability but not under the stricter criterion.

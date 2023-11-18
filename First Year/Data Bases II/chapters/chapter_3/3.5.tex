@@ -1,14 +1,16 @@
 \section{Skyline queries}
 
 Skyline queries aim to identify superior objects across multiple perspectives, relying on the concept of dominance.
-\begin{definition}
-    A tuple $t$ \emph{dominates} a tuple $s$ ($t \prec s$) if and only if $t$ in nowhere worse than $s$: 
+\begin{definition}[\textit{Domination}]
+    A tuple $t$ dominates a tuple $s$ ($t \prec s$) if and only if $t$ in nowhere worse than $s$: 
     \[\forall i, 1 \leq i \leq m \rightarrow t[A_i] \leq s[A_i]\] 
     And is better at least once: 
     \[\exists j, 1 \leq j \leq m \land t[A_j] < s[A_j]\]
-
-    The \emph{skyline} of a relation is the set of its non-dominated tuples.
 \end{definition}
+\begin{definition}[\textit{Skyline}]    
+    The skyline of a relation is the set of its non-dominated tuples.
+\end{definition}
+
 The convention on the skyline queries is that lower values are better than higher values.
 The convention is that lower values are considered better. 
 A tuple is part of the skyline if it is the top-1 result with respect to at least one monotone scoring function. 
@@ -27,7 +29,7 @@ ORDER BY <conditions>
 This query can be easily translated into a standard query, but the result is too slow and cannot be used in practice. 
 
 \subsection{Block Nested Loop algorithm}
-The Block Nested Loop Algorithm takes a dataset $D$ of multidimensional points as input and outputs the skyline of $D$. 
+The Block Nested Loop algorithm takes a dataset $D$ of multidimensional points as input and outputs the skyline of $D$. 
 Its complexity is $O(n^2)$, making it inefficient for large datasets.
 \begin{algorithm}[H]
     \caption{Block nested loop algorithm}
@@ -44,8 +46,8 @@ Its complexity is $O(n^2)$, making it inefficient for large datasets.
 \end{algorithm}
 
 \subsection{Sort Filter Skyline algorithm}
-The Sort Filter Skyline Algorithm also takes a dataset $D$ of multidimensional points as input and outputs the skyline of $D$. 
-It performs better than the Block Nested Loop Algorithm, especially for large datasets, but still has a complexity of $O(n^2)$.
+The Sort Filter Skyline algorithm also takes a dataset $D$ of multidimensional points as input and outputs the skyline of $D$. 
+It performs better than the Block Nested Loop algorithm, especially for large datasets, but still has a complexity of $O(n^2)$.
 \begin{algorithm}[H]
     \caption{Sort filter skyline algorithm}
         \begin{algorithmic}[1]
@@ -70,18 +72,6 @@ It performs better than the Block Nested Loop Algorithm, especially for large da
         \multicolumn{1}{l|}{Hilton}   & 0.175 & 0.3        \\
         \multicolumn{1}{l|}{Sheraton} & 0.2   & 0.2        \\
         \multicolumn{1}{l|}{Novotel}  & 0.15  & 0.1       
-        \end{tabular}
-    \end{table}
-    We decide to order them by the sum of cost and complaints, and the resulting dataset is: 
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{lcc}
-        \textbf{Name}                 & \textbf{Cost} & \textbf{Complaints} \\ \hline
-        \multicolumn{1}{l|}{Novotel}  & 0.15          & 0.1                 \\
-        \multicolumn{1}{l|}{Crillon}  & 0.25          & 0.1                 \\
-        \multicolumn{1}{l|}{Ibis}     & 0.08          & 0.3                 \\
-        \multicolumn{1}{l|}{Sheraton} & 0.2           & 0.2                 \\
-        \multicolumn{1}{l|}{Hilton}   & 0.175         & 0.3                
         \end{tabular}
     \end{table}
     The skyline, consisting of Novotel and Ibis, is identified by the algorithm.

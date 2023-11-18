@@ -1,12 +1,12 @@
 \section{Timestamps}
 
-Locking, often referred to as pessimistic concurrency control, assumes collisions will occur, although in reality, collisions are infrequent.
+Locking assumes collisions will occur, although in reality, collisions are infrequent.
 Optimistic concurrency control methods like timestamps can be employed to address this. 
 Timestamps are identifiers that establish a total ordering of a system's events. 
 Each transaction is assigned a timestamp representing its initiation time, enabling transactions to be ordered based on their timestamps. 
 A schedule is accepted only if it aligns with the serial ordering of transactions induced by their timestamps. 
 Timestamps, given by a system's function upon request, have the syntax:
-\[\textnormal{event-id}.\textnormal{node-id}\]
+\[\left\langle \textnormal{event-id}.\textnormal{node-id} \right\rangle \]
 The synchronization algorithm, known as the Lamport method, relies on the send-receive of messages. 
 It ensures that a message from the future cannot be received. 
 If this occurs, the bumping rule is employed to adjust the timestamp of the receiving event beyond that of the sending event.  
@@ -17,17 +17,19 @@ If this occurs, the bumping rule is employed to adjust the timestamp of the rece
         \includegraphics[width=0.75\linewidth]{images/timestamps.png}
     \end{figure}
 \end{example}
+
+\paragraph*{Counters}
 The scheduler uses two counters: one for writes (WTM($x$)) and another for reads (RTM($x$)).
 Read/write requests are tagged with the timestamp of the requesting transaction.
 For read operations:
 \begin{itemize}
-    \item If $ts<\textnormal{WTM}(x)$, the request is rejected, and the transaction is killed.
-    \item Otherwise, access is granted, and $\textnormal{RTM}(x)=\max(\textnormal{RTM}(x),ts)$. 
+    \item If $\textnormal{ts}<\textnormal{WTM}(x)$, the request is rejected, and the transaction is killed.
+    \item Otherwise, access is granted, and $\textnormal{RTM}(x)=\max(\textnormal{RTM}(x),\textnormal{ts})$. 
 \end{itemize}
 For write operations:
 \begin{itemize}
-    \item If $ts<\textnormal{RTM}(x)$ or $ts<\textnormal{WTM}(x)$, the request is rejected, and the transaction is killed.
-    \item Otherwise, access is granted, and $\textnormal{WTM}(x)=ts$. 
+    \item If $\textnormal{ts}<\textnormal{RTM}(x)$ or $\textnormal{ts}<\textnormal{WTM}(x)$, the request is rejected, and the transaction is killed.
+    \item Otherwise, access is granted, and $\textnormal{WTM}(x)=\textnormal{ts}$. 
 \end{itemize}
 However, these rules may lead to excessive transaction killings.
 \begin{example}
@@ -47,22 +49,22 @@ However, these rules may lead to excessive transaction killings.
         \end{tabular}
     \end{table}
 \end{example}
-Comparing Two-Phase Locking (2PL) to Timestamps (TS) is challenging, and there is no subset relationship between the two. 
-However, TS implies Conflict Serializable (CSR).
-\begin{proof}[TS implies CSR]
+Comparing 2PL to is challenging, and there is no subset relationship between the two. 
+However, TS implies CSR.
+\begin{proof}
     Let $S$ be a TS schedule of $T_1$ and $T_2$. Suppose $S$ is not CSR, which implies that it contains a cycle between $T_1$ and $T_2$. 
     $S$ contains $op_1(x)$, $op_2(x)$ where at least one is a write. 
     $S$ contains also $op_2(y)$, $op_1(y)$ where at least one is a write. 
-    When $op_1(y)$ arrives:
-    \begin{itemize}
-        \item If $op_1(y)$ is a read, $T_1$ is killed by TS because it tries to read a value written by a younger transaction, so it is a contradiction. 
-        \item If $op_1(y)$ is a write, $T_1$ is killed no matter what $op_2(y)$ is, because it tries to write a value already read or written by a younger transaction, so it is a contradiction. 
-    \end{itemize}
+    When $op_1(y)$ arrives we have two possibilities. 
+    If $op_1(y)$ is a read, $T_1$ is killed by TS because it tries to read a value written by a younger transaction, so it is a contradiction. 
+    If $op_1(y)$ is a write, $T_1$ is killed no matter what $op_2(y)$ is, because it tries to write a value already read or written by a younger transaction, so it is a contradiction. 
 \end{proof}
+
+\paragraph*{Transaction abort}
 Basic TS-based control considers only committed transactions, ignoring aborted transactions. 
 If aborts occur, dirty reads may happen. 
 To handle dirty reads, a variant of basic TS must be used. 
-A transaction $T_i$ issuing $r_{ts}(x)$ or $w_{ts}(x)$ such that $ts>\textnormal{WTM}(x)$ delays its read or write operation until the transaction $T^{'}$ that wrote the value of $x$ has committed or aborted. 
+A transaction $T_i$ issuing $r_{\textnormal{ts}}(x)$ or $w_{\textnormal{ts}}(x)$ such that $\textnormal{ts}>\textnormal{WTM}(x)$ delays its read or write operation until the transaction $T^{'}$ that wrote the value of $x$ has committed or aborted. 
 This is similar to long-duration write locks.
 \begin{table}[H]
     \centering
@@ -80,26 +82,26 @@ Commercial systems often combine these techniques to leverage the best features 
 \paragraph*{Thomas rule}
 To reduce the number of killings, the Thomas rule can be used, altering the rule for write operations:
 \begin{itemize}
-    \item If $ts<\textnormal{RTM}(x)$ the request is rejected and the transaction is killed. 
-    \item If $ts<\textnormal{WTM}(x)$ then our write is obsolete: it can be skipped. 
-    \item Else, access is granted, and we set $\textnormal{WTM}(x)=ts$. 
+    \item If $\textnormal{ts}<\textnormal{RTM}(x)$ the request is rejected and the transaction is killed. 
+    \item If $\textnormal{ts}<\textnormal{WTM}(x)$ then our write is obsolete: it can be skipped. 
+    \item Else, access is granted, and we set $\textnormal{WTM}(x)=\textnormal{ts}$. 
 \end{itemize}
 
 \subsection{Multi-version timestamps}
 The concept of multi-versioning involves generating new versions with each write operation, and reads access the relevant version.
-Each write produces new copies, each with a new Write Timestamp (WTM($x$)), ensuring that each object $x$ always has $N \geq 1$ active versions.
-A unique global Read Timestamp (RTM($x$)) is maintained, and old versions are discarded when there are no transactions requiring their values.
+Each write produces new copies, each with a new write timestamp (WTM($x$)), ensuring that each object $x$ always has $N \geq 1$ active versions.
+A unique global read timestamp (RTM($x$)) is maintained, and old versions are discarded when there are no transactions requiring their values.
 In theory, the following rules can be applied:
 \begin{itemize}
-    \item $r_{ts}(x)$ is always accepted. A copy $x_k$ is selected for reading, where:
+    \item $r_{\textnormal{ts}}(x)$ is always accepted. A copy $x_k$ is selected for reading, where:
         \begin{itemize}
-            \item If $ts \geq \textnormal{WTM}_N(x)$, then $k=N$.
-            \item Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq ts < \textnormal{WTM}_{k+1}(x)$. 
+            \item If $\textnormal{ts} \geq \textnormal{WTM}_N(x)$, then $k=N$.
+            \item Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq \textnormal{ts} < \textnormal{WTM}_{k+1}(x)$. 
         \end{itemize}
-    \item $w_{ts}(x)$: 
+    \item $w_{\textnormal{ts}}(x)$: 
         \begin{itemize}
-            \item If $ts < \textnormal{RTM}(x)$, the request is rejected. 
-            \item  Otherwise, a new version is created for timestamp $ts$ (incrementing $N$).
+            \item If $\textnormal{ts} < \textnormal{RTM}(x)$, the request is rejected. 
+            \item  Otherwise, a new version is created for timestamp $\textnormal{ts}$ (incrementing $N$).
         \end{itemize}
 \end{itemize}
 \begin{example}
@@ -123,17 +125,18 @@ In theory, the following rules can be applied:
     \end{table}
 \end{example}
 
+\paragraph*{Multiversioning in practice}
 In practice, the rule set is modified slightly:
 \begin{itemize}
-    \item $r_{ts}(x)$ is always accepted. A copy $x_k$ is selected for reading, where:
+    \item $r_{\textnormal{ts}}(x)$ is always accepted. A copy $x_k$ is selected for reading, where:
         \begin{itemize}
-            \item If $ts \geq \textnormal{WTM}_N(x)$, then $k=N$. 
-            \item  Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq ts < \textnormal{WTM}_{k+1}(x)$. 
+            \item If $\textnormal{ts} \geq \textnormal{WTM}_N(x)$, then $k=N$. 
+            \item  Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq \textnormal{ts} < \textnormal{WTM}_{k+1}(x)$. 
         \end{itemize}
     \item $w_{ts}(x)$:
         \begin{itemize}
-            \item If $ts < \textnormal{RTM}(x)$ or $ts < \textnormal{WTM}_N(x)$, the request is rejected. 
-            \item  Otherwise, a new version is created for timestamp $ts$ (incrementing $N$).
+            \item If $\textnormal{ts} < \textnormal{RTM}(x)$ or $\textnormal{ts} < \textnormal{WTM}_N(x)$, the request is rejected. 
+            \item  Otherwise, a new version is created for timestamp $\textnormal{ts}$ (incrementing $N$).
         \end{itemize}
 \end{itemize}
 \begin{example}

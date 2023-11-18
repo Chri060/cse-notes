@@ -1,75 +1,10 @@
 \section{Anomalies in concurrent transactions}
 
-The anomalies resulting from incorrect scheduling include: lost updates, dirty reads, non-repeatable reads, phantom updates and phantom inserts.
-
-\paragraph*{Lost update}
-A lost update is an update applied from a state that ignores a preceding update, resulting in the loss of the earlier update.
-\begin{table}[H]
-    \centering
-    \begin{tabular}{c|c}
-    \textbf{Transaction $\boldsymbol{t_1}$}    & \textbf{Transaction $\boldsymbol{t_2}$} \\ \hline
-    $r_1(x)$                        &                            \\
-    $x=x+1$                         &                            \\
-                                    & $r_2(x)$                   \\
-                                    & $x=x+1$                    \\
-                                    & $w_2(x)$                   \\
-                                    & commit                     \\
-    $w_1(x)$                        &                            \\
-    commit                          &                           
-    \end{tabular}
-\end{table}
-
-\paragraph*{Dirty read}
-A dirty read is created when an uncommitted value is used to update the data.
-\begin{table}[H]
-    \centering
-    \begin{tabular}{c|c}
-    \textbf{Transaction $\boldsymbol{t_1}$} & \textbf{Transaction $\boldsymbol{t_2}$} \\ \hline
-    $r_1(x)$                   &                            \\
-    $x=x+1$                    &                            \\
-    $w_1(x)$                   &                            \\
-                               & $r_2(x)$                   \\
-                               & commit                     \\
-    abort                      &                           
-    \end{tabular}
-\end{table}
-
-\paragraph*{Non-repeatable read}
-We have a non-repeatable read when another transaction updates a previously read value.
-\begin{table}[H]
-    \centering
-    \begin{tabular}{c|c}
-    \textbf{Transaction $\boldsymbol{t_1}$}  & \textbf{Transaction $\boldsymbol{t_2}$} \\ \hline
-    $r_1(x)$                    &                            \\
-                                & $r_2(x)$                   \\
-                                & $x=x+1$                    \\
-                                & $w_2(x)$                   \\
-                                & commit                     \\
-    $r_1(x)$                    &                            \\
-    commit                      & \multicolumn{1}{l}{}      
-    \end{tabular}
-\end{table}
-
-\paragraph*{Phantom update}
-We have a phantom update when another transaction updates data that contributes to a previously valid constraint.
-\begin{table}[H]
-    \centering
-    \begin{tabular}{c|c}
-    \textbf{Transaction $\boldsymbol{t_1}$} & \textbf{Transaction $\boldsymbol{t_2}$} \\ \hline
-    $r_1(x)$                    &                            \\
-                                & $r_2(y)$                   \\
-    $r_1(y)$                    &                            \\
-                                & $y=y-100$                  \\
-                                & $r_2(z)$                   \\
-                                & $z=z+100$                  \\
-                                & $w_2(y)$                   \\
-                                & $w_2(z)$                   \\
-                                & commit                     \\
-    $r_1(z)$                    &                            \\
-    $s=x+y+z$                   &                            \\
-    commit                      &                           
-    \end{tabular}
-\end{table}
-
-\paragraph*{Phantom insert}
-We have a phantom insert when another transaction inserts data that contributes to a previously read datum.
+The anomalies resulting from incorrect scheduling include: 
+\begin{itemize}
+    \item \textit{Lost updates}: update applied from a state that ignores a preceding update, resulting in the loss of the earlier update.
+    \item \textit{Dirty reads}: an uncommitted value is used to update the data.
+    \item \textit{Non-repeatable reads}: another transaction updates a previously read value.
+    \item \textit{Phantom updates}: another transaction updates data that contributes to a previously valid constraint.
+    \item \textit{Phantom inserts}: another transaction inserts data that contributes to a previously read datum.
+\end{itemize}

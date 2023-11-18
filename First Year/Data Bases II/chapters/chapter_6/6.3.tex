@@ -45,17 +45,17 @@ For queries with conjunctions or disjunctions of predicates, the DBMS optimizes 
 The \texttt{JOIN} operation is acknowledged as the most resource-intensive task for a DBMS due to the potential for a substantial increase in the number of tuples in the result. 
 To address this challenge, the optimizer employs one of three techniques:
 \begin{enumerate}
-\item Nested-loop, based on scanning: 
+\item \textit{Nested-loop}, based on scanning: 
     \begin{itemize}
         \item A scan is executed on a table (referred to as the external table), and for each tuple, a scan is performed on the other table (referred to as the internal table).
         \item The matching process is efficient when there is an index on the join attribute of the internal table.
     \end{itemize}
-\item Merge-Scan, based on ordering:
+\item \textit{Merge-Scan}, based on ordering:
     \begin{itemize}
         \item This technique necessitates that both tables are sorted based on the join attribute.
         \item Two synchronized scans traverse the tuples of each table in parallel, and the matching is carried out.
     \end{itemize}
-\item Hash-join, based on hashing
+\item \textit{Hash-join}, based on hashing
     \begin{itemize}
         \item This technique requires that both tables are hashed using the join attribute.
         \item The tuples of the internal table are hashed and stored in a hash table, while the tuples of the external table are scanned, and the matching is performed.
@@ -65,12 +65,12 @@ To address this challenge, the optimizer employs one of three techniques:
 \paragraph*{Equality}
 The expense associated with an equality lookup is contingent upon the type of structure that represents the table:
 \begin{itemize}
-    \item Sequential structures with no index:
+    \item \textit{Sequential structures with no index}:
         \begin{itemize}
             \item Equality lookups are not supported, resulting in a cost equivalent to a full scan.
             \item Sequentially ordered structures might incur a reduced cost.
         \end{itemize}
-    \item Hash or Tree structures:
+    \item \textit{Hash or Tree structures}:
         \begin{itemize}
             \item Equality lookups are supported if $A$ is the search key attribute of the structure.
             \item The cost depends on the storage type (primary or secondary) and the search key type (unique or not).
@@ -80,21 +80,21 @@ The expense associated with an equality lookup is contingent upon the type of st
 \paragraph*{Range}
 The cost associated with a range lookup is contingent upon the type of structure representing the table:
 \begin{itemize}
-    \item Sequential structures (primary):
+    \item \textit{Sequential structures} (primary):
         \begin{itemize}
             \item Range lookups are not supported, resulting in a cost equivalent to a full scan.
             \item Sequentially ordered structures may incur a reduced cost.
         \end{itemize}
-    \item Hash structures(primary and secondary):
+    \item \textit{Hash structures} (primary and secondary):
         \begin{itemize}
             \item Range lookups are not supported, leading to a cost equivalent to a full scan.
         \end{itemize}
-    \item Tree structures (primary and secondary):
+    \item \textit{Tree structures} (primary and secondary):
         \begin{itemize}
             \item Range lookups are supported if $A$ serves as the search key attribute of the structure.
             \item The cost depends on the storage type (primary or secondary) and the search key type (unique or non-unique).
         \end{itemize}
-    \item B+ tree structures (primary and secondary):
+    \item \textit{B+ tree structures} (primary and secondary):
         \begin{itemize}
             \item Range lookups are supported if $A$ is the search key attribute of the structure.
         \end{itemize}

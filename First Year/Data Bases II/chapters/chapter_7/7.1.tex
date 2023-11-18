@@ -1,12 +1,12 @@
 \section{Introduction}
 
-\begin{definition}
-    \emph{Reliability} is defined as the ability of an item to perform a required function under stated conditions for a stated time length.
+\begin{definition}[textit{Reliability}]
+    Reliability is defined as the ability of an item to perform a required function under stated conditions for a stated time length.
 \end{definition}
 In the realm of databases, reliability control ensures the foundational attributes of transactions:
 \begin{itemize}
-    \item Atomicity: guaranteeing the all-or-nothing execution of a transaction.
-    \item Durability: ensuring that once a transaction is committed, its effects are permanent.
+    \item \textit{Atomicity}: guaranteeing the all-or-nothing execution of a transaction.
+    \item \textit{Durability}: ensuring that once a transaction is committed, its effects are permanent.
 \end{itemize}
 The Database Management System (DBMS) implements a specific architecture for reliability control, with key components residing in stable memory and log management.
 
@@ -17,17 +17,17 @@ Additionally, it coordinates read and write access to data and log pages, managi
 \paragraph*{Memory persistence}
 Durability implies a form of memory whose content endures indefinitely, abstracted over existing storage technology levels:
 \begin{itemize}
-    \item Main memory: non-persistent.
-    \item Mass memory: persistent but subject be loss.
-    \item Stable memory: incapable of loss, with a failure probability of zero.
+    \item \textit{Main memory}: non-persistent.
+    \item \textit{Mass memory}: persistent but subject be loss.
+    \item \textit{Stable memory}: incapable of loss, with a failure probability of zero.
 \end{itemize}
 While achieving a zero probability of failure is impractical, the goal is to minimize the failure probability to a negligible value. 
 Techniques such as replication and write protocols are employed for this purpose. 
 The discipline addressing stable memory failure is known as disaster recovery.
 Stable memory can be guaranteed via:
 \begin{itemize}
-    \item On-line replication: the data is replicated on multiple disks (e.g., RAID disk architecture).
-    \item Off-line replication: the data is replicated on backup units
+    \item \textit{On-line replication}: the data is replicated on multiple disks (e.g., RAID disk architecture).
+    \item \textit{Off-line replication}: the data is replicated on backup units
 \end{itemize}
 
 \subsection{Main memory management}
@@ -35,8 +35,8 @@ The objective of main memory management is to reduce data access time without co
 This is achieved through buffers that cache data in faster memory and deferred writing onto secondary storage.
 A buffer page can contain multiple rows and includes:
 \begin{itemize}
-    \item Transaction counter: indicates the number of transactions accessing it.
-    \item Dirty flag: indicates whether the page has been modified and needs alignment with secondary storage.
+    \item \textit{Transaction counter}: indicates the number of transactions accessing it.
+    \item \textit{Dirty flag}: indicates whether the page has been modified and needs alignment with secondary storage.
 \end{itemize}
 On dedicated DBMS servers, up to 80\% of the memory is allocated to the buffer.
 
@@ -53,18 +53,18 @@ The primitives used for buffer management are:
 \paragraph*{Buffer management policies}
 The policies used for buffer management are: 
 \begin{itemize}
-    \item Write policies: asynchronous page writing to disk concerning transactions:
+    \item \textit{Write policies}: asynchronous page writing to disk concerning transactions:
         \begin{itemize}
             \item \texttt{force}: pages are always transferred at commit.
             \item \texttt{no\_force}: transfer of pages can be delayed by the buffer manager.
         \end{itemize}
-    \item De-allocation policies:
+    \item \textit{De-allocation policies}:
         \begin{itemize}
             \item \texttt{steal}: discards and flushes a page in an active transaction to disk.
             \item \texttt{no\_steal}: puts the transaction on a waitlist, managing the request when the page is no longer needed.
         \end{itemize}
-    \item Pre-fetch Policies: loads pages likely to be read into the buffer before they are needed.
-    \item Pre-flushing Policies: de-allocates pages likely to be written from the buffer before they are needed.
+    \item \textit{Pre-fetch policies}: loads pages likely to be read into the buffer before they are needed.
+    \item \textit{Pre-flushing policies}: de-allocates pages likely to be written from the buffer before they are needed.
 \end{itemize}
 
 \paragraph*{Fix primitive}

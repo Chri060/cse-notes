@@ -2,6 +2,7 @@
 
 Ranking queries, also known as top-$k$ queries, focus on retrieving the $k$ best answers from a potentially extensive result set based on the concept of relevance.
 
+\paragraph*{Algorithm}
 The algorithm takes as inputs the cardinality $k$, the dataset $R$, and the scoring function $S$, with the output being the top $k$ tuples with the highest scores according to $S$.
 The algorithm's approach involves computing scores for all tuples, sorting them based on these scores, and finally returning the top $k$ tuples.
 
@@ -32,6 +33,7 @@ ORDER BY 0.8*Price+0.2*Miles
 Only the initial $k$ tuples are included in the result. 
 If multiple sets of $k$ tuples meet the ordering directive, any of these sets is considered a valid answer, demonstrating non-deterministic semantics.
 
+\paragraph*{Evaluation}
 The evaluation of a top-$k$ query considers two basic aspects: query type (one relation, many relations, and aggregate results) and access paths (no index, indexes on all/some ranking attributes).
 In the simplest case, in a top-$k$ selection query with a single relation, if the input is sorted according to $S$, only the first $k$ tuples need to be read.
 If the tuples are not sorted, an in-memory sort is performed with a complexity of $O(N\log{k})$.
@@ -39,52 +41,52 @@ If the tuples are not sorted, an in-memory sort is performed with a complexity o
     Consider the two-dimensional attribute space (Price, Mileage) illustrated in the previous example:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.25\linewidth]{images/ex1.png}
+        \includegraphics[width=0.2\linewidth]{images/ex1.png}
     \end{figure}
     In this representation, each tuple corresponds to a two-dimensional point $(p, m)$, where $p$ denotes the Price, and $m$ represents the Mileage. 
     The intuition behind minimizing $0.8 \cdot \text{Price} + 0.2 \cdot \text{Mileage}$ is the same as searching for points in proximity to $(0,0)$.
     Our preferences play a crucial role in determining the outcome. 
     Consider the equation of the line:
-    \[0.8\cdot Price + 0.2\cdot Mileage = v\]
+    \[0.8\cdot \text{Price} + 0.2\cdot \text{Mileage} = v\]
     Here, $v$ is a constant. 
     This equation can be alternatively expressed as:
-    \[Mileage = -4\cdot Price + 5\cdot v\]
+    \[\text{Mileage} = -4\cdot \text{Price} + 5\cdot v\]
     From the previous equation we see that all the lines have a slope $-4$. 
     By definition, all points on the same line are equally good. 
     Modifying the weights may lead to variations in the optimal choice. 
     Importantly, the target of a query is not confined to $(0,0)$; it can be any point $q=(q_1,q_2)$.
 \end{example}
 
+\paragraph*{Distance functions}
 In a general context, to assess the quality of a tuple $t$, we calculate its distance from the target point $q$. 
 The desirability increases as the distance from $q$ decreases. 
 When examining the distances, the model can be characterized by the following components:
 \begin{itemize}
-    \item An $m$-dimensional space $A = (A_1, A_2, \dots, A_m)$ comprising ranking attributes, where $m \geq 1$.
+    \item An $m$-dimensional space $A = (A_1, A_2, \dots)$ comprising ranking attributes, where $m \geq 1$.
     \item A relation $R(A_1, A_2, \dots, B_1, B_2, \dots)$, with $B_1, B_2, \dots$ representing additional attributes.
-    \item A target point $q = (q_1, q_2, \dots, q_m)$ located in $A$.
+    \item A target point $q = (q_1, q_2, \dots)$ located in $A$.
     \item A distance function $d: A \times A \rightarrow \mathbb{R}^{+}$, quantifying the distance between points in $A$.
 \end{itemize}
-\begin{definition}
-    The top-$k$ query is called $k$-\emph{nearest neighbors} if given a point $q$, a relation $R$, an integer $k \geq 1$, and a distance function $d$ it determines the $k$ tuples in $R$ that are closest to $q$ according to $d$. 
-
-    The distance function, denoted as $L_p$-\emph{norms}, is defined by the formula:
+\begin{definition}[\textit{Nearest neighbors}]
+    The top-$k$ query is called $k$-nearest neighbors if given a point $q$, a relation $R$, an integer $k \geq 1$, and a distance function $d$ it determines the $k$ tuples in $R$ that are closest to $q$ according to $d$. 
+\end{definition}
+\begin{definition}[\textit{$L_p$-norms}]
+    The distance function, denoted as $\text{L}_{\text{p}}$-norms, is defined by the formula:
     \[L_p(t,q)=\left(\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert^{p}}\right)^{\frac{1}{p}}\]
 \end{definition}
-
-\paragraph*{Distance functions}
 Significant instances of the $L_p$-norm include:
 \begin{itemize}
-    \item Euclidean distance (ellipsoids): $L_2(t,q)=\sqrt{\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert^{2}}}$
-    \item Manhattan distance (rhomboids): $L_1(t,q)=\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert}$
-    \item Čebyšëv distance (rectangles): $L_{\infty}(t,q)=\max_{i}\{\left\lvert t_i-q_i\right\rvert\}$
+    \item \textit{Euclidean distance} (ellipsoids): $L_2(t,q)=\sqrt{\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert^{2}}}$
+    \item \textit{Manhattan distance} (rhomboids): $L_1(t,q)=\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert}$
+    \item \textit{Čebyšëv distance} (rectangles): $L_{\infty}(t,q)=\max_{i}\{\left\lvert t_i-q_i\right\rvert\}$
 \end{itemize}
 The shape of the attribute space depends on the distance function and the weight associated to each coordinate: 
 \begin{itemize}
-    \item Euclidean distance (hyper-ellipsoids):
+    \item \textit{Euclidean distance} (hyper-ellipsoids):
         \[L_2(t,q;W)=\sqrt{\sum_{i=1}^{m}{w_i\left\lvert t_i-q_i \right\rvert^{2}}}\]
-    \item Manhattan distance (hyper-rhomboids): 
+    \item \textit{Manhattan distance} (hyper-rhomboids): 
         \[L_1(t,q;W)=\sum_{i=1}^{m}{w_i\left\lvert t_i-q_i \right\rvert}\]
-    \item Čebyšëv distance (hyper-rectangles): 
+    \item \textit{Čebyšëv distance} (hyper-rectangles): 
         \[L_{\infty}(t,q;W)=\max_{i}\{w_i \left\lvert t_i-q_i\right\rvert\}\]
 \end{itemize}
 
@@ -98,7 +100,6 @@ ORDER BY S(p1,p2,...,pm) [DESC]
 FETCH FIRST k ROWS ONLY             
 \end{lstlisting}
 In this query, $p_1, p_2, \dots, p_m$ represent the scoring criteria.
-
 In top-$k$ $1-1$ join queries, where all joins are on a common key attribute, two main scenarios are possible:
 \begin{itemize}
     \item There is an index for retrieving tuples according to each preference.
@@ -161,14 +162,14 @@ The global score $S(o)$ of $o$ is computed using a scoring function $S$ that com
 \[S(o) \equiv  S(p(o)) = S(p_1(o),p_2(o),\dots,p_m(o))\]
 With $S:[0,1]^m \rightarrow \mathbb{R}^{+}$. 
 \begin{example}
-    Consider the attribute space $A = (Price,Mileage)$
+    Consider the attribute space $A = (\text{Price},\text{Mileage})$
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.25\linewidth]{images/ex1.png}
     \end{figure}
-    If we choose $MaxP = 50,000$ and $MaxM = 80,000$, a generic point $o$ is mapped with these formulas:
-    \[p_1(o) = 1 - \dfrac{o.Price}{MaxP}\]
-    \[p_2(o) = 1 - \dfrac{o.Mileage}{MaxM}\]
+    If we choose $\text{MaxP} = 50,000$ and $\text{MaxM} = 80,000$, a generic point $o$ is mapped with these formulas:
+    \[p_1(o) = 1 - \dfrac{o.\text{Price}}{\text{MaxP}}\]
+    \[p_2(o) = 1 - \dfrac{o.\text{Mileage}}{\text{MaxM}}\]
     The new graph is as follows: 
     \begin{figure}[H]
         \centering
@@ -257,7 +258,10 @@ The algorithm follows these steps:
     \item Among these, output the $k$ objects with the best overall score. 
 \end{enumerate}
 The complexity of this algorithm is $O(N^{\frac{m-1}{m}}k^{\frac{1}{m}})$, which is sublinear in the number $N$ of objects. 
-The stopping criterion is independent of the scoring function, and it is not instance-optimal.
+The stopping criterion is function-independent. 
+\begin{property}
+    The algorithm is not instance-optimal.
+\end{property}
 \begin{example}
     Consider hotel reviews on different sites:
     \begin{table}[H]
@@ -288,6 +292,8 @@ The stopping criterion is independent of the scoring function, and it is not ins
         \end{tabular}
     \end{table}
 \end{example}
+
+\paragraph*{Drawbacks}
 The primary limitation of this algorithm lies in its dependence on accesses, leading to an underutilization of the specificity inherent in certain scoring functions. 
 Additionally, the memory requirements have the potential to become impractical.
 While there are possibilities for improvements, substantial enhancements in complexity can only be achieved by modifying the stopping condition.
@@ -304,12 +310,12 @@ The algorithm follows these steps:
     \item Let $s_{L_i}$ be the last score seen under sorted access for $R_i$. 
     \item Define the threshold $T=S(s_{L_1}, \dots, s_{L_m})$. 
     \item If the score of the $k$-th object is worse than $T$, go to step one. 
-    \item Return the current top$k$ objects. 
+    \item Return the current top $k$ objects. 
 \end{enumerate}
+The stopping criterion depends on the function and not on the number of accesses. 
 \begin{property}
     The threshold algorithm is instance optimal among all algorithms that use random and sorted accesses. 
 \end{property}
-The stopping criterion depends on the function and not on the number of accesses. 
 \begin{example}
     Consider hotel reviews with cheapness and rating values.
     \begin{table}[H]
@@ -327,12 +333,11 @@ The stopping criterion depends on the function and not on the number of accesses
         $\dots$       & $\dots$            &                & $\dots$       & $\dots$         \\ \cline{1-2} \cline{4-5} 
         \end{tabular}
     \end{table}
-    The scoring function is $0.5 \cdot cheapness+0.5 \cdot rating$, and $k=2$. 
+    The scoring function is $0.5 \cdot \text{cheapness}+0.5 \cdot \text{rating}$, and $k=2$. 
     We do a sorted access, and we put the hotels in the first row in the buffer with the mean value of both variables (the second can be found with a random access). 
     The threshold point is $(0.92,0.9)$ and has a value of $0.91$, found with the scoring function. 
     We continue to do this procedure, and we update the top $k$ hotels only if the found hotel has a better score of at least one of the hotels in the buffer (note that we keep in the buffer only the top $k$ hotels, while we delete the others). 
     We stop the iteration when the value of all the objects in the buffer is greater or equal to the threshold value. 
-    In this example this happens after three iteration. 
     The buffer contains the top $k$ hotels with their corresponding scores.
     \begin{table}[H]
         \centering
@@ -343,8 +348,10 @@ The stopping criterion depends on the function and not on the number of accesses
         Crillon                       & 0.825          \\ \hline
         \end{tabular}
     \end{table}
-    The threshold point has a value of $0.825$
+    The threshold point has a value of 0.825.
 \end{example}
+
+\paragraph*{Performance evaluation}
 In general, the Threshold Algorithm outperforms the Fagin Algorithm since it can adapt to the specific scoring function. 
 To assess the performance of Threshold Algorithm, we evaluate the middleware cost using the following formula:
 \[\textnormal{cost} = SA \cdot c_{SA} + RA \cdot c_{RA}\]

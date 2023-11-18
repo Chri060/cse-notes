@@ -2,8 +2,8 @@
 
 The entity instances in Java Persistence API (JPA) are plain Java objects, and they don't become managed until the application invokes an API method to initiate the process. 
 The entity manager serves as the central authority for all persistence actions, managing the mapping and APIs for interacting with the database and the objects.
-\begin{definition}
-    The \emph{persistence context} is a fundamental concept in JPA, acting as a main memory database that holds objects in a managed state.
+\begin{definition}[\textit{Persistence context}]
+    The persistence context is a fundamental concept in JPA, acting as a main memory database that holds objects in a managed state.
 \end{definition}
 A managed object is tracked, enabling automatic synchronization of modifications to its state with the database.
 Database writes typically occur asynchronously, requiring the persistence context to connect to a transaction when they happen. 
@@ -68,11 +68,11 @@ em.remove(emp);
 \end{figure}
 Referring to the preceding diagram, entities can exist in five primary states (deleted is excluded in the illustration):
 \begin{itemize}
-    \item New: the entity is unknown to the entity manager, lacking a persistent identity, and without any associated tuple.
-    \item Managed: the entity is associated with persistence context, c with changes to objects automatically synchronized with the database.
-    \item Detached: the entity has an identity potentially associated with a database tuple, but changes are not automatically propagated to the database.
-    \item Removed: the entity is scheduled for removal from the database.
-    \item Deleted: the entity is erased from the database. 
+    \item \textit{New}: the entity is unknown to the entity manager, lacking a persistent identity, and without any associated tuple.
+    \item \textit{Managed}: the entity is associated with persistence context, c with changes to objects automatically synchronized with the database.
+    \item \textit{Detached}: the entity has an identity potentially associated with a database tuple, but changes are not automatically propagated to the database.
+    \item \textit{Removed}: the entity is scheduled for removal from the database.
+    \item \textit{Deleted}: the entity is erased from the database. 
 \end{itemize}
 
 \subsection{Application architecture}
@@ -85,10 +85,10 @@ The advantage of using EJB is that this container provides support to make Java 
 \end{figure}
 Transactions in this context exist at three levels:
 \begin{itemize}
-    \item DBMS transactions: managed by the Database Management System (DBMS) and utilize SQL.
+    \item \textit{DBMS transactions}: managed by the Database Management System (DBMS) and utilize SQL.
         This level is used by the entity manager.
-    \item Resource-local transactions: managed by the application and use the Java Database Connectivity (JDBC) connection interface, mapped to JDBC.
-    \item Container transaction: managed by the application or the container and use the Java Transaction API (JTA) interface, also mapped to JDBC. 
+    \item \textit{Resource-local transactions}: managed by the application and use the Java Database Connectivity (JDBC) connection interface, mapped to JDBC.
+    \item \textit{Container transaction}: managed by the application or the container and use the Java Transaction API (JTA) interface, also mapped to JDBC. 
         The level utilized by the entity manager is the container transaction level.
 \end{itemize}
 After defining a business object, the container injects the entity manager into it.
@@ -110,13 +110,13 @@ This behavior is the most common and default, but the business object methods ca
 A method can be annotated to achieve the desired transactional behavior using: 
 \texttt{@TransactionAttribute(TransactionAttributeType.type)}, where \texttt{type} can be: 
 \begin{itemize}
-    \item Mandatory: expects a transaction to have already been started and be active when the method is called. 
+    \item \texttt{Mandatory}: expects a transaction to have already been started and be active when the method is called. 
         If no transaction is active, an exception is thrown.
-    \item Required: the default behavior; starts a new transaction if none is active. 
+    \item \texttt{Required}: the default behavior; starts a new transaction if none is active. 
         If one is active, it is used.
-    \item Requires\_new: the method always needs to be in its own transaction.
+    \item \texttt{Requires\_new}: the method always needs to be in its own transaction.
         Any active transaction is suspended.
-    \item Supports: the method does not access transactional resources but tolerates running inside one if it exists.
-    \item Not\_supported: the method will cause the container to suspend the current transaction if one is active when the method is called.
-    \item Never: the method will cause the container to throw an exception if a transaction is active when the method is called.
+    \item \texttt{Supports}: the method does not access transactional resources but tolerates running inside one if it exists.
+    \item \texttt{Not\_supported}: the method will cause the container to suspend the current transaction if one is active when the method is called.
+    \item \texttt{Never}: the method will cause the container to throw an exception if a transaction is active when the method is called.
 \end{itemize}

@@ -19,36 +19,37 @@ REFERENCING {
 \paragraph*{Modes}
 Triggers can be executed in different modes, including:
 \begin{itemize}
-    \item BEFORE: in this mode, the trigger's action occurs before any changes to the database's status, but only if the specified condition is met.
+    \item \texttt{BEFORE}: in this mode, the trigger's action occurs before any changes to the database's status, but only if the specified condition is met.
         It is primarily used for validating modifications before they are applied, potentially allowing for conditional effects.
         A significant constraint is that "before" triggers cannot directly update the database. 
         However, they can impact transition variables at a row-level granularity, often implemented as: 
         \begin{lstlisting}[style=SQL]
 SET NEW.t = <expression>
         \end{lstlisting}
-    \item AFTER: this mode involves executing the trigger's action after the database has undergone modifications, contingent upon the satisfaction of the specified condition.
+    \item \texttt{AFTER}: this mode involves executing the trigger's action after the database has undergone modifications, contingent upon the satisfaction of the specified condition.
         It is the most commonly used mode and is well-suited for a wide range of applications.
 \end{itemize}
 
 \paragraph*{Granularity}
 Triggers can function at various levels of granularity:
 \begin{itemize}
-    \item Row-level granularity: tn this approach, the trigger is evaluated and potentially executed separately for each tuple affected by the triggering statement. 
+    \item \textit{Row-level granularity}: tn this approach, the trigger is evaluated and potentially executed separately for each tuple affected by the triggering statement. 
         Writing triggers at the row-level is more straightforward but may be less efficient.
-    \item Statement-level granularity: triggers are assessed and potentially executed only once for each activating statement, regardless of the number of tuples impacted in the target table. 
+    \item \textit{Statement-level granularity}: triggers are assessed and potentially executed only once for each activating statement, regardless of the number of tuples impacted in the target table. 
         This occurs even if no tuple is affected. 
         This mode aligns more closely with the traditional SQL statement approach, which is typically set-oriented.
 \end{itemize}
-\begin{definition}
-    In the context of triggers, \emph{transition variables} are special variables that indicate the state of a modification, both before and after, and their syntax depends on the chosen granularity:
-    \begin{itemize}
-        \item Row-level: in this case, the variables old and new are used, where old represents the value before the modification of the specific row (tuple) being considered, and new represents the value after the modification.
-        \item Statement-level: for this granularity, table variables are employed. 
-            These include old table and new table, with old table containing the old values of all affected rows and new table containing the new values of those rows.
-    \end{itemize}
+\begin{definition}[\textit{Transition variables}]
+    In the context of triggers, transition variables are special variables that indicate the state of a modification, both \texttt{BEFORE} and \texttt{AFTER}. 
 \end{definition}
+The syntax depends on the level of granularity: 
+\begin{itemize}
+    \item Row-level: in this case, the variables old and new are used, where old represents the value before the modification of the specific row (tuple) being considered, and new represents the value after the modification.
+    \item Statement-level: for this granularity, table variables are employed.
+     These include old table and new table, with old table containing the old values of all affected rows and new table containing the new values of those rows.
+\end{itemize}
 It's important to note that, in specific cases, these variables may be undefined. 
-In triggers with an event of "insert", the variables old and old table are undefined, while in triggers with an event of "delete", the variables new and new table are undefined.  
+In triggers with an event of \texttt{INSERT}, the variables old and old table are undefined, while in triggers with an event of \texttt{DELETE}, the variables new and new table are undefined.  
 \begin{example}
     Table T2 serves as a replica of table T1. 
     Whenever an update is made to T1, this modification is automatically replicated in T2. 
@@ -99,11 +100,11 @@ DELETE FROM T2 WHERE T2.ID = old.ID;
 \paragraph*{Execution order}
 When multiple triggers are linked to a common event, SQL:1999 dictates the sequence in which they execute: 
 \begin{enumerate}
-    \item "before" statement level triggers. 
-    \item "before" row level triggers. 
+    \item \texttt{BEFORE} statement level triggers. 
+    \item \texttt{BEFORE} row level triggers. 
     \item Modification is applied, and integrity constraints are checked.
-    \item "after" row level triggers. 
-    \item "after" statement level triggers.
+    \item \texttt{AFTER} row level triggers. 
+    \item \texttt{AFTER} statement level triggers.
 \end{enumerate}
 However, if there are multiple triggers within the same category, the order of execution is contingent upon the specific system's implementation.
 
@@ -111,8 +112,8 @@ However, if there are multiple triggers within the same category, the order of e
 The action of a trigger can lead to the activation of another trigger, a phenomenon known as cascading or nesting.
 Recursive cascading occurs when a statement, S, executed on table T initiates a sequence of triggers that generates the same event, S, on table T, often referred to as looping.
 It is important to ensure that recursive cascading does not. produce undesired effects. 
-\begin{definition}
-    In the context of triggers, the concept of \emph{termination} ensures that, regardless of the initial state and any sequence of modifications, there is always a definitive final state, thereby preventing the possibility of infinite activation cycles.
+\begin{definition}[\textit{Termination}]
+    In the context of triggers, the concept of termination ensures that, regardless of the initial state and any sequence of modifications, there is always a definitive final state, thereby preventing the possibility of infinite activation cycles.
 \end{definition}
 The simplest check exploits the triggering graph, that consists of a node $i$ for each trigger $T_i$, and an arc from a node $i$ to a node $j$ if the execution of trigger $T_i$'s action may activate trigger $T_j$.
 The graph is created through a straightforward syntactic analysis. 
