@@ -1,0 +1,200 @@
+\section{Sampling based methods}
+
+Consider a Bayesian network encompassing random variables $X_1, \dots, X_N$, some of which are observed ($X_{\text{obs}}=y_{\text{obs}}$). 
+The objective is to compute marginal posteriors $\text{P}(X_i|X_{\text{obs}}=y_{\text{obs}})$ conditioned on the provided observations.
+To achieve this, a set of $K$ joint samples $S=\{(x_1,x_2,\dots,x_N)\}_{k=1}^K$ is generated, where each sample $(x_1,x_2,\dots,x_N)$ represents a list of instantiations for all0 $X_1,X_2,\dots,X_N$. 
+With these samples in hand, the computation of $\text{P}(X_i=x|X_{\text{obs}}=y_{\text{obs}})$ is approximated as follows:
+\[\text{P}(X_i=x|X_{\text{obs}}=y_{\text{obs}}) \approx \dfrac{\textnormal{count}_S \left(x_i^k=x \land x_{\text{obs}}^k=y_{\text{obs}}\right)}{\textnormal{count}_S \left(x_{\text{obs}}^k=y_{\text{obs}}\right)}\]
+Various sampling methods can be employed, including:
+\begin{itemize}
+    \item \textit{Rejection sampling}: discards false samples, potentially slowing down when a significant number of samples are rejected.
+    \item \textit{Likelihood sampling}: force the usability of all samples.
+    \item \textit{Gibbs sampling}: directly generates samples based on the provided probability distribution.
+\end{itemize}
+
+\subsection{Rejection sampling}
+To generate a single sample $x_{1:N}^k$ using rejection sampling, the following steps are employed:
+\begin{enumerate}
+    \item Sort all random variables in topological order. 
+    \item Initialize with $i=1$.
+    \item Sample a value $x_i^k \sim \text{P}\left(X_i|x_{\textnormal{parents}(X_i)}^k\right)$ conditional on $x_{i:i-1}^k$. 
+    \item If $i$ is in the set of observed variables ($\text{obs}$), compare the sampled value $x_i^k$ with the observation $y_i$. 
+        Reject and repeat from the previous steps if the sample does not match the observation.
+    \item Repeat with $i=i+1$.
+\end{enumerate}
+After generating $k$, the computation of $\text{P}\left(X_i=x|X_{\text{obs}}=y_{\text{obs}}\right)$ is approximated as: 
+\[\text{P}\left(X_i=x|X_{\text{obs}}=y_{\text{obs}}\right) \approx \dfrac{\textnormal{count}_S\left( x_i^k=x \right)}{K}\]
+\begin{example}
+    Consider the sprinkler example. 
+    The sampling of $x^k$ involves generating random numbers with $U(0,1)$ for each variable.
+    Specifically:
+    \begin{itemize}
+        \item If $s\leq\text{P}(C)$, then $x_C^k=1$; $x_C^k=0$ otherwise. 
+        \item If $s\leq\text{P}(S|x_C^k)$, then $x_S^k=1$; $x_S^k=0$ otherwise. 
+        \item If $s\leq\text{P}(R|x_C^k)$, then $x_R^k=1$; $x_R^k=0$ otherwise. 
+        \item If $s\leq\text{P}(W|x_S^k,x_R^k)$, then $x_W^k=1$; $x_W^k=0$ otherwise. 
+    \end{itemize}
+    Generated samples that are entirely false are discarded. 
+    The process is repeated for the four variables to obtain various samples. 
+    One possible set of samples could be:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccc}
+        \hline
+        \textbf{C} & \textbf{S} & \textbf{R} & \textbf{W} \\ \hline
+        0          & 1          & 0          & 1          \\
+        0          & 0          & 0          & 0          \\
+        0          & 1          & 1          & 1          \\
+        0          & 1          & 1          & 1          \\
+        0          & 1          & 1          & 1          \\
+        1          & 0          & 1          & 1          \\ \hline
+        \end{tabular}
+    \end{table}
+    Eliminating samples that are entirely false, the final set might look like the following:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccc}
+        \hline
+        \textbf{C} & \textbf{S} & \textbf{R} & \textbf{W} \\ \hline
+        0          & 1          & 0          & 1          \\
+        0          & 1          & 1          & 1          \\
+        0          & 1          & 1          & 1          \\
+        0          & 1          & 1          & 1          \\
+        1          & 0          & 1          & 1          \\ \hline
+        \end{tabular}
+    \end{table}
+    From these samples, probabilities such as $\text{P}(C|W)$ can be computed:
+    \[\text{P}(C|W)=\dfrac{\text{P}(C \land W)}{\text{P}(W)}=\dfrac{\# (C \land W)}{\#(W)}=\dfrac{1}{5}=0.2\]
+\end{example}
+However, this method becomes inefficient when dealing with rare events due to the rejection of a significant number of samples.
+
+\subsection{Likelihood sampling}
+To generate a single weighted sample $(w_k,x_{1:N}^k)$ using importance sampling with likelihood weighting, the following steps are taken:
+\begin{enumerate}
+    \item Sort all random variables in topological order. 
+    \item Initialize with $i=1$ and $w^k=1$.
+    \item If $i$ is not in the set of observed variables ($\text{obs}$), sample a value $x_i^k \sim \text{P}\left(X_i|x_{\text{parents}(X_i)}^k\right)$ conditional on $x^k_{1:i-1}$. 
+    \item If $i$ is in $\text{obs}$, set the value $x_i^k =y_i$ and update $w^k=w^k\cdot\text{P}\left( X_i=y_i|x^k_{1:i-1} \right)$.
+    \item Repeat with $i=i+1$.
+\end{enumerate}
+After generating $k$ samples, the computation of $\text{P}\left(X_i=x|X_{\text{obs}}=y_{\text{obs}}\right)$ is approximated as:
+\[\text{P}\left(X_i=x|X_{\text{obs}}=y_{\text{obs}}\right) \approx \dfrac{\sum_{k=1}^Kw^k\cdot I_{x_i^k=x}}{\sum_{k=1}^Kw^k}\]
+Here, $I_{x_i^k=x}$ is 1 if $x_i^k=x$ or 0 otherwise. 
+\begin{example}
+    Consider the sprinkler example. 
+    In the sampling of $x^k$, we initialize $w^k$ to 1 and generate three random numbers from $U(0,1)$. 
+    The sampling proceeds as follows:
+    \begin{itemize}
+        \item If $ s \leq \text{P}(C)$, then $x_C^k=1$; $x_C^k=0$ otherwise. 
+        \item If $ s \leq \text{P}(S|x_C^k)$, then $x_S^k=1$; $x_S^k=0$ otherwise. 
+        \item If $ s \leq \text{P}(R|x_C^k)$, then $x_R^k=1$; $x_R^k=0$ otherwise. 
+    \end{itemize}
+    The fourth part of the sample is determined by forcing $w^k_W=1$ using the formula: 
+    \[w^k=w^k\cdot\text{P}\left( x_W^k=1|x_S^k,x_R^k \right)\]
+    This probability is computed based on the other free variables, and the value can be obtained by checking the row with the values found for $S$ and $R$.
+    The process is repeated for all four variables to obtain various samples. 
+    One possible set of samples, along with their corresponding weights, could be:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccccc}
+        \hline
+        \textbf{C} & \textbf{S} & \textbf{R} & \textbf{W} & \textbf{w}  \\ \hline
+        0          & 1          & 0          & 1          & 0.9         \\
+        0          & 0          & 0          & 1          & 0           \\
+        0          & 1          & 1          & 1          & 0.99        \\
+        0          & 1          & 1          & 1          & 0.99        \\
+        0          & 1          & 1          & 1          & 0.99        \\
+        1          & 0          & 1          & 1          & 0.9         \\ \hline
+        \end{tabular}
+    \end{table}
+    After obtaining multiple samples, probabilities such as $\text{P}(C|W)$ can be computed:
+    \[\text{P}(C|W)=\dfrac{\sum_{k=1}^Kw^k\cdot I_{x_i^k=x}}{\sum_{k=1}^Kw^k}=\dfrac{0.9}{0.9+0+0.99+0.99+0.99+0.9}=0.1886\]
+\end{example}
+The key distinction from rejection sampling is that all samples are considered, making this method suitable for handling rare events.
+
+\subsection{Gibbs sampling}
+In Gibbs sampling, the samples are dependent as each subsequent sample is influenced by the preceding one. 
+To implement Gibbs sampling, the following steps are taken:
+\begin{enumerate}
+    \item All observed variables (\text{obs}) are fixed to their observed values $x_i^k=y_i$ for any $k$. 
+    \item To generate the $(k-1)$th sample, iterate over latent variables $i \notin \text{obs}$, updating: 
+        \begin{align*}
+            x_i^{k+1}   &\sim \text{P}\left(X_i|x_{1:N\backslash i}^k\right) \\
+                        &\sim \text{P}\left(X_i|x_{1}^k,x_{2}^k,\dots,x_{i-1}^k,x_{i+1}^k,\dots,x_{N}^k\right) \\
+                        &\sim \text{P}\left(X_i|x_{\text{parents}(i)}^k\right)\prod_{j:i \in \text{parents}(j)}\text{P}\left(X_j=x_j^k|X_i,x_{\text{parents}(j)\backslash i}^k\right)
+        \end{align*}
+\end{enumerate}
+Each $x_I^{k+1}$ is resampled conditionally on the other current sample values.
+After an initial set of samples is obtained, subsequent samples can be directly utilized.
+\begin{example}
+    Consider the sprinkler example. 
+    Applying Bayes' theorem, we can obtain the proportional relationships as follows:
+    \begin{itemize}
+        \item $\text{P}(C|S^k,R^k,W^k) \propto \text{P}(C)\text{P}(S^k|C)\text{P}(R^k|C)$.
+        \item $\text{P}(S|C^k,R^k,W^k) \propto \text{P}(S|C^k)\text{P}(W^k|S,R^k)$.
+        \item $\text{P}(R|C^k,S^k,W^k) \propto \text{P}(R|C^k)\text{P}(W^k|S^k,R)$.
+        \item $\text{P}(W|C^k,S^k,R^k) \propto \text{P}(W|S^k,R^k)$.
+    \end{itemize}
+    The goal is to sample $\text{P}(C|W=1)$  by generating samples $x^k$ based on $U(0,1)$. 
+    For the initial sample, likelihood sampling is employed with the following steps:
+    \begin{itemize}
+        \item Force $x_W^k=1$. 
+        \item If $ s \leq \text{P}(C|x_S^{k-1},x_R^{k-1},x_W^{k-1})$, then $x_C^k=1$; $x_C^k=0$ otherwise. 
+        \item If $ s \leq \text{P}(S|x_C^{k-1},x_R^{k-1},x_W^{k-1})$, then $x_S^k=1$; $x_S^k=0$ otherwise. 
+        \item If $ s \leq \text{P}(R|x_C^{k-1},x_S^{k-1},x_W^{k-1})$, then $x_R^k=1$; $x_R^k=0$ otherwise. 
+    \end{itemize}
+    One possible result for the initial sample can be:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccc}
+        \hline
+        \textbf{C} & \textbf{S} & \textbf{R} & \textbf{W} \\ \hline
+        0          & 1          & 0          & 1          \\ \hline
+        \end{tabular}
+    \end{table}
+    Following the initial sample, Gibbs' sampling iterations are applied.
+    If we decide to fix the value of $W$ to one, the other variables can be computed using the proportions found before. 
+    For instance:    
+    \begin{itemize}
+        \item For cloudy ($C$):
+            \begin{itemize}
+                \item $\text{P}(C=1|S^{k-1},R^{k-1},W^{k-1}) \propto 0.125$
+                \item $\text{P}(C=0|S^{k-1},R^{k-1},W^{k-1}) \propto 0.36$
+            \end{itemize}
+            We can compute the value of $C=1$ given the other variables, which is: 
+            $\text{P}(C=1|S^{k-1},R^{k-1},W^{k-1}) = \dfrac{0.125}{0.125+0.36}=0.257$
+            We generate the number and put 0 or 1 in the table.
+        \item For sprinkler ($S$):
+            \begin{itemize}
+                \item $\text{P}(S=1|C^{k-1},R^{k-1},W^{k-1}) \propto 0.81$
+                \item $\text{P}(S=0|C^{k-1},R^{k-1},W^{k-1}) \propto 0$
+            \end{itemize}
+            We can compute the value of $C=1$ given the other variables, which is: 
+            $\text{P}(C=1|S^{k-1},R^{k-1},W^{k-1}) = \dfrac{0.81}{0.81+0}=1$
+            We generate the number and put 0 or 1 in the table. 
+        \item For raining ($R$):
+            \begin{itemize}
+                \item $\text{P}(R=1|C^{k-1},S^{k-1},W^{k-1}) \propto 0.198$
+                \item $\text{P}(R=0|C^{k-1},S^{k-1},W^{k-1}) \propto 0.72$
+            \end{itemize}
+            We can compute the value of $C=1$ given the other variables, which is: 
+            $\text{P}(C=1|S^{k-1},R^{k-1},W^{k-1}) = \dfrac{0.198}{0.198+0.72}=0.215$
+            We generate the number and put 0 or 1 in the table. 
+    \end{itemize}
+    This procedure is iteratively applied, and the final table (which may vary depending on the samples) could be:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cccc}
+        \hline
+        \textbf{C} & \textbf{S} & \textbf{R} & \textbf{W} \\ \hline
+        0          & 1          & 0          & 1          \\
+        0          & 1          & 0          & 1          \\
+        0          & 1          & 1          & 1          \\
+        1          & 1          & 0          & 1          \\
+        0          & 0          & 0          & 1          \\
+        1          & 0          & 0          & 1          \\ \hline
+        \end{tabular}
+    \end{table}
+    As an example computation, the probability of $\text{P}(C|W)$ is:
+    \[\text{P}(C|W)=\dfrac{\text{P}(C \land W)}{\text{P}(W)}=\dfrac{\# (C \land W)}{\#(W)}=\dfrac{2}{6}=0.333\]
+\end{example}

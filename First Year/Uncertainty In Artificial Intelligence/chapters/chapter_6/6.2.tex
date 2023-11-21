@@ -6,7 +6,7 @@ Nodes represent random variables, and edges indicate direct influence.
     In the provided Bayesian network:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.25\linewidth]{images/insurance.png}
+        \includegraphics[width=0.4\linewidth]{images/insurance.png}
     \end{figure}
     Random variables "age," "income," and "occupation" are independent, whereas "buy X" and "Interested in insurance" are conditional probability distributions.
 \end{example}
@@ -17,7 +17,7 @@ This is achieved by multiplying the number of nodes by $2^k$, where $k$ represen
     In the provided Bayesian network:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.25\linewidth]{images/insurance.png}
+        \includegraphics[width=0.4\linewidth]{images/insurance.png}
     \end{figure}
     For the full joint distribution, we require $2^N - 1$ parameters, which in this case is $2^5 - 1 = 31$ parameters.
     To represent the Bayesian network itself, we need to calculate the parameters required:
@@ -28,7 +28,7 @@ This is achieved by multiplying the number of nodes by $2^k$, where $k$ represen
     \end{itemize}
     So, the total parameters needed to represent the Bayesian network is $3 + 8 + 2 = 13$ parameters.
 \end{example}
-\begin{definition}
+\begin{definition}[\textit{Conditionally indipendent}]
     We define $X_1$ to be conditionally independent of $X_2$ given $X_3$ if the probability of $X_1$ is not influenced by the value of $X_2$ when we have knowledge about $X_3$.  
     This can be expressed as:
     \[\textnormal{P}(X_1|X_2,X_3)=\textnormal{P}(X_1|X_3)\]
@@ -46,8 +46,8 @@ Likewise, for sets of variables, we can state that $X_1, X_2, X_3$ are independe
     This can be expressed as:
     \[\textnormal{P}(A|B,C)=\textnormal{P}(A|C)\]
 \end{example}
-\begin{definition}
-    A \emph{prior probability} is a probability associated with a variable that has no incoming edges in a Bayesian network. 
+\begin{definition}[\textit{Prior probability}]
+    A prior probability is a probability associated with a variable that has no incoming edges in a Bayesian network. 
 \end{definition}
 It's important to note that in a Bayesian network, a node is independent of its ancestors, given its parent node.
 \begin{example}
@@ -143,35 +143,37 @@ It's important to note that in a Bayesian network, a node is independent of its 
     \end{table}
 \end{example}
 In statistics, the phenomenon of explaining away is often referred to as Berkson's paradox or selection bias. It pertains to situations where two variables become dependent due to the observation of a third variable. 
+
+\paragraph*{Classification}
 In a Bayesian network, the relationships between variables can exhibit various types of dependencies and independencies: 
 \begin{itemize}
     \item $\textnormal{P}(X,Y,Z)=\textnormal{P}(X)\textnormal{P}(Y)\textnormal{P}(Z|X,Y)$ and $\textnormal{P}(X,Y|Z)=\textnormal{P}(X)\textnormal{P}(Y)$ if the nodes are connected in the following way. 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.2\linewidth]{images/independencies1.png}
+            \includegraphics[width=0.3\linewidth]{images/independencies1.png}
         \end{figure}
     \item $\textnormal{P}(X,Y,Z)=\textnormal{P}(X|Z)\textnormal{P}(Y|Z)\textnormal{P}(Z)$ and $\textnormal{P}(X,Y|Z)=\textnormal{P}(X|Z)\textnormal{P}(Y|Z)$ if the nodes are connected in the following way. 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.2\linewidth]{images/independencies2.png}
+            \includegraphics[width=0.3\linewidth]{images/independencies2.png}
         \end{figure}
     \item $\textnormal{P}(X,Y,Z)=\textnormal{P}(X)\textnormal{P}(Z|X)\textnormal{P}(Y|Z)$ and $\textnormal{P}(X,Y|Z)=\textnormal{P}(X|Z)\textnormal{P}(Y|Z)$ if the nodes are connected in the following way. 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.2\linewidth]{images/independencies3.png}
+            \includegraphics[width=0.3\linewidth]{images/independencies3.png}
         \end{figure}
 \end{itemize}
-\begin{definition}
-    Two sets of nodes, denoted as $A$ and $B$, exhibit what is termed as \emph{conditional independence} or are often referred to as being \emph{d-separated}, given a set of nodes $C$ if and only if all paths from $A$ to $B$ are effectively blocked by the presence of $C$.
+\begin{definition}[\textit{Conditional indipendence}]
+    Two sets of nodes, denoted as $A$ and $B$, exhibit what is termed as conditional independence or are often referred to as being d-separated, given a set of nodes $C$ if and only if all paths from $A$ to $B$ are effectively blocked by the presence of $C$.
 \end{definition}
 When we classify $C$ based on its role within a Bayesian network:
 \begin{itemize}
-    \item $C$ is categorized as a "root" when it remains hidden or unobserved. 
+    \item $C$ is categorized as a root when it remains hidden or unobserved. 
         In this scenario, the children of $C$ are dependent on each other due to the influence of a common unobserved cause. 
         However, if $C$ is observed, the children become conditionally independent, meaning that the common unobserved cause is no longer exerting an impact.
-    \item $C$ is termed a "leaf" when it is hidden, and its parent nodes are marginally independent of one another. 
+    \item $C$ is termed a leaf when it is hidden, and its parent nodes are marginally independent of one another. 
         Nevertheless, if $C$ (or any descendant of $C$) is observed, the parent nodes become dependent on each other, introducing conditional dependence.
-    \item $C$ is described as a "bridge" when the nodes both upstream and downstream of $C$ become dependent solely when $C$ remains hidden. 
+    \item $C$ is described as a bridge when the nodes both upstream and downstream of $C$ become dependent solely when $C$ remains hidden. 
         Conditioning on $C$, by observing or introducing knowledge about it, effectively disrupts the graph's structure at that particular point, resulting in dependence between the nodes on either side of $C$.
 \end{itemize}
 These distinctions in the role of $C$ are essential in understanding how the presence or absence of observations can affect the conditional independence relationships within a Bayesian network.
@@ -181,11 +183,12 @@ These distinctions in the role of $C$ are essential in understanding how the pre
     \caption{Graphical representation of root, bridge, and leaf}
 \end{figure}
 
+\paragraph*{Bayesian networks reasoning}
 Two distinct modes of reasoning are applicable when working with Bayesian networks:
 \begin{itemize}
-    \item Bottom-up reasoning: this approach involves inferring the cause when provided with evidence. 
+    \item \textit{Bottom-up reasoning}: this approach involves inferring the cause when provided with evidence. 
         In other words, it seeks to determine the underlying factors or causes that may have led to observed outcomes.
-    \item Top-down reasoning: in this mode, we calculate the probability of one event given another event. 
+    \item \textit{Top-down reasoning}: in this mode, we calculate the probability of one event given another event. 
         This represents a predictive utilization of Bayesian networks, as they function as "generative" models. 
         It's about estimating the likelihood of certain events based on other known events.
 \end{itemize}

@@ -27,15 +27,124 @@ This iterative procedure is executed until convergence is achieved.
         \centering
         \includegraphics[width=0.5\linewidth]{images/bay.png}
     \end{figure}
+    With these probabilities: 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|cc|}
+        \hline
+        $d^0$ & $d^1$ \\ \hline
+        0.6   & 0.4   \\ \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|cc|}
+        \hline
+        $i^0$ & $i^1$ \\ \hline
+        0.7   & 0.3   \\ \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|cc|}
+        \cline{2-3}
+                                    & $s^0$ & $s^1$ \\ \hline
+        \multicolumn{1}{|c|}{$i^0$} & 0.95  & 0.05  \\
+        \multicolumn{1}{|c|}{$i^1$} & 0.2   & 0.8   \\ \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|cc|}
+        \cline{2-3}
+                                    & $l^0$ & $l^1$ \\ \hline
+        \multicolumn{1}{|c|}{$g^1$} & 0.1   & 0.9   \\
+        \multicolumn{1}{|c|}{$g^2$} & 0.4   & 0.6   \\
+        \multicolumn{1}{|c|}{$g^3$} & 0.99  & 0.01  \\ \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|ccc|}
+        \cline{2-4}
+                                        & $g^1$ & $g^2$ & $g^3$ \\ \hline
+        \multicolumn{1}{|c|}{$i^0,d^0$} & 0.3   & 0.4   & 0.3   \\
+        \multicolumn{1}{|c|}{$i^0,d^1$} & 0.05  & 0.25  & 0.7   \\
+        \multicolumn{1}{|c|}{$i^1,d^0$} & 0.9   & 0.08  & 0.02  \\
+        \multicolumn{1}{|c|}{$i^1,d^1$} & 0.5   & 0.3   & 0.2   \\ \hline
+        \end{tabular}
+    \end{table}
     From this network, we create the corresponding factor graph:
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\linewidth]{images/bayfac.png}
     \end{figure}
+    The corresponding functions are: 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|c|}
+        \cline{2-2}
+        $D$                     & $f_1(D)$ \\ \hline
+        \multicolumn{1}{|c|}{0} & 0.6      \\
+        \multicolumn{1}{|c|}{1} & 0.4      \\ \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|c|}
+        \cline{2-2}
+        $I$                     & $f_2(I)$ \\ \hline
+        \multicolumn{1}{|c|}{0} & 0.7      \\
+        \multicolumn{1}{|c|}{1} & 0.3      \\ \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccc|c|}
+        \cline{4-4}
+        $G$                    & $I$ & $D$ & $f_3(G,I,D)$ \\ \hline
+        \multicolumn{1}{|c}{1} & 0   & 0   & 0.3          \\
+        \multicolumn{1}{|c}{1} & 0   & 1   & 0.05         \\
+        \multicolumn{1}{|c}{1} & 1   & 0   & 0.9          \\
+        \multicolumn{1}{|c}{1} & 1   & 1   & 0.5          \\
+        \multicolumn{1}{|c}{2} & 0   & 0   & 0.4          \\
+        \multicolumn{1}{|c}{2} & 0   & 1   & 0.25         \\
+        \multicolumn{1}{|c}{2} & 1   & 0   & 0.08         \\
+        \multicolumn{1}{|c}{2} & 1   & 1   & 0.3          \\
+        \multicolumn{1}{|c}{3} & 0   & 0   & 0.3          \\
+        \multicolumn{1}{|c}{3} & 0   & 1   & 0.7          \\
+        \multicolumn{1}{|c}{3} & 1   & 0   & 0.02         \\
+        \multicolumn{1}{|c}{3} & 1   & 1   & 0.2          \\ \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cc|c|}
+        \cline{3-3}
+        $S$                     & $I$ & $f_4(S,I)$ \\ \hline
+        \multicolumn{1}{|c}{0} & 0   & 0.95       \\
+        \multicolumn{1}{|c}{0} & 1   & 0.2        \\
+        \multicolumn{1}{|c}{1} & 0   & 0.05       \\
+        \multicolumn{1}{|c}{1} & 1   & 0.8        \\ \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cc|c|}
+        \cline{3-3}
+        $L$                    & $G$ & $f_5(L,G)$ \\ \hline
+        \multicolumn{1}{|c}{0} & 1   & 0.1        \\
+        \multicolumn{1}{|c}{0} & 2   & 0.4        \\
+        \multicolumn{1}{|c}{0} & 3   & 0.99       \\
+        \multicolumn{1}{|c}{1} & 1   & 0.9        \\
+        \multicolumn{1}{|c}{1} & 2   & 0.6        \\
+        \multicolumn{1}{|c}{1} & 3   & 0.01       \\ \hline
+        \end{tabular}
+    \end{table}
     In the initial step, all messages are set to one:
     \begin{table}[H]
         \centering
-        \begin{tabular}{|cc|}
+        \begin{tabular}{cc}
         \hline
         $\mu_{D \rightarrow 1}=[1,1]$ & $\mu_{1 \rightarrow D}=[1,1]$   \\
         $\mu_{D \rightarrow 3}=[1,1]$ & $\mu_{2 \rightarrow I}=[1,1]$   \\
@@ -100,7 +209,7 @@ This iterative procedure is executed until convergence is achieved.
     \end{itemize}
     \begin{table}[H]
         \centering
-        \begin{tabular}{|cc|}
+        \begin{tabular}{cc}
         \hline
         $\mu_{D \rightarrow 1}=[1,1]$ & $\mu_{1 \rightarrow D}=[0.6,0.4]$   \\
         $\mu_{D \rightarrow 3}=[1,1]$ & $\mu_{2 \rightarrow I}=[0.7,0.3]$   \\
@@ -165,7 +274,7 @@ This iterative procedure is executed until convergence is achieved.
     \end{itemize}
     \begin{table}[H]
         \centering
-        \begin{tabular}{|cc|}
+        \begin{tabular}{cc}
         \hline
         $\mu_{D \rightarrow 1}=[2,2]$ & $\mu_{1 \rightarrow D}=[0.6,0.4]$   \\
         $\mu_{D \rightarrow 3}=[0.6,0.4]$ & $\mu_{2 \rightarrow I}=[0.7,0.3]$   \\
@@ -181,7 +290,7 @@ This iterative procedure is executed until convergence is achieved.
     We continue this process until convergence, assuming the following table exhibits this property (we assume that the values reported below are convergent):
     \begin{table}[H]
         \centering
-        \begin{tabular}{|cc|}
+        \begin{tabular}{cc}
         \hline
         $\mu_{D \rightarrow 1}=[2,2]$ & $\mu_{1 \rightarrow D}=[0.6,0.4]$   \\
         $\mu_{D \rightarrow 3}=[0.6,0.4]$ & $\mu_{2 \rightarrow I}=[0.7,0.3]$   \\
@@ -204,6 +313,7 @@ This iterative procedure is executed until convergence is achieved.
     \end{itemize}
 \end{example}
 
+\paragraph*{Marginal probabilities}
 Let's examine the computation of marginal probabilities in a factorized probability distribution $\textnormal{P}(X)=\textnormal{P}( X_1) \textnormal{P} (X_2|X_1) \textnormal{P} (X_3|X_2) \textnormal{P} (X_4|X_3)$ where we focus on $X_2$. 
 Given specific observations for $X_1=x_{e_1}$ and $X_3=x_{e_3}$, we can calculate $\textnormal{P}(X)$ as follows:
 \[\textnormal{P} (X_2|X_1 = x_{e_1}, X_3 = x_{e_3})= \textnormal{P} (X_1 = x_{e_1})\textnormal{P} (X_2|X_1 = x_{e_1})\textnormal{P} (X_3 = x_{e_3}|X_2) \sum_{X_4}\textnormal{P} (X_4|X_3)\]

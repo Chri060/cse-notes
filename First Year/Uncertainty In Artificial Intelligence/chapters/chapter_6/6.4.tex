@@ -19,6 +19,8 @@ As we carry out these innermost summations, we generate fresh terms in the proce
                                 =& \mu_5(X_5)
     \end{align*}
 \end{example}
+
+\paragraph*{Dynamic programming}
 The variable elimination procedure relies on dynamic programming. 
 To utilize this approach, we break down the main problem into multiple smaller problems by leveraging the factorization of the joint distribution. 
 This factorization not only guides us in establishing the most efficient order for variable elimination but also aids in determining the functions for the intermediate variables denoted as $\mu$.
@@ -38,11 +40,12 @@ The key characteristics of this graph include:
 \end{itemize}
 In this representation, the factor graph serves as a powerful tool for modeling and automating probabilistic calculations, offering a clear visual depiction of variable dependencies and factor relationships.
 
+\paragraph*{Factor graph}
 To convert a Bayesian network into a factor graph, the process involves applying a step called moralization. 
 In the typical scenario, this operation entails establishing links between the parents of nodes while preserving as many independence properties as possible.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/mor.png}
+    \includegraphics[width=0.6\linewidth]{images/mor.png}
     \caption{An example of moralization}
 \end{figure}
 To convert the Bayesian network into a factor graph, it's necessary to combine unconnected parents into a single factor.
@@ -58,8 +61,8 @@ To convert the Bayesian network into a factor graph, it's necessary to combine u
         \includegraphics[width=0.25\linewidth]{images/bnf.png}
     \end{figure}
 \end{example}
-\begin{definition}
-    A graph is a \emph{perfect map} if and only if every independence property of a distribution is reflected in the graph and vice versa. 
+\begin{definition}[\textit{Perfect map}]
+    A graph is a perfect map if and only if every independence property of a distribution is reflected in the graph and vice versa. 
 \end{definition}
 Please be aware of the following:
 \begin{itemize}
@@ -84,6 +87,7 @@ Please be aware of the following:
 \end{example}
 It's important to note that factor graphs are not unique; there are various ways to represent any given Bayesian network.
 
+\paragraph*{Algorithm}
 The variable elimination algorithm takes two inputs: a list denoted as $F$ containing factors and a tuple labeled as $C_0$ representing the output variables to retain. 
 The result of the algorithm is a single factor $m$ that encompasses the variables in $X_{C_0}$.
 \begin{algorithm}[H]
@@ -181,57 +185,11 @@ It returns the updated list of factors, which remains labeled as $F$.
 It's worth mentioning that the order in which variables are selected as input for the function can be determined using a heuristic function. 
 One common approach is to order the nodes based on the ascending number of connections they have in the factor graph.
 \begin{example}
-    Given the Bayesian network and the associated truth tables:
+    Consider the sprinkler example with the probabilities given before: 
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.3\linewidth]{images/sprinkler.png}
     \end{figure}
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{cc}
-        \hline
-        \textbf{Cloudy} & \textbf{P(C)} \\ \hline
-        0      & 0.5  \\
-        1      & 0.5  \\ \hline
-        \end{tabular}
-    \end{table}
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{ccc}
-        \hline
-        \textbf{Sprinkler} & \textbf{Cloudy} & \textbf{P(S$|$C)} \\ \hline
-        0         & 0      & 0.1  \\
-        0         & 1      & 0.5  \\
-        1         & 0      & 0.9  \\
-        1         & 1      & 0.5  \\ \hline
-        \end{tabular}
-    \end{table}
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{ccc}
-        \hline
-        \textbf{Raining} & \textbf{Cloudy} & \textbf{P(R$|$C)} \\ \hline
-        0       & 0      & 0.8    \\
-        0       & 1      & 0.5    \\
-        1       & 0      & 0.2    \\
-        1       & 1      & 0.5    \\ \hline
-        \end{tabular}
-    \end{table}
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{cccc}
-        \hline
-        \textbf{Wet} & \textbf{Sprinkler} & \textbf{Raining} & \textbf{P(W$|$S,R)} \\ \hline
-        0            & 0                  & 0                & 1                   \\
-        0            & 0                  & 1                & 0.1                 \\
-        0            & 1                  & 0                & 0.1                 \\
-        0            & 1                  & 1                & 1                   \\
-        1            & 0                  & 0                & 0                   \\
-        1            & 0                  & 1                & 0.9                 \\
-        1            & 1                  & 0                & 0.9                 \\
-        1            & 1                  & 1                & 0.99                \\ \hline
-        \end{tabular}
-    \end{table}
     We want to compute $\textnormal{P}(W)$. To do this, we start by transforming the Bayesian network into a factor graph, where we define the factors as follows:
     \begin{itemize}
         \item $f_1(C)=\textnormal{P}(C)$.
