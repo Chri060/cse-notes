@@ -6,7 +6,7 @@ ince there can be multiple ways to execute the same query, the optimizer is resp
 The optimization process involves several steps:
 \begin{enumerate}
     \item Lexical, syntactic and semantic analysis of the query.
-    \item Translation into an internal representation(similar to algebraic expressions). 
+    \item Translation into an internal representation (similar to algebraic expressions). 
     \item Algebraic optimization.
     \item Cost-based optimization.
     \item Code generation.
@@ -27,6 +27,28 @@ Cost-based optimization relies on the approximate values obtained from these rel
 The selectivity of a predicate, representing the probability that any row satisfies a given predicate, is a crucial metric.
 If val$(A) = N$ and the values are uniformly distributed, the selectivity of the predicate $A = v$ is $\frac{1}{N}$.
 If no data on distribution is available, then the distribution is always assumed uniform.
+\begin{example}
+    Consider a memory with block size of 8 KB (8192 bytes). 
+    Consider the following schemas: 
+    \begin{enumerate}
+        \item STUDENT (\underline{ID}, Name, LastName, Email, City, Birthdate, Sex)
+        \item EXAM (\underline{SID}, \underline{CourseID}, Date, Grade)
+    \end{enumerate}
+
+    In the first table we have 150000 tuples. 
+    Every tuple has a size of 95 bytes. 
+    Each block contains: 
+    \[\dfrac{8192}{95} \approx 87 \textnormal{ tuples}\]
+    As a result the occupied blocks are: 
+    \[\dfrac{150000}{340} \approx 1700 \textnormal{ blocks}\]
+
+    In the second table we have 1,8 million tuples. 
+    Every tuple has a size of 24 bytes. 
+    Each block contains: 
+    \[\dfrac{8192}{24} \approx 340 \textnormal{ tuples}\]
+    As a result the occupied blocks are: 
+    \[\dfrac{1800000}{340} \approx 5300 \textnormal{ blocks}\]
+\end{example}
 
 \subsection{Internal representation of queries}
 The optimizer creates a representation for a query that accounts for the physical structure used to implement tables and any present indexes. 
@@ -41,7 +63,7 @@ As already seen, indexes are structures of the database that allow to access the
 The DBMS chooses the corresponding index when a query involves a single supported predicate. 
 For queries with conjunctions or disjunctions of predicates, the DBMS optimizes the use of indexes.
 
-\paragraph*{Join operation}
+\paragraph*{Join}
 The \texttt{JOIN} operation is acknowledged as the most resource-intensive task for a DBMS due to the potential for a substantial increase in the number of tuples in the result. 
 To address this challenge, the optimizer employs one of three techniques:
 \begin{enumerate}
