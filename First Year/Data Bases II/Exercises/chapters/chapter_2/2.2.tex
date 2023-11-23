@@ -1,0 +1,35 @@
+\section{Schedule classification}
+
+Classify the following schedule with respect to 2PL and strict 2PL classes: 
+\[r_4(x) r_2(x) w_4(x) w_2(y) w_4(y) r_3(y) w_3(x) w_4(z) r_3(z) r_6(z) r_8(z) w_6(z) w_9(z) r_5(z) r_10(z)\]
+
+\paragraph*{Solution}
+For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|ccccccccccccccc}
+                & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
+    \textit{X} & $r_4$      & $r_2\searrow _2$          & $w_4$      &                              &            &            & $w_3$      &            &            &             &             &             &             &             &             \\
+    \textit{Y} &            &                           &            & $w_2\downharpoonleft_2$      & $w_4$      & $r_3$      &            &            &            &             &             &             &             &             &             \\
+    \textit{Z} &            &                           &            &                              &            &            &            & $w_4$      & $r_3$      & $r_6$       & $r_8$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
+    \end{tabular}%
+\end{table}
+It is therefore clear that the schedule cannot be in 2PL-strict, due to $T_2$ and $T_4$: $T_2$ ends after 4, but $T_4$ wants to write $X$ at 3, and $T_2$ would thus be 
+required to release $X$ earlier, which is impossible if $T_2$ has to keep all locks until after 4.
+
+For 2PL we have:
+\begin{table}[H]
+    \centering
+    \resizebox{\columnwidth}{!}{%
+    \begin{tabular}{c|ccccccccccccccc}
+                & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
+    \textit{X} & $\nearrow_4r_4$        & $\nearrow_2r_2\searrow_2$         & $\nearrow_4w_4$       &                       & $\searrow_4$                          &                           & $\nearrow_3w_3$       &                       &                          & $\searrow_3$  &                       &             &             &             &             \\
+    \textit{Y} &                        & $\nearrow_2$                      &                       & $w_2\searrow_2$       & $\nearrow_4w_4\searrow_4$             & $\nearrow_3r_3$           &                       &                       &                          & $\searrow_3$  &                       &             &             &             &             \\
+    \textit{Z} &                        &                                   & $\nearrow_4$          &                       &                                       &                           &                       & $w_4\searrow_4$       & $\nearrow_3r_3$          & $r_6$         & $r_8\searrow_3$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
+    \end{tabular}%
+    }
+\end{table}
+We need to look at those acquisitions that must be anticipated and to those releases that must be delayed to not violate the 2PL rules.
+$T_4$ can only get the XL on X only after 2 and on $Y$ after 4 and has to release $Y$ before 6 and $X$ before 7. Thus, the lock on $Z$ must be acquired before 6.
+$T_2$ can get all the locks at the beginning and release them immediately after each use. $T_3$ can acquire $X$, $Y$ and $Z$ just before using them and release them all before 12. 
+All other transactions ($T_6, T_9, T_5, T_{10}$) clearly pose no problems.

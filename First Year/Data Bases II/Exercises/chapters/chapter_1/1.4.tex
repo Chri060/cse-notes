@@ -1,0 +1,22 @@
+\section{Schedule classification}
+Classify the following schedule with respect to CSR and VSR classes:  
+\[r_2(u) w_2(s) r_1(x) r_2(y) w_3(y) r_5(x) w_5(u) w_3(s)w_2(u) w_3(x) w_1(u) r_4(y) w_5(z) r_5(z)\]
+
+\paragraph*{Solution}
+Since CSR contains VSR we check with the conflict graph. To do so we first divide the schedule based on the resources: 
+\begin{itemize}
+    \item $x: r_1 \: r_5 \:w_3$
+    \item $y: r_2 \: w_3 \:r_4$
+    \item $z: w_5 \: r_5$
+    \item $s: w_2 \: w_3$
+    \item $u: r_2 \: w_5 \: w_2 \:w_1$
+\end{itemize}
+The nodes are $\{1,2,3,4,5\}$ and the arcs are found with the write-write or write-read relations found in the previous groups. So we have the following graph:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/conflictgraph1.png}
+\end{figure}
+It is possible to see that there is a cycle between two and five. The definition of VSR states that we need to have the same reads-from relations and final writes. So, we try to find a view-equivalent 
+schedule that is also CSR. One possible solution is simply to swap the two writes on the resource $u$ and that is sufficient to eliminate the cycle. So, the schedule: 
+\[r_2(u) w_2(s) r_1(x) r_2(y) w_3(y) r_5(x) w_5(u) w_2(u) w_3(s) w_3(x) w_1(u) r_4(y) w_5(z) r_5(z)\]
+is CSR and also VSR. 

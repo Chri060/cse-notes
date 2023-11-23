@@ -1,0 +1,22 @@
+\section{Anomalies classification}
+
+Can the following schedules produce anomalies? $c_i$ and $a_i$ indicate the transactional decision commit and abort. 
+\begin{enumerate}
+    \item $r_1(x) w_1(x) r_2(x) w_2(y)\:a_1\:c_2$
+    \item $r_1(x) w_1(x) r_2(y) w_2(y)\:a_1\:c_2$
+    \item $r_1(x) r_2(x) r_2(y) w_2(y) r_1(z)\:a_1\:c_2$
+    \item $r_1(x) r_2(x) w_2(x) w_1(x)\:c_1\:c_2$
+    \item $r_1(x) r_2(x) w_2(x) r_1(y)\:c_1\:c_2$
+    \item $r_1(x) w_1(x) r_2(x) w_2(x)\:c_1\:c_2$
+\end{enumerate}
+
+\paragraph*{Solution}
+\begin{enumerate}
+    \item We have a serial execution, but with the abort of the first transaction. Since the second transaction reads the modified value of $x$ before the abort, we have a
+        dirty read. 
+    \item We have a serial execution and the two transactions require different resources, so there are no anomalies.
+    \item There are no anomalies because the last operation of the first transaction works on a different resource. 
+    \item Both transactions first reads in sequence the resource $x$ and then updates it without considering the updated value, so we have a lost update. 
+    \item There are no anomalies because the last operation of the first transaction works on a different resource. 
+    \item We have a serial execution, so the schedule is correct. 
+\end{enumerate}

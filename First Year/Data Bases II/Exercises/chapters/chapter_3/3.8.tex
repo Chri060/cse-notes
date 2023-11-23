@@ -1,0 +1,32 @@
+\section{Hierarchical lock}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{images/HL1.png}
+\end{figure}
+Given the resource hierarchy above, is the following schedule compatible with a 2PL-strict scheduler that applies hierarchical locking?
+\[r_1(A) w_1(S) w_2(T) r_2(A) w_1(A)\]
+
+\paragraph*{Solution}
+The lock manager works as follows: 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|cccccc|c}
+    \cline{2-7}
+    \textit{}                          & \textit{X}               & \textit{A}              & \textit{B} & \textit{Y}               & \textit{S}          & \textit{T}          & \textit{}    \\ \cline{1-7}
+    \multicolumn{1}{|c|}{$r_1(A)$}     & $\textnormal{ISL}_1$     & -                       & -          & -                        & -                   & -                   &              \\
+    \multicolumn{1}{|c|}{}             & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & -                        & -                   & -                   &              \\
+    \multicolumn{1}{|c|}{$w_1(S)$}     & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_1$     & -                   & -                   &              \\
+    \multicolumn{1}{|c|}{}             & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_1$     & $\textnormal{XL}_1$ & -                   &              \\
+    \multicolumn{1}{|c|}{$w_2(T)$}     & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_{1,2}$ & $\textnormal{XL}_1$ & -                   &              \\
+    \multicolumn{1}{|c|}{}             & $\textnormal{ISL}_1$     & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_{1,2}$ & $\textnormal{XL}_1$ & $\textnormal{XL}_2$ &              \\
+    \multicolumn{1}{|c|}{$r_2(A)$}     & $\textnormal{ISL}_{1,2}$ & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_{1,2}$ & $\textnormal{XL}_1$ & $\textnormal{XL}_2$ &              \\
+    \multicolumn{1}{|c|}{}             & $\textnormal{ISL}_{1,2}$ & $\textnormal{SL}_{1,2}$ & -          & $\textnormal{IXL}_{1,2}$ & $\textnormal{XL}_1$ & $\textnormal{XL}_2$ &              \\
+    \multicolumn{1}{|c|}{commit $T_2$} &                          &                         &            &                          &                     &                     & End of $T_2$ \\
+    \multicolumn{1}{|c|}{}             & $\textbf{ISL}_1$         & $\textnormal{SL}_1$     & -          & $\textnormal{IXL}_1$     & $\textnormal{XL}_1$ & -                   &              \\
+    \multicolumn{1}{|c|}{$w_1(A)$}     & $\textbf{IXL}_1$         & $\textbf{SL}_1$         & -          & $\textnormal{IXL}_1$     & $\textnormal{XL}_1$ & -                   &              \\
+    \multicolumn{1}{|c|}{}             & $\textnormal{IXL}_1$     & $\textbf{XL}_1$         & -          & $\textnormal{IXL}_1$     & $\textnormal{XL}_1$ & -                   &              \\
+    \multicolumn{1}{|c|}{commit $T_1$} &                          &                         &            &                          &                     &                     & End of $T_1$ \\ \cline{1-7}
+    \end{tabular}
+\end{table}
+So, it is compatible with a strict 2PL scheduler. 

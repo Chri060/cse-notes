@@ -1,0 +1,31 @@
+\section{Schedule classification}
+
+Classify the following schedule with respect to 2PL and strict 2PL classes: 
+\[r_1(x) w_2(x) r_1(z) w_1(y) r_3(x) r_4(x) w_3(z) w_2(y) r_3(y) w_4(x) w_4(y)\]
+
+\paragraph*{Solution}
+For strict 2PL we assume that all transactions commit and release all locks immediately after their last operation, and check if releases can be executed at commit time.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|ccccccccccc}
+                & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11}          \\ \hline
+    \textit{X} & $r_1\searrow_1$       & $w_2$      &            &                                  & $r_3$      & $r_4$      &            &            &            & $w_4$       &                    \\
+    \textit{Y} &                       &            &            & $w_1\downharpoonleft_1$          &            &            &            & $w_2$      & $r_3$      &             & $w_4$                \\
+    \textit{Z} &                       &            & $r_1$      &                                  &            &            & $w_3$      &            &            &             &                     
+    \end{tabular}%
+\end{table}
+The schedule is not strict 2PL.
+
+For 2PL we have:
+\begin{table}[H]
+    \centering
+    \resizebox{\columnwidth}{!}{%
+    \begin{tabular}{c|ccccccccccc}
+                & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11}          \\ \hline
+    \textit{X} & $\nearrow_1r_1\searrow_1$              & $\nearrow_2w_2$       &                       &                                   & $\searrow_2\nearrow_3r_3$         & $\nearrow_4r_4$       &                       &                   & $\searrow_3$                   & $\nearrow_4w_4$       & $\searrow_4$     \\
+    \textit{Y} & $\nearrow_1$                           &                       &                       & $w_1\searrow_1\nearrow_2$         &                                   &                       &                       & $w_2\searrow_2$   & $\nearrow_3r_3\searrow_3$      &                       & $\nearrow_4w_4\searrow_4$                \\
+    \textit{Z} & $\nearrow_1$                           &                       & $r_1\searrow_1$       &                                   &                                   &                       & $\nearrow_3w_3$       &                   & $\searrow_3$                   &                       &                     
+    \end{tabular}%
+    }
+\end{table}
+The schedule is 2PL. 

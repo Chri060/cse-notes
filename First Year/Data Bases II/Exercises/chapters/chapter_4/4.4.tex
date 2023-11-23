@@ -1,0 +1,63 @@
+\section{Ranking and skyline queries}
+
+Consider the following lists reporting statistics about soccer players.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cc|cc}
+    \hline
+    \textbf{Goals} & \textbf{Player} & \textbf{Assists} & \textbf{Player} \\ \hline
+    25             & LEW             & 17               & DEB             \\
+    21             & RON             & 15               & SAN             \\
+    19             & MES             & 12               & MES             \\
+    18             & MBA             & 6                & NEY             \\
+    15             & ILI             & 5                & MBA             \\
+    14             & SAN             & 5                & ILI             \\
+    13             & NEY             & 3                & RON             \\
+    8              & DEB             & 3                & LEW             \\ \hline
+    \end{tabular}
+\end{table}
+\begin{enumerate}
+    \item Apply the TA to determine the top-$2$ players according to the scoring function: 
+        \[S(\textnormal{player})=\textnormal{player.Goals}+\textnormal{player.Assists}\]
+    \item Reuse as much as possible the answer of the previous question to indicate the 
+        reached depth and the number of sorted and random accesses to determine, with TA,
+        the top-$1$ player according to the same scoring function as the previous point.
+    \item Discuss whether any algorithm could attain a lower execution cost than the cost 
+        incurred by TA to determine the top-$1$ player. 
+    \item Apply now the TA to determine the top-$2$ players according to the scoring function: 
+        \[S(\textnormal{player})=\left\lvert \textnormal{player.Goals}-\textnormal{player.Assists} \right\rvert\]
+    \item Determine the skyline of the dataset. 
+\end{enumerate}
+
+\paragraph*{Solution}
+\begin{enumerate}
+    \item The execution of the TA algorithm needs four rounds to stop on the given dataset. At the fourth 
+        round we have the following buffer. 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cc|c}
+            \hline
+            \textbf{Player} & \textbf{Goals} & \textbf{Assists} & \textbf{Score} \\ \hline
+            MES             & 19             & 12               & 31             \\
+            SAN             & 14             & 15               & 29             \\ \hline
+            \end{tabular}
+        \end{table}
+        With a threshold value of $24$. We found that the best two players for the given scoring function
+        are MES and SAN. 
+    \item The procedure is the same as the previous point, but it stops at the third round since the threshold 
+        condition is already verified at this step. The buffer is the following.
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cc|c}
+            \hline
+            \textbf{Player} & \textbf{Goals} & \textbf{Assists} & \textbf{Score} \\ \hline
+            MES             & 19             & 12               & 31             \\ \hline
+            \end{tabular}
+        \end{table}
+        With a threshold of $31$. We have found that the best player is MES. 
+    \item FA would stop at depth three as well, but only needs four random accesses to find the top player. 
+    \item The given function is not monotone, so the TA can return wrong results. In this case the algorithm 
+        will fail, returning DEB instead of RON. 
+    \item After sorting the dataset we insert MES in the window. The only players that are not dominated by him
+        are: SAN, LEW, and DEB. So, we have that the skyline is composed by these three players. 
+\end{enumerate}

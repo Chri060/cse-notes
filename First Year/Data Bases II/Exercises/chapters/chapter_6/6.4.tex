@@ -1,0 +1,60 @@
+\section{Triggers}
+
+Consider the following schema describing a system for hiring rehearsal rooms to musical groups. 
+Start and end time of reservations contain only hours (minutes are always “00”). 
+Use of rooms can only happen if there is a corresponding reservation, but can start later or end earlier. 
+All rooms open at 7:00 and close at 24:00.
+\begin{itemize}
+    \item USER (\underline{SSN}, Name, Email, Type)
+    \item RESERVATION (\underline{UserSSN}, \underline{RoomCode}, \underline{Date}, \underline{StartTime}, EndTime)
+    \item ROOM (\underline{RoomId}, Type, CostPerHour)
+\end{itemize}
+\begin{enumerate}
+    \item Write a trigger that prevents the reservation of already booked rooms. 
+    \item Suppose that usage data are inserted into a table Usage only after the room has been actually used. 
+        Enrich the schema to track the number of hours that have been reserved but not used by each user, and write a (set of) trigger(s) that track such a number and set the “type” of a user to “unreliable” when he totalizes 50 hours of unused reservations.
+\end{enumerate}
+
+\paragraph*{Solution}
+\begin{enumerate}
+    \item The requested trigger is: 
+        \begin{lstlisting}[style=SQL]
+CREATE TRIGGER ThouShallNotBook
+BEFORE INSERT INTO Reservation
+FOR EACH ROW
+WHEN EXISTS ( 
+    SELECT *
+    FROM RESERVATION
+    WHERE RoomCode = NEW.RoomCode
+    AND Date = NEW.Date AND
+    StartTime < NEW.EndTime AND EndTime > NEW.StartTime 
+    )
+ROLLBACK;
+        \end{lstlisting}
+    \item We add and modify the tables as follows: 
+        \begin{itemize}
+            \item USAGE (UserSSN, RoomCode, Date, StartTime, EndTime)
+            \item USER (SSN, Name, Email, Type, WastedHours)
+        \end{itemize}
+        The requested triggers are: 
+        \begin{lstlisting}[style=SQL]
+CREATE TRIGGER UpdateWastedHours
+AFTER INSERT ON USAGE
+FOR EACH ROW
+UPDATE USER
+SET WastedHours = WastedHours +
+    ( SELECT EndTime - StartTime - ( NEW.EndTime - NEW.StartTime )
+      FROM Reservation
+      WHERE RoomCode = NEW.RoomCode AND Date = NEW.Date
+      AND StartTime <= NEW.StartTime AND EndTime >= NEW.EndTime )
+WHERE SSN = NEW.UserSSN
+
+CREATE TRIGGER UpdateType
+AFTER UPDATE OF WastedHours ON USER
+FOR EACH ROW
+WHEN old.WastedHours < 50 AND NEW.WastedHours >= 50
+UPDATE USER
+SET Type = "Unreliable"
+WHERE SSN = OLD.SSN;
+        \end{lstlisting}
+\end{enumerate}
