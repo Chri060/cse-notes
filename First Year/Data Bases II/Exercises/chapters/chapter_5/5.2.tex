@@ -65,93 +65,93 @@ The entity product is defined as:
 @NamedQuery(name = "BomProduct.findAllTop", query = "SELECT p FROM BomProduct p WHERE p.fathers IS EMPTY") })
 
 public class BomProduct implements Serializable {
-...
-private static final long serialVersionUID = 1L;
-@Id @Column(name="id") @GeneratedValue(strategy = GenerationType.IDENTITY)
-private int id;
-private String description;
-private String name;
-private int unitcost;
-...
-@ElementCollection(fetch = FetchType.EAGER)
-@CollectionTable(name = "subparts",joinColumns = @JoinColumn(name = "father"))
-@MapKeyJoinColumn(name = "child")
-@Column(name = "QUANTITY")
-private Map<BomProduct, Integer> subparts;
+    ...
+    private static final long serialVersionUID = 1L;
+    @Id @Column(name="id") @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private String description;
+    private String name;
+    private int unitcost;
+    ...
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "subparts",joinColumns = @JoinColumn(name = "father"))
+    @MapKeyJoinColumn(name = "child")
+    @Column(name = "QUANTITY")
+    private Map<BomProduct, Integer> subparts;
 
-@ManyToMany
-@JoinTable(name = "subparts",
-           joinColumns = @JoinColumn(name = "child"),
-           inverseJoinColumns = @JoinColumn(name ="father"))
-private List<BomProduct> fathers;
-...            
+    @ManyToMany
+    @JoinTable(name = "subparts",
+            joinColumns = @JoinColumn(name = "child"),
+            inverseJoinColumns = @JoinColumn(name ="father"))
+    private List<BomProduct> fathers;
+    ...            
 }
     \end{lstlisting}
 The better way is to make the many-to-many relationships with attributes a weak entity like in the following image. 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\linewidth]{images/BoMweak.png}
+    \includegraphics[width=0.5\linewidth]{images/BoMweak.png}
 \end{figure}
 The entity P2PLinkID is defined as:  
 \begin{lstlisting}[style=Java]
 @Embeddable
 public class P2PLinkID implements Serializable {
-private static final long serialVersionUID = 1L;
-private int father;
-private int child;
+    private static final long serialVersionUID = 1L;
+    private int father;
+    private int child;
 
-public P2PLinkID() { }
+    public P2PLinkID() { }
 
-public P2PLinkID(int father, int child) {
-    super();
-    this.father = father;
-    this.child = child;
-}
-...
+    public P2PLinkID(int father, int child) {
+        super();
+        this.father = father;
+        this.child = child;
+    }
+    ...
 }
 \end{lstlisting}
 The entity P2PLink is defined as:  
 \begin{lstlisting}[style=Java]
 @Entity
 public class P2PLink implements Serializable {
-private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-@EmbeddedId
-private P2PLinkID id;
+    @EmbeddedId
+    private P2PLinkID id;
 
-@ManyToOne
-@MapsId("father") // reference to the foreign key attribute
-@JoinColumn(name = "father")
-private BomProduct father;
+    @ManyToOne
+    @MapsId("father") // reference to the foreign key attribute
+    @JoinColumn(name = "father")
+    private BomProduct father;
 
-@ManyToOne
-@MapsId("child") // reference to the foreign key attribute
-@JoinColumn(name = "child")
-private BomProduct child;
+    @ManyToOne
+    @MapsId("child") // reference to the foreign key attribute
+    @JoinColumn(name = "child")
+    private BomProduct child;
 
-private int quantity;
-...
+    private int quantity;
+    ...
 }
 \end{lstlisting}
 The entity product is defined as:  
 \begin{lstlisting}[style=Java]
 @Entity
 public class BomProduct implements Serializable {
-private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-private int id;
-private String description;
-private String name;
-private int unitcost;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private String description;
+    private String name;
+    private int unitcost;
 
-// getters setters and constructors
+    // getters setters and constructors
 
-@OneToMany(mappedby="father")
-private List<P2PLink> children;
+    @OneToMany(mappedby="father")
+    private List<P2PLink> children;
 
-@OneToMany(mappedby="child")
-private List<P2PLink> fathers;
-...
+    @OneToMany(mappedby="child")
+    private List<P2PLink> fathers;
+    ...
 }
 \end{lstlisting}
