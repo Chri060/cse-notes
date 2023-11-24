@@ -1,0 +1,81 @@
+\section{Sensitivity analysis}
+
+The sensitivity analysis of a linear programming problem is the study of the effect of small changes in the data of the problem on the optimal solution: it evaluates the sensitivity of an optimal solution with respect to variations in the model parameter
+\begin{definition}[\textit{Shadow price}]
+    The shadow price of the $i$-th resource is the maximum price the company is willing to pay to buy an additional unit of the $i$-th resource.
+\end{definition}
+
+\subsection*{Algebraic form}
+Evaluate the sensitivity of an optimal solution when the model parameters $\left\langle c_j, a_{ij}, b_i \right\rangle $ vary.
+Given: 
+\begin{align*}
+    \min                      \:&\: c^T            \\
+    \textnormal{such that }     &\: Ax = b         \\
+                                &\: x \geq 0
+\end{align*}
+And optimal basic solution $x^{*}$: 
+\[x^{*}_B=B^{-1}b \geq 0\]
+\[x^{*}_N=0\]
+
+The objective is to evaluate the limits that allow $B$ to remain optimal, under two conditions:
+\begin{enumerate}
+  \item \textit{Feasibility}: $B^{-1} b \geq 0$
+  \item \textit{Optimality}: $c_N^T = c_N^T - c_B^T B^{-1} N = 0^T$
+\end{enumerate}
+
+\paragraph*{Changes in the requirement vector b}
+Suppose that some component $b_i$ of the requirements vector $b$ is changed by a small amount $\delta$.
+The new requirement vector is now:
+\[ b^T := b + \delta e_k \]
+where $e_k$ is the unitary vector equal to $1$ on the $k$-th ($1 \leq k \leq n$) position and $0$ elsewhere.
+
+The objective is to determine the range of values of $\delta$ under which the current basis remains optimal;
+since the optimality conditions are not affected by the change, only the feasibility condition must be verified.
+
+The basis $B$ with the basic solution: 
+\[ x^\ast = \begin{bmatrix} B^{-1} b^T \\ 0 \end{bmatrix} = \begin{bmatrix} B^{-1} \left( b + \delta e_k \right) \\ 0 \end{bmatrix} \]
+remains optimal as long as the following relation holds:
+\[ B^{-1} \left( b + \delta e_k \right) \geq 0 \Rightarrow B^{-1} b \geq - \delta B^{-1} e_k \]
+The latter is $m$ inequalities that define an interval of values for $\delta $.
+If $\delta$ is outside the allowed range, then the current solution satisfies the optimality conditions but is primal infeasible.
+
+The basis $B$ remains optimal, but the optimal basic feasible solution $x^\ast$ changes.
+The objective function value changes from $c_B^T B^{-1} b$ to $c_B^T B^{-1} \left( b + \delta e_k \right)$, and as such the optimal value of the dual variable is:
+\[ \Delta z^\ast = \overbrace{c_B^T B^{-1}}^{y^{\ast T}} \left( \delta e_k \right) = \delta  y_k^\ast = \delta  \dfrac{\partial z^\ast}{\partial b_k}\]
+where $\Delta z^\ast$ is the \textbf{shadow price} of the $k$-th resource.
+
+\paragraph*{Changes in the cost vector c}
+Suppose that some cost coefficient $c_j$ of the objective function $c$ is changed by a small amount $\delta$.
+The new cost vector is now:
+\[ c^T := c + \delta  e_j \]
+where $e_j$ is the unitary vector equal to $1$ on the $j$-th ($1 \leq j \leq n$) position and $0$ elsewhere.
+The primal feasibility condition is not affected, so the only condition to verify is the optimality condition:
+\[ c^T_B B^{-1} A \leq c^T \]
+
+Two cases then arise:
+\begin{enumerate}
+  \item $c_j$ is the cost of a basic variable: the optimal solution remains unchanged
+  \item $c_j$ is the cost of a non-basic variable: the optimal solution changes
+\end{enumerate}
+
+However, the basic solution does not change:
+\[ x_B^\ast = B^{-1} b \ \land x_N^\ast = 0 \]
+
+\paragraph*{Cost associated with a non-basic variable}
+If $c_j$ is the cost coefficient of a \textbf{non-basic variable} $x$, then $c_B$ is not affected and the only inequality affected is the one for the reduced cost of $x_j$:
+\[ c^T_B B^{-1} A_j \leq c_j + \delta \]
+this inequality defines a lower bound of $\delta$:
+\[ \delta \geq - c_j \]
+If this condition holds, the current basis is optimal.
+The reduced cost represents the max decrease of $c_j$ for which $B$ remains optimal.
+
+\paragraph*{Cost associated with a basic variable}
+If $c_j$ is the cost coefficient of the $l$-th \textbf{basic variable}, then $c_B$ is affected by the change in $c_j$:
+\[ c^T_B := c_B + \delta  e_l \]
+All the optimality conditions are then affected by the change in $c_j$:
+\[ \left( c_B + \delta e_l \right)^T B^{-1} A \leq c_i \quad \forall i \neq j \]
+The variable $x_j$ is skipped as it is basic and its reduced cost stays at zero.
+The condition is equal to:
+\[ \delta_{q_{li}} \leq c_i \quad \forall i \neq j \]
+where $q_{li}$ is the position of the $l$-th basic variable in the $i$-th row of $A$.
+These inequalities determine the range of $\delta$ for which the same basis remains optimal.

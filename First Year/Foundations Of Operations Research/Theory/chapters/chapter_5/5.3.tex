@@ -1,0 +1,89 @@
+\section{Cutting plane method and Gomory fractional cuts}
+
+By considering the ILP problem:
+\begin{gather*}
+    \begin{aligned}
+    \min \quad        & c^T x                \\
+    \text{s.t.} \quad & Ax \geq b            \\
+                        & x \in \N, \ x \geq 0
+    \end{aligned}
+\end{gather*}
+
+Having a feasible region:
+\[ X = \left\{ x \in \Z \mid Ax \geq b,x \geq 0 \right\} \]
+Under the assumption that $a_{ij} \in N$, $b_i \in N$, $c_i \in N$, the feasible region can be described by different sets of constraints that could be either weaker or tighter.
+All infinite formulations are equivalent, but the optimal solution of the linear relaxations of the ILP ($x^\ast_{LP}$) may vary greatly.
+\begin{definition}[\textit{Ideal formulation}]
+    The ideal formulation is the formulation describing the convex hull of $X$, called $\conv(X)$, representing the smallest convex subset containing $X$
+\end{definition}
+Since all vertices have integer coordinates, for any $c \in \conv(X)$, the following relation holds:
+\[ z^\ast_{LP} = z^\ast_{ILP} \]
+and the optimum of the LP is also the optimum of the ILP.
+
+\begin{theorem}[Ideal Formulation]
+    For any feasible region $X$ of an ILP (bounded or unbounded), there exists an ideal formulation (a description of $\conv(X)$ involving a finite number of linear constraints) but the number of the constraints can be very large;
+    the number of constraints grows exponentially with respect to the size of the original formulation.
+\end{theorem}
+Via this theorem, the solution of any ILP can be reduced to that of a single LP;
+however, the ideal formulation is often either very large or very difficult to determine.
+
+\subsection{Cutting plane method}
+A full description of $\conv(X)$ is not required, as just a good description of the neighborhood of the optimal solution is needed.
+\begin{definition}[\textit{Cutting plane}]
+    A Cutting plane is an inequality $a^T x \leq b$ that is not satisfied by $x^\ast_{LP}$ but is satisfied by all the feasible solutions of the ILP.
+\end{definition}
+
+
+\subsection{Cutting plane methods and Gomory fractional cuts}
+Given an initial formulation, iteratively add cutting planes as long as the linear relaxation does not provide an optimal integer solution.
+
+Let $x^\ast_{LP}$ be the optimal solution of the linear relaxation of the ILP problem formulated as:
+\[ \min \left\{ c^T x \mid Ax = b, x \geq 0 \right\} \]
+And let $x^\ast_{B{r}}$ be the fractional basic variable.
+The corresponding row of the optimal tableau is:
+\[ x_{B[r]} + \displaystyle \sum_{j \vert x_j \in \N} \overline{a}_{rj} x_j = \overline{b}_r \]
+\begin{definition}[\textit{Gomory cut}]
+    The Gomory cut with respect to the fractional basic variable $x_{B{r}}$ is the inequality:
+    \[ \displaystyle \sum_{j \vert x_j \in \N} \left( \overline{a}_{rj} - \lfloor \overline{a}_{rj} \rfloor \right) x_j \geq \overline{b}_r - \lfloor \overline{b}_r \rfloor \]
+\end{definition}
+
+\begin{property}
+    The \textbf{integer} form:
+    \[ \displaystyle x_{B[r]} + \sum_{j \vert x_j \in \N} \lfloor\overline{a}_{rj}\rfloor x_j \leq \lfloor\overline{b}_r\rfloor \]
+    and the \textbf{fractional} form:
+    \[ \displaystyle x_{B[r]} + \sum_{j \vert x_j \in \N} \left( \overline{a}_{rj} - \lfloor \overline{a}_{rj} \rfloor \right) x_j \geq \overline{b}_r - \lfloor \overline{b}_r \rfloor \]
+    Are equivalent.
+\end{property}
+
+\paragraph*{Cutting plane method Algorithm}
+
+\begin{lstlisting}
+solve the linear relaxation of the ILP problem $\min\left\{c^T x \vert Ax = b, x \geq 0 \right\}$
+let $x^\ast_{LP}$ be the optimal solution of the linear relaxation
+while $x^\ast_{LP}$ is not integer do:
+    select a basic variable $x_{B[r]}$ with fractional value
+    generate the corresponding Gomory cut
+    add constraint to the optimal tableau of the linear relaxation
+    perform one iteration of the dual simplex method
+end
+\end{lstlisting}
+
+\begin{theorem}
+    If the ILP has a finite number of optimal solutions, the Cutting plane method with Gomory cuts is guaranteed to find an optimal solution.
+\end{theorem}
+The number of iterations that the algorithm needs to perform, however, is not known in advance and it's often very large.
+
+\subsection{Above and Beyond the Cutting Plane Method}
+\paragraph*{Other cutting planes}
+Other types of generic cutting planes exists, including a large number of classes of cutting planes for specific problems.
+The thorough study of the combinatorial structure of various problems led to:
+\begin{itemize}
+    \item the characterization of entire classes of facets.
+    \item efficient procedures for generating the facets.
+\end{itemize}
+
+\paragraph*{Branch-and-Cut}
+The combined approach of \textbf{branch-and-cut} aims at overcoming the disadvantages of the \textbf{branch-and-bound} method and pure \textbf{cutting plane methods}.
+For each subproblem, the \textbf{branch-and-cut} method generates a set of \textbf{cuts} that are valid for the subproblem and adds them to the formulation of the subproblem.
+Whenever the cutting planes become less effective, cut generation is stopped and a branching operation is performed.
+The cuts then to strengthen the formulation of the various subproblems; the long series of cuts without sensible improvements are interrupted by branching operations.

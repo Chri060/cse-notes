@@ -1,0 +1,140 @@
+\section{Linear programming duality}
+
+We can associate a closely related maximization (minimization) linear program with any minimization (maximization) linear program, based on the same parameters.
+In both cases, we encounter different spaces and objective functions, but, in general, the optimal objective function values coincide.
+This duality is valuable because finding the best lower bound (i.e., the maximum) is challenging, while finding the best upper bound is relatively simpler.
+
+The general strategy involves combining the constraints linearly with non-negative multiplicative factors.
+\begin{example}
+    For instance, consider the following original problem:
+    \begin{align*}
+        \max                      \:&\: 4x_1+x_2+5x_3+3x_4          \\
+        \textnormal{such that }     &\: x_1-x_2-x_3+3x_4 \leq 1     \\
+                                    &\: 5x_1+x_2+3x_3+8x_4 \leq 55  \\
+                                    &\: -x_1+2x_2+3x_3-5x_4 \leq 3  \\
+                                    &\: x_1,x_2,x_3,x_4 \geq 0      
+    \end{align*}
+    We can construct the dual problem to solve it more easily:
+    \begin{align*}
+        \min                      \:&\: y_1+55y_2+3y_3              \\
+        \textnormal{such that }     &\: y_1+5y_2-y_3 \geq 4         \\
+                                    &\: -y_1+y_2+2y_3 \geq 1        \\
+                                    &\: -y_1+3y_2+3y_3 \geq 5       \\
+                                    &\: 3y_1+8y_2-5y_3 \geq 3       \\   
+                                    &\: y_1,y_2,y_3 \geq 3          \\
+    \end{align*}
+\end{example}
+
+\begin{property}
+    The dual of the dual problem coincides with the primal problem. 
+\end{property}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cc}
+    \hline
+    \textbf{Primal (minimization)} & \textbf{Dual (maximization)}   \\ \hline
+    $m$ constraints                & $m$ variables                  \\
+    $n$ variables                  & $n$ constraints                \\
+    right-hand side                & coefficient objective function \\
+    coefficient objective function & right-hand side                \\
+    $A$                            & $A^T$                          \\
+    equality constraints           & unrestricted variables         \\
+    unrestricted variables         & equality constraints           \\
+    inequality constraints         & non-negative variables         \\
+    non-negative variables         & inequality constraints         \\ \hline
+    \end{tabular}
+\end{table}
+
+\begin{theorem}[\textit{Weak duality theorem}]
+    Given the primal problem: 
+    \begin{align*}
+        \min                      \:&\: z=c^T            \\
+        \textnormal{such that }     &\: Ax\geq b         \\
+                                    &\: x \geq 0
+    \end{align*}
+    And its dual: 
+    \begin{align*}
+        \max                      \:&\: w=b^Ty              \\
+        \textnormal{such that }     &\: A^ty\leq c          \\
+                                    &\: y \geq 0
+    \end{align*}
+    With $X=\{x|Ax \geq b, x \geq 0\} \neq \varnothing$ and $Y=\{y|A^Ty \leq c, y \geq 0\} \neq \varnothing$.
+    For every feasible solution $x \in X$ of the primal problem and every feasible solution $y \in Y$ of the dual problem, we have: 
+    \[b^Ty \leq c^Tx\]
+\end{theorem}
+\begin{proof}
+    For every pair $x \in X$ and $y \in Y$, we have $Ax \geq b$, $x \geq O$ and $A^Ty \leq c$, $y \geq 0$ which imply that: 
+    \[b^Ty \leq x^TA^Ty \leq x^Tc=c^Tx\]
+\end{proof}
+As a result we have that if $x$ is a feasible solution of $(P)$ $(x \in X)$, $y$ is a feasible solution of $(D)$ $(y \in Y)$, and the values of the respective objective functions coincide, $c^Tx=b^Ty$, then $x$ is optimal for $(P)$ and y is optimal for $(D)$. 
+The optimal solutions are denoted by $x^{*}$ and $y^{*}$. 
+
+\subsection{Strong duality theorem}
+\begin{theorem}[\textit{Strong duality theorem}]
+    If $X=\{x|Ax \geq b, b,x \geq 0\}$ and $\min\{c^Tx|x \in X\}$ is finite, there exist $x^{*} \in X$ and $y^{*} \in Y$ such that $c^Tx^{*}=b^Ty^{*}$. 
+\end{theorem}
+This is equivalent to say: 
+\[\min\{c^Tx|x \in X\}=\max\{b^Ty|y \in Y\}\]
+\begin{proof}
+    Derive an optimal solution of $(D)$ from one of $(P)$. Given: 
+    Given the primal problem: 
+    \begin{align*}
+        \min                      \:&\: z=c^T            \\
+        \textnormal{such that }     &\: Ax = b         \\
+                                    &\: x \geq 0
+    \end{align*}
+    And its dual: 
+    \begin{align*}
+        \max                      \:&\: w=b^Ty              \\
+        \textnormal{such that }     &\: y^tA \leq c^T       \\
+                                    &\: y \in \mathbb{R}^m
+    \end{align*}
+    And: 
+    \[x^{*}=\begin{bmatrix}
+        x^{*}_B \\ 
+        x^{*}_N
+    \end{bmatrix}\]
+    Here, $x^{*}_B=B^{-1}b$ and $x^{*}_N=0$ an optimal feasible solution of $(P)$, provided (after a finite number of iterations) by the Simplex algorithm with Bland's rule. 
+    Consider $\overline{y}^T=c_B^TB^{-1}$.
+    
+    Verify that $\overline{y}$ is a feasible solution of $(D)$. 
+    For the non-basic variables: 
+    \[\overline{c}_N^T=c_N^T-(c_B^TB^{-1})N=c_N^T-\overline{y}^TN \geq 0^T \implies \overline{y}^TN \geq c_N^T\]
+    For the basic variables 
+    \[\overline{c}_B^T=c_B^T-(c_B^TB^{-1})B=c_B^T-\overline{y}^TB \geq 0^T \implies \overline{y}^TB \geq c_B^T\]
+    
+    According to weak duality, $\overline{y}$ is an optimal solution of $(D)$: 
+    \[\overline{y}^Tb?(c_B^TB^{-1})b=c_B^T(B^{-1}b)=c_B^Tx_B^{*}=c^Tx^{*}\]
+
+    Hence, $\overline{y}=y^{*}$
+\end{proof}
+
+\paragraph*{Consequences}
+Since in a linear programming problem, only one of the three following cases can occur: 
+\begin{enumerate}
+    \item There exists an optimal solution. 
+    \item The problem is unbounded: the optimal cost is $+\infty$ for maximization problems and $-\infty$ for minimization problems. 
+    \item The problem is infeasible. 
+\end{enumerate}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ccccc}
+                                                     &                         & \multicolumn{3}{c}{\textbf{Dual}}                                  \\
+                                                     &                         & \textit{Finite optimum} & \textit{Unbounded} & \textit{Infeasible} \\
+    \multirow{3}{*}{\rotatebox{90}{\textbf{Primal}}} & \textit{Finite optimum} & \checkmark              & \tikzxmark         & \tikzxmark          \\
+                                                     & \textit{Unbounded}      & \tikzxmark              & \tikzxmark         & \checkmark          \\
+                                                     & \textit{Infeasible}     & \tikzxmark              & \checkmark         & \checkmark                   
+    \end{tabular}
+\end{table}
+
+\subsection{Complementary slackness}
+\begin{theorem}[Complementary slackness]
+    Let $x \in X^\ast$ and $y \in Y^\ast$ be feasible solutions to the primal and dual problem, respectively.
+    Then $x$ and $p$ are optimal for their respective problems if and only if:
+    \[y_i^\ast \left( a^T_i x - b_i \right) = 0 \quad  \forall, i \in \left\{ i = 1, \ldots, m \right\}\]
+    \[\left( c_j - y^T A_j \right) x_j^\ast = 0 \quad  \forall, j \in \left\{ j = 1, \ldots, n \right\}\]
+    Where $a_i$ denotes the $i$-th row of $A$ and $A_j$ the $j$-th column of $A$.
+\end{theorem}
+
+At optimality, the product of each variable with the corresponding slack variable of the constraint of the relative dual problem must be zero. 

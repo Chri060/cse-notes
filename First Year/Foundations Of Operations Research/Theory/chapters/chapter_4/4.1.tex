@@ -1,0 +1,93 @@
+\section{Introduction}
+
+\begin{definition}[\textit{Linear programming problem}]
+    A linear programming problem is an optimization problem defined as follows:
+    \begin{align*}
+        \min                      \:&\:f(x)           \\
+        \textnormal{such that }     &\: x \in x \subseteq \mathbb{R}^n \rightarrow \mathbb{R} 
+    \end{align*}
+    Here, the objective function, denoted as $f:x \rightarrow \mathbb{R}$, is linear, and the feasible region $x$ is described as:
+    \[x=\{x\in\mathbb{R}^n|g_i(x)r_i0\land i\in(1,m)\}\]
+    Where $r_i$ takes values from $\{=,\geq,\leq\}$, and $g_i:\mathbb{R}^n\rightarrow\mathbb{R}$ represents linear functions for $i=1,\dots,m$.
+\end{definition}
+\begin{definition}[\textit{Optimal solution}]
+    An \emph{optimal solution}, denoted as $x^{*} \in \mathbb{R}^n$, of the linear program is defined as satisfying $f(x^{*}) \leq f(x)$ for all $x\in x$.
+\end{definition}
+The general form of a linear programming problem can be expressed as follows:
+\[\min{z}=c^Tx\]
+Such that $Ax \geq b$ and $x \geq 0$. 
+In this notation, $x$ represents the vector of decision variables.
+It's important to note that the inequality for the matrix $A$ can be transformed into an equality, and the constraints on the variable values can be relaxed in some instances.
+It's often helpful to convert all linear programming problems into the general form.
+
+\paragraph*{Transformation rules}
+This transformation can be achieved using the following rules:
+\begin{itemize}
+    \item To convert a maximization problem into a minimization problem, you can use: 
+        \[\max{(c^Tx)}=\min{(-c^Tx)}\]
+    \item For $a^Tx \leq b$, you can introduce a slack variable $s$ as: 
+        \[a^Tx \leq b \implies
+        \begin{cases}
+            a^Tx+s=b \\
+            s \geq 0
+        \end{cases}\]
+    \item For $a^Tx \geq b$, you can introduce a surplus variable $s$ as: 
+        \[a^Tx \geq b \implies 
+        \begin{cases}
+            a^Tx-s=b \\
+            s \geq 0
+        \end{cases}\]
+    \item If a variable $x_{ij}$ is unrestricted in sign, you can represent it as:
+        \[\begin{cases}
+            x_j=x_j^{+}-x_j^{-} \\
+            x_j=x_j^{+},x_j^{-} \geq 0
+        \end{cases}\]
+        After substituting $x_j$ with $x_j^{+}-x_j^{-}$, you can remove $x_j$ from the problem. 
+    \item To change the direction of an inequality, you can use the following equivalences:
+        \[a^Tx \leq b \textnormal{ is equivalent to } -a^Tx \geq -b\]
+        \[a^Tx \geq b \textnormal{ is equivalent to } -a^Tx \leq -b\]
+    \item For an equality constraint $a^Tx = b$, you can represent it as:
+        \[\begin{cases}
+            a^Tx \geq b \\
+            a^Tx \leq b
+        \end{cases}\]
+\end{itemize}
+\begin{example}
+    Given the following linear programming model, we'll rewrite it in the normal form:
+    \begin{align*}
+        \max{f(x_1,x_2)}           =&\: 2x_1-3x_2          \\
+        \textnormal{such that }     &\: 4x_1-7x_2 \leq 5  \\
+                                    &\: 6x_1-2x_2 \geq 4  \\
+                                    &\: x_1 \geq 0, x_2 \in \mathbb{R}
+    \end{align*}
+    We can add two new variables, $x_2=x_3-x_4$, with $x_3,x_4 \geq 0$, and we obtain:
+    \begin{align*}
+        \max{f(x_1,x_2)}           =&\: 2x_1-3x_2          \\
+        \textnormal{such that }     &\: 4x_1-7x_3+7x_4 \leq 5  \\
+                                    &\: 6x_1-2x_3+2x_4 \geq 4  \\
+                                    &\: x_1,x_2,x_4 \geq 0
+    \end{align*}
+    Next, we introduce slack and surplus variables $x_5$ and $x_6$, resulting in:
+    \begin{align*}
+        \max{f(x_1,x_2)}           =&\: 2x_1-3x_2          \\
+        \textnormal{such that }     &\: 4x_1-7x_3+7x_4+x_5 = 5  \\
+                                    &\: 6x_1-2x_3+2x_4-x_6 = 4  \\
+                                    &\: x_1,x_2,x_4,x_5,x_6 \geq 0
+    \end{align*}
+    Finally, we need to change the sign of the objective function:
+    \begin{align*}
+        \min{f(x_1,x_2)}           =&\: -2x_1+3x_2          \\
+        \textnormal{such that }     &\: 4x_1-7x_3+7x_4+x_5 = 5  \\
+                                    &\: 6x_1-2x_3+2x_4-x_6 = 4  \\
+                                    &\: x_1,x_2,x_4,x_5,x_6 \geq 0
+    \end{align*}
+\end{example}
+The assumptions underlying linear programming models can be summarized as follows:
+\begin{enumerate}
+    \item Linearity of the objective function and constraints. 
+    \item Proportionality of the objective function and constraints: the contribution of each variable is scaled by a constant. 
+    \item Additivity of the objective function and constraints: the overall contribution of all variables is the sum of their individual contributions.
+    \item Divisibility: variables are allowed to take rational values, and fractional values are acceptable.
+    \item Parameters are considered as constant which can be estimated with a sufficient degree of accuracy. 
+\end{enumerate}
+The linear programming sensitivity analysis is a technique used to assess how an optimal solution reacts to small alterations in parameter values.
