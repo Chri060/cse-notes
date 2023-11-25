@@ -9,13 +9,13 @@ The idea of the simplex method is that, given a linear program in standard form:
 we will examine a sequence of basic feasible solutions with non-increasing objective function values until an optimal solution is reached, or the  linear program is 
 found to be unbounded. 
 
-\subsection*{Optimality test}
+\subsection{Optimality test}
 Because a basic feasible solution is characterized by $x_B=B^{-1}b,x_N=0$, we can express the objective function in terms of only the non-basic variables as follows:
 \[c^Tx=c_B^TB^{-1}b+\left(c_N^T-c_B^TB^{-1}N\right)x_N\]
-\newpage
-\begin{definition}
+\begin{definition}[\textit{Vector of reduced cost}]
+    The vector: 
     \[\overline{c}^T=c^T-C_B^TB^{-1}A=\left[c^T-C_B^TB^{-1}B,c^T-C_B^TB^{-1}N\right]\]
-    is the \emph{vector of reduced costs} with respect to the basis $B$. 
+    is the vector of reduced costs with respect to the basis $B$. 
 \end{definition}
 $\overline{c}_j$ represents the change in the objective function value if non-basic $x_j$ is increased from 0 to 1 while keeping all other non-basic variables at 0. 
 The solution value changes by:
@@ -81,7 +81,8 @@ This optimality condition is sufficient, but in general, it's not necessary.
     Since $\overline{c}_2=-2<0$, increasing $x_2$ to 1 will improve the solution by $-2$. 
 \end{example}
 
-\subsection*{Vertex selection}
+\newpage
+\subsection{Vertex selection}
 \begin{example}
     Consider the following linear problem:
     \begin{align*}
@@ -125,7 +126,7 @@ The value of $x_s$ can be increased up to:
 \[\theta^{*}=\min_{i=1,\dots,m}{\left[\dfrac{\overline{b}_i}{\overline{a}_{is}} \textnormal{ such that }\overline{a}_{is} \geq 0\right]}\]
 The value of $x_r$ where $r=\textnormal{argmin}_{i=1,\dots,m}{\left[\frac{\overline{b}_i}{\overline{a}_{is}} \textnormal{ such that }\overline{a}_{is} \geq 0\right]}$ decreases to 0 and exits the basis. 
 
-\subsection*{Change of basis}
+\subsection{Change of basis}
 Consider a feasible basis $B$ and a non-basic variable $x_s$ (part of $x_N$) with a reduced cost $\overline{c}_ < 0$.
 To improve the objective function value, we aim to increase $x_s$ as much as possible while keeping all other non-basic variables at zero.
 Among the basic variables $x_r$ (in $x_B$) where $x_r>0$, one imposes the strictest upper limit, denoted as $\theta^{*}$ on the increase of $x_s$.
@@ -145,7 +146,7 @@ For a given system $Ax=b$, the steps are as follows:
 \end{enumerate}
 It's important to note that this procedure preserves the feasibility of the solutions.
 
-\subsection*{Tableau representation}
+\subsection{Tableau representation}
 A system with non-negativity constraints can be represented as a table in the following manner:
 \begin{table}[H]
     \centering
@@ -227,7 +228,7 @@ By performing pivoting operations, we transform the tableau into canonical form 
     \[x^{*T}=(0,6,0,18) \textnormal{ with } z^{*}=-6\]
 \end{example}
 
-\subsection*{Algorithm}
+\subsection{Algorithm}
 \begin{algorithm}[H]
     \caption{Simplex algorithm (LP with minimization)}
         \begin{algorithmic}[1]
@@ -252,23 +253,22 @@ By performing pivoting operations, we transform the tableau into canonical form 
         \end{algorithmic}
 \end{algorithm}
 
-\subsection*{Degenerate basic feasible solution and convergence}
-\begin{definition}
-    A basic feasible solution $x$ is \emph{degenerate} if it contains at least one basic variable $x_j=0$.
+\subsection{Degenerate basic feasible solution and convergence}
+\begin{definition}[\textit{Degenerate basic feasible solution}]
+    A basic feasible solution $x$ is degenerate if it contains at least one basic variable $x_j=0$.
 \end{definition}
 This property implies that a solution $x$ with more than $n - m$ zero values corresponds to multiple distinct bases. 
 When degenerate basic feasible solutions are present, changing the basis may not necessarily result in a decrease in the objective function value.
 In such cases, it is possible to cycle through a sequence of degenerate bases associated with the same vertex.
 To manage these scenarios, various anti-cycling rules have been proposed to select the variables that enter and exit the bases (indices $r$ and $s$). 
 One such rule is Bland's rule, which dictates choosing the variable with the smallest index among all candidates to enter or exit the basis.
-\newpage
 \begin{proposition}
     The Simplex algorithm, when using Bland's rule, terminates after a maximum of $\binom{n}{m}$ iterations.
 \end{proposition}
 In some exceptional cases, the number of iterations may grow exponentially with respect to the values of $n$ or $m$. 
 However, in general, the Simplex algorithm is highly efficient, and extensive experimental studies have shown that the number of iterations increases linearly with respect to $m$ and very slowly with respect to $n$. 
 
-\subsection*{Two-phase simplex method}
+\subsection{Two-phase simplex method}
 The two-phase Simplex method differs from the standard simplex method in that it first addresses an auxiliary problem aiming to minimize the sum of artificial variables. 
 Once this auxiliary problem is solved and the final tableau is reorganized, the second phase, which resembles the standard Simplex method, begins.
 
@@ -370,9 +370,9 @@ Two possibilities arise:
     Since the basic feasible solution is already optimal, there is no need for a phase two.
 \end{example}
 
-\subsection*{Polynomial-time algorithms for linear programming}
+\subsection{Polynomial-time algorithms for linear programming}
 Over the years, polynomial-time algorithms for linear programming have been developed, including:
 \begin{itemize}
-    \item The Ellipsoid method (Khachiyan, 1979), which holds significant theoretical importance.
-    \item Interior point methods (Karmarkar, 1984), known for their highly efficient variants when dealing with certain types of problem instances. 
+    \item \textit{Ellipsoid method} (Khachiyan, 1979), which holds significant theoretical importance.
+    \item \textit{Interior point methods} (Karmarkar, 1984), known for their highly efficient variants when dealing with certain types of problem instances. 
 \end{itemize}

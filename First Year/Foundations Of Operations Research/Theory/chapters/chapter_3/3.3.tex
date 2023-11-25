@@ -20,11 +20,7 @@ The algorithm's fundamental concept is:
         \includegraphics[width=0.3\linewidth]{images/sgraph.png}
     \end{figure}
     We start by selecting node 3 as our initial node. 
-    Therefore, we have two sets: 
-    \begin{itemize}
-        \item $S=\{3\}$.
-        \item $T=\{\varnothing\}$.
-    \end{itemize}
+    Therefore, we have two sets: $S=\{3\}$ and $T=\{\varnothing\}$.
     Next, we follow these steps:
     \begin{itemize}
         \item The edge with the minimum cost connects nodes 3 and 4. 
@@ -56,7 +52,7 @@ The algorithm's fundamental concept is:
     Graphically, the resulting minimum spanning tree is as shown below:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\linewidth]{images/MST.png}
+        \includegraphics[width=0.8\linewidth]{images/MST.png}
     \end{figure}
 \end{example}
 \begin{algorithm}[H]
@@ -85,24 +81,22 @@ The exactness does not depend on the choice of the first node nor on the selecte
 \begin{proof}
     By contradiction, assume $T^{} \subseteq E$ is a minimum cost spanning tree with $F \subseteq T^{}$ and $e \notin T^{}$. 
     Adding edge $e$ to $T^{}$ creates the cycle $C$. 
-    Let $f \in \delta(S) \cap C$: 
-    \begin{itemize}
-        \item If $c_e=c_f$, then $T^{}\cup\{e\}-\{f\}$ is also optimal since it has same cost of $T^{}$.
-        \item If $c_e<c_f$, then $c\left(T^{}\cup\{e\}-\{f\}\right)<C(T^{})$, hence $T^{*}$ is not optimal.
-    \end{itemize}
+    Let $f \in \delta(S) \cap C$.
+    If $c_e=c_f$, then $T^{}\cup\{e\}-\{f\}$ is also optimal since it has same cost of $T^{}$.
+    If $c_e<c_f$, then $c\left(T^{}\cup\{e\}-\{f\}\right)<C(T^{})$, hence $T^{*}$ is not optimal.
 \end{proof}
 \begin{proposition}
     Prim's algorithm is greedy. 
 \end{proposition}     
 At each step a minimum cost edge is selected among those in the cut $\delta (S)$ induced by the current set of nodes $S$. 
-\begin{definition}
-    Given a spanning tree $T$, an edge $e \notin T$ is \emph{cost decreasing} if when $e$ is added to $T$ it creates a cycle $C$ with $C \subseteq T \cup \{e\}$ and $\exists f \in C-\{e\}$ such that $c_e<c_f$. 
+\begin{definition}[\textit{Cost decreasing edge}]
+    Given a spanning tree $T$, an edge $e \notin T$ is cost decreasing if when $e$ is added to $T$ it creates a cycle $C$ with $C \subseteq T \cup \{e\}$ and $\exists f \in C-\{e\}$ such that $c_e<c_f$. 
 \end{definition}
 \begin{example}
     In the context of the given graph:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.5\linewidth]{images/costdecreasing.png}
+        \includegraphics[width=0.4\linewidth]{images/costdecreasing.png}
     \end{figure}
     Since we have the equation:
     \[c(T \cup \{e\}-\{f\})=c(T)+c_e-c_f\]
@@ -112,10 +106,13 @@ At each step a minimum cost edge is selected among those in the cut $\delta (S)$
 \begin{theorem}
     A tree $T$ is of minimum total cost if and only if no cost decreasing edge exists. 
 \end{theorem}
-\begin{proof}[of direct implication]
+
+\begin{proof}
+    We prove that if the tree is of minimum total cost if no cost decreasing edge exists.
     If a cost-decreasing edge exists, then $T$ is not of minimum total cost.
 \end{proof}
-\begin{proof}[of inverse implication]
+\begin{proof}
+    We prove that if no cost decreasing edge exists the tree is of minimum total cost.
     When there are no cost-decreasing edges, it implies that the spanning tree $T$ has the minimum total cost.
     Consider a minimum-cost spanning tree denoted as $T^{*}$, which is obtained through Prim's algorithm.
     It is possible to confirm that, by gradually exchanging one edge at a time, $T^{*}$ can be transformed step by step into $T$ without altering the overall cost.

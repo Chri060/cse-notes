@@ -1,12 +1,12 @@
 \section{Graph shortest path problem}
 
-\subsection*{Dijkstra's algorithm}
+\subsection{Dijkstra's algorithm}
 Given a directed graph $G=(N,A)$ with a cost $c_j \in R$ for each arc $(i,j) \in A$, and two nodes $s$ and $t$, determine a minimum cost path from $s$ to $t$. 
 
 Each value $c_j$ represents the cost associated with arc $(i,j) \in A$. 
 Here, node $s$ is designated as the source or origin, while node $t$ is specified as the destination or sink.
-\begin{definition}
-    A path is considered \emph{simple} when it ensures that each node is visited exactly once, without any repetitions.
+\begin{definition}[\textit{Simple path}]
+    A path is considered simple when it ensures that each node is visited exactly once, without any repetitions.
 \end{definition}
 \begin{property}
     If $c_j \geq 0$ for all $(i,j) \in A$, there is at least one shortest path which is simple. 
@@ -25,33 +25,57 @@ It is important to note that Dijkstra's algorithm follows a greedy approach with
     We assign labels as follows:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.2\linewidth]{images/D1.png}
+        \includegraphics[width=0.25\linewidth]{images/D1.png}
     \end{figure}
     Next, we examine all arcs leading from the starting node to other nodes and update their labels:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.2\linewidth]{images/D2.png}
+        \includegraphics[width=0.25\linewidth]{images/D2.png}
     \end{figure}
     Moving to node 2, we explore reachable nodes. 
     In this case, we find the shortest path from the initial node to 4, so we update the label for 4:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.2\linewidth]{images/D3.png}
+        \includegraphics[width=0.25\linewidth]{images/D3.png}
     \end{figure}
     Now, we proceed to node 4, which is the closest node to the starting point.
         We check all arcs leading to other nodes:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.2\linewidth]{images/D4.png}
+        \includegraphics[width=0.25\linewidth]{images/D4.png}
     \end{figure}
     We repeat this process for the remaining nodes, considering them in ascending order of cost from the start:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.4\linewidth]{images/D5.png}
+        \includegraphics[width=0.25\linewidth]{images/D5.png}
     \end{figure}
     At this point, we can trace back the shortest path to any node in the graph using the predecessor label. 
     For instance, the shortest path from $s$ to 5 has a cost of 13, and the path is $(1,2,3,5)$. 
 \end{example}
+\begin{proposition}
+    Dijkstra's algorithm is exact. 
+\end{proposition}
+\begin{proof}
+    At the $k$-th step: $S = \{s,i_2,\dots,i_k\}$ and 
+    \[L_j=
+    \begin{cases}
+        \textnormal{cost of a minimum path from } s \textnormal{ to } j,\:j \in S \\ 
+        \textnormal{cost of a minimum path with all intermediate nodes in } S, \: j \notin S
+    \end{cases}
+    \]
+    We prove the proposition by induction on the number $k$ of steps. 
+    For the base case it is easy to see that the statement holds for $k = 1$, since 
+    \[S=\{s\},\: L_s=0,\: L_j= +\infty,\: \forall j \neq S \]
+    For the inductive step we must prove that, if the statement holds at the $k$-th step, it must also hold for the $(k + 1)$-th step. 
+    In the $(k + 1)$-th step let $u \notin S$be the node that is inserted in $S$ and $\varnothing$ the path from $s$ to $u$ such that:
+    \[L_v + c_{uv} \leq L_i + C_{ij},\: \forall(i,j) \in \delta^{+}(S)\]
+    Let us verify that every path $\pi$ from $s$ to $u$ has $c(\pi) \geq c(\varnothing)$. There exist $i \in S$ and $j \notin S$ such that: 
+    \[\pi= \pi_1 \cup \{(i,j)\} \cup \pi_2\]
+    Where $(i, j)$ is the first arc in $\pi \cap \delta^{+}(S)$. Moreover: 
+    \[c(\pi) = c(\pi_1) + c_{ij} + c(\pi_2) \geq L_i + c_{ij}\]
+    Because $c_{ij} \geq 0$, thus, $c(\pi_2) \geq 0$, and by the induction assumption, $c(\pi_1) \geq L_i$. Finally, by the choice of $(v,u)$ we have: 
+    \[L_i + c_{ij} \geq L_v + c_{vu} = c(\varnothing)\]
+\end{proof}
 
 The inputs to the algorithm consist of a graph $G=(N, E)$ with non-negative costs assigned to its arcs, and a designated starting node $s$, which is a member of $N$.
 \begin{algorithm}[H]
@@ -76,32 +100,6 @@ The inputs to the algorithm consist of a graph $G=(N, E)$ with non-negative cost
         \end{algorithmic}
 \end{algorithm}
 The worst-case time complexity of this algorithm is $O(n^3)$. 
-\begin{proposition}
-    Dijkstra's algorithm is exact. 
-\end{proposition}
-\begin{proof}
-    At the $k$-th step: $S = \{s,i_2,\dots,i_k\}$ and 
-    \[L_j=
-    \begin{cases}
-        \textnormal{cost of a minimum path from } s \textnormal{ to } j,\:j \in S \\ 
-        \textnormal{cost of a minimum path with all intermediate nodes in } S, \: j \notin S
-    \end{cases}
-    \]
-    By induction on the number $k$ of steps: 
-    \begin{itemize}
-        \item Base case: it is easy to see that the statement holds for $k = 1$, since 
-            \[S=\{s\},\: L_s=0,\: L_j= +\infty,\: \forall j \neq S \]
-        \item Inductive step: we must prove that, if the statement holds at the $k$-th step, it must also hold for the $(k + 1)$-th step. 
-    \end{itemize}
-    In the $(k + 1)$-th step let $u \notin S$be the node that is inserted in $S$ and $\varnothing$ the path from $s$ to $u$ such that:
-    \[L_v + c_{uv} \leq L_i + C_{ij},\: \forall(i,j) \in \delta^{+}(S)\]
-    Let us verify that every path $\pi$ from $s$ to $u$ has $c(\pi) \geq c(\varnothing)$. There exist $i \in S$ and $j \notin S$ such that: 
-    \[\pi= \pi_1 \cup \{(i,j)\} \cup \pi_2\]
-    Where $(i, j)$ is the first arc in $\pi \cap \delta^{+}(S)$. Moreover: 
-    \[c(\pi) = c(\pi_1) + c_{ij} + c(\pi_2) \geq L_i + c_{ij}\]
-    Because $c_{ij} \geq 0$, thus, $c(\pi_2) \geq 0$, and by the induction assumption, $c(\pi_1) \geq L_i$. Finally, by the choice of $(v,u)$ we have: 
-    \[L_i + c_{ij} \geq L_v + c_{vu} = c(\varnothing)\]
-\end{proof}
 We can observe the following points:
 \begin{itemize}
     \item A collection of the shortest paths from the starting node $s$ to all nodes $j$ can be obtained using the predecessor vector.
@@ -110,7 +108,7 @@ We can observe the following points:
     \item Dijkstra's algorithm is not applicable when there are arcs with negative costs.
 \end{itemize}
 
-\subsection*{Floyd-Warshall's algorithm}
+\subsection{Floyd-Warshall's algorithm}
 When the graph $G$ contains a negative-cost cycle, the well-defined nature of the shortest path problem is compromised. 
 Such cycles repeatedly lead to a decrease in cost, making it impossible to identify a finite shortest path from node $s$ to $t$.
 To address this issue, the Floyd-Warshall algorithm is employed, as it is capable of detecting negative-cost cycles.
@@ -122,8 +120,8 @@ It employs $n \times n$ matrices, $D$ and $P$, where their elements represent, u
     \item $p_{ij}$, indicating the predecessor of node $j$ in the shortest path from node $i$ to $j$.
 \end{itemize}
 
-\begin{definition}
-    The \emph{triangular operation} specifies that for every pair of nodes $i$ and $j$, where $i$ is not equal to $u$ and $j$ is not equal to $u$ (including the case when $i$ equals $j$), one should examine whether it is more advantageous to reach $j$ from $i$ via an intermediate node $u$. 
+\begin{definition}[\textit{Triangular operation}]
+    The triangular operation specifies that for every pair of nodes $i$ and $j$, where $i$ is not equal to $u$ and $j$ is not equal to $u$ (including the case when $i$ equals $j$), one should examine whether it is more advantageous to reach $j$ from $i$ via an intermediate node $u$. 
     This determination is made by checking if the following relationship holds:
     \[d_{iu}+d_{uj} < d_{ij}\]
 \end{definition}
@@ -174,6 +172,14 @@ It employs $n \times n$ matrices, $D$ and $P$, where their elements represent, u
         \item $0=d_{44} < d_{42} + d_{24} = -5+3$ (negative cost circuit found). 
     \end{itemize}
 \end{example}
+Given that the triangular operation is executed for all nodes $u$ and for each pair of nodes $i$ and $j$ in the worst-case scenario, the overall time complexity of the Floyd-Warshall algorithm is $O(n^3)$.
+\begin{proposition}
+    Floyd-Warshall's algorithm is exact. 
+\end{proposition}
+\begin{proof}
+    Let's assume that the nodes of $G$ are numbered from $1$ to $n$. 
+    We can verify that when following the node index order, after the $u$-th cycle, the value of $d_{ij}$ (for any $i$ and $j$) corresponds to the cost of the shortest path from $i$ to $j$ with only intermediate nodes in the set ${1,\dots,u}$. 
+\end{proof}
 
 The algorithm takes as its inputs a directed graph $G = (N,A)$ and an $n \times n$ cost matrix, $C = [c_{ij}]$.
 \begin{algorithm}[H]
@@ -206,17 +212,9 @@ The algorithm takes as its inputs a directed graph $G = (N,A)$ and an $n \times 
             \EndFor
         \end{algorithmic}
 \end{algorithm}
-Given that the triangular operation is executed for all nodes $u$ and for each pair of nodes $i$ and $j$ in the worst-case scenario, the overall time complexity of the Floyd-Warshall algorithm is $O(n^3)$.
-\begin{proposition}
-    Floyd-Warshall's algorithm is exact. 
-\end{proposition}
-\begin{proof}
-    Let's assume that the nodes of $G$ are numbered from $1$ to $n$. 
-    We can verify that when following the node index order, after the $u$-th cycle, the value of $d_{ij}$ (for any $i$ and $j$) corresponds to the cost of the shortest path from $i$ to $j$ with only intermediate nodes in the set ${1,\dots,u}$. 
-\end{proof}
 
-\subsection*{Topological order algorithm}
-The topological order algorithm deals with a directed acyclic graph $G = (N,A)$, where each arc $(i,j) \in A$ has an associated cost $c_ij \in \mathbb{R}$, 
+\subsection{Topological order algorithm}
+The topological order algorithm deals with a directed acyclic graph $G = (N,A)$, where each arc $(i,j) \in A$ has an associated cost $c_{ij} \in \mathbb{R}$, 
 Given nodes $s$ and $t$, the goal is to determine the shortest or longest path from $s$ to $t$.
 Directed acyclic graphs possess a crucial property known as topological order, where the nodes in any such graph $G$ can be indexed in a way that for each arc $(i, j) \in A$, we have $i < j$. 
 This topological order property can be leveraged in an efficient dynamic programming algorithm to find shortest or longest paths in directed acyclic graphs.
@@ -235,10 +233,10 @@ The complexity of this algorithm is $O(m)$, where $m$ is the cardinality of $A$ 
     \end{figure}
 \end{example}
 
-\subsection*{DAGs' dynamic programming algorithm}
+\subsection{DAGs' dynamic programming algorithm}
 Any shortest path from 1 to $\pi_t$, with at least two arcs, can be subdivided into two parts: $\pi_t$ and $(i,t)$, where $\pi_t$ is the shortest sub-path from $s$ to $i$. 
 For each node  $i=1,\dots,t$, let $L_i$ denote the cost of the shortest path from $1$ to $i$. 
-Therefore, we can express $L_t$as follows:
+Therefore, we can express $L_t$ as follows:
 \[L_t=\min_{(i,t) \in \delta^{-}(t)}\{L_i+c_{it}\}\]
 This minimum is taken over all possible predecessors $i$ of $t$.
 If the graph $G$ is directed, acyclic, and topologically ordered, the only possible predecessors of $t$ in the shortest path $\pi_t$ from 1 to $t$ are those nodes with an index $i$ less than $t$. 
@@ -250,6 +248,17 @@ For Directed Acyclic Graphs (DAGs) whose nodes are topologically ordered, $L_{t-
 \[L_{t-1}=\min_{i<t-1}\{L_i+c_{i,t-1}\};\dots;L_2=\min_{i=1}\{L_i+c_i2\}=L_1+c_{12};L_1=0\]
 These relations can be solved in reverse order:
 \[L_1=0;L_2=L_1+c_{12};\dots;L_{t}=\min_{i<t-1}\{L_i+c_{t}\}\]
+\begin{algorithm}[H]
+    \caption{Dynamic programming to find the shortest paths in DAGs}
+        \begin{algorithmic}[1]
+            \State Sort the nodes of $G$ topologically
+            \State $L_1 \leftarrow 0$
+            \For {$j=2,\dots,n$}
+                \State $L_j \leftarrow \min\{L_i+c_{ij}|(i,j) \in \delta^{-}(j) \land i < j\}$
+                \State $pred_j \leftarrow v \: \textnormal{such that} \: (v,j)=\textnormal{argmin} \{L_i+c_{ij}|(i,j) \in \delta^{-}(j) \land i < j\}$
+            \EndFor
+        \end{algorithmic}
+\end{algorithm}
 \begin{example}
     Consider the following graph:
     \begin{figure}[H]
@@ -268,17 +277,6 @@ These relations can be solved in reverse order:
         \item $L_8=\min_{i=4,5,6,7}\{L_i+c_{i8}\}=\min{16,14,21,18}=14 \rightarrow \textnormal{pred}_8=5$
     \end{itemize}
 \end{example}
-\begin{algorithm}[H]
-    \caption{Dynamic programming to find the shortest paths in DAGs}
-        \begin{algorithmic}[1]
-            \State Sort the nodes of $G$ topologically
-            \State $L_1 \leftarrow 0$
-            \For {$j=2,\dots,n$}
-                \State $L_j \leftarrow \min\{L_i+c_{ij}|(i,j) \in \delta^{-}(j) \land i < j\}$
-                \State $pred_j \leftarrow v \: \textnormal{such that} \: (v,j)=\textnormal{argmin} \{L_i+c_{ij}|(i,j) \in \delta^{-}(j) \land i < j\}$
-            \EndFor
-        \end{algorithmic}
-\end{algorithm}
 As the nodes are topologically ordered, each node and each arc is processed exactly once, resulting in a time complexity of $O(m)$, where $m$ represents the cardinality of $A$ (the number of arcs).    
 
 The same algorithm can also be applied to find the longest path using the following formula:
@@ -292,12 +290,13 @@ The same algorithm can also be applied to find the longest path using the follow
     For any shortest (longest) path from node from 1 to $t,\pi_t$, there exists a pair of nodes $i$ and $j$, where $i < j$,  such that the path can be partitioned into two parts: $\pi_i$ and $(i,t)$, where $\pi_i$ represents the minimum (maximum) length from $s$ to $i$.
 \end{proof}
 
-\subsection*{Project planning algorithm}
-\begin{definition}
-    A \emph{project}  comprises a collection of $m$ activities with an associated duration. 
+\subsection{Project planning algorithm}
+\begin{definition}[\textit{Project}]
+    A project  comprises a collection of $m$ activities with an associated duration. 
     Specifically, activity $A_i$ has an estimated duration of $d_j \geq 0, i=1,\dots,m$. 
-
-    Certain pairs of activities are governed by \emph{precedence constraint}. 
+\end{definition}
+\begin{definition}[\textit{Precedence constraint}]
+    Certain pairs of activities are governed by precedence constraint. 
     A notation such as $A_i \varpropto A_j$ signifies that the commencement of $A_j$ is contingent upon the completion of $A_i$. 
 \end{definition}
 A project can be conveniently represented using a directed graph $G = (N, A)$, where each arc corresponds to an activity, and the length of the arc signifies the duration of the associated activity.
@@ -380,19 +379,20 @@ The steps involved are as follows:
     To do this, we start by creating a graph associated with the given problem:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.5\linewidth]{images/eproject.png}
+        \includegraphics[width=0.6\linewidth]{images/eproject.png}
     \end{figure}
     The first two phases of the CPM algorithm result in the following graphs:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.75\linewidth]{images/aproject.png}
+        \includegraphics[width=0.6\linewidth]{images/aproject.png}
     \end{figure}
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.75\linewidth]{images/aproject1.png}
+        \includegraphics[width=0.6\linewidth]{images/aproject1.png}
     \end{figure}
     As a result, the longest path that is critical, and hence determines the minimum project duration, is $(1,2,4,5,6,8)$.
 \end{example}
+
 The algorithm takes as inputs a graph $G = (N,A)$, where $n= \left\lvert N \right\rvert $, and the duration $d_{ij}$ assigned to each $(i,j) \in A$. 
 \begin{algorithm}[H]
     \caption{Algorithm for the critical path method}
@@ -409,12 +409,13 @@ The algorithm takes as inputs a graph $G = (N,A)$, where $n= \left\lvert N \righ
         \end{algorithmic}
 \end{algorithm}
 The algorithm's time complexity is $O(m)$, where $m =\left\lvert A\right\rvert$. 
-\begin{definition}
+\begin{definition}[\textit{Critical activity}]
     An activity $(i,j)$ with zero slack, which means that:
     \[\sigma_{ij}=T_{max_j}-T_{min_i}-d_{ij}=0\]
-    is considered \emph{critical}. 
-
-    A \emph{critical path} is defined an $s-t$ path only composed of critical activities (it always exists).
+    is considered critical. 
+\end{definition}
+\begin{definition}[\textit{Critical path}]
+    A critical path is defined an $s-t$ path only composed of critical activities (it always exists).
 \end{definition}
 
 To determine the slack of a project, another approach is to use Gantt charts, which were initially introduced by Henry Gantt in 1910. 
@@ -440,6 +441,6 @@ These charts offer a visual representation of the project's timeline.
     These results can be illustrated using a Gantt chart as shown below:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.25\linewidth]{images/Gantt.png}
+        \includegraphics[width=0.5\linewidth]{images/Gantt.png}
     \end{figure}
 \end{example}
