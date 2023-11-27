@@ -1,20 +1,20 @@
 \section{Regular expressions and languages}
 
-The family of regular languages is the most basic among formal language families and can be defined in three different ways: algebraically, through generative grammars, and by using recognizer automata.
-\begin{definition}
-    A \emph{regular expression} is a string denoted as $r$, constructed over the alphabet $\Sigma=\{a_1,a_2,\dots,a_k\}$ and featuring metasymbols: union ($\cup$), concatenation ($\cdot$), star ($^{*}$), empty string ($\varepsilon$), subject to the following rules:
-    \begin{enumerate}
-        \item Empty string: $r=\varepsilon$.
-        \item Unitary language: $r=a$.
-        \item Union of expressions: $r=s \cup t$.
-        \item Concatenation of expressions: $r=(st)$.
-        \item Iteration of an expression: $r=s^{*}$. 
-    \end{enumerate}
-    Here, the symbols $s$ and $t$ represent regular expressions.
+The regular language family, the most fundamental among formal language families, can be defined in three distinct ways: algebraically, through generative grammars, and by employing recognizer automata.
+\begin{definition}[\textit{Regular expression}]
+    A regular expression is a string denoted as $r$, constructed over the alphabet $\Sigma=\{a_1,a_2,\dots,a_k\}$ and featuring metasymbols: union ($\cup$), concatenation ($\cdot$), star ($^{*}$), empty string ($\varepsilon$). 
 \end{definition}
-The operator precedence is as follows: star has the highest precedence, followed by concatenation, and then union.
-\newpage
-In addition to these operators, we often make use of derived operators:
+The metasymbols adhere to the following rules:
+\begin{enumerate}
+    \item \textit{Empty string}: $r=\varepsilon$.
+    \item \textit{Unitary language}: $r=a$.
+    \item \textit{Union of expressions}: $r=s \cup t$.
+    \item \textit{Concatenation of expressions}: $r=(st)$.
+    \item \textit{Iteration of an expression}: $r=s^{*}$. 
+\end{enumerate}
+In these rules, the symbols $s$ and $t$ represent regular expressions. 
+The operator precedence is structured as follows: star has the highest precedence, followed by concatenation, and then union.
+In addition to these operators, derived operators are frequently employed:
 \begin{itemize}
     \item $\varepsilon$, defined as $\varepsilon=\varnothing^{*}$. 
     \item $e^{+}$, defined as $e \cdot e^{*}$. 
@@ -33,25 +33,29 @@ The interpretation of a regular expression $r$ corresponds to a language $L_r$ o
     $s^{*}$                              & $L_s^{*}$                            \\ \hline
     \end{tabular}
 \end{table}
-\begin{definition}
-    A \emph{regular language} is a language that is represented by a regular expression.
+\begin{definition}[\textit{Regular language}]
+    A regular language can be described by a regular expression.
 \end{definition}
+
 \begin{example}
-    The regular expression $e=(111)^{*}$ represents the language $L_e=\{\varepsilon,111,111111,\dots\}$. 
-
-    The regular expression $e_1=11(1)^{*}$ represents the language $L_e=\{11,111,1111,11111,\dots\}$. 
+    Consider the regular expression $e=(111)^{*}$, which denotes the language 
+    \[L_e=\{\varepsilon,111,111111,\dots\}\]
+    Similarly, the regular expression $e_1=11(1)^{*}$ represents the language 
+    \[L_{e_1}=\{11,111,1111,11111,\dots\}\]
 \end{example}
-\begin{definition}
-    The \emph{family of regular languages}, denoted as REG, is the collection of all regular languages. 
-
-    The \emph{family of finite languages}, denoted as FIN, is the collection of all languages with finite cardinality.
+\begin{definition}[\textit{Family of regular languages}]
+    The family of regular languages, denoted as REG, encompasses all languages that can be expressed by regular expressions.
 \end{definition}
-Every finite language is considered regular because it can be expressed as the union of a finite number of strings, each of which is formed by concatenating a finite number of alphabet symbols: 
+\begin{definition}[\textit{Family of finite languages}]
+    The family of finite languages, denoted as FIN, comprises languages with finite cardinality.
+\end{definition}
+Every finite language is considered regular  since it can be articulated as the union of a finite set of strings, each formed by concatenating a finite number of alphabet symbols:
 \[\left(x_1 \cup x_2 \cup \dots \cup x_k \right) = \left( a_{1_1}a_{1_2}\dots a_{1_n} \cup \dots \cup a_{k_1}a_{k_2}\dots a_{k_m} \right)\]
-It's important to note that the family of regular languages includes languages with infinite cardinality as well.
-Therefore, we can conclude that $\textnormal{FIN} \subset \textnormal{REG}$.
+It is essential to recognize that the family of regular languages includes languages with infinite cardinality. 
+Consequently, $\textnormal{FIN} \subset \textnormal{REG}$.
 
-The union and repetition operators in regular expressions correspond to possible choices, allowing for the creation of sub-expressions that identify specific sub-languages.
+\paragraph*{Operations}
+The union and repetition operators in regular expressions correspond to various choices, enabling the formulation of sub-expressions that identify specific sub-languages.
 \begin{table}[H]
     \centering
     \begin{tabular}{cc}
@@ -62,80 +66,75 @@ The union and repetition operators in regular expressions correspond to possible
     $e^{+}$                                                                 & $e^n$ for every $n \geq 1$                                \\ \hline
     \end{tabular}
 \end{table}
-When working with a regular expression, it's possible to derive a new one by replacing any outermost sub-expression with another that represents a choice of it.
-\newpage
-\begin{definition}
-    We state that a regular expression $e^{'}$ \emph{derives} a regular expression $e^{''}$, denoted as $e^{'} \implies e^{''}$, when the two regular expressions can be factorized as:
+When manipulating a regular expression, it is possible to derive a new expression by substituting any outermost sub-expression with another that represents a choice of it.
+
+\begin{definition}[\textit{Derivation}]
+    We define a derivation relationship between two regular expressions, $e^{'}$ and $e^{''}$, denoted as $e^{'} \implies e^{''}$,  when these expressions can be decomposed as follows:
     \[e^{'}=\alpha \beta \gamma\]
     \[e^{''}=\alpha \delta \gamma\]
-    Here, $\delta$ represents a choice involving $\beta$.
+    Here, $\delta$ represents a choice that includes $\beta$.
 \end{definition}
-The derivation relation can be applied iteratively, resulting in the following relations:
+The derivation relation can be applied iteratively, leading to the following relations:
 \begin{itemize}
-    \item Power of $n$: $\overset{n}{\implies}$ with $n \in \mathbb{N}$. 
-    \item Transitive closure: $\overset{*}{\implies}$ with $n \geq 0$. 
-    \item Reflexive transitive closure: $\overset{+}{\implies}$ with $n > 0$.
+    \item \textit{Power of $n$}: $\overset{n}{\implies}$ with $n \in \mathbb{N}$. 
+    \item \textit{Transitive closure}: $\overset{*}{\implies}$ with $n \geq 0$. 
+    \item \textit{Reflexive transitive closure}: $\overset{+}{\implies}$ with $n > 0$.
 \end{itemize}
 \begin{example}
-    The expression $e_0 \overset{n}{\implies} e_n$ implies that $e_n$ is derived from $e_0$ in $n$ steps. 
-
-    The expression $e_0 \overset{+}{\implies} e_n$ implies that $e_n$ is derived from $e_0$ in $n \geq 1$ steps. 
-
-    The expression $e_0 \overset{*}{\implies} e_n$ implies that $e_n$ is derived from $e_0$ in $n \geq 0$ steps. 
+    If $e_0 \overset{n}{\implies} e_n$, it implies that $e_n$ is derived from $e_0$ in $n$ steps.
+    Similarly, $e_0 \overset{+}{\implies} e_n$ indicates that $e_n$ is derived from $e_0$ in $n \geq 1$ steps.
+    Additionally, $e_0 \overset{*}{\implies} e_n$ suggests that $e_n$ is derived from $e_0$ in $n \geq 0$ steps.
 \end{example}
 Some derived regular expressions incorporate metasymbols, including operators and parentheses, while others consist solely of symbols from the alphabet $\Sigma$, also known as terminals, and the empty string $\varepsilon$. 
-These latter define the language specified by the regular expression.
-
-It's essential to note that in derivations, operators must be selected from the external to the internal layers.
-Making a premature choice could eliminate valid sentences from consideration.
-\begin{definition}
-    Two regular expressions are considered \emph{equivalent} if they define the same language. 
+These expressions define the language specified by the regular expression.
+It's crucial to observe that in derivations, operators must be selected from the outer to the inner layers. 
+Premature choices could eliminate valid sentences from consideration.
+\begin{definition}[\textit{Expression equivalence}]
+    Two regular expressions are considered equivalent if they define the same language. 
 \end{definition}
 
-\subsection*{Ambiguity}
-A phrase from a regular language can be derived through different equivalent derivations. 
-These derivations may vary in the order of the choices made during the derivation process.
-To determine the expression that can be derived in multiple ways, we need to establish the numbered subexpressions of a regular expression. 
-To achieve this, follow these steps:
+\subsection{Ambiguity}
+A regular language may yield identical phrases through various equivalent derivations, introducing ambiguity.
+The order of choices in these derivations can differ, leading to multiple valid outcomes.
+To determine expressions with multiple derivations, it's essential to establish numbered subexpressions within a regular expression. 
+Follow these steps:
 \begin{itemize}
-    \item Begin with a regular expression and consider all possible parentheses.
-    \item Derive a numbered version, denoted as $e_N$, of the original regular expression, $e$.
-    \item Identify all the numbered subexpressions within the expression.
+    \item Start with a regular expression, considering all possible parentheses.
+    \item Derive a numbered version, represented as $e_N$, from the original expression, $e$.
+    \item Identify all numbered subexpressions within the resulting expression.
 \end{itemize}
 \begin{example}
-    Taking the regular expression $e=(a \cup(bb))^{*}(c^{+} \cup(a\cup(bb)))$, the corresponding numbered regular expression is:
+    For the regular expression $e=(a \cup(bb))^{*}(c^{+} \cup(a\cup(bb)))$, the corresponding numbered expression is:
     \[e_N=(a_1\cup(b_2b_3))^{*}(c_4^{+} \cup(a_5\cup(b_6b_7)))\]
-    From this expression, we can derive its subexpressions by iteratively removing the parentheses and union symbols.
+    Sub-expressions can be derived by iteratively removing parentheses and union symbols.
 \end{example}
-\newpage
-\begin{definition}
-    A regular expression is considered \emph{ambiguous} of its numbered version, denoted as $f'$, contains two distinct strings, $x$ and $y$, that become identical when the numbers are removed.
+\begin{definition}[\textit{Ambiguous regular expression}]
+    A regular expression is termed ambiguous if its numbered version, denoted as $f'$, contains two distinct strings, $x$ and $y$, that become identical when the numbers are removed.
 \end{definition}
 \begin{example}
-    Taking the regular expression $e=(aa|ba)^{*}a|b(aa|b)^{*}$, its corresponding numbered version is $e_N=(a_1a_2|b_3a_4)^{*}a_5|b_6(a_7a_8|b_9)^{*}$.
-    
-    From this expression, we can derive $b_3a_4a_5$ and $b_6a_7a_8$, both of which map to the string $baa$. 
-    Consequently, it can be concluded that the regular expression $e$ is ambiguous.
+    Consider the regular expression $e=(aa|ba)^{*}a|b(aa|b)^{*}$; its numbered version is:
+    \[e_N=(a_1a_2|b_3a_4)^{*}a_5|b_6(a_7a_8|b_9)^{*}\]
+    Deriving $b_3a_4a_5$ and $b_6a_7a_8$ from this expression results in the same string, $baa$. 
+    Therefore, the regular expression $e$ is deemed ambiguous.
 \end{example}
-Ambiguity is often a source of problems. 
 
-\subsection*{Extended regular expressions}
-To define a regular expression, we can introduce the following operators without altering its expressive power: 
+\subsection{Extended regular expressions}
+To formulate a regular expression, the introduction of the following operators does not alter its expressive power:
 \begin{itemize}
-    \item Power: $a^h=aa\dots a$ for $h$ times. 
-    \item Repetition: $[a]^n_k=a^k \cup a^{k+1} \cup \dots \cup a^n$.
-    \item Optionality: $(\varepsilon \cup a)$ or $[a]$.
-    \item Ordered interval: $(0\dots 9)(a \dots z)(A \dots Z)$.
-    \item Intersection: useful to define languages through conjunction of conditions. 
-    \item Complement: $\lnot L$.
+    \item \textit{Power}: $a^h$ represents the repetition of $a$ for $h$ times, i.e., $aa\dots a$ repeated $h$ times.
+    \item \textit{Repetition}: $[a]^n_k=a^k \cup a^{k+1} \cup \dots \cup a^n$.
+    \item \textit{Optionality}: $(\varepsilon \cup a)$ or $[a]$ denotes the choice between an empty string and the character $a$.
+    \item \textit{Ordered interval}: $(0\dots 9)(a \dots z)(A \dots Z)$ specifies an ordered range, combining numeric digits, lowercase, and uppercase letters.
+    \item \textit{Intersection}: this operator proves useful in defining languages through the conjunction of conditions.
+    \item \textit{Complement}: $\lnot L$ denotes the complement of language $L$.
 \end{itemize}
 
-\subsection*{Closure properties of the REG family}
-\begin{definition}
-    Suppose $op$ represents a unary or binary operator.
-    A family of languages is said to be closed under $op$ if and only if every language obtained by applying the $op$ operator to languages within that family remains within the same family.
+\subsection{Closure properties of the REG family}
+\begin{definition}[\textit{Closure}]
+    Let $op$ denote a unary or binary operator.
+    A family of languages is considered closed under $op$ if, and only if, applying the $op$ operator to languages within that family results in a language that remains within the same family.
 \end{definition}
 \begin{property}
-    The REG family is closed under concatenation, union, star, intersection, and complement operators. 
+    The REG family exhibits closure under concatenation, union, star, intersection, and complement operators.
 \end{property}
-This implies that regular languages can be combined using these operators without going beyond the boundaries of the REG family.
+This signifies that regular languages can be merged and manipulated using these operators without venturing outside the confines of the REG family.

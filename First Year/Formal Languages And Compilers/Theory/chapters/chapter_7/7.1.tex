@@ -1,49 +1,51 @@
-\section{Regular expressions}
+\section{Regular expression}
 
-The basic character set of regular expression is: 
+The \texttt{POSIX} compatible regular expression library is a standard library of the \texttt{C} programming language.
+It contains an extended set of functions to build and manipulate regular expressions.
 \begin{table}[H]
-    \centering
-    \begin{tabular}{cc}
-    \hline
-    \textbf{Syntax} & \textbf{Matches}                               \\ \hline
-    $x$             & The x character                                \\
-    $.$             & Any character except newline                   \\
-    $[xyz]$         & $x$ or $y$ or $z$                              \\
-    $[a-z]$         & Any character between $a$ and $z$              \\
-    $[^a-z]$        & Any character except those between $a$ and $z$ \\ \hline
-    \end{tabular}
+  \centering
+  \begin{tabular}{c|c}
+    \textbf{Syntax}                   & \textbf{Matches}                              \\ \hline
+    \texttt{x}                        & the character \texttt{x}                      \\
+    \texttt{.}                        & any character except newline                  \\
+    \texttt{[x,y,z]}                  & any character in the set \texttt{x, y, z}     \\
+    \texttt{[\textasciicircum x,y,z]} & any character not in the set \texttt{x, y, z} \\
+    \texttt{[a-z]}                    & any character in the range \texttt{a-z}       \\
+    \texttt{[\textasciicircum a-z]}   & any character not in the range \texttt{a-z}   \\
+  \end{tabular}
+  \caption{Basic character sets}
 \end{table}
-The composition rules are the following: 
 \begin{table}[H]
-    \centering
-    \begin{tabular}{cc}
-    \hline
-    \textbf{Syntax} & \textbf{Matches}                                  \\ \hline
-    R               & The R regular expression                          \\
-    RS              & Concatenation of R and S                          \\
-    R$|$S             & Either R or S                                     \\
-    R*              & Zero or more occurrences of R                     \\
-    R+              & One or more occurrences of R                      \\
-    R?              & Zero or one occurrence of R                       \\
-    R\{$m,n$\}      & A number of R occurrences ranging from $n$ to $m$ \\
-    R\{$n,$\}       & $n$ or more occurrences of R                      \\
-    R\{$n$\}        & Exactly $n$ occurrences of R                      \\ \hline
-    \end{tabular}
+  \centering
+  \begin{tabular}{c|c}
+    \textbf{Syntax}           & \textbf{Matches}                                                     \\ \hline
+    \texttt{R}                & the regular expression \texttt{R}                                    \\
+    \texttt{R S}              & the concatenation of \texttt{R} and \texttt{S}                       \\
+    \texttt{R}|\texttt{S}     & the alternation of \texttt{R} and \texttt{S}                         \\
+    \texttt{R*}               & zero or more occurrences of \texttt{R}                               \\
+    \texttt{R+}               & one or more occurrences of \texttt{R}                                \\
+    \texttt{R?}               & zero or one occurrence of \texttt{R}                                 \\
+    \texttt{R}\{\texttt{n}\}  & exactly \texttt{n} occurrences of \texttt{R}                         \\
+    \texttt{R}\{\texttt{n,}\} & at least \texttt{n} occurrences of \texttt{R}                        \\
+    \texttt{R}\{\texttt{n,m}\}& at least \texttt{n} and at most \texttt{m} occurrences of \texttt{R} \\
+  \end{tabular}
+  \caption{Composition of Regular Expressions}
 \end{table}
-Other utilities for regular expressions are: 
 \begin{table}[H]
-    \centering
-    \begin{tabular}{cc}
-    \hline
-    \textbf{Syntax}                                         & \textbf{Matches}                                                                   \\ \hline
-    (R)                                                     & Override precedence / capturing group                                              \\
-    \textasciicircum{}R                                     & R at beginning of a line                                                           \\
-    R\$                                                     & R at the end of a line                                                             \\
-    \textbackslash{}t                                       & Tab character (just like in C)                                                     \\
-    \textbackslash{}n                                       & Newline (just like in C)                                                           \\
-    \textbackslash{}w                                       & A word (same as {[}a-zA-Z0-9\_{]})                                                 \\
-    \textbackslash{}d                                       & A digit (same as {[}0-9{]})                                                        \\
-    \textbackslash{}s                                       & Whitespace (same as {[} \textbackslash{}t\textbackslash{}r\textbackslash{}n{]})    \\
-    \textbackslash{}W, \textbackslash{}D, \textbackslash{}S & Complement of \textbackslash{}w, \textbackslash{}d, \textbackslash{}s respectively \\ \hline
-    \end{tabular}
+  \centering
+  \begin{tabular}{c|c}
+    \textbf{Syntax}             & \textbf{Matches}                                                                                         \\ \hline
+    \texttt{(R)}                & capture group or override precedence                                                                     \\
+    \texttt{\textasciicircum R} & match at the beginning of the line                                                                       \\
+    \texttt{R\$}                & match at the end of the line                                                                             \\
+    \textbackslash \texttt{t}   & tab character                                                                                            \\
+    \textbackslash \texttt{n}   & newline character                                                                                        \\
+    \textbackslash \texttt{w}   & a word \textit{(same as \texttt{[a-zA-Z0-9\_]})}                                                         \\
+    \textbackslash \texttt{d}   & a digit \textit{(same as \texttt{[0-9]})   }                                                             \\
+    \textbackslash \texttt{s}   & a whitespace character (\textit{same as} [\textbackslash \texttt{t}\textbackslash \texttt{s}\textbackslash \texttt{n}]) \\
+    \textbackslash \texttt{W}   & a non-word character                                                                                     \\
+    \textbackslash \texttt{D}   & a non-digit character                                                                                    \\
+    \textbackslash \texttt{S}   & a non-whitespace character                                                                               \\
+  \end{tabular}
+  \caption{Regular expression utilities}
 \end{table}
