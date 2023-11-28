@@ -1,0 +1,48 @@
+\section{TrainTicket}
+
+Consider a microservices application called \texttt{TrainTicket} composed of 3 domain microservices (search, reserve, buy) and 1 additional microservice that acts as the API gateway. 
+TrainTicket supports two basic operations invoked using the exposed RESTFul APIs:
+\begin{enumerate}
+    \item Search: /APIv1/search/{args}.
+    \item Reserve: /APIv1/reserve/{args}.
+\end{enumerate}
+Requests (both search and reserve) are received and then dispatched by the API gateway.
+In particular, the following high-level schema shows how requests propagate from the gateway to internal microservices.
+Note that in this example reserve includes also the purchase of reserved items.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/hl.png}
+\end{figure}
+Microservices run in units deployed onto 2 different Virtual Machines, VM1 and VM2 as shown in the following UML deployment diagram.
+The available VMs have Computational Resources (CRs) that can be allocated to run microservices.
+Each VM has a maximum number of CRs and each microservice requires a certain number of CRs, according to the executed artifact. 
+As shown in the schema, available CRs are as follows:
+\begin{itemize}
+    \item VM1: 20 CRs.
+    \item VM2: 22 CRs.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/hl1.png}
+\end{figure}
+
+The mapping between microservices and required CRs is as follows:
+\begin{itemize}
+    \item API gateway: 2 CRs.
+    \item Search: 5 CRs.
+    \item Reserve: 4 CRs.
+    \item Buy: 5 CRs.
+\end{itemize}
+The deployment diagram shows that each microservice can be replicated to have redundant business-critical components. 
+In the latter case, requests are directed to all the replicas rather than to an individual instance and the first answer received from a replica is returned to the caller, while the others are simply ignored. 
+The number of replicas for each microservice shall be defined so that the following nonfunctional requirement is satisfied, and the deployment constraints defined in the deployment diagram and above are fulfilled.
+We have also the following requirement: both search and reserve services exposed through API gateway shall have availability greater than or equal to 0.99. 
+\begin{enumerate}
+    \item Considering the constraints of the execution environment represented above, determine whether requirement R1 can be satisfied or not assuming the following availability estimates for each microservice: API gateway (0.99), search (0.98), reserve (0.95), and buy (0.91).
+\end{enumerate}
+
+
+
+
+
+\paragraph*{Solution}
