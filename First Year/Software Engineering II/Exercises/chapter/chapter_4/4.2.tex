@@ -39,10 +39,41 @@ The number of replicas for each microservice shall be defined so that the follow
 We have also the following requirement: both search and reserve services exposed through API gateway shall have availability greater than or equal to 0.99. 
 \begin{enumerate}
     \item Considering the constraints of the execution environment represented above, determine whether requirement R1 can be satisfied or not assuming the following availability estimates for each microservice: API gateway (0.99), search (0.98), reserve (0.95), and buy (0.91).
+    \item Consider the problem of resource allocation taking into account the operational profile, that is, the behavior of the users. 
+        Assume the following workload in terms of average number of concurrent users for each request:
+        \begin{itemize}
+            \item Search: 50 users. 
+            \item Reserve: 90 users. 
+        \end{itemize}
+        Assume also that for reserve, only 20$\%$ of users complete the purchase at reservation time. This means that 20$\%$ of reserve requests get through and reach the buy microservice, while 80$\%$ of them terminate the execution without calling buy.
 \end{enumerate}
 
-
-
-
-
 \paragraph*{Solution}
+\begin{enumerate}
+    \item Considering the execution environment, we can derive the following equations constraining the number of replicas:
+        \begin{itemize}
+            \item $2x + 5y \leq 20$.
+            \item $4u + 5z \leq 22$.
+            \item $(1 - (1 - 0.99)x) \cdot (1 - (1 - 0.98)y) \geq 0.99$.
+            \item $(1 - (1 - 0.99)x) \cdot (1 - (1 - 0.95)u) \cdot (1 - (1 - 0.91)z) \geq 0.99$. 
+        \end{itemize}
+        Where variables $x$, $y$, $u$, and $z$ represent the number of replicas for the microservices API gateway, search, reserve, and buy, respectively.
+        The requirement R1 can be satisfied since there exists a valid assignment to variables that satisfies all constraints. 
+        For instance: $x = 2$, $y = 2$, $u = 3$, and $z = 2$. 
+    \item After a preliminary analysis, we realize that availability depends on the workload according to the following new estimates:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/load.png}
+        \end{figure}
+        The expected workload for each microservice is as follows:
+        \begin{itemize}
+            \item API gateway: 140 users (high). 
+            \item Search: 50 users (low).
+            \item Reserve: 90 users (high).
+            \item Buy: 18 users (low).
+        \end{itemize}
+        The constraints extracted from requirement R1 become as follows:
+        \[(1 - (1 - 0.98)x) \cdot (1 - (1 - 0.98)y) \geq 0.99\]
+        \[(1 - (1 - 0.98)x) \cdot (1 - (1 - 0.93)u) \cdot (1 - (1 - 0.91)z) \geq 0.99\]
+        An optimal resource allocation is represented by the assignment $x = 2$, $y = 2$, $u = 3$, and $z = 2$ that is again feasible according to environment constraints.
+\end{enumerate}
