@@ -177,11 +177,22 @@ Let $C$ represent the set of pairs, including those of the form $\frac{\varepsil
 Initially, the stack contains the axiom $S$, and the reading head is positioned at the first character of the source string. 
 At each step, the automaton non-deterministically selects an applicable rule and performs the corresponding move. 
 It's important to note that this automaton doesn't necessarily require states, although they may be introduced later to enhance its execution.
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=1\linewidth]{images/trans.png}
-\end{figure}
-
+\begin{table}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{c|c|c|c}
+    \textbf{$\#$} & \textbf{Rule}                                                                                                                                           & \textbf{}                                                                                                                 & \textbf{Comment}                                                                                                                          \\ \hline
+    1             & \makecell[l]{$A \rightarrow \frac{\varepsilon}{v}BA_1\dots A_n$ \\ $n \geq 0$ \\ $v \in \Delta^{+}, B \in V$ \\ $A_i \in \left( C \cup V \right)$}      & \makecell[l]{if $top=A$ then write($v$) \\ pop \\ push $A_n \dots A_1B$}                                                  & \makecell[l]{emit the string $v$ \\ push on stack the prediction string $BA_1 \dots A_n$}                                                 \\ \hline
+    2             & \makecell[l]{$A \rightarrow \frac{b}{w}BA_1\dots A_n$ \\ $n \geq 0$ \\ $w \in \Delta^{*}, b \in \Sigma$ \\ $A_i \in \left( C \cup V \right)$}           & \makecell[l]{if $cc=b \land top=A$ then write($w$) \\ pop \\ push $A_n \dots A_1$ \\ advance the reading head}            & \makecell[l]{char $b$ was next expected and has been read \\ emit the target string $w$ \\ push the prediction string $A_1 \dots A_n$}    \\ \hline
+    3             & \makecell[l]{$A \rightarrow BA_1\dots A_n$ \\ $n \geq 0$ \\ $w \in \Delta^{*}, b \in \Sigma$ \\ $A_i \in \left( C \cup V \right)$}                      & \makecell[l]{if $top=A$ then pop \\ push $A_n \dots A_1B$}                                                                & push the prediction string $BA_1 \dots A_n$                                                                                               \\ \hline
+    4             & \makecell[l]{$A \rightarrow \frac{\varepsilon}{v}$ \\ $v \in \Delta^{+}$}                                                                               & \makecell[l]{it $top=A$ then write($v$) \\ pop}                                                                           & emit the string $v$                                                                                                                       \\ \hline
+    5             & $A \rightarrow \varepsilon$                                                                                                                             & \makecell[l]{if $top=A$ then pop}                                                                                         &                                                                                                                                           \\ \hline
+    6             & \makecell[l]{for every pair \\ $\frac{\varepsilon}{v} \in C$}                                                                                           & \makecell[l]{if $top=\frac{\varepsilon}{v}$ then write($v$) \\ pop}                                                       & \makecell[l]{the past prediction $\frac{\varepsilon}{v}$ is now \\ completed by writing $v$}                                              \\ \hline
+    7             & \makecell[l]{for every pair \\ $\frac{b}{w} \in C$}                                                                                                     & \makecell[l]{if $cc=b \land top=\frac{b}{w}$ then write($w$) \\ pop \\ advance the reading head}                          & \makecell[l]{the past prediction $\frac{b}{w}$ is now \\ completed by writing $w$}                                                        \\ \hline
+    8             &                                                                                                                                                         & \makecell[l]{if $cc=\dashv \land$ stack is empty \\ then accept and halt}                                                 & the string has been translated                
+    \end{tabular}%
+    }
+\end{table}
 \begin{itemize}
     \item Rows $1, 2, 3, 4, 5$ are applicable when the stack top is a nonterminal symbol.
         In case $2$, if the right part begins with a source terminal, the move is conditioned by its presence in the input string.
