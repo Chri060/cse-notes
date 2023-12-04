@@ -1,11 +1,6 @@
 \section{Data partitioning}
 
 The spatial indices structure can be derived either from one-dimensional structures (such as a grid file) or from ad-hoc structures (like an R-tree), resulting in a myriad of potential data structures.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{images/mult.png}
-    \caption{Taxonomy of tree-based indexing techniques}
-\end{figure}
 
 \paragraph*{Classification}
 Spatial indices can be classified based on:
@@ -103,64 +98,41 @@ The differences between a B+ tree and an R-tree are outlined below:
     \end{tabular}
 \end{table}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \paragraph*{Organization}
-The R-tree is formed through a recursive bottom-up aggregation of objects using the Minimum Bounding Box (MBB). 
-The regions encapsulated by the MBB may exhibit overlaps. 
-Each node, excluding the root, can accommodate a maximum of $C_{\text{max}}$ entries, but no fewer than:
-\[C_{\text{min}}=0.5 \cdot C_{\text{max}}\]
-Graphically we have the following schema: 
+The R-tree is constructed by recursively aggregating objects in a bottom-up fashion, utilizing the Minimum Bounding Box (MBB). 
+Overlapping regions may be present within the MBBs. 
+Each node, excluding the root, has a capacity for a maximum of $C_{\text{max}}$ entries, but no fewer than $C_{\text{min}}=0.5 \cdot C_{\text{max}}$.
+Visually, the structure can be represented as shown below:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/r.png}
+    \includegraphics[width=0.75\linewidth]{images/r.png}
 \end{figure}
+Leaf nodes store entries in the form $\left\langle \text{key}, \text{RID} \right\rangle$, where the key holds the coordinates of the record referenced by RID.
+Additionally, the R-tree is capable of storing $d$-dimensional objects with spatial extensions, where $\text{key}=\text{MBB}(\text{object})$. 
 
-The leaf nodes contain entries with the form $\left\langle \text{key}, \text{RID} \right\rangle$, where key stores the coordinates of the record referenced by RID. 
-Actually, R-tree could also store $d$-dimensinal objects with a spatial extension, with $\text{key}=\text{MBB}(\text{object})$. 
-
-The internal nodes contain entries of the form $\left\langle \text{MBB}, \text{PID} \right\rangle$, where MBB stores the coordinates of the MBB containing all entries reachable from the node referenced by PID. 
-Overall, each node contains entries with the form $\left\langle \text{key}, \text{pointer} \right\rangle$, where key is a spatial value.
+Internal nodes contain entries of the form $\left\langle \text{MBB}, \text{PID} \right\rangle$, where MBB represents the coordinates of the MBB containing all entries reachable from the node referenced by PID. 
+In summary, each node contains entries in the format $\left\langle \text{key}, \text{pointer} \right\rangle$, where the key is a spatial value.
 
 \paragraph*{Insertion}
-To \texttt{insert} a new object, we start from the root and move down the tree one step at a time, trying to find a nice place where to accommodate the new object $p$. 
-At each step we try to find the most suitable child node to accommodate $p$. 
-In general, for each node we compute a penalty value, and choose the one with minimum penalty.
-If point $p$ is inside the region of a node, then the penalty is 0. 
-Otherwise, penalty can be computed as the increment of volume (area) of the MBB. 
-For leaf nodes, the $R^{*}$ tree variant considers the increment of overlap with the other regions. 
-Both criteria aim to obtain trees with better performance:
+To \texttt{insert} a new object, the process begins at the root and proceeds down the tree incrementally, seeking an optimal location to accommodate the new object $p$. 
+At each step, the objective is to identify the most appropriate child node for $p$. 
+In general, a penalty value is computed for each node, and the one with the minimum penalty is selected.
+
+If point $p$ falls within the region of a node, the penalty is set to 0. 
+Otherwise, the penalty is determined by the increase in volume (or area) of the Minimum Bounding Box (MBB).
+For leaf nodes, the $R^{*}$ tree variant considers the increment of overlap with other regions.
+Both criteria are designed to enhance tree performance, with the following considerations:
 \begin{itemize}
-    \item \textit{Large volume}: the chance of visiting the node during a query increases.
-    \item \textit{Large overlap}: the number of nodes visited during a query increases.
+    \item \textit{Large volume}: increases the likelihood of visiting the node during a query.
+    \item \textit{Large overlap}: raises the number of nodes visited during a query.
 \end{itemize}
 \begin{example}
-    Consider the insertion of the point $p$ in the R-tree with nodes $A$ and $B$: 
+    Consider the example of inserting the point $p$ into an R-tree with nodes $A$ and $B$:
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.4\linewidth]{images/r1.png}
     \end{figure}
-    The most suitable area for the point $p$ is $B$, since the area is lower: 
+    In this scenario, the most suitable area for the point $p$ is node $B$ since it results in a lower area:
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.4\linewidth]{images/r2.png}
@@ -168,99 +140,94 @@ Both criteria aim to obtain trees with better performance:
 \end{example}
 
 \paragraph*{Splitting}
-When $p$ has to be inserted into a leaf node $N$ that already contains $C_{\text{max}}$ entries, an overflow occurs, and $N$ has to be split. 
-For leaf nodes whose entries are points the solution aims to split the set of $C_{\text{max}}+1$ points into two subsets, each with at least $C_{\text{min}}$ and at most $C_{\text{max}}$ points.
-This is an $\mathcal{NP}$-hard problem, thus heuristics have to be applied. 
-Among the several possibilities, one could consider the choice that leads to have a minimum overall volume. 
-As in B+ trees, splits propagate upward and can recursively trigger splits at higher levels of the tree. 
-The R-tree just aims to minimize the sum of resulting volumes. 
-The $R^{*}$ tree implements a more sophisticated criterion, which takes into account the volume, overlap, and surface of the resulting regions.
-An overlap-free split cannot be guaranteed.
+When the insertion of point $p$ into a leaf node $N$ results in surpassing the maximum capacity $C_{\text{max}}$, an overflow occurs, necessitating the split of node $N$.
+For leaf nodes containing point entries, the goal is to divide the set of $C_{\text{max}}+1$ points into two subsets, each with a minimum of $C_{\text{min}}$ and a maximum of $C_{\text{max}}$ points.
+This task is recognized as an $\mathcal{NP}$-hard problem, requiring the application of heuristics. 
+Similar to B+ trees, splits propagate upward and may recursively induce splits at higher levels of the tree. 
+The objective of the R-tree is to minimize the sum of resulting volumes.
+In contrast, the $R^{*}$ tree employs a more intricate criterion, considering the volume, overlap, and surface of the resulting regions.
+It should be noted that guaranteeing an overlap-free split is not always possible.
 
 \paragraph*{Search}
-To search the objects we have to retrieve all points included into a product of $d$ intervals. 
-Such points could only be found in nodes whose MBB overlaps with the query region. 
+To search for objects, we need to retrieve all points contained within the product of $d$ intervals. 
+Such points are located in nodes whose Minimum Bounding Boxes (MBBs) overlap with the query region.
 \begin{example}
-    A visual representation of a window query in the R-tree shown in the previous example is as follows: 
+    Consider a visual representation of a window query in the R-tree shown in the previous example:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.5\linewidth]{images/r3.png}
+        \includegraphics[width=0.75\linewidth]{images/r3.png}
     \end{figure}
 \end{example}
-Another possible query is the range query. 
-This types of queries require: a query point $q$, a search radius $r$, and a distance function $D$.
+Another type of query is the range query, which involves a query point $q$, a search radius $r$, and a distance function $D$.
 The query region is defined as $\text{Reg}(q)=\{p|p \in \mathbb{R}^d, D(p,q) \leq r\}$. 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.15\linewidth]{images/r4.png}
 \end{figure}
-The algorithm for processing a range query is extremely simple:
+The algorithm for processing a range query is straightforward:
 \begin{itemize}
     \item Start from the root; for each node $N$, check if MBB($N$) intersects $\text{Reg}(q)$. 
-    \item On leaf nodes, for each point $p$ check if $D(p,q) \leq r$. 
+    \item On leaf nodes, for each point $p$, check if $D(p,q) \leq r$. 
 \end{itemize}
 
 \paragraph*{Search with distance functions}
-For a node $N$, we have that the minimum possible distance between $q$ and a point reachable from $N$ is: 
+For a node $N$, the minimum possible distance between the query point $q$ and a point reachable from $N$ is defined as:
 \[\text{D}_{\text{MIN}}(q,N)=\inf_p\{D(q,p)|p \in \text{MBB}(N)\}\]
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{images/d.png}
     \caption{Graphical representation of a general minimum distance function}
 \end{figure}
-The basic fact of the distance function is that: 
+The fundamental characteristic of the distance function is expressed as:
 \[\text{Reg}(q) \cap \text{MBB}(N) \neq \varnothing \leftrightarrow \text{D}_{\text{MIN}}(q,N) \leq r\]
-
-The most commonly used distance functions are $L_p$-norms, generally defined as: 
+The commonly used distance functions are $L_p$-norms, generally given by:
 \[L_p(t,q)=\left( \sum_{i=1}^d \left\lvert t_i-q_i \right\rvert^p  \right)^{\frac{1}{p}}\]
-Significant instances of the $L_p$-norm include:
+Notable instances of the $L_p$-norm include:
 \begin{itemize}
     \item \textit{Euclidean distance}: $L_2(t,q)=\sqrt{\sum_{i=1}^{d}{\left\lvert t_i-q_i \right\rvert^{2}}}$
     \item \textit{Manhattan distance}: $L_1(t,q)=\sum_{i=1}^{d}{\left\lvert t_i-q_i \right\rvert}$
     \item \textit{Čebyšëv distance}: $L_{\infty}(t,q)=\max_{i}\{\left\lvert t_i-q_i\right\rvert\}$
 \end{itemize}
-With the correspondent weighted versions: 
+These distance functions also have weighted versions:
 \begin{itemize}
     \item \textit{Euclidean distance}: $L_2(t,q)=\sqrt{\sum_{i=1}^{d}{w_i\left\lvert t_i-q_i \right\rvert^{2}}}$
     \item \textit{Manhattan distance}: $L_1(t,q)=\sum_{i=1}^{d}{w_i\left\lvert t_i-q_i \right\rvert}$
     \item \textit{Čebyšëv distance}: $L_{\infty}(t,q)=\max_{i}\{w_i\left\lvert t_i-q_i\right\rvert\}$
 \end{itemize}
-
-For the $i$-th coordinate of a given MBB let us define the offset of the query point $q=(q_1,\dots,q_d)$ with respect to $\text{MBB}(N)$ as:
+For the $i$-th coordinate of a given Minimum Bounding Box (MBB), the offset of the query point $q=(q_1,\dots,q_d)$ with respect to $\text{MBB}(N)$ is defined as:
 \[ \delta_i=\begin{cases}
     q_i-h_i \qquad \textnormal{if } q_i \geq h_i \\
     l_i-q_i \qquad \textnormal{ if } l_i \geq q_i \\
     0 \qquad\qquad \textnormal{  otherwise}
 \end{cases}\]
-As a result the distance $D_{\text{MIN}}$ is computed as:
+As a result, the distance $D_{\text{MIN}}$ is computed as:
 \[L_{p,\text{MIN}}(q,N;W)=\left( \sum_{i=1}^d{w_i\delta_i^p} \right)^{\frac{1}{p}}\]
 
 \paragraph*{Search with k-NN queries}
-The \texttt{kNNOptimal} algorithm can solve k-NN queries with an R-tree in an I/O-optimal way. 
-The algorithm also applies to all index structures such that the region of any child node is included in the one of its parent. 
+The \texttt{kNNOptimal} algorithm provides an I/O-optimal solution for k-NN queries with an R-tree. 
+The algorithm is applicable to all index structures where the region of any child node is encompassed within the region of its parent.
 
-The basic case considers $k=1$. 
-In such case, let $t_{NN}$ be the first nearest neighbor of $q$ $(1-NN=NN)$, and let $r_{NN}=D(q,t_{NN})$ be its distance from $q$. 
-Clearly, $r_{NN}$ is only known when the algorithm terminates. 
+The fundamental case involves setting $k=1$. 
+In this scenario, consider $t_{NN}$ as the first nearest neighbor of $q$ (i.e., 1-NN), with $r_{NN}=D(q,t_{NN})$ representing its distance from $q$. 
+The distance $r_{NN}$ becomes known only upon the termination of the algorithm.
 \begin{theorem}
-    Any correct algorithm for 1-NN queries must visit at least all the nodes $N$ whose $D_{\text{MIN}}$ is strictly less than $r_{NN}$, i.e., $D_{\text{MIN}}(q,N) < r_{NN}$. 
+    Any correct algorithm for 1-NN queries must visit at least all nodes $N$ such that $D_{\text{MIN}}(q,N) < r_{NN}$.
 \end{theorem}
 \begin{proof}
-    If an algorithm A stops by reporting as $NN$ of $q$ a point $t$, and A does not read a node $N$ such that $D_{\text{MIN}}(q,N) < D(q,t)$, then $N$ might lead to a point $t^{'}$ with $D(q,t^{'}) < D(q,t)$, thus contradicting the hypothesis that $t$ is the $NN$ of $q$.
+    If an algorithm $A$ stops by reporting a point $t$ as the $NN$ of $q$, and $A$ does not read a node $N$ such that $D_{\text{MIN}}(q,N) < D(q,t)$, then $N$ might lead to a point $t^{'}$ with $D(q,t^{'}) < D(q,t)$, contradicting the hypothesis that $t$ is the $NN$ of $q$.
 \end{proof}
 
-kNNOptimal uses a priority queue PQ, whose elements are pairs $\left\langle \text{ptr}(N), D_{\text{MIN}}(q,N)\right\rangle $
-PQ is ordered by increasing values of $D_{\text{MIN}(q,N)}$. 
-This means that \texttt{dequeue} extracts from PQ the pair with minimal $D_{\text{MIN}}$ and \texttt{enqueue}($\left\langle \text{ptr}(N), D_{\text{MIN}}(q,MBB(N)) \right\rangle $) performs an ordered insertion of the pair in the queue. 
+The \texttt{kNNOptimal} algorithm employs a priority queue PQ, consisting of pairs $\left\langle \text{ptr}(N), D_{\text{MIN}}(q,N)\right\rangle $. 
+PQ is ordered based on increasing values of $D_{\text{MIN}(q,N)}$. 
+Thus, \texttt{dequeue} extracts the pair with the minimum $D_{\text{MIN}}$, and \texttt{enqueue}($\left\langle \text{ptr}(N), D_{\text{MIN}}(q,MBB(N)) \right\rangle $) performs an ordered insertion of the pair into the queue.
 \begin{property}
-    If we have found a point $t$ with $D(q,t) = r$, then all nodes $N$ with $D_{\text{MIN}}(q,N) \geq r$ can be excluded from the search. 
+    If a point $t$ with $D(q,t) = r$ is found, then all nodes $N$ with $D_{\text{MIN}}(q,N) \geq r$ can be excluded from the search.
 \end{property}
-If a node can be excluded, it can be pruned. 
-This operation is done with the function \texttt{update}(PQ). 
-If you do not want to prune the nodes, it is possible to leave such nodes in the queue and stop when the result cannot be improved anymore. 
+The exclusion of nodes can be achieved through pruning. 
+The \texttt{update}(PQ) function facilitates this operation. 
+If node pruning is not desired, the nodes can be retained in the queue until the point where further improvement in the result is unattainable.
 
-The input of this algorithm is a query point $q$ and an index tree with root node RN. 
-The outputs are $t_{NN}$, the nearest neighbor of $q$, and $r_{NN}=D(q,t_{NN})$. 
+The algorithm takes a query point $q$ and an index tree with the root node RN as input, producing outputs $t_{NN}$ (the nearest neighbor of $q$) and $r_{NN}=D(q,t_{NN})$.
 \begin{algorithm}[H]
     \caption{kNNOptimal Algorithm}
         \begin{algorithmic}[1]
@@ -288,37 +255,37 @@ The outputs are $t_{NN}$, the nearest neighbor of $q$, and $r_{NN}=D(q,t_{NN})$.
             \State \Return $t_{NN}$ and $r_{NN}$
         \end{algorithmic}
 \end{algorithm}
-
-The kNNOptimal algorithm is clearly correct
-To show that it is also I/O-optimal, that is, it reads the minimum number of nodes, it is sufficient to prove the following. 
+The correctness of the \texttt{kNNOptimal} algorithm is evident. 
+To establish its I/O-optimality, i.e., to demonstrate that it reads the minimum number of nodes, it suffices to prove the following theorem.
 \begin{theorem}
-    The kNNOptimal algorithm for 1-NN queries never reads a node $N$ whose $D_{\text{MIN}}$ is strictly larger than $r_{NN}$, i.e., $D_{\text{MIN}}(q,N) > r_{NN}$. 
+    The \texttt{kNNOptimal} algorithm for 1-NN queries never reads a node $N$ whose $D_{\text{MIN}}$ is strictly larger than $r_{NN}$, i.e.: 
+    \[D_{\text{MIN}}(q,N) > r_{NN}\]
 \end{theorem}
 \begin{proof}
     Node $N$ is read only if, at some execution step, it becomes the first element in PQ. 
-    Let $N_1$ be the node containing $t_{NN}$, $N_2$ its parent node, $N_3$ the parent node of $N_2$, and so on, up to $N_h = RN$, where $h$ is the height of the tree. 
+    Let $N_1$ be the node containing $t_{NN}$, $N_2$ its parent node, $N_3$ the parent node of $N_2$, and so on, up to $N_h = RN$, where $h$ is the height of the tree.
     Now observe that, by definition of $D_{\text{MIN}}$, it is:
     \[r_{NN} \geq D_{\text{MIN}}(q,N_1) \geq D_{\text{MIN}}(q,N_2) \geq \dots \geq D_{\text{MIN}}(q,N_h)\]
-    At each time step before we find $t_{NN}$, one (and only one) of the nodes $N_1,N_2,\dots,N_h$ is in the priority queue. 
-    It follows that $N$ can never become the first element of PQ. 
+    At each time step before we find $t_{NN}$, one (and only one) of the nodes $N_1, N_2, \dots, N_h$ is in the priority queue. 
+    It follows that $N$ can never become the first element of PQ.
 \end{proof}
-The algorithm is easily extended to the case $k \geq 1$ by using: 
+The algorithm easily extends to the case where $k > 1$ by incorporating:
 \begin{itemize}
-    \item A data structure (Res), where we maintain the $k$ closest objects found so far, together with their distances from $q$. 
-    \item A current search radius the distance, $rk-NN$, of the current $k$-th $NN$ of $q$, that is, the $k$-th element of Res.
+    \item A data structure (Res), maintaining the $k$ closest objects found so far along with their distances from $q$.
+    \item A current search radius, $rk$-NN, representing the distance of the current $k$-th nearest neighbor of $q$ (i.e., the $k$-th element of Res).
 \end{itemize}
-While the rest of the algorithm remains unchanged. 
+The remainder of the algorithm remains unchanged.
 
 \paragraph*{Indexing regions}
-Leaves can store MBB's of regions, rather than points. 
-Assume you want to determine all the data regions o that are at distance less or equal to $r$ from the query region, i.e., $L2(q,o) \geq r$. 
-We have to apply two phases: 
+Leaves can store Minimum Bounding Boxes (MBBs) of regions instead of individual points. 
+Suppose the objective is to identify all data regions $o$ that are at a distance less than or equal to $r$ from the query region, expressed as $L_2(q,o) \geq r$. 
+This process involves two phases:
 \begin{enumerate}
-    \item \textit{Filter}: use the index and retrieve all the MBB's such that $L_2\left(\text{MBB}(q),\text{MBB}(o)\right) \leq r$. 
-    \item \textit{Refine}: access the actual geometries of the objects and apply the test $L_2(q,o) \leq r$. 
+    \item \textit{Filter phase}: utilize the index to retrieve all MBBs such that $L_2\left(\text{MBB}(q),\text{MBB}(o)\right) \leq r$.
+    \item \textit{Refine phase}: access the actual geometries of the objects and apply the test $L_2(q,o) \leq r$.
 \end{enumerate}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/i.png}
+    \includegraphics[width=0.75\linewidth]{images/i.png}
     \caption{Representation of indexing regions procedure}
 \end{figure}
