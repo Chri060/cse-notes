@@ -1,0 +1,137 @@
+\section{Static analysis}
+
+The idea of the static analysis is to analyze the source code via analyzers. 
+Each analyzer targets a fixed set of hard-coded (pre-defined, not custom) properties and test them in a completely automatic way. 
+The output is safe, if there are no issues, and unsafe otherwise. 
+
+\paragraph*{Properties}
+Checked properties are often general safety properties (absence of certain conditions that may yield errors). 
+Usually we want these properties: 
+\begin{itemize}
+    \item  No overflow for integer variables.
+    \item  No type errors.
+    \item  No null-pointer dereferencing.
+    \item  No out-of-bound array accesses.
+    \item  No race conditions.
+    \item  No useless assignments.
+    \item  No usage of undefined variables.
+\end{itemize}
+
+\begin{definition}[\textit{Program behavior}]
+    The program behavior is the collection of all possible executions as sequences of states. 
+\end{definition}
+Static analysis allows us to find erroneous states, but program behavior may not reach any erroneous state. 
+Thus, static analysis is pessimistic. 
+
+\paragraph*{Precision and efficiency}
+Static analysis is based on over-approximations to be sound.
+Degree of precision is often traded-off against efficiency.
+Perfect precision is often impossible due to undecidability.
+High precision may still be too computationally expensive.
+Low precision is cheaper but leads to many false positives that must be verified manually.
+Designing a static analysis technique requires balancing precision and efficiency in a way that is practical.
+
+\subsection{Data-flow analysis}
+
+\paragraph*{Control-flow graph}
+The control-flow graphs is a directed graph representing possible execution paths. 
+Each node represents a program statement, while each edge connects two consecutive statements. 
+We ignore declarations since they do not affect the program state. 
+
+\paragraph*{Data-flow analysis}
+The data-flow analysis works on the control-flow graph (CFG) of a program. 
+It extracts information about the data flow: it checks what values are read (used) and written (defined). 
+The properties can be checked by analyzing the output. 
+
+\paragraph*{Variable liveness}
+\begin{definition}[\textit{Live variable}]
+    Given a CFG, a variable $v$ is live at the exit of a block $b$ if there is some path (on the CFG) from block $b$ to a use of $v$ that does not redefine $v$.
+\end{definition}
+The live variable analysis determines, for each block, which variables may be live (at the exit of the block). 
+Note that the constraint "may be live" is an over-approximation. 
+Thus, $\text{LV}(k)$ is a superset of the live variables at $k$: 
+\begin{itemize}
+    \item If $x\notin\text{LV}(k)$, then $x$ is definitely not live at $k$. 
+    \item If $x\in\text{LV}(k)$, then $x$ may not be live at $k$.
+\end{itemize}
+Live variable analysis reduces to an equation system. 
+Hence, the solution of the equation system identifies the live variables. 
+The solution of the resulting equation system can be computed automatically using standard algorithms like fixedpoint or worklist algorithms. 
+
+The data-flow analysis can be used to eliminate the dead assignments: if a variable is not live after it is defined by an assignment, the assignment is useless and can be removed without changing the program behavior
+
+\paragraph*{Reaching definition analysis}
+Reaching definition analysis determines, for each block, which definitions may reach the block. 
+\begin{definition}[\textit{Definition}]
+    A definition $(v,k)$ is an assignment to variable $v$ occurring at block $k$. 
+\end{definition}
+\begin{definition}[\textit{Block reachability}]
+    A definition $(v,k)$ reaches block $r$ if there is a path from $k$ to $r$ that does not redefine $v$.
+\end{definition}
+For this type of analysis we can define the following equations for each block $k$: 
+\[\text{RD}_{\text{IN}}(k)= \bigcup_{h \rightarrow k}\text{RD}_{\text{OUT}}(h)\]
+\[\text{RD}_{\text{OUT}}(k)= \left(\text{RD}_{\text{IN}}(k) - \text{kill}_{\text{RD}}(k) \right) \cup \text{Gen}_{\text{RD}}(k)\]
+
+The reaching definition analysis can be used to retrieve information about which statements define values and which use them is useful for program optimizations or avoid potential errors. 
+\begin{definition}[\textit{Use-definition chain}]
+    A use-definition chain, denoted as UD, links a use to all definitions that may reach it: 
+    \[\text{UD}(v,k)=\{q|{"q:v:=E"} \textnormal{ and def\_clear}(v,q,k)\}\cup\{?|\text{def\_clear}(v,?,k)\}\]
+\end{definition}
+In the previous definition we have that "q:v:=E" is an assignment for $v$ at line $q$. 
+Note that $\text{def\_clear}(v,q,k)$ holds if and only if there is a definition-clear path from $q$ to $k$ (i.e.,noblock between $q$ and $k$ redefines $v$). 
+\begin{definition}[\textit{Use-definition path}]
+    A use-definition path is a path from $q$ to $k$ such that $k$ uses some $v$ and $q \in \text{UD}(v,k)$.
+\end{definition}
+The set $\text{UD}(v, k)$ can be computed from reaching definitions analysis as follows: 
+\[\begin{cases}
+    \{q|(v,q)\in \text{RD}_{\text{IN}}(k)\} \textnormal{ if }v \textnormal{ uses } d \textnormal{ in block } k \\
+    \{\:\} \textnormal{ otherwise}
+\end{cases}\]
+\begin{definition}[\textit{Definition-use chain}]
+    A definition-use chain, denoted as DU, links a definition to all use such that the definition may reach them:
+    \[\text{DU}(v,k)=\{q|q \textnormal{ uses } v \textnormal{ and } (v,k) \textnormal{ reaches } q\}\]
+\end{definition}
+\begin{definition}[\textit{Definition-use path}]
+    A definition-use path is a path from $k$ to $q$ such that $k$ defines some $v$ and $q \in \text{DU}(v,k)$.
+\end{definition}
+The set $\text{DU}(v, k)$ can be computed as the inverse of UD: 
+\[ \text{DU}(v,k)=\{q|k \in \text{UD}(v,q)\}\]
+\begin{definition}[\textit{Definition-use pair}]
+    Given $\text{DU}(v,k)$, if some $q \in \text{DU}(v, k)$, we say that $\left\langle k,q \right\rangle $ is a definition-use pair for $v$.
+\end{definition}
+\begin{example}
+    SLIDE 41 42 43 44 45
+\end{example}
+
+\subsection{Symbolic execution}
+Symbolic execution analyzes source code to check the following properties: 
+\begin{itemize}
+    \item \textit{Reachability}: check if in some execution the location $l$ in code $S$ is reachable. 
+        This method tries to verify that $l$ cannot be reached, or alternatively spots the condition under which $l$ can be reached. 
+    \item \textit{Path feasibility}: check if in a certain path $p$ in code $S$ is fully reachable. 
+        This method tries to verify that $p$ cannot be executed, or alternatively spots the condition under which $p$ can be executed. 
+\end{itemize} 
+It can be used to generate test cases automatically, but it may fail in find all the possible paths. 
+Symbolic execution executes programs on symbolic values and symbolic states keep track of the (symbolic) value of the variables. 
+
+\paragraph*{Outcomes}
+The possible outcomes of the symbolic execution can be: 
+\begin{itemize}
+    \item SAT exit ($\pi$ is satisfiable): any satisfying assignment to variables in $\pi$ is an input that satisfies the given property in a concrete execution.
+    \item UNSAT exit ($\pi$ is not satisfiable): the given property cannot be satisfied by any concrete execution. 
+\end{itemize}
+Execution paths can be collected in an execution tree, where final states are marked as SAT or UNSAT. 
+\begin{example}
+    SLIDE 11 in poi 
+\end{example}
+It seems symbolic execution can be used to verify the correctness of any program, however: 
+\begin{itemize}
+    \item Path conditions may be too complex for constraint solvers. 
+        Solvers are very good at checking linear constraints.
+        However, is harder for them to reason on non-linear arithmetic, bit-wise operations, string manipulation.
+    \item Impossible/hard to use when number of paths to be explored is huge.  
+        Unbounded loops give rise to infinite sets of paths. 
+        Even if set of paths is finite, checking all loops is expensive/unfeasible in practice.
+        We may apply the rule of thumb: approximate the analysis by considering 0, 1, and 2 iterations. 
+    \item There may be external code: if sources not available we have an unknown behavior for the solver. 
+\end{itemize}
