@@ -1,0 +1,36 @@
+\section{Break-even analysis}
+
+A table T(\underline{PK}, X, Y, $\dots$), primarily organized as entry-sequenced, contains one million tuples stored in a hundred thousand blocks. 
+A secondary B+ tree, built on the primary key, indexes the table and has depth equal to three.
+\begin{enumerate}
+    \item Estimate the average fan out of the tree.
+    \item If the average access time for sequential access is 10 times less than the time required for a random access, how many tuples should be returned by an interval query on the primary key to exhibit the same access time of a complete sequential scan of the table?
+\end{enumerate}
+
+\paragraph*{Solution}
+\begin{enumerate}
+    \item We have that: 
+        \[x^3=1000000\]
+        Here, $x$ is the fan out that must be approximately 100 in a properly balanced tree.
+    \item Each node in the structure either points to 100 index nodes or to 100 tuples. 
+        There are 10 tuples per block, and the tree structure has 10101 nodes overall (confirming the indication that the size is 10K blocks).
+        Answering an interval query using the entry-sequenced storage means scanning the whole table, at the fixed cost of: 
+        \[1\cdot t_{RA}+(100000-1)t_{SA} \approx 100000\cdot t_{SA}=10000\cdot t_{RA}\]
+        Answering via the B+ index, instead, requires:
+        \begin{itemize}
+            \item $3\cdot t_{RA}$ to reach the first leaf node (containing the first value in the interval). 
+            \item As many $t_{RA}$ as further leaf nodes need to be scanned in the ordered chain to reach the end of the interval of interest (a new leaf node every 100 key values). 
+            \item One $t_{RA}$ for each key value, in order to retrieve the actual tuple (assuming that there is no cache). 
+        \end{itemize}
+        Overall, we have: 
+        \[3 \cdot t_{RA}+\dfrac{N}{100}t_{RA}+Nt_{RA}\]
+        where $N$ is the number of values in the interval and 100 is the number of key values in each leaf node.
+        Disregarding the fact that $N$ is not a multiple of 100 and that intervals do not start from the first tuple of the first block, we can approximate the expression and balance the two costs in the following equation, to identify the break-even:
+        \[10000\cdot t_{RA}=3 \cdot t_{RA}+\dfrac{N}{100}t_{RA}+Nt_{RA} \approx N \cdot t_{RA}\]
+        We assume that $3+\frac{N}{100}+N = N$, if $N \gg 300$, so we need to check if the condition holds. 
+        If it is the case, the approximation error is strictly less than 1\%. 
+        We have: 
+        $N \approx 10000 \dfrac{t_{RA}}{t_{RA}}= 10000$
+        Confirming that our approximation holds. 
+        Te final result is: if the query planner expects the interval in the query to contain more than 10000 values then, as counterintuitive as it may sound, the most effective plan is to scan the whole table sequentially rather than to use the B+ index.
+\end{enumerate}
