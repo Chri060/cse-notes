@@ -10,7 +10,7 @@
 The client-server architectural style is primarily employed in distributed applications, where the client initiates requests, and the server delivers responses.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/clientserver.png}
+    \includegraphics[width=0.35\linewidth]{images/clientserver.png}
     \caption{Client-server architecture general schema}
 \end{figure}
 This approach proves beneficial in situations where multiple users require access to a common resource, when there is a need to remotely access existing software, and when it is advantageous to structure the system around a shared functionality that multiple components utilize.
@@ -28,17 +28,25 @@ Various solutions can be considered to address this challenge:
         \end{itemize}
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.75\linewidth]{images/fork.png}
+            \includegraphics[width=0.5\linewidth]{images/fork.png}
+        \end{figure}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/fork1.png}
         \end{figure}
     \item Worker pooling (NGINX Web Server): 
         \begin{itemize}
-            \item Approach: specifically designed for high concurrency, addressing scalability issues inherent in the forking model by introducing a new architectural tactic\footnote{Design decisions that influence the control of one or more quality attributes.}.
+            \item Approach: specifically designed for high concurrency, addressing scalability issues inherent in the forking model by introducing a new architectural tactic.
             \item Architectural Tactic: NGINX prioritizes scalability and performance at the expense of availability.
             \item Strengths: fixed number of workers for each pool, each worker equipped with a queue (with dropped requests for performance if the queue is full), and a dispatcher for load balancing among workers.
         \end{itemize}    
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.75\linewidth]{images/work.png}
+            \includegraphics[width=0.5\linewidth]{images/work.png}
+        \end{figure}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\linewidth]{images/work1.png}
         \end{figure}
 \end{itemize}
 
@@ -89,7 +97,7 @@ Achieving exactly-once semantics is feasible but comes with the trade-off of lon
 Alternatively, opting for at-least-once semantics involves excluding duplicate management, and at-most-once semantics can be chosen by dispatching messages asynchronously.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/producer.png}
+    \includegraphics[width=0.75\linewidth]{images/producer.png}
     \caption{Example of a producer}
 \end{figure}
 
@@ -102,7 +110,7 @@ In this case, if a failure occurs after storing the offset, the impact of the re
 Transactional management of the log introduces the capability for exactly-once semantics, providing a robust mechanism for ensuring that each message is processed only once, even in the face of failures or system disruptions.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.4\linewidth]{images/consumer.png}
+    \includegraphics[width=0.75\linewidth]{images/consumer.png}
     \caption{Example of a consumer}
 \end{figure}
 Apache Kafka's architectural tactics include scalability through multiple partitions and brokers and fault tolerance through persistent partition storage and data replication.
@@ -114,19 +122,20 @@ These services communicate using lightweight mechanisms, often employing HTTP re
 
 Microservices focus on addressing a single bounded context within the target domain, offering advantages such as fine-grained scaling strategies, reduced impact of localized issues, improved resilience through decentralized functionality, and enhanced reuse and composability.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{images/msa.png}
-    \caption{Typical microservices architecture process}
-\end{figure}
 The process of creating a microservices architecture involves reducing teams' synchronization overhead, organizing small development teams with well-defined responsibilities, and employing technology-neutral protocols like REST APIs for communication, resulting in smaller codebases for easier debugging and more cost-effective maintenance.
 
 The architecture's main elements include a REST API that exposes core service operations, the application or business logic responsible for implementing core operations, and local data storage for each microservice, emphasizing limited data sharing and avoiding global databases.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{images/wf.png}
-    \caption{Microservices architecture's workflow}
-\end{figure}
+
+The standard process in a microservice architecture involves the following steps:
+\begin{enumerate}
+    \item A client initiates an HTTP GET request to the Hello microservice.
+    \item The microservice parses the HTTP request, mapping the verb, URL, resource, and parameters to a corresponding method in the codebase.
+    \item After identifying the route, the microservice maps any defined parameters within the route to arguments of the associated method.
+    \item Additional parameters can be transmitted through JSON in the HTTP body, mapping to objects utilized by the method.
+    \item Once the data is mapped, the microservice executes the business logic, which may involve calling operations exposed by other microservices.
+    \item After the execution of business logic, the microservice converts the returned objects into JSON.
+    \item The client receives the response from the microservice in JSON format, with the success or failure of the call indicated by the HTTP status code.
+\end{enumerate}
 
 To achieve location transparency and scalability in microservices, routing patterns are essential.
 Service discovery, a critical element, must be highly available, load-balanced, resilient, and fault-tolerant. 
@@ -145,7 +154,7 @@ As it invokes the remote service, the CB actively monitors the call for potentia
 In the event of "too many" failures, the circuit breaker intervenes by inhibiting future calls to prevent further issues.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/cb.png}
+    \includegraphics[width=0.75\linewidth]{images/cb.png}
     \caption{Circuit breaker pattern}
 \end{figure}
 
@@ -154,7 +163,7 @@ While this gateway simplifies the implementation of authentication and authoriza
 This challenge is mitigated by deploying multiple instances of the gateway with a server-side load balancer.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{images/sp.png}
+    \includegraphics[width=0.5\linewidth]{images/sp.png}
     \caption{Security pattern}
 \end{figure}
 
@@ -163,7 +172,7 @@ Despite their strengths in providing flexibility, scalability, and availability,
 Event-driven frameworks, supporting multiple communication styles such as notification, request/response, and publish/subscribe, are employed to decouple different parts of the system.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.4\linewidth]{images/cp.png}
+    \includegraphics[width=0.75\linewidth]{images/cp.png}
     \caption{Security pattern}
 \end{figure}
 \newpage
