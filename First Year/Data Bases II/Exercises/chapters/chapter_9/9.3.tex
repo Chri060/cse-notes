@@ -1,0 +1,36 @@
+\section{Physical database}
+
+Consider the following tables: 
+CAR(\underline{PlateNo}, OwnerId, PurchaseDate) : 1000000 tuples primarily stored in a hash on PlateNo, with 20000 buckets, occupying 32K blocks overall (average cost per lookup: 1.6 I/O operations).
+FINE(\underline{Id}, Date, PlateNo, MeasuredSpeed, PhotoRef) : 72000 fines given by a single speed camera in over 10 years, primarily stored sequentially ordered by Date on 4000 blocks.
+Describe query plans and their costs for the query below in the following three scenarios: 
+\begin{enumerate}
+    \item There are no auxiliary structures. 
+    \item Indexes: for FINE we have B+(Date), 3 levels, 2000 leaves and for CAR we have B+(PurchaseDate), 3 levels, 10000 leaves. 
+    \item A hash index for Fine on PlateNo (same hash as Car, negligible overflow chains).
+\end{enumerate}
+Further data: val(PurchaseDate) = 5K, val(Date) = 3.6K, 75\% of the fines are for a speed over 70 km/h, 0.1\% of the fines are given to cars on their purchase date.
+The query is: 
+\begin{lstlisting}[style=SQL]
+SELECT OwnerId 
+FROM CAR C JOIN FINE F ON C.PlateNo = F.PlateNo
+WHERE PurchaseDate = Date AND MeasuredSpeed > 70.0
+\end{lstlisting}
+
+\paragraph*{Solution}
+We have that the number of fines that are found by the query is equal to: 
+\[72000 \cdot 0.75 \cdot 0.001=54\]
+\begin{enumerate}
+    \item In this case we scan the fines and lookup for the cars. 
+        The cost required to perform this action is: 
+        \[S_{fine}+L_{cars}=4000+\left(72000 \cdot 0.75\right) =90400\]
+        We have considered only 75\% of the cars (and not only 54 fines) since we cannot filter on FINE. 
+        The scan of CAR and FINE is not considered sicne the cost of scanning CAR is already greater than the cost of the cased analyzed. 
+    \item The cost of a lookup on Car via the index is higher than via the hash, so a scan Fine and lookup Car option is dominated by the previous plan.
+        A lookup on Fine retrieves the fines of a certain date (approx. 72K/val(Date) = 20 fines/day) and costs at least 3 I/O in the tree + 1 block with the 20 tuples (even more if the fines are split in consecutive blocks).
+        The cost of a scan Car and lookup Fine is then at least:
+        \[32000 + 1000000( 4 )> 4000000\]
+    \item At join time there is no way to prune any plate/plate combination, so all fines must be retrieved (the index has no information on the date or the speed), and all 72000 blocks would be read one at a time. 
+        Thus, cost of retrieving the fines is 72000:
+        \[32000 + 20000 + 72000 = 124000\]
+\end{enumerate}

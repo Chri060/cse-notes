@@ -10,58 +10,40 @@ Consider the following tables:
 Calculate as accurately as possible the cost of joining the two tables according to the most convenient join method given the access structures.
 Then, also calculate the join cost in case \texttt{EXAM} were, instead, structured according to the same hash as \texttt{STUDENT}.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\paragraph*{Solution}
+In the STUDENT table we have a block factor of 4.3 tuples per block. 
+In the EXAM table we have a block factor of 18 tuples per block, and that the three is divided in four levels. 
+The possible strategies are as follows: 
+\begin{itemize}
+    \item Pure nested loop: we consider both table as external using the formula: 
+        \[b_{ext}+b_{ext}\cdot b_{int}\]
+        With the tables we have: 
+        \begin{itemize}
+            \item EXAM as external: 
+                \[b_{exam}+b_{exam}\cdot b_{student}=15000+15000\cdot 10000=150015000\]
+            \item STUDENT as external: 
+                \[b_{exam}+b_{exam}\cdot b_{student}=10000+10000\cdot 15000=150010000\]
+        \end{itemize}
+        With this strategy we have that the cost is approximately 150 milion. 
+    \item Indexed nested loop with EXAM as external: 
+        STUDENT need 1 I/O operation for each block, while EXAM needs four. 
+        In this caser EXAM is external, so we have to access every block of it with a unitary coast (10000 blocks) and then perform access for each tuple found (with hash cost 1 and number of tuples equal to 180000).
+        \[S_{exam}+L_{student}=10000+180000 \cdot 1=190000\]
+    \item Indexed nested loop with STUDENT as external: 
+        STUDENT need 1 I/O operation for each block, while EXAM needs four. 
+        In this case we have to acess all the blocks of STUDENT (15000 blocks) and then perform an indexed access on the tree for each tuple found (64000 students with a cost of 4 for each access). 
+        \[S_{student}+L_{exam}=15000+64000 \cdot 1=271000\]
+    \item Indexed nested loop with EXAM as external (optimized version): 
+        After accessing the STUDENT tuple for s1, we can (re)use the same tuple for all the exams of s1, which are contiguous in the B+ leaves. 
+        So we need to access the hash only once per student (64k) instad of once per exam (180k): 
+        \[S_{exam}+L_{student}=10000+64000 \cdot 1=74000\]
+\end{itemize}
+Note that if we have a hash indexes for both tables we have to consider only the blocks of the joining table (left of the equality) since they have a mapping one to one with the second table. 
+The query: 
+\begin{lstlisting}[style=SQL]
+SELECT *
+FROM STUDENT S JOIN EXAM E ON S.SNumber = E.SNumber 
+\end{lstlisting}
+Needs to use the tuples of STUDENT. 
+As a result the cost of the query will be: 
+\[\text{cost}=15000+15000=30000\]
