@@ -1,0 +1,52 @@
+\section{Testing}
+
+Consider the function \texttt{foo}, written in a C-like language:
+\begin{lstlisting}[style=C]
+0: int foo(int a, int b) { 
+1:     a++;
+2:     while (a < b) {
+3:        if (a != b)
+4:        a++; 
+5:    }
+6:    return a;
+7: }
+\end{lstlisting}
+\begin{enumerate}
+    \item Execute \texttt{foo} symbolically limiting the execution of the loop statement to exactly two iterations. 
+        Show, for each non-conditional statement:
+        \[\text{path condition, symbolic state}\]
+    \item Define the precondition to the execution of \texttt{foo} such that the while loop is executed exactly twice. 
+    \item Generate three possible test cases to run this path. 
+\end{enumerate}
+
+\paragraph*{Solution}
+\begin{enumerate}
+    \item The path needed to limit the execution of the loop exactly two time is composed by the following lines: 
+        \begin{enumerate}
+            \item [0:] $a=A,b=B$
+            \item [1:] $a=A+1$
+            \item [2:] $A+1<B$
+            \item [3:] $A+1 \neq B$
+            \item [4:] $a=A+2$
+            \item [2:] $A+2<B$
+            \item [3:] $A+2 \neq B$
+            \item [4:] $a=A+3$
+            \item [2:] $A+3 \geq B$
+            \item [6:] 
+        \end{enumerate}
+    \item The condition on the variables are: 
+        \[\begin{cases}
+            A+1<B \\
+            A+1 \neq B \\
+            A+2<B \\
+            A+2 \neq B \\
+            A+3 \geq B
+        \end{cases}\]
+        The final condition for this path is that $A+3 = B$. 
+    \item Three possible test cases are: 
+        \begin{itemize}
+            \item $\{a = 1, b = 4\}$ 
+            \item $\{a = 0, b = 3\}$
+            \item $\{a = -3, b = 0\}$
+        \end{itemize}
+\end{enumerate}
