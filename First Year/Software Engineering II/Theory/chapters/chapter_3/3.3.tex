@@ -4,12 +4,13 @@ Let's consider the task of creating a basic address book model.
 This address book contains a collection of addresses associated with their respective names.
 In this scenario, there are three primary entities:
 \begin{itemize}
-    \item "Name": represents names of individuals.
-    \item "Addr": represents addresses.
-    \item "Book": signifies the context of the address book.
+    \item \texttt{Name}: represents names of individuals.
+    \item \texttt{Addr}: represents addresses.
+    \item \texttt{Book}: signifies the context of the address book.
 \end{itemize}
-The relationship here is established through the entity "Addr", which links "Name" to "Addr" within the context of "Book". 
-We use the "lone" keyword to indicate that each "Name" can be linked to at most one "Addr". To summarize the preceding descriptions:
+The relationship here is established through the entity \texttt{Addr}, which links \texttt{Name} to \texttt{Addr} within the context of \texttt{Book}. 
+We use the \texttt{lone} keyword to indicate that each \texttt{Name} can be linked to at most one \texttt{Addr}. 
+To summarize the preceding descriptions:
 \begin{lstlisting}[language=alloy]
 sig Name {}
 sig Addr {}
@@ -23,13 +24,13 @@ This specification creates the following relationships:
     \item Scalars are sets consisting of a single element.
     \item The ternary relation involves these three predicates.
 \end{itemize}
-A new predicate can be defined using the "pred" keyword.
+A new predicate can be defined using the \texttt{pred} keyword.
 \begin{lstlisting}[language=alloy]
 pred show {}
 run show for 3 but exactly 1 Book
 \end{lstlisting}
-In the second line, it specifies that we should find a maximum of three elements for each "Book". 
-The previously defined predicate "show" is currently empty and always returns true.
+In the second line, it specifies that we should find a maximum of three elements for each \texttt{Book}. 
+The previously defined predicate \texttt{show} is currently empty and always returns true.
 We can now create a predicate with specific arguments. 
 For instance:
 \begin{lstlisting}[language=alloy]
@@ -38,8 +39,8 @@ pred show [b:Book]{
 }
 run show for 3 but exactly 1 Book
 \end{lstlisting}
-In the previous example, the consistent predicate imposes a restriction on the quantity of "Address" relations within a given "Book". 
-In the following example, the consistent predicate enforces a constraint on the number of distinct "Address" entries that appear within the "Book"
+In the previous example, the consistent predicate imposes a restriction on the quantity of \texttt{Address} relations within a given \texttt{Book}. 
+In the following example, the consistent predicate enforces a constraint on the number of distinct \texttt{Address} entries that appear within the \texttt{Book}.
 \begin{lstlisting}[language=alloy]
 pred show [b:Book]{
     # b.addr > 1
@@ -47,8 +48,8 @@ pred show [b:Book]{
 }
 run show for 3 but exactly 1 Book
 \end{lstlisting}
-In the subsequent example, the inconsistent predicate utilizes the "some" keyword, indicating the existence of an element. 
-In this scenario, there is only one "Book" so the tool will report that no instances can be identified.
+In the subsequent example, the inconsistent predicate utilizes the \texttt{some} keyword, indicating the existence of an element. 
+In this scenario, there is only one \texttt{Book} so the tool will report that no instances can be identified.
 \begin{lstlisting}[language=alloy]
 pred add [b:Book]{
     # b.addr > 1
@@ -58,7 +59,7 @@ run show for 3 but exactly 1 Book
 \end{lstlisting}
 All the preceding predicates are considered static as they do not modify the signature. 
 In Alloy, dynamic predicates are used for dynamic analysis. 
-For instance, we can create a predicate that introduces an "Address" and a "Name" to a "Book" as follows:
+For instance, we can create a predicate that introduces an \texttt{Address} and a \texttt{Name} to a \texttt{Book} as follows:
 \begin{lstlisting}[language=alloy]
 pred add [b,b':Book, n:Name,a:Addr]{
     b'.addr=b.addr + n -> a
@@ -69,13 +70,13 @@ pred showAdd [b,b':Book, n:Name,a:Addr]{
 }
 run showAdd
 \end{lstlisting}
-We can now define a predicate for the "Book" deletions.  
+We can now define a predicate for the \texttt{Book} deletions.  
 \begin{lstlisting}[language=alloy]
 pred del [b,b':Book, n:Name]{
     b'.addr=b.addr - n -> Addr
 }
 \end{lstlisting}
-We can verify whether performing a delete operation after an add operation restores us to the initial state or not by employing an "assertion". 
+We can verify whether performing a delete operation after an add operation restores us to the initial state or not by employing an assertion. 
 \begin{lstlisting}[language=alloy]
 assert delRevertsAdd{
     all b1,b2,b3:Book,n:Name,a:Addr
@@ -95,7 +96,7 @@ assert delUndoesAdd{
 \end{lstlisting}
 In some cases, we may need to retrieve specific signatures. 
 To accomplish this, we can leverage Alloy functions. 
-For instance, we can define a function that searches for a particular "Book" and returns a set of "Address":        
+For instance, we can define a function that searches for a particular \texttt{Book} and returns a set of \texttt{Address}:        
 \begin{lstlisting}[language=alloy]
 fun lookup[b:Book,n:Name]: set Addr{
     n.(n.addr)

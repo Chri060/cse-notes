@@ -14,16 +14,15 @@ sig Woman extends Person {
     husband: lone Man
 }
 \end{lstlisting}
-We establish that each "Person" can have at most one father and one mother (indicated by the keyword "lone"), as we require a root for the family tree. 
+We establish that each \texttt{Person} can have at most one father and one mother (indicated by the keyword \texttt{lone}), as we require a root for the family tree. 
 The person at the root should have no parents, possibly due to them being unknown. 
-The "Person" signature is declared as "abstract" because it needs to be specialized into one of the subsequent signatures, either "Man" or "Woman". 
-Signatures, denoted by the "sig" keyword, represent sets of elements. 
-Before this keyword, we can specify the number of entities required ("lone", "one", or "some").
-\begin{definition}
-    The \emph{fields} of a signature are relations whose domain is a subset of the signature. 
-    
-    The keyword \emph{extends} is used to declare a subset of signature. 
-\end{definition}
+The \texttt{Person} signature is declared as \texttt{abstract} because it needs to be specialized into one of the subsequent signatures, either \texttt{Man} or \texttt{Woman}. 
+Signatures, denoted by the \texttt{sig} keyword, represent sets of elements. 
+Before this keyword, we can specify the number of entities required (\texttt{lone}, \texttt{one}, or \texttt{some}).
+\begin{definition}[\textit{Fields of a signature}]
+    The fields of a signature are relations whose domain is a subset of the signature. 
+\end{definition}  
+The keyword \texttt{extends} is used to declare a subset of signature. 
 To obtain the set of grandfathers of a given individual, we can define a function like this:
 \begin{lstlisting}[language=alloy]
 fun grandpas[p:Person]:set Person {
@@ -33,12 +32,12 @@ pred ownGrandpa[p:Person] {
     p in p.grandpas[p]
 }
 \end{lstlisting}
-We've additionally created a predicate that verifies if a person is within the set of grandfathers returned by the "grandpas" function. 
+We've additionally created a predicate that verifies if a person is within the set of grandfathers returned by the \texttt{grandpas} function. 
 However, the issue at hand is that we haven't imposed constraints on relations. 
 To address this, we need to define two new operators for binary relations:
 \begin{itemize}
-    \item Transitive closure: \textasciicircum $r=r+r.r+r.r.r+\dots$
-    \item Reflex transitive closure: $*r=iden+$\textasciicircum$r$
+    \item \textit{Transitive closure}: \textasciicircum $r=r+r.r+r.r.r+\dots$.
+    \item \textit{Reflex transitive closure}: $*r=iden+$\textasciicircum$r$.
 \end{itemize}
 We can now specify that no one can be their own father or mother:
 \begin{lstlisting}[language=alloy]
