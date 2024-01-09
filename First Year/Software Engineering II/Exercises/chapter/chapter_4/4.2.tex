@@ -11,7 +11,7 @@ In particular, the following high-level schema shows how requests propagate from
 Note that in this example reserve includes also the purchase of reserved items.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\linewidth]{images/hl.png}
+    \includegraphics[width=0.5\linewidth]{images/hl.png}
 \end{figure}
 Microservices run in units deployed onto 2 different Virtual Machines, VM1 and VM2 as shown in the following UML deployment diagram.
 The available VMs have Computational Resources (CRs) that can be allocated to run microservices.
@@ -23,7 +23,7 @@ As shown in the schema, available CRs are as follows:
 \end{itemize}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\linewidth]{images/hl1.png}
+    \includegraphics[width=0.75\linewidth]{images/hl1.png}
 \end{figure}
 
 The mapping between microservices and required CRs is as follows:
@@ -61,10 +61,18 @@ We have also the following requirement: both search and reserve services exposed
         The requirement R1 can be satisfied since there exists a valid assignment to variables that satisfies all constraints. 
         For instance: $x = 2$, $y = 2$, $u = 3$, and $z = 2$. 
     \item After a preliminary analysis, we realize that availability depends on the workload according to the following new estimates:
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=0.9\linewidth]{images/load.png}
-        \end{figure}
+            \begin{tabular}{l|cc|}
+            \cline{2-3}
+            \multicolumn{1}{c|}{}                       & \textbf{Low workload} & \textbf{High workload} \\ \hline
+            \multicolumn{1}{|l|}{\textbf{Microservice}} & \multicolumn{2}{c|}{\textit{Availability}}                                                     \\ \hline
+            \multicolumn{1}{|l|}{\textbf{API gateway}}  & 0.99                                         & 0.98                                            \\
+            \multicolumn{1}{|l|}{\textbf{Search}}       & 0.98                                         & 0.95                                            \\
+            \multicolumn{1}{|l|}{\textbf{Reserve}}      & 0.95                                         & 0.93                                            \\
+            \multicolumn{1}{|l|}{\textbf{Buy}}          & 0.91                                         & 0.90                                            \\ \hline
+            \end{tabular}
+        \end{table}
         The expected workload for each microservice is as follows:
         \begin{itemize}
             \item API gateway: 140 users (high). 

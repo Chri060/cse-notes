@@ -49,11 +49,29 @@ Consider the following function \texttt{foo2}, written in a C-like language:
         \[\# \text{runs}= \dfrac{1}{P(a=3 \land b=2 \land \texttt{rand}(1,10)=10)}=\dfrac{1}{5,4\cdot 10^{-21}}=1,8 \cdot 10^{20}\]
     \item The execution time is given by the runs multiplied by the execution of each run, that is: 
         \[\text{execution time}=\# \text{runs} \cdot \text{time}= 10^{20} \cdot 0,001 =5.7\cdot 10^{9}  \text{ years}\]
+    \item By looking at the source code we need to generate values for \texttt{a} and \texttt{b} such that both conditions two and five are true. 
+        We can now define
+        \begin{itemize}
+            \item Search space: all possible pairs of integer values. 
+            \item Neighborhood relation: given a pair, we possibly modify each element of the pair by one.
+                In this case for each pair we have eight pairs in total. 
+                For example we may have $\left\langle 1,1 \right\rangle \rightarrow \left\langle 0,0 \right\rangle, \left\langle 0,1 \right\rangle, \left\langle 0,2 \right\rangle, \left\langle 1,0 \right\rangle, \left\langle 1,2 \right\rangle, \left\langle 2,0 \right\rangle, \left\langle 2,1 \right\rangle, \left\langle 2,2 \right\rangle$.
+            \item Fitness function: consider the distance from the branches we want to execute. 
+                For the \texttt{if} in line two the total distance is the sum of all distances from the three conditions. 
+                Each distance should be normalized to avoid biased search (some distances may depend on very large values, some other distances on very small values): 
+                \begin{lstlisting}[style=C]
+0: int dist1(int a, int b) {
+1:      return norm(dist_subb1(a,b))+ norm(dist_subb2(a)) + norm(dist_subb3(b));
+2: }
+                \end{lstlisting}
+                We have to do the same for the \texttt{if} in the fifth line: 
+                \begin{lstlisting}[style=C]
+0: int dist2(int x, int rand(1,10)) { 
+1:      return norm(dist_subb1(rand(1,10),x)); 
+2: }
+                \end{lstlisting}
+                Now we have that the fitness can be defined as the sum of \texttt{dist1} and \texttt{dist2}. 
+                When the sum is zero it means we execute the true branch of both conditions. 
+                The test case generation shall minimize the sum. 
+        \end{itemize}
 \end{enumerate}
-
-
-
-
-
-
-
