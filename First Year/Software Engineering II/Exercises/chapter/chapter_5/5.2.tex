@@ -2,22 +2,22 @@
 
 Consider the function \texttt{bar}, written in a C-like language:
 \begin{lstlisting}[style=C]
-0:  int bar(int a, int b, int c) {
-1:    int h = b-2;
-2:    if (a < h) {
-3:      if (a == h+2)
-4:        return c;
-5:     else if (a < b-3)
-6:        h = a;
-7:   }
-8:   return h; 
+0: int bar(int a, int b, int c) {
+1:      int h = b-2;
+2:      if (a < h) {
+3:          if (a == h+2)
+4:              return c;
+5:          else if (a < b-3)
+6:              h = a;
+7:      }
+8:      return h; 
 9: } 
 \end{lstlisting}
 \begin{enumerate}
     \item Derive the Control Flow Graph of the given function.
     \item Derive the set of live variables at the exit of each block.
         Are there dead variables after definition at block 0?
-    \item Use symbolic execution to explore all paths in the function
+    \item Use symbolic execution to explore all paths in the function. 
 \end{enumerate}
 
 \paragraph*{Solution}
@@ -40,22 +40,10 @@ Consider the function \texttt{bar}, written in a C-like language:
             \item $\text{LV}(6) = \{h\}$ 
             \item $\text{LV}(8) = \{ \}$
         \end{itemize}
+    \item The possible paths are: 
+        \begin{itemize}
+            \item $\left\langle 0,1,2,3,5,6,8 \right\rangle$: that is feasible with the condition $A < B-3$. 
+            \item $\left\langle 0,1,2,3,5,8 \right\rangle$: that is feasible with the condition $A=B-3 $. 
+            \item $\left\langle 0,1,2,8 \right\rangle$: that is feasible with the condition $A \geq B-2$. 
+        \end{itemize}
 \end{enumerate}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

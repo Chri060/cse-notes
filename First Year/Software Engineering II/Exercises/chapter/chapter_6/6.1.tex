@@ -1,0 +1,49 @@
+\section{Testing}
+
+Consider the function \texttt{foo}, written in a C-like language:
+\begin{lstlisting}[style=C]
+0: void foo(int a, int b) {
+1:      for (int i=a; i<b; i++) {
+2:          if (i % 5 == 0) {
+3:              print(i)
+4:          }
+5:      }
+6: }
+\end{lstlisting}
+\begin{enumerate}
+    \item Run a concolic execution starting from the following input $\{a = 1, b = 3\}$. 
+    \item Run a concolic execution with concrete values that allow no execution of the loop. 
+    \item Run a concolic execution with concrete values that allow the execution of the loop two times. 
+        Line three must be executed only in the second iteration. 
+\end{enumerate}
+
+\paragraph*{Solution}
+\begin{enumerate}
+    \item The path executed with the given input is the following: 
+        \begin{enumerate}
+            \item [0: ] $a=A(1), b=B(3)$
+            \item [1: ] $i=A(1), A<B$
+            \item [2: ] $A\%5 \neq 0$
+            \item [1: ] $i = A+1(2), A+1<B$
+            \item [2: ] $A+1\%5 \neq 0$
+            \item [1: ] $i=A+2(3), A+2=B$
+        \end{enumerate}
+        In this case we have that the test executes the loop 2 times without executing the location 3 as requested. 
+        The condition for this path are: 
+        \[\begin{cases}
+            A\%5 \neq 0 \\ A+1\%5 \neq 0 \\ A+2=B
+        \end{cases}\]
+    \item To avoid the loop we have to negate the condition to enter in it, that is: 
+        \[\neg( A < B ) \Rightarrow A \geq B\]
+        One test case that satisfies this condition is: 
+        \[\{a=3,b=1\}\]
+        In this case the final path will be $\left\langle 0,1 \right\rangle$. 
+    \item Starting from the execution of the first test case we have only to negate the condition: 
+        \[A+1\%5 \neq 0\]
+        This results in the following conditions: 
+        \[\begin{cases}
+            A\%5 \neq 0 \\ A+1\%5 = 0 \\ A+2=B
+        \end{cases}\]  
+        One possible concrete set is $\{a = 4, b = 6\}$. 
+        After running the concrete execution we have that the request is satisfied. 
+\end{enumerate}
