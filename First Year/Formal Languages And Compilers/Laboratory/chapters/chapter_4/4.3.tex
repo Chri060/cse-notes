@@ -1,0 +1,82 @@
+\section{LANguage for Compiler Education}
+LANCE is the source language recognized by ACSE:
+\begin{itemize}
+    \item It supports a very small subset of C99.
+    \item It includes a standard set of arithmetic, logic, and comparison operators.
+    \item It features a limited set of control flow statements, including while, do-while, and if.
+    \item It comprises only one scalar type, namely int.
+    \item It includes only one aggregate type, namely an array of ints.
+    \item It does not support functions.
+\end{itemize}
+The input and output operations have very limited support: 
+\begin{itemize}
+    \item \texttt{read(var)} stores an integer read from standard input into \texttt{var}.
+    \item \texttt{write(var)} writes var to standard output.
+\end{itemize}
+
+\paragraph*{Syntax}
+A LANCE source file comprises two sections: variable declarations and the program body, which is a list of statements.
+A statement is a syntactic unit of an imperative programming language that expresses some action to be carried out.
+Statements can be classified as:
+\begin{itemize}
+    \item Simple Indivisible element of computation (e.g., assignments, read, write). 
+    \item Compound Statements which contain multiple simple statements (e.g., if, while, do-while). 
+\end{itemize}
+
+\paragraph*{Compilation}
+Due to the absence of optimizations, there is no middle-end in the compilation process. 
+Consequently, the compilation steps are as follows:
+\begin{enumerate}
+    \item The source code is tokenized by a flex-generated scanner.
+    \item The stream of tokens is parsed by a bison-generated parser.
+    \item The code is translated to a temporary intermediate representation by the semantic actions in the parser.
+    \item The intermediate representation is normalized to accommodate the physical limitations of the MACE processor.
+    \item Each instruction is printed out, resulting in the assembly file.
+\end{enumerate}
+
+\subsection{Expressions}
+In the LANCE language, expressions are prevalent and support nearly all operators found in the C language, including:
+\begin{itemize}
+    \item Basic arithmetic ($+, -, *, /$).
+    \item Bitwise operators ($\&, |, <<, >>$).
+    \item Logical operators ($\&\&, ||, !$).
+    \item Comparison operators ($!=, ==, >, <, >=, <=$).
+\end{itemize}
+The expression grammar of LANCE mirrors the example infix expression grammar we've encountered during discussions about BISON.
+Naturally, we must declare operator precedence and associativity to properly parse expressions.
+\paragraph*{MINUS}
+The LANCE grammar incorporates unary minus syntax for negation, denoted as \texttt{MINUS exp}. 
+The \texttt{MINUS} operator is left associative and shares the same priority as \texttt{PLUS}, which is suitable for normal subtraction operations. 
+However, this precedence is incorrect for negation operations.
+
+\subsection{Variables}
+In ACS every scalar variable is stored in a register. 
+The function used to retrieve the register is \texttt{get\_symbol\_location} that returns the register identifier. 
+It needs as input the name of the variable. 
+The other information of the variables can be retrieved with \texttt{getVariable} that returns the structure \texttt{t\_axe\_variable}. 
+
+\paragraph*{Registers}
+To get a new register we can use the function \texttt{getNewRegister} that returns the identifier of the register created. 
+To get a register with a constant we can use the function \texttt{gen\_load\_immediate()} function. 
+
+\paragraph*{Helper function}
+Another operations used to do simple operations on registers are: 
+\begin{itemize}
+    \item \texttt{handle\_bin\_numeric\_op()}: for arithmetic and logical operations. 
+    \item \texttt{handle\_binary\_comparison()}: for comparisons. 
+\end{itemize}
+
+\subsection{Branches}
+In ACSE, branches can be categorized as:
+\begin{itemize}
+    \item \textit{Forward}: The label appears after the branch in the code.
+    \item \textit{Backward}: The label appears before the branch in the code.
+\end{itemize}
+
+Since ACSE is a syntax-directed translator, we require a mechanism to allocate a label without explicitly generating it. 
+This task can be accomplished using the following functions:
+\begin{itemize}
+    \item \texttt{newLabel()}: define a new label that will be inserted after the current instruction. 
+    \item \texttt{assignLabel()}: insert a label in the current line. 
+    \item \texttt{assingNewLabel()}.
+\end{itemize}
