@@ -1,173 +1,238 @@
-\section{Attribute grammars}
+\section{Static analysis}
 
-The significance of a sentence lies in a collection of attribute values, determined by semantic functions and assigned to the nodes of the syntax tree. 
-Within a syntax-directed translator, the definition of these semantic functions is encapsulated, and they are linked to the grammar rules. 
-The amalgamation of grammar rules and their associated semantic functions is termed an attribute grammar.
-
-For the sake of simplicity, the attribute grammar is formulated in reference to an abstract syntax, which may be less intricate than the actual grammar but is often prone to ambiguity. 
-Nonetheless, this ambiguity does not hinder a single-valued translation, as the parser transmits only one syntax tree to the semantic evaluator.
-
-In instances where compilers are less complex, they might streamline the process by consolidating the two phases into a single pass utilizing a unified syntax, typically that of the language itself.
-
-\paragraph*{Attribute grammar}
-An attribute grammar is defined as follows: 
-\begin{enumerate}
-    \item A context-free syntax $G = \left( V, \Sigma, P, S \right)$ where $V$ and $\Sigma$ represent the terminal and nonterminal sets, $P$ comprises the production rule set, and $S$ serves as the axiom. 
-        It is advisable (though not mandatory) to exclude the axiom from any rule RP.
-    \item A collection of symbols, known as (semantic) attributes, is linked with both nonterminal and terminal syntax symbols. 
-        The set of attributes associated with a symbol $\bigoplus$ is represented as $\text{attr}\left( \bigoplus \right)$.
-        Within the grammar, the attribute set is divided into two distinct sets: the left and right attributes.
-    \item A set of semantic functions (or rules) is defined with the following characteristics:
-        \begin{itemize}
-            \item Each function is linked to a production rule:
-                  \[ p: D_0 \rightarrow D_1 D_2 \ldots D_r \quad r \geq 0\]
-                  where $D_0$ is a nonterminal, and the other symbols can be either terminal or nonterminal.
-            \item The production $p$ is referred to as the syntactic support of the function and may be shared among different functions.
-            \item The attribute $\sigma$ associated with a symbol $D_k$ is denoted by $\sigma_k$ or $\sigma_D$ if the syntactic symbol occurs exactly once in production $p$.
-            \item A semantic function is structured as follows:
-                  \[ \sigma_k := f \left( \text{attr} \left( \left\{ D_0, D_1, \ldots , D_k \right\} \right) \setminus \left\{ \sigma_k \right\}\right) \quad 0 \leq k \leq r \]
-                  where function $f$ assigns the computed value to the attribute $\sigma$ of symbol $D_k$, and its arguments can include any attributes of the same production $p$, excluding $\sigma_k$ itself.
-            \item Generally, semantic functions cover their entire domain and are expressed in a suitable notation, termed semantic metalanguages, which can be informal.
-            \item A function $\sigma_0 := f(\ldots)$ defines an attribute, identified as left, of the nonterminal $D_0$, which serves as the LP (or parent) of the production.
-            \item A function $\sigma_k := f(\ldots), \ k \geq 1$ defines an attribute, labeled as right, of a symbol (sibling or child) $D_k$ present in the RP.
-            \item The same attribute cannot serve as left in one function and right in another.
-            \item Since terminal characters never appear in the left part, their attributes cannot be of the left type.
-        \end{itemize}
-    \item The set $\text{fun}(p)$ of functions supported by production $p$ must adhere to the following conditions:
-        \begin{enumerate}
-            \item For each left attribute $\sigma_0$ of $D_0$, there must exist exactly one function in $\text{fun}(p)$ defining the attribute.
-            \item No function within $\text{fun}(p)$ defining the attribute exists for each right attribute $\delta_0$ of $D_0$.
-            \item No function within $\text{fun}(p)$ defining the attribute exists for each left attribute $\sigma_i, i \geq 1$.
-            \item For each attribute $\delta_i, i \geq 1$, there must exist exactly one function in $\text{fun}(p)$ defining the attribute.
-        \end{enumerate}
-        The left attributes $\sigma_0$ and the right ones $\delta_i$ with $i \geq 1$ are termed internal for production $p$ because functions supported by $p$ define them. 
-        Conversely, the right attributes $\delta_0$ and left attributes $\sigma_i$ with $i \geq 1$ are termed external for production $p$ since functions supported by other productions define them.    
-    \item Certain attributes can be initialized with constant values or values computed by external functions. 
-        This is frequently observed in the case of lexical attributes, which are linked to terminal symbols. 
-        In such instances, the grammar does not stipulate a specific computation rule.
-\end{enumerate}
-
-\subsection{Dependence graph}
-If a grammar is specified through a translation, it abstracts from the details of tree-traversing procedures. 
-The attribute evaluation program can be automatically constructed based on the functional dependencies between attributes, assuming the semantic function bodies are provided.
-\begin{definition}[\textit{Dependence graph of a semantic function}]
-    The nodes of dependence graph of a semantic function are the arguments and results of the function considered, and there is an arc from each argument to the result.
-\end{definition}
-\begin{definition}[\textit{Dependence graph of a production $p$}]
-    The dependence graph of a production $p$, denoted by $\text{dep}_p$, collects the dependence graphs for all the functions supported by the production considered.
-\end{definition}
-\begin{definition}[\textit{Dependence graph of a decorated syntax tree}]
-    The dependence graph of a decorated syntax tree is obtained by pasting together the graphs of the individual productions that are used in the tree nodes.
-\end{definition}
-A grammar is termed acyclic (or loop-free) if the dependence graph of the tree is acyclic for every sentence.
-\begin{property}[\textit{Correct attribute grammar}]
-    Given an attribute grammar satisfying the conditions for attribute grammars, the following holds: if the attribute dependence graph of the tree is acyclic, the system of equations corresponding to the semantic function has exactly one solution.
-\end{property}
-Under the acyclicity condition, the equations can be ordered so that each semantic function is applied after the functions that compute its arguments. 
-This results in a value for the solution, given the totality of the functions. 
-The solution is unique, similar to a system of linear equations. 
-The topological ordering method can be used to provide a total order of nodes, although this is an inefficient way to compute the solution. 
-It would require applying the sorting algorithm even before computing the attribute values.
-
-Checking whether a given grammar is acyclic poses another problem. 
-Since the source language is typically infinite, exhaustive enumeration of all trees for the acyclicity test is impractical. 
-An algorithm determining if an attribute grammar is acyclic exists but is $\mathcal{NP}$-complete and thus not used in practice. 
-It is more convenient to test certain sufficient conditions.
-
-\subsection{One-sweep semantic evaluation}
-An efficient evaluator should be capable of computing all attributes of a tree in just one pass. 
-This involves traversing the tree through a depth-first search, allowing for attribute evaluation in a single sweep across the entire tree.
-
-Let $N$ represent a node in the tree, with $N_1, \dots, N_r$ as its children, and $t_i$ denoting the subtree rooted at node $N_i$.
-A depth-first algorithm starts by visiting the tree root, and to visit the subtree $t_N$ rooted at node $N$, it recursively follows these steps:
-\begin{enumerate}
-    \item Conduct a depth-first visit of the subtrees $t_1, \ldots, t_r$ in an order corresponding to a permutation  of $1, \ldots, r$. 
-    \item Evaluate the attributes with the following principles:
-        \begin{itemize}
-            \item Before entering and evaluating a subtree $t_N$, compute the right attributes of node $N$  (the root of the subtree). 
-                These attributes are then passed as input parameters to the procedure implementing the visit.
-                Procedure calls with input parameter passing constitute the "descending phase" of the visit.
-            \item At the end of the visit of subtree $t_N$, compute the left attributes of node $N$. 
-                These attributes are the output parameters of the procedure implementing the visit.
-                Procedure returns with output parameter passing constitute the "ascending phase" of the visit.
-          \end{itemize}
-\end{enumerate}
-Not all grammars are compatible with this one-sweep procedure because more intricate functional dependencies may necessitate multiple visits to the same node.
-\begin{figure}
-  \centering
-  \includegraphics[width=0.5\linewidth]{images/sweep.png}
-  \caption{One-sweep semantic evaluation}
-\end{figure}
-
-\paragraph*{One-Sweep Grammar}
-For each production $p: D_0 \rightarrow D_1 D_2 \ldots D_r$ with $r \geq 0$, it is necessary to introduce a new relation between the symbols in the right part of the production.
-This allows the creation of a directed graph, referred to as the sibling graph $\text{sibl}_p$, which captures the relations between the symbols in the right part of the production $p$.
-The nodes of $\text{sibl}_p$ are the symbols $\left\{ D_1, \ldots , D_r \right\}$ of the production, and has arcs $D_i \rightarrow D_j$, with $i \neq j, \ i,j \geq 1$ if in the dependence graph $\text{dep}_p$ there is an arc $\sigma_i \rightarrow \delta_j$ from an attribute of symbol $D_i$ to an attribute of symbol $D_j$.
-Note that the nodes in the sibling graph are syntactical symbols, distinct from the attributes in the dependence graph.
-
-A grammar satisfies the one-sweep condition if, for each production $p : D_0 \rightarrow D_1 D_2 \ldots D_r,  r \geq 0$ that has a dependence graph $\text{dep}_p$, the following clauses hold at the same time:
-\begin{enumerate}
-    \item Graph $\text{dep}_p$ contains no circuit (is acyclic).
-    \item Graph $\text{dep}_p$ does not contain a path $\lambda_i \rightarrow \ldots \rightarrow \rho_i, \ i \geq 1$ that goes from a left attribute $\lambda_i$ to a right attribute $\rho_i$ of the same symbol $D_i$, where $D_i$ is a sibling of $D_0$.
-    \item Graph $\text{dep}_p$ contains no arc $\lambda_0 \rightarrow \rho_i, \ \geq 1$, from a left attribute of the father node $D_0$ to a right attribute of a sibling node $D_i$.
-    \item The sibling graph $\text{sibl}_p$ contains no circuit (is acyclic).
-\end{enumerate}
-
-\paragraph*{Explanation of the conditions}
-\begin{enumerate}
-    \item Necessary for the grammar to be acyclic.
-    \item If such a path existed, it would be impossible to compute the right attribute $\rho_i$ before visiting the subtree $t_i$, because the value of the left attribute $\lambda_i$ is computed at the end of the visit of $t_i$ (against the order of the depth-first visit).
-    \item The value of attribute $\rho_i$ would not be available when the visit of the subtree $t_i$ is started.
-    \item Allows to topologically sort the child nodes.
-\end{enumerate}
-
-\paragraph*{Construction of the one-sweep evaluator}
-The procedure visits the subtrees, computes, and returns the left attributes of the root of the subtree.
-For each production $p : D_0 \rightarrow D_1 D_2 \ldots D_r, \ r \geq 0$:
-\begin{enumerate}
-    \item Choose a topological order (TOS) of the nonterminals $D_1, D_2, \ldots  D_r$ with respect to the sibling graph $\text{sibl}_p$.
-    \item For each symbol $D_i,  1 \leq i \leq r$, choose a topological order (TOR) of the right attributes of symbol $D_i$ with respect to the dependence graph $\text{dep}_p$.
-    \item Choose a topological order (TOL) of the left attributes of symbol $D_0$ with respect to the dependence graph $\text{dep}_p$.
-\end{enumerate}
-The three orders TOS, TOR and TOL prescribe how to arrange the instructions of the procedure that implements the visit of the subtree $t_N$.
-
-\subsection{Combined syntax and semantic analysis}
-The integration of syntax tree construction and attribute computation allows the parser to handle both responsibilities, invoking semantic functions as needed. 
-In this context, we assume the use of a pure BNF grammar, avoiding the complexity that EBNF productions would introduce in specifying the relationship between syntax symbols and attributes.
-\begin{table}[H]
-    \centering
-    \begin{tabular}{c|c|c}
-        \textbf{Source language}  &                                                   & \textbf{Tool}         \\ \hline
-        regular                   & lexical analysis with lexical attributes          & flex, lex             \\
-        LL(k)                     & recursive descent parser with attributes          &                       \\
-        LR(k)                     & shift-reduce parser with attributes               & yacc, bison
-    \end{tabular}
-    \caption{Combined syntax and semantic}
-\end{table}
-
-\paragraph*{Lexical analysis with attribute evaluation}
-The lexical analyzer, or scanner, not only divides the source text into lexemes (or tokens) but also assigns semantic attributes to these lexemes. 
-Lexemes, representing the smallest meaningful substrings, are categorized into lexical classes defined by regular formal languages, such as regular expressions or sets of strings. 
-The lexical and syntactic specifications operate at different levels, with the lexical level determining the form of lexemes and the syntactic level assuming these lexemes as terminal symbols in the grammar.
-Some lexemes may carry additional meaning, serving as semantic attributes computed by the lexical analyzer.
-
-\paragraph*{Attributed recursive descent translator}
-In cases where a syntax is suitable for deterministic top-down parsing, attribute evaluation can proceed during parsing, provided that the functional dependencies of the grammar satisfy conditions beyond those of a one-sweep grammar. 
-The one-sweep algorithm traverses the syntax tree in a depth-first order, which may differ from the natural order constructed by a top-down parser. 
-To merge these two procedures, functional dependencies must be free from any conflicts that might result from differing tree traversal orders.
-
-\paragraph*{L-condition}
-A grammar satisfies the condition L if, for each production $p: D_0 \rightarrow D_1 \ldots D_r$, it holds:
-\begin{enumerate}
-    \item The one-sweep condition is satisfied. 
-    \item The sibling graph $\text{sibl}_p$ contains arc $D_j \rightarrow D_i, j > i \geq 1$.
-\end{enumerate}
-The second condition in the L-condition prevents a right attribute of node $D_i$ from depending on any attribute of a node $D_j$ placed to its right in the production $p$.
-
-\paragraph*{Attribute grammar and deterministic parsing}
-Consider an attribute grammar $G$, where:
+Static analysis is a methodology employed by compilers to examine certain properties of the source code prior to the compilation phase.
+Various analyses can be classified based on their intended objectives, including:
 \begin{itemize}
-    \item The syntax satisfies the $LL(k)$ condition.
-    \item The semantic rules satisfy the L-condition.
+    \item \textit{Verification}: this involves examining the correctness of the program.
+    \item \textit{Optimization}: the goal is to enhance the efficiency of the program.
+    \item \textit{Scheduling and parallelizing}: this aims to alter the program's execution order to exploit parallelism.
 \end{itemize}
-It's possible to construct a top-down deterministic parser with attribute evaluation able to compute the attributes of $G$ at parsing time.
+In these scenarios, a control-flow graph is employed, which is a directed graph resembling a program flowchart. 
+This graph can be conveniently interpreted as representing the state-transition function of a finite automaton. 
+Static analysis involves scrutinizing this graph using various techniques.
+It is crucial to note that the control-flow graph only reflects the source code of an individual program, not the entire source language. 
+Static flow analysis should not be conflated with syntax-driven translation.
+
+\subsection{Program as an automaton}
+The control-flow graph serves as an abstraction of a program and can be likened to a Finite State Automaton (FSA). Its key components are detailed below:
+\begin{itemize}
+    \item Each node represent an instruction. 
+        Instructions are simplified compared to those in the source language.
+        Typical instructions include assignments, jumps, arithmetic operations, and more.
+        Operands consist solely of simple variables and constants.
+    \item Each arc signifies a possible control flow. 
+        If an instruction $p$ is followed by $q$, a directed arc is present from $p$ to $q$.
+        Unconditional instructions have at most one successor.
+        Conditional instructions have two (or more) successors.
+        An instruction with two or more predecessors creates a confluence of arcs in the graph.
+    \item The first instruction of the program serves as the entry point, corresponding to the initial node.
+    \item The last instruction of the program serves as the exit point, corresponding to the final node.
+\end{itemize}
+While a control-flow graph is a valuable representation, it lacks certain details of the program:
+\begin{itemize}
+  \item The \texttt{true}/\texttt{false} value determining the successor of a conditional instruction.
+  \item The node representing a \texttt{goto} instruction is absent, as it is simplified to an arc to the successor instruction.
+  \item Any operations executed by an instruction are abstracted. 
+    A value assignment is considered to define a variable.
+    If a variable appears in the Right-Hand Part (RHP) of an expression or boolean condition, it is deemed used.
+    A node representing a statement $p$ in the graph is associated with set $\text{def}(p)$ of defined variables and set $\text{use}(p)$ of used variables. 
+\end{itemize}
+\begin{definition}[\textit{Language of the control-flow graph}]
+    Consider a finite state automaton $A$, depicted as a control-flow graph.
+     Its terminal alphabet is the set $I$ of program instructions, with each instruction represented by a $3$-tuple:
+    \[ \left\langle \texttt{label}, \texttt{defined variables}, \texttt{used variables} \right\rangle \]
+    The language $L(A)$ recognized by the automaton comprises strings over the alphabet $I$. 
+    These strings label the paths from the initial node (the entry point) to the final node (the exit point).
+    Each string in $L(A)$ signifies a sequence of program instructions that the machine can execute when the program runs.
+\end{definition}
+Furthermore, language $L$ is local.
+
+\paragraph*{Conservative approximation}
+The automaton provides only an approximation of the valid execution paths of a program. 
+It does not guarantee that all paths specified are executable, as it does not perform syntax analysis on the conditions governing the selection of successor nodes in conditional instructions.
+\begin{example}
+    Consider the following code snippet: 
+    \begin{verbatim}
+        1: if x^2 >= 0 then
+        2: instruction_2 else
+        3: instruction_3
+    \end{verbatim}
+    The formal language accepted by the automaton contains two paths:
+    \[ \left\{ 1 \: 2,  1 \: 3 \right\} \]
+    However, the second path is not executable, as the condition is always true.
+\end{example}
+As a result, static analysis can sometimes lead to pessimistic conclusions (discovering never-executed code paths). 
+Determining whether a path in a control-flow graph will ever be executed by the program is undecidable, reducing the problem to the halting problem.
+
+Analyzing all recognized paths is a conservative approximation to a program. 
+While it may identify non-existing errors or erroneously assign resources, it ensures that real errors will never be missed. 
+Despite its potential inefficiency, this method is deemed \textbf{error safe}.
+
+A common assumption in static analysis is that the automaton is clean, meaning every instruction is on a path from the entry point to the exit point. 
+Deviations from this assumption can lead to anomalies:
+\begin{itemize}
+    \item Some executions may not reach the exit point.
+    \item Some instructions may remain unexecuted (dead code).
+\end{itemize}
+
+\subsection{Liveness of a variable}
+A professional compiler undergoes multiple analysis passes to optimize code, with one of the most crucial being the analysis of variable liveness, determining the duration for which the value of a variable is required.
+
+\paragraph*{Variable liveness}
+
+A variable $a$ is considered live upon exiting a program node $p$  if there exists a path from $p$ to another node $q$ (not necessarily distinct from $p$) in the program's control-flow graph. 
+This path must satisfy the following conditions:
+\begin{itemize}
+    \item The path does not traverse an instruction $r \neq q$ that defines $a$. 
+        If $r$ defines $a$, then $a \in \text{def}\left(r\right)$.
+    \item The instruction $q$ uses $a$. 
+        If $q$ uses $a$, then $a \in \text{use}\left(q\right)$.
+\end{itemize}
+In simpler terms, a variable is considered live out of a particular node if some instruction that could be subsequently executed utilizes the value that the variable held in the former node. 
+If the variable is reassigned before its next use, it is not live out of the node. 
+More precisely, a variable is live-out for a node if it is live on any outgoing arc from that node. 
+Similarly, a variable is live-in for a node if it is live on some incoming arc to the node.
+
+\paragraph*{Computing liveness intervals}
+Let $I$ denote the instruction set, and let $D(a)(I) \subseteq I$ and $U(a)(I) \subseteq I$ represent the sets of instructions defining and using variable $a$, respectively.
+Variable $a$ is considered live out of an instruction $p$ if and only if, for the language $L(A)$ accepted by the automaton, condition is satisfied:
+the language $L(A)$ contains a sentence $x = u p v q w$, where:
+\begin{itemize}
+    \item $u, w$ are arbitrary sequences of instructions (possibly empty). 
+    \item $p$ is any instruction. 
+    \item $v$ is a possibly empty instruction sequence not containing a definition of $a$. 
+    \item $q$ is an instruction that uses $a$. 
+\end{itemize}
+These conditions are formalized by the equation:
+\[ u, w \in I^{*} \land p \in I \land v \in \left( I \setminus D\left( a \right) \right) \land q \in U\left( a \right) \]
+Here, the set difference contains all instructions that do not define $a$, while $q$ uses $a$.
+The set of all strings $x$ satisfying this condition, denoted as $L_p$ is a subset of the language $L(A)$ recognized by the automaton.
+$L_p$  is regular because it can be defined by the intersection:
+\[ L_p = L(A) \cap R_p \]
+where $R_p$ is the regular language defined by the regular expression:
+\[ R_p = I^{*} p \left( I \setminus D \left( a \right) \right)^{*} U \left( a \right) I^{*} \]
+The definition of $R_p$ and $L_p$ specifies that the symbol $p$ must be followed by a symbol $q$ from the set $U\left( a \right)$, and all symbols between $p$ and $q$ must not be in set $D\left( a \right)$.
+To check if a variable is live out of node $p$, it is sufficient to verify if $L_p \neq \emptyset$. 
+This can be achieved by building the recognizer as the product of machine $A$ and the recognizer of $R_p$.
+If no path connects the input node to the final node, then $L_p$ is empty.
+
+However, this procedure is not efficient given the large number of variables and instructions in real-world programs. 
+A more efficient technique is data-flow analysis, which examines all paths from any instruction to another instruction using the same variable.
+
+\paragraph*{Data-Flow equations}
+The computation of liveness is articulated through a system of data-flow equations. 
+Let's consider a node $p$ in a program $A$.
+The equations establish the relationship between variables that are live out (denoted $\text{live}_\text{out}\left( p \right)$) and those live in (denoted by $\text{live}_\text{in}\left( p \right)$) for the node. 
+Additionally, they express the connection between variables live out of a node and those live in for its successors.
+Here, $\text{succ}\left( p \right)$ denotes the set of (eventually immediate) successors of node $p$ and $\text{var}(A)$ is the set of all variables in program $A$.
+\begin{definition}[\textit{Data-flow equations}]
+      For each final node $p$:
+      \[ \text{live}_\text{out}\left( p \right) = \emptyset \]
+      For any other node $p$:
+      \[ \text{live}_\text{in}\left( p \right) = \text{use}\left( p \right) \cup \left( \text{live}_\text{out} \left( p \right) \setminus \text{def}\left( p \right) \right) \]
+      \[ \text{live}_\text{out}\left( p \right) = \bigcup_{q \in \text{succ}\left( p \right)} \text{live}_\text{in}\left( q \right) \]
+\end{definition}
+
+\paragraph*{Solution of data-flow equations}
+In the context of a control-flow graph with a total of $|I| = n \geq 1$ nodes, the resulting system gives rise to $2 \cdot n$ equations involving $2 \cdot n$ unknown variables: $\text{live}_\text{in}\left( p \right)$ and $\text{live}_\text{out}\left( p \right)$ for each node $p \in I$.
+Each unknown is a set of variables, and the solution sought is a pair of vectors, each containing $n$ sets.
+
+To solve the system of equations, an iterative approach is employed, starting with the empty set as the initial approximation ($i=0$) for every unknown:
+\[ \forall \: p \in I \quad \text{live}_\text{in}\left( p \right) = \emptyset \quad \text{live}_\text{out} \left( p \right) = \emptyset \]
+At each iteration $i$, for each equation in the system defined, the unknowns on the right-hand side are replaced with the values computed in the previous iteration.
+The new iteration $i + 1$ is then calculated.
+The iteration process halts when the values computed in the last iteration are equal to those computed in the previous iteration (a fixed point is reached). 
+This solution is termed the least fixed point solution of the transformation that computes a new vector from one of the preceding iterations.
+
+A finite number of iterations is always sufficient to compute the least fixed point solution because:
+\begin{itemize}
+  \item Every set $\text{live}_\text{in}\left( p \right)$ and $\text{live}_\text{out}\left( p \right)$ is finite, given the finite number of variables.
+  \item Each iteration either increases the cardinality of the aforementioned sets of variables or leaves them unchanged, as the equation is monotonic.
+  \item When the solution ceases to change, the algorithm terminates.
+\end{itemize}
+
+\subsection{Application of Liveness Analysis}
+\paragraph*{Memory allocation}
+Liveness Analysis is particularly valuable for determining whether two variables can share the same memory cell. 
+If two variables are live-in at the same program instruction, then they must be stored in different memory cells. 
+This is indicative of the two variables interfering with each other. 
+Conversely, if two variables do not interfere, it implies that they can be stored in the same memory cell.
+
+\paragraph*{Useless instructions}
+An instruction that defines a variable is deemed useless if the assigned value to the variable is never utilized by any subsequent instruction; in other words, the value is not live-out for the defining instruction. 
+To ascertain the uselessness of the definition of a variable $a$ by instruction $p$, it suffices to check if $\text{live}_\text{out}\left( p \right) \not\subseteq \left\{ a \right\}$.
+
+\subsection{Reaching definition analysis}
+Another fundamental type of static analysis involves the search for a variable definition that reaches a specified instruction. 
+In particular, this is crucial when an instruction assigns a constant value to a variable. 
+The compiler examines the program to determine if this constant can replace the variable in subsequent instructions using it. 
+This transformation offers two advantages:
+\begin{enumerate}
+    \item \textit{Reduced memory access and increased speed}: by replacing the variable with a constant value, the number of memory accesses is reduced, potentially leading to a faster program.
+    \item \textit{Compile-time evaluation}: obtaining an expression where all operands are constants allows for compile-time evaluation.
+\end{enumerate}
+The second transformation is termed constant propagation. 
+\begin{definition}[\textit{Reaching definition}]
+    The definition of a variable $a$ at instruction $q$ \textit{(denoted as $a_q$)} reaches the input of an instruction $p$ (not necessarily different from $q$) if there exists a path from $q$ to $p$ that does not contain any redefinition of $a$.
+\end{definition}
+This implies that instruction $p$ can access and use the value of the variable $a$ defined in instruction $q$.
+
+\paragraph*{Reaching definition and regular expressions}
+The definition $a_q$ reaches instruction $p$ if language $L(A)$ contains a sentence of the form $x = u q v p w$, where:
+\begin{itemize}
+    \item $u, w$ are arbitrary sequences of instructions (possibly empty). 
+    \item $p$ is any instruction.
+    \item $v$ is a sequence of instructions that do not contain any definition of $a$ (possibly empty).
+    \item $q$ is an instruction that defines $a$.
+\end{itemize}
+The condition is represented by the following regular expression:
+\[ u, w \in I^{*} \land q \in D\left( a \right) \land v \in \left( I \setminus D \left( a \right)\right)^{*} \land p \in I \]
+where $p, q$ may coincide.
+
+\paragraph*{Reaching definition and data-flow equations}
+If node $p$ defines variable $a$, any other definition $a_q$ of the same variable in another node $q$, with $q \neq p$ is suppressed by $p$.
+The set of definitions suppressed by instruction $p$ is given by:
+\[
+\begin{cases}
+    \text{sup}(p) = \emptyset \quad                                                                                             & \text{if} \ \text{def}(p) = \emptyset    \\
+    \text{sup}(p) = \left\{ a_q \mid q \in I \land q \neq p \land a \in \text{def} (q) \land a \in \text{def}(p) \right\} \quad & \text{if} \ \text{def}(p) \neq \emptyset
+\end{cases}
+\]
+
+\paragraph*{Data-flow equations}
+For the initial node $1$:
+\[\text{in}(1) = \emptyset\]
+For any other node $p \in I$:
+\[\text{out}(p) = \text{def}(p) \cup \left( \text{in}(p) \setminus \text{sup}(p) \right)\]
+\[\text{in}(p) = \bigcup_{\forall q \in  \text{pred}(p)} \text{out}(q)\]
+Similar to the liveness equations, the reaching definition system can be solved through iteration until the computed solution converges to a fixed point; initially, all sets are empty. 
+The set $\text{out}^{'}$ represents the elements of $\text{out}$ reaching the exit node starting from node $q$, but with their subscripts deleted.
+
+\paragraph*{Explanation}
+\begin{itemize}
+    \item The initial data flow equations presuppose the absence of variables passed as input parameters to the subprogram.
+        If there are input parameters, $\text{in}(1)$ would then comprise the set of these 
+    \item The subsequent data flow equations incorporate into the exit from node $p$ all local definitions of $p$ and the definitions reaching the entrance to $p$, unless the latter are overridden by $p$.
+    \item The final data flow equations assert that any definition reaching the exit of a predecessor node also reaches the entrance to node $p$.
+\end{itemize}
+
+\paragraph*{Constant propagation}
+The constant propagation problem is the search for constant expressions that can be evaluated at compile time.
+In the instruction $p$, it is safe to replace with a constant $k$ any variable $a$ used in $p$ if the following conditions hold:
+\begin{enumerate}
+    \item There exists and instruction $q : a := k$, such that $a_q$ reaches $p$
+    \item No other definition $a_r$ of variable $a$ reaches the entrance of $p$, with $r \neq q$
+\end{enumerate}
+
+\paragraph*{Availability of variables and initialization}
+A basic correctness check performed by a compiler is to verify that all the variables are initialized before their first use;
+more generally, a variable used in some instruction must be available at the entrance of that instruction.
+\begin{definition}[\textit{Variable availability}]
+  A variable $a$ is available at the entrance of instruction $p$ (just before its execution) if in the program control-flow graph every path from the initial node $1$ to the entrance of $p$ contains a statement that defines variable $a$.
+\end{definition}
+\begin{definition}[\textit{Badly initialized variables}]
+    An instruction $p$ is not well initialized if the following predicate holds:
+    \[ \exists q \in \text{pred}(p) \textnormal{ such that } use(p) \nsubseteq \text{out}^{'}(q) \]
+\end{definition}
+The condition says that there exists a node $q$ predecessor of $p$ such that the definition of reaching its exit does not include all the variables used in $p$.
+Therefore, when the program execution runs on a path through $q$, one or more variables used in $p$ don't have a value.
