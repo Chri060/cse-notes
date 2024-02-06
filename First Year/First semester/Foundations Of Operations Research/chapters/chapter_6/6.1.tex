@@ -20,7 +20,7 @@ y = [ model.add_var(name = str(i) + str(j), var_type = mip.CONTINUOUS, lb = 0) f
 model.objective = mip.minimize( mip.xsum(d[i][j] * y[i][j] for i in I for j in J) + 100 * mip.xsum(x[i] for i in I))
 # declare constraints
 for i in I:
-  model.add_constr(mip.xsum(y[i][j] <= x[i] if j != i else 0))
+  model.add_constr(mip.xsum(y[i][j] <= x[i] for j in J if j != i else 0))
 # optimize the model
 model.optimize()
 \end{lstlisting}
