@@ -14,22 +14,14 @@ model = mip.model()
 #   x_i binary variables for i in I
 #   y_ij >= 0 for i in I, j in J
 #   minimize sum_i sum_j d_ij y_ij + 100 sum_i x_i
-x = [ model.add_var(name = str(i), var_type = mip.BINARY)
-      for i in I 
-    ]
-y = [ model.add_var(name = str(i) + str(j), var_type = mip.CONTINUOUS, lb = 0)
-      for i in I for j in J 
-    ]
+x = [ model.add_var(name = str(i), var_type = mip.BINARY) for i in I ]
+y = [ model.add_var(name = str(i) + str(j), var_type = mip.CONTINUOUS, lb = 0) for i in I for j in J ]
 # declare the objective function
-model.objective = mip.minimize(
-  mip.xsum(d[i][j] * y[i * N + j] for i in I for j in J) +
-  100 * mip.xsum(x[i] for i in I)
-  )
+model.objective = mip.minimize( mip.xsum(d[i][j] * y[i][j] for i in I for j in J) + 100 * mip.xsum(x[i] for i in I))
 # declare constraints
 for i in I:
-  model.add_constr(
-    mip.xsum(y[i * N + j] <= x[i] if j != i else 0)
-  )
+  model.add_constr(mip.xsum(y[i][j] <= x[i] if j != i else 0))
 # optimize the model
 model.optimize()
 \end{lstlisting}
+\newpage
