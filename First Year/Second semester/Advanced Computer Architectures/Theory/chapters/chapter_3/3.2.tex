@@ -1,0 +1,33 @@
+\section{Speed measures}
+
+To compare the speed of two computers we can use two metrics: 
+\begin{itemize}
+    \item \textit{Computer system user} tries to minimize elapsed time for program execution:
+        \[\text{response time} : \text{execution time} = \text{time\_end} - \text{time\_start}\]
+    \item \textit{Computer center manager} tries to maximize the completion rate. 
+        In other words it tries to maximize the throughput that is the total amount of work done in a given time. 
+\end{itemize}
+The two metrics can be compared with the formula: 
+\[\text{throughput}=\dfrac{1}{\text{response time}}\]
+This equality holds if there are no overlaps, otherwise we will have a greater throughput. 
+
+Usually we consider the frequent case because it is often simpler and can be done faster than the infrequent case. 
+\begin{theorem}[\textit{Amdahl's law}]
+    The performance improvement of a system that can be achieved by optimizing a certain part of the system is limited by the fraction of time during which that part is actually utilized.
+\end{theorem}
+
+Suppose that enhancement $E$ accelerates a fraction $F$ of the task by a factor $S$, and the remainder of the task is unaffected. 
+We have that: 
+\[\text{Speedup}_{overall}=\dfrac{1}{\left(1-\text{Fraction}_{enhanced}\right)+\dfrac{\text{Fraction}_{enhanced}}{\text{Speedup}_{enhanced}}}\]
+As a result the best we could ever hope to do is: 
+\[\text{Speedup}_{overall}=\dfrac{1}{1-\text{Fraction}_{enhanced}}\]
+\begin{example}
+    Consider a new CPU 10x faster. 
+    Consider a I/O bound server, so 60\% time waiting for I/O. 
+    The overall speedup will be: 
+    \[\text{Speedup}_{overall}=\dfrac{1}{\left(1-\text{Fraction}_{enhanced}\right)+\dfrac{\text{Fraction}_{enhanced}}{\text{Speedup}_{enhanced}}}=\dfrac{1}{\left(1-0.4\right)+\dfrac{0.4}{10}}=1.56\]
+    Apparently, its human nature to be attracted by 10X faster, vs. keeping in perspective its just 1.6X faster. 
+\end{example}
+\begin{corollary}[\textit{Amdahl's law}]
+    If an enhancement is only usable for a fraction of a task we can't speed up the task by more than the reciprocal of 1 minus the fraction
+\end{corollary}
