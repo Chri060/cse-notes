@@ -1,0 +1,105 @@
+\section{Linear regression}
+
+The objective of regression is to learn an approximation of a function $f(x)$ that maps input $x$ to a continuous output $t$ from a dataset $\mathcal{D}$: 
+\[\mathcal{D}=\left\{ \left\langle x,t \right\rangle \right\} \implies t=f(x)\]
+Here, the variable $x$ is a vector. 
+To perform a regression we need to assume that there exists a function that can perform this type of mapping. 
+The elements needed to contruct a linear regression problem are: 
+\begin{itemize}
+    \item The method used to model the function $f$ (that is the hypothesis space). 
+    \item The evaluation for the approximation (that is the loss function). 
+    \item The way to optimize the model (optimization process). 
+\end{itemize}
+
+In linear regression the function $f$ is modeled with linear functions. 
+We choose this model since: 
+\begin{itemize}
+    \item Linear models can be easily explained. 
+    \item A linear regression problem can be solved analytically. 
+    \item Linear functions can be estended to model also non-linear relationships. 
+    \item More sophisticated methods are based on linear regression. 
+\end{itemize}
+
+\paragraph*{Hypothesis space}
+In a mathematical form, the approximation $y$ can be defined as: 
+\[y(\textbf{x},\textbf{w})=w_0+\sum_{j=1}^{D-1}w_j x_j=\textbf{w}^T\textbf{x}\]
+Here, $\textbf{x} = \left( 1,x_1,\dots,x_{D-1} \right)$ is a vector and $w_0$ is called bias parameter. 
+Note that the output $y$ is a scalar value. 
+
+In a bidimensional space we have that our hypothesis space will be the set of all points in the plane $(w_0,w_1)$. 
+The coordinate of each point will correspond to a line in the $\left( \textbf{x}, y \right)$. 
+
+\paragraph*{Loss function}
+A convenient error loss function for the linear regression problem is the sum of squared errors (SSE): 
+\[L(\textbf{w})=\dfrac{1}{2}\sum_{n=1}^{N}\left( y(x_n, \textbf{w})-t_n \right)^2\]
+The sum in $\mathcal{L}$ is also called residual sum of squares (RSS) and can be written as the sum of redisual errors: 
+\[RSS(\textbf{w})=\left\lVert \boldsymbol{\epsilon}^2_2 \right\rVert = \sum_{i=1}^{N}\epsilon^2_i \]
+From this formulation of the loss function we can esaily obtain a closed-form optimization. 
+
+\paragraph*{Optimization}
+The optimization of the previous loss function can be done with least squares. 
+
+
+
+
+
+
+
+
+A linear combination of the input variable is not always enough to model data but we just need a regression model that is linear in paramenters. 
+We can define a model usiong non-linear basis functions in the following way: 
+\[y(\textbf{x},\textbf{w})=w_0+\sum_{j=1}^{M-1}w_j \phi_j(\textbf{x})=\textbf{w}^T\boldsymbol{\phi}(\textbf{x})\]
+Here, the elements of the $\boldsymbol{\phi}(\textbf{x})=\left( 1,\phi_1(\textbf{x}),\dots,\phi_{M-1}(\textbf{x}) \right)^T$ vectors are called features. 
+\begin{example}
+    Consider a set of couples $(\text{weight}, \text{height})$ regarding some people: 
+    70  180
+    80  184
+    60  174
+    ... ... 
+    Consider a target value that computes the completion time $t$ of a one kilometer run. 
+    Consider the following top time for the three people conidered before. 
+    180 s 
+    220 s 
+    170 s 
+    We model the problem in the following way 
+    x0 x1 x2 t
+    .
+    .
+    .
+    Here, $x_0$ is a dummy variable inizialized always to one. 
+    Instead of considering the height and the weight we can compute the BMI value for each person using the function: 
+    \[\text{BMI}=\dfrac{w}{h^2}\]
+    At this point we have introduced a new variable, obtained by the previous basis function, $x_3$ obtaining the following table: 
+    x3
+    21
+    23
+    20
+    We can now decide to keep weight and height ore remove them and consider only the BMI values. 
+\end{example}
+The most used basis functions are: 
+\begin{itemize}
+    \item \textit{Polynomial}: 
+        \[\phi_j(x)=x^j\]
+    \item \tetxit{Gaussian}:
+        \[\phi_j(x)=\exp \left( -\dfrac{\left( x-\mu_j \right)^2}{2 \sigma^2} \right) \]
+    \item \textit{Sigmoidal}: 
+        \[\phi_j(x)=\dfrac{1}{1+\exp\left(\dfrac{\mu_j-x}{\sigma}\right)}\]
+\end{itemize}
+The constant $\mu_j$ is called hyperparameter since the value of it needs to be determined by the designer via some experiments and depends on the user's experience. 
+
+It's important to note that only in the Gaussian model we modify the problem to look like a local approximation since some values can be omitted since they are close to zero. 
+In this way we can capture the relation between the input and the output in less input space area. 
+This is because when we go far enough from the mean we are close to zero and the values in this zone are negligible. 
+
+SLIDE 11??????????????????????????????????????????????????????????
+
+
+
+
+
+
+
+
+
+
+
