@@ -1,0 +1,34 @@
+\section{Computational security}
+
+The objective of ensuring confidentiality is to prevent unauthorized individuals from comprehending the data. 
+Various methods can compromise confidentiality:
+\begin{itemize}
+    \item Passive interception by an attacker.
+    \item Knowledge of a set of potential plaintexts by the attacker.
+    \item Data manipulation by the attacker to observe the reactions of an entity capable of decryption.
+\end{itemize}
+
+\begin{definition}[\textit{Perfect cipher}]
+    In a perfect cipher, for any plaintext $ptx$ in the plaintext space $P$ and any corresponding ciphertext $ctx$ in the ciphertext space $C$, the probability of the plaintext being sent is equal to the conditional probability of that plaintext given the observed ciphertext:
+    \[\text{P}(ptx\:sent=ptx)=\text{P}(ptx\:sent=ptx|ctx\:sent=ctx)\]
+\end{definition}
+In other words, observing a ciphertext $c \in C$ provides no information about the corresponding plaintext it represents.
+\begin{theorem}[Shannon 1949]
+    Any symmetric cipher $\left\langle P,K,C,\mathbb{E},\mathbb{D} \right\rangle $ with $\left\lvert P \right\rvert=\left\lvert K \right\rvert=\left\lvert C \right\rvert$, achieves perfect security if and only if every key is utilized with equal probability $\dfrac{1}{\left\lvert K\right\rvert }$, and each plaintext is uniquely mapped to a ciphertext by a unique key:
+    \[\forall \left(ptx,ctx\right) \in P \times C, \exists !k \in K \text{ such that } \mathbb{E}\left(ptx,k\right)=ctx\]
+\end{theorem}
+\begin{example}
+    Let's consider $P$, $K$, and $C$ as sets of binary strings. 
+    The encryption function selects a uniformly random, fresh key $k$ from $K$ each time it's invoked and computes the ciphertext as $ctx=ptx \oplus k$.
+
+    Gilbert Vernam patented a telegraphic machine in 1919 that implemented $ctx=ptx \oplus k$ using the Baudot code. 
+    Joseph Mauborgne proposed utilizing a random tape containing the key $k$.
+
+    Combining Vernam's encryption machine with Mauborgne's approach results in a perfect cipher implementation.
+\end{example}
+
+It's crucial to understand that while a cipher may achieve perfect security, this doesn't necessarily mean it's practical or user-friendly.
+Managing key material and regularly changing keys can be exceptionally challenging.
+
+In practice, perfect ciphers often face vulnerabilities due to issues such as key theft or reuse. 
+Additionally, the generation of truly random keys has historically been problematic, leading to potential vulnerabilities and breaches.
