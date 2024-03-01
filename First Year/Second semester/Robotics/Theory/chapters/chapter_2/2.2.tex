@@ -1,164 +1,82 @@
-\section{Sensors}
+\section{Actuators}
 
-\subsection{Encoder}
-An encoder translates rotary motion or position of a motor/joint into electronic pulses. 
-Encoders come in two primary types:
+Effectors are responsible for altering the state of the environment, with actuators facilitating the actions of effectors.
+In robotics, we employ various types of actuators:
 \begin{itemize}
-    \item \textit{Linear encoder}: comprising a lengthy linear read track and a compact read head, linear encoders are designed for linear motion measurement.
-    \item \textit{Rotary encoder}: suitable for both rotary and linear motion, rotary encoders convert rotary motion into electrical signals. 
-        They are further categorized as incremental or absolute.
-\end{itemize}
-Their operation proceeds as follows:
-\begin{enumerate}
-    \item A light-emitting diode (LED) projects a light beam onto a tape striped with red and black segments.
-    \item The reflected light is captured by a photodetector.
-    \item The photodetector generates a periodic wave whose frequency varies based on the speed of the tape.
-\end{enumerate}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{images/encoder.png}
-    \caption{Linear encoder structure}
-\end{figure}
-
-\paragraph*{Incremental rotary encoders}
-Incremental rotary encoders operate based on the photoelectric principle, employing a disk with alternating transparent and opaque zones containing two traces or sensors.
-These traces facilitate the identification of rotation direction and enhance resolution through quadrature.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.35\linewidth]{images/rotary1.png}
-    \caption{Incremental rotary encoder}
-\end{figure}
-To determine speed and direction, the quadrature technique is employed, where the two signals are shifted by $\frac{1}{4}$ step. 
-Denoting $N$ as the number of steps of light/dark zones per turn, the resolution is given by:
-\[\text{resolution}=\dfrac{360^{\circ}}{4N}\]
-Using this technique:
-\begin{itemize}
-    \item If a transition from $1 1$ to $1 0$ occurs, it indicates a counterclockwise rotation.
-    \item Conversely, if a transition from $1 1$ to $0 1$ occurs, it indicates a clockwise rotation.
+    \item \textit{Electric motors}: these devices convert electrical energy into mechanical energy by leveraging the principles of electromagnetism. 
+        They produce rotational motion through the interaction between magnetic fields and electric currents.
+    \item \textit{Hydraulics}: this technology utilizes fluids to transmit force, employing the principles of fluid mechanics to generate, control, and transfer power via pressurized liquids.
+    \item \textit{Pneumatics}: a branch of engineering that employs compressed air or gas to transmit and regulate power, akin to hydraulics but using air or gas instead of liquids.
+    \item \textit{Photo-reactive materials}: these substances undergo a chemical change upon exposure to light.
+    \item \textit{Chemically reactive materials}: substances in this category undergo chemical reactions with other materials or their surroundings.
+    \item \textit{Thermally reactive materials}: these substances undergo changes in properties or behavior when subjected to variations in temperature.
+    \item \textit{Piezoelectric materials}: materials that generate electric charges in response to mechanical stress or pressure, while also displaying mechanical deformation under an electric field.
 \end{itemize}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.25\linewidth]{images/rotary.png}
-    \caption{Incremental rotary encoder with quadrature}
-\end{figure}
-The encoders' limitation lies in their inability to determine the actual position relative to the starting point.
-The only feasible solution involves resetting to the starting position and then incrementally counting until reaching the desired position.
+Originally, early robots were equipped with hydraulic and pneumatic actuators. 
+Hydraulic actuators were costly, heavy, and required significant maintenance, making them suitable mainly for larger robots. 
+Pneumatic actuators found use in stop-to-stop applications like pick-and-place tasks due to their swift actuation.
 
-\paragraph*{Absolute rotary encoder}
-The absolute rotary encoder addresses the limitation of determining absolute position by encoding it directly on the disk.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.35\linewidth]{images/rotary2.png}
-    \caption{Incremental rotary encoder}
-\end{figure}
-The disk features transparent and opaque areas arranged in concentric rings. 
-Each bit of position data is represented by a corresponding ring, offering an absolute resolution of:
-\[\text{resolution}=\dfrac{360^{\circ}}{2^N}\]
-In robotic applications, a minimum of 12 rings are typically employed. 
-To prevent ambiguities, binary codes with single variations, such as Gray code, are utilized.
+In modern times, electrical motors have become the prevalent choice for actuators. 
+Typically, each joint incorporates its dedicated motor along with a controller. 
+High-speed motors are often paired with elastic gearing to moderate their speed. 
+These motors necessitate internal sensors for precise control. 
+Stepper motors, on the other hand, don't require internal sensors; however, in case of an error, their exact position becomes unknown.
 
-\subsection{Time of flight telemeter}
-The time-of-flight telemeter records the duration between when the emitter generates a signal and when the detector detects its reflection.
-The signal travels a distance of $2d$, and the time of flight is given by: 
-\[\Delta t=\dfrac{2d}{c}\]
-The initial type of sensor utilizing this principle in robotics was the sonar, which relies on sound waves.
-Sound waves, with their slower speed of approximately $340\:m/s$, and their relatively broad directionality ranging from $20^{\circ}$ to $40^{\circ}$, offer an advantage in measuring shorter distances.
+\subsection{Direct current motor}
+Direct Current (DC) motors transform electrical energy into mechanical energy.
+They are compact, cost-effective, reasonably efficient, and straightforward to operate.
+
+Electric current flows through coils of wire arranged on a rotating shaft. 
+These wire loops create a magnetic field that interacts with the magnetic fields of permanent magnets positioned nearby. 
+The resulting interaction between these magnetic fields causes them to repel each other, resulting in the rotation of the armature.
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.2\linewidth]{images/sonar.png}
-    \caption{Sonar sensor}
+    \includegraphics[width=0.25\linewidth]{images/brushed.png}
+    \caption{Brushed motor structure}
 \end{figure}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{ll}
-    \multicolumn{2}{c}{\textbf{Sonar}}                                   \\ \hline
-    \multicolumn{1}{l|}{\textit{Range (m)}}               & 0.3 up to 10 \\
-    \multicolumn{1}{l|}{\textit{Accuracy (m)}}            & 0.025        \\
-    \multicolumn{1}{l|}{\textit{Cone opening ($\:^\circ$)}} & 30           \\
-    \multicolumn{1}{l|}{\textit{Frequency (Hz)}}          & 50000       
-    \end{tabular}
-\end{table}
-The primary limitation is the susceptibility of the signal-to-noise, particularly from significant reflections.
-Selecting an appropriate range is crucial depending on the specific application. 
-However, these sensors may not function optimally in all scenarios, due to factors such as:
+
+Continuously adjusting the current causes the armature to keep rotating and generating motion. 
+This current modification is facilitated by two connectors positioned at the center of the armature, known as brushes. 
+It's worth noting that in lower-cost electrical motors, the external magnets remain stationary. 
+However, these budget-friendly versions encounter several issues related to their brushes:
 \begin{itemize}
-    \item Balancing sampling frequency. 
-    \item Dealing with reflections off walls. 
-    \item Detecting small or soft objects. 
+    \item Brushes gradually wear out over time.
+    \item Brushes generate noise during operation.
+    \item They impose a maximum speed limit.
+    \item Cooling them proves to be challenging.
+    \item They restrict the number of poles that can be utilized.
 \end{itemize}
-Additionally, it's worth noting that room dimensions may appear distorted, especially around corners.
+To circumvent this issue, one can opt for brushless motors, where external magnets are substituted with copper coils and a magnet is positioned at the center. 
+This configuration yields a motor wherein brushes are replaced by electronics, permanent magnets reside on the rotor, and electromagnets are situated on the stator. 
+While these motors offer superior performance, they also come at a higher cost compared to their brushed counterparts.
+
 \begin{figure}[H]
     \centering
-    \begin{subfigure}{0.3\textwidth}
-        \centering
-        \includegraphics[width=0.5\linewidth]{images/far.png} 
-        \caption{Distance}
-    \end{subfigure}
-    \begin{subfigure}{0.3\textwidth}
-        \centering
-        \includegraphics[width=0.4\linewidth]{images/inclination.png}
-        \caption{Inclination}
-    \end{subfigure}
-    \begin{subfigure}{0.3\textwidth}
-        \centering
-        \includegraphics[width=0.6\linewidth]{images/dimension.png} 
-        \caption{Dimension}
-    \end{subfigure}
-    \caption{Possible problems for sonar sensors}
+    \includegraphics[width=0.25\linewidth]{images/brushless.png}
+    \caption{Brushless motor structure}
 \end{figure}
 
-\subsection{Reflective optosensors}
-Reflective optosensors are active sensors where the emitter is a source of light and the detector is a light detector. 
-This type of sensors uses triangulation to compute distance: 
-\begin{enumerate}
-    \item Emitter casts a beam of light on the surface. 
-    \item The detector measures the angle corresponding to the maximum intensity of returned light. 
-    \item Being $s$ the distance between the emitter and the detector we have: 
-    \[d=s \cdot \tan \alpha\]
-\end{enumerate}
+\subsection{Stepper motor}
+The stepper motor, a type of synchronous electric motor lacking brushes, transforms digital pulses into mechanical shaft rotations.
+
+A stepper motor offers several advantages: it provides a direct correlation between input pulse and rotation angle, maintains full torque even at standstill when windings are energized, enables precise positioning and repeatability, responds promptly to starting, stopping, and reversing commands, boasts high reliability due to the absence of contact brushes, facilitates open-loop control which simplifies and reduces costs, supports very low-speed synchronous rotation with directly coupled loads, and offers a wide range of rotational speeds.
+However, there are also disadvantages: it necessitates a specialized control circuit, consumes more current compared to DC motors, experiences a reduction in torque at higher speeds, risks resonances if not adequately managed, and finds it challenging to operate at extremely high speeds.
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.35\linewidth]{images/opto.png}
-    \caption{Reflective optosensor}
+    \includegraphics[width=0.2\linewidth]{images/stepper.png}
+    \caption{Stepper motor structure}
 \end{figure}
-Infrared sensors are relatively inexpensive and sturdy, but they have their drawbacks. 
-They exhibit nonlinear characteristics that require calibration.
-Additionally, there can be ambiguity when used at short ranges, necessitating precise placement within the robot. 
-Their fixed ranges and opening angles mean that careful selection is needed for optimal performance in various applications. 
-Moreover, they may encounter issues with reflections under certain conditions.
 
-An instance of such technology is the Kinect, an input device designed by Microsoft (originally by Primesense) for Xbox 360.
-This device functions as a three-dimensional scanner and is equipped with an infrared projector, an infrared camera, and an RGB camera.
-\begin{table}[H]
-    \centering
-    \begin{tabular}{ll}
-    \multicolumn{2}{c}{\textbf{Kinect}}                                                         \\ \hline
-    \multicolumn{1}{l|}{\textit{Range (m)}}                             & 0.7 up to 6           \\
-    \multicolumn{1}{l|}{\textit{Horizontal cone opening ($\:^\circ$)}}  & 57                    \\
-    \multicolumn{1}{l|}{\textit{Vertical cone opening ($\:^\circ$)}}    & 43                    \\
-    \multicolumn{1}{l|}{\textit{Infrared camera}}                       & 11-bit 640$\times$480        \\    
-    \multicolumn{1}{l|}{\textit{RGB camera}}                            & $30\:Hz$ 8-bit 640$\times$480    \\  
-    \end{tabular}
-\end{table}
-In this device, the distance from the camera $Z_k$ is calculated as:
-\[Z_k=\dfrac{Z_0}{1+\dfrac{d}{fb}Z_0}\]
+The step angle, denoted by $\varphi$, can be determined using the following formula:
+\[\varphi =\left(\dfrac{N_s-N_r}{N_s \cdot N_r}\right) \times 360^\circ\]
+In this equation, $N_s$ represents the number of teeth on the stator, and $N_r$ represents the number of teeth on the rotor.
 
-\paragraph*{Time of flight camera}
-Three-dimensional time-of-flight (TOF) cameras illuminate the scene using a modulated light source and capture the reflected light. 
-The phase shift between illumination and reflection is then translated into distance information.
+\subsection{Servo motor}
+A servo is a type of specialized motor designed to precisely move its shaft to a specific position. These motors find common use in hobby radio control applications. 
+They possess the capability to measure their own position and adjust for external loads in accordance with a control signal.
 
-These sensors encounter challenges such as utilizing illumination from a solid-state laser or a near-infrared ($\sim 850 \: nm$) LED, where an imaging sensor converts captured light into electrical current. 
-Additionally, distance information is encoded within the reflected component. 
-Consequently, a high ambient component diminishes the signal-to-noise ratio (SNR).
-
-\subsection{Light detection and ranging (LIDAR)}
-Laser sensors offer superior accuracy with the following capabilities:
-\begin{itemize}
-    \item Providing 180 ranges across a 180° field of view (expandable to 360°).
-    \item Scanning 1 to 64 planes.
-    \item Delivering scan rates of 10-75 scans per second.
-    \item Achieving range resolutions of less than $1\:cm$.
-    \item Offering a maximum range of up to 50-80 meters.
-    \item Facing challenges only with mirrors, glass, and matte black surfaces.
-\end{itemize}
+Servo motors are typically constructed from direct current motors with additional components including gear reduction, a position sensor, and control electronics. 
+The travel range of the shaft is usually limited to 180 degrees, which is adequate for the majority of applications.
