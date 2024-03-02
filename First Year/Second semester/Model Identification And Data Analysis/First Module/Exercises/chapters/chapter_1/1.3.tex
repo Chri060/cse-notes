@@ -1,0 +1,78 @@
+\section{Exercise three}
+
+Consider an AR(2) process described by the following equation:
+\[y(t)=\dfrac{1}{2}y(t-1)-\dfrac{1}{4}y(t-2)+e(t)\]
+Here, $e(t)\sim WN(0,1)$. 
+\begin{enumerate}
+    \item Determine the transfer function of the given system.
+    \item Calculate the expected value.
+    \item Compute the covariance.
+\end{enumerate}
+
+\subsection{Solution}
+\begin{enumerate}
+    \item Using the Z-transform, we have:
+        \[y(t)=\dfrac{1}{2}y(t)z^{-1}-\dfrac{1}{4}y(t)z^{-2}+e(t)\]
+        This yields:
+        \[y(t)=\dfrac{1}{1-\dfrac{1}{2}z^{-1}+\dfrac{1}{4}z^{-2}}e(t)\]
+    \item The expected value is determined as follows:
+        \begin{align*}
+            \mathbb{E}\left[y(t)\right]     &= \mathbb{E}\left[\dfrac{1}{2}y(t-1)-\dfrac{1}{4}y(t-2)+e(t)\right] \\
+                                            &= \dfrac{1}{2}\mathbb{E}\left[y(t-1)\right] +\dfrac{1}{4}\mathbb{E}\left[y(t-2)\right]-\underbrace{\mathbb{E}\left[e(t)\right]}_0 \\
+                                            &= \dfrac{1}{2}\mathbb{E}\left[y(t-1)\right] +\dfrac{1}{4}\mathbb{E}\left[y(t-2)\right]
+        \end{align*}
+        Now, assuming that $y(t)$ is a stationary stochastic process, we have $\mathbb{E}\left[y(t)\right]=m$ for all instants. 
+        Thus, rewriting the previous formula:
+        \[m=\dfrac{1}{2}m +\dfrac{1}{4}m\rightarrow m=0\]
+        This value coincides with the expected value.
+
+        To confirm the hypothesis, we need to check if the input process is a stationary stochastic process (white noise is a stationary stochastic process) and if the transfer function is stable:
+        \[W(x)=\dfrac{z^2}{z^2-\dfrac{1}{2}z+\dfrac{1}{4}}\]
+        Stability requires that all the modules of the poles are inside the unit circle:
+        \[z^2-\dfrac{1}{2}z+\dfrac{1}{4}=0\]
+        The solutions to this equation are:
+        \[z_{1,2}=\dfrac{1}{4}\pm i \dfrac{\sqrt{3}}{4}\] 
+        From which the modules are:
+        \[\left\lvert z_{1,2} \right\rvert =\dfrac{1}{2}\]
+        Thus, the system is stable, confirming the hypothesis.
+    \item The covariance at lag zero is calculated as follows:
+        \[\gamma_y(0) = \mathbb{E}\left[\dfrac{1}{2}y(t-1)-\dfrac{1}{4}y(t-2)+e(t)\right]\]
+        From this we have: 
+        \begin{multline*}
+            \gamma_y(0) = \dfrac{1}{4}\underbrace{\mathbb{E}\left[y(t-1)^2\right]}_{\gamma_y(0)} +\dfrac{1}{16}\underbrace{\mathbb{E}\left[y(t-2)^2\right]}_{\gamma_y(0)} +\underbrace{\mathbb{E}\left[e(t^2)\right]}_1 +\dfrac{1}{4}\underbrace{\mathbb{E}\left[y(t-1)y(t-2)\right]}_{\gamma_y(1)} + \\
+            +\underbrace{\mathbb{E}\left[y(t-1)e(t)\right]}_0 + \dfrac{1}{2}\underbrace{\mathbb{E}\left[y(t-1)e(t)\right]}_0 
+        \end{multline*}
+        The resulting equation is:
+        \[\dfrac{11}{16}\gamma_y(0)-\dfrac{1}{4}\gamma_y(1)=1\]
+        To determine the covariance at lag one, we compute:
+        \begin{align*}
+            \gamma_y(1)     &= \mathbb{E}\left[\left(\dfrac{1}{2}y(t-1)-\dfrac{1}{4}y(t-2)+e(t)\right)y(t-1)\right] \\
+                            &= \dfrac{1}{2}\underbrace{\mathbb{E}\left[y(t-1)^2\right]}_{\gamma_y(0)} -\dfrac{1}{4}\underbrace{\mathbb{E}\left[y(t-2)y(t-1)\right]}_{\gamma_y(1)} +\underbrace{\mathbb{E}\left[e(t)y(t-1)\right]}_0  \\
+                            &= \dfrac{1}{2}\gamma_y(0) -\dfrac{1}{4}\gamma_y(1) 
+        \end{align*}
+        This leads to the equation:
+        \[ \gamma_y(1)=\dfrac{1}{2}\gamma_y(0) -\dfrac{1}{4}\gamma_y(1)\]
+        The resulting system of equations is:
+        \[\begin{cases}
+            \dfrac{11}{16}\gamma_y(0)-\frac{1}{4}\gamma_y(1)=1 \\ 
+            -\dfrac{1}{2}\gamma_y(0)+\frac{5}{4}\gamma_y(1)=0
+        \end{cases}\]
+        Solving this system yields:
+        \[\begin{cases}
+            \gamma_y(0)=\dfrac{80}{63} \\ 
+            \gamma_y(1)=\dfrac{32}{63}
+        \end{cases}\]
+        Now, we can compute the covariance at lag two:
+        \begin{align*}
+            \gamma_y(2)     &= \mathbb{E}\left[\left(\dfrac{1}{2}y(t-1)-\dfrac{1}{4}y(t-2)+e(t)\right)y(t-2)\right] \\
+                            &= \dfrac{1}{2}\underbrace{\mathbb{E}\left[y(t-1)y(t-2)\right]}_{\gamma_y(1)} -\dfrac{1}{4}\underbrace{\mathbb{E}\left[y(t-2)^2\right]}_{\gamma_y(0)} +\underbrace{\mathbb{E}\left[e(t)y(t-2)\right]}_0  \\
+                            &= \dfrac{1}{2}\gamma_y(1) -\dfrac{1}{4}\gamma_y(0) \\
+                            &= -\dfrac{4}{63}
+        \end{align*}
+        The final result is:
+        \[\begin{cases}
+            \gamma_y(0)=\frac{80}{63} \\
+            \gamma_y(1)=\frac{32}{63} \\
+            \gamma_y(\tau)=\frac{1}{2}\gamma_y(\tau-1)-\frac{1}{4}\gamma_y(\tau-2) \qquad \forall\left\lvert \tau\right\rvert \geq 2
+        \end{cases}\]
+\end{enumerate}
