@@ -1,0 +1,90 @@
+\section{Pseudorandom number generators}
+
+To expand the key for use in a Vernam cipher with a finite-length key, we require a pseudorandom number generator (PRNG).
+We assume that the attacker's computational capability is limited to poly($\lambda$) computations. 
+\begin{definition}[\textit{Cryptographically safe pseudorandom number generators}]
+    A cryptographically secure pseudorandom number generator is a deterministic function:
+    \[\text{PRNG}:\left\{ 0,1 \right\}^\lambda \rightarrow \left\{ 0,1 \right\}^{\lambda+I}\] 
+    where $I$ is an expansion factor, such that the output of the PRNG cannot be distinguished from a uniformly random sample $ \left\{ 0,1 \right\}^{\lambda+I}$ with computational complexity $\mathcal{O} (\text{poly}(\lambda))$. 
+\end{definition}
+In practice, cryptographic pseudo-random number generators (CSPRNGs) are considered as candidates because there is no conclusive evidence supporting the existence of a definitive pseudo-random number generator (PRNG) function.
+Demonstrating the existence of a CSPRNG would imply $\mathcal{P} \neq \mathcal{NP}$.
+
+Developing a CSPRNG from scratch is feasible but not the usual approach due to inefficiency. 
+Typically, they are constructed using another fundamental element called Pseudorandom Permutations (PRPs), which are derived from PseudoRandom Functions (PRFs).
+
+To randomly select a function, we start by considering the set:
+\[F=\left\{ f:\{0,1\}^{in}\rightarrow\{0,1\}^{out}, in,out \in \mathbb{N}  \right\}\]
+A uniformly randomly sampled $f \overset{\$}{\leftarrow}F$  can be represented by a table with $2^{in}$ entries, each entry being $out$ bits wide: 
+\[\left\lvert F \right\rvert = \left( 2^{out} \right)^{2^{in}}\]
+\begin{example}
+    For instance, if $in=2$ and $out = 2$, the function set $F=\left\{ f:\{0,1\}^{2}\rightarrow\{0,1\}^{1} \right\}$ consists of the 16 Boolean functions with two inputs.
+    Each function is represented by a 4-entry truth table.
+    The total number of functions is 16, corresponding to the $2^4=16=\left( 2^1 \right)^{2^2}$ tables.
+\end{example}
+
+\subsection{Pseudorandom function}
+\begin{definition}[\textit{Pseudorandom function}]
+    A pseudorandom function (PRF) is denoted as: 
+    \[prf_{seed}:\left\{ 0,1 \right\}^{in} \rightarrow \left\{ 0,1 \right\}^{out}\]
+    Where it takes an input and a $\lambda$-bit seed.
+\end{definition}
+Consequently, $prf_{seed}$ is entirely determined by the seed value.
+It cannot be distinguished from a random function: 
+\[ f \in \left\{ f:\{ 0,1 \}^{in} \rightarrow \{ 0,1 \}^{out}\right\}\]
+within polynomial time in $\lambda$.
+In other words, given $a \in \left\{ f:\{ 0,1 \}^{in} \rightarrow \{ 0,1 \}^{out}\right\}$, it is computationally infeasible to determine which of the following is true:
+\begin{itemize}
+    \item $a=prf_{seed}(\cdot)$ with $\text{seed}\overset{\$}{\leftarrow}\{0,1\}^\lambda$. 
+    \item $b\overset{\$}{\leftarrow}F$, where $F=\left\{ f:\{ 0,1 \}^{in} \rightarrow \{ 0,1 \}^{out}\right\}$.
+\end{itemize}
+
+\subsection{Pseudorandom permutation}
+\begin{definition}[\textit{Pseudorandom permutation}]
+    A pseudorandom permutation is a bijective pseudorandom function defined as:
+    \[prf_{seed}:\left\{ 0,1 \right\}^{len}\rightarrow\left\{ 0,1 \right\}^{len}\]
+\end{definition}
+It is characterized solely by its seed value and cannot be distinguished from a random function within poly($\lambda$).
+This permutation represents a rearrangement of all possible strings of length $len$.
+In practical terms:
+\begin{itemize}
+    \item It operates on a block of bits and yields another block of equal size.
+    \item The output appears unrelated to the input.
+    \item Its behavior is entirely determined by the seed, akin to a key in conventional cryptography.
+\end{itemize}
+
+However, there is no formally proven pseudorandom permutation because its existence would imply $\mathcal{P} \neq \mathcal{NP}$. 
+Construction of such a pseudorandom permutation typically involves three steps:
+\begin{enumerate}
+    \item Compute a small bijective Boolean function $f$ with input and key.
+    \item Compute $f$ again between the previous output and the key.
+    \item Repeat the second step until satisfaction.
+\end{enumerate}
+
+\paragraph*{PRP selection}
+Modern Pseudorandom Permutations (PRPs) often emerge from public competitions, where cryptanalytic techniques help identify and eliminate biases in their outputs, ensuring robust designs.
+
+These PRPs are commonly known as block ciphers.
+A block cipher is considered broken if it can be distinguished from a PRP with less than $2^\lambda$ operations, achieved by:
+\begin{itemize}
+    \item Deriving the input corresponding to an output without knowledge of the key.
+    \item Determining the key identifying the PRP or narrowing down plausible options.
+    \item Detecting non-uniformities in their outputs.
+\end{itemize}
+The key length $\lambda$ is chosen to be sufficiently large to render computing $2^\lambda$ guesses impractical.
+For different security levels:
+\begin{itemize}
+    \item Legacy-level security typically employs $\lambda$ around 80.
+    \item For a security duration of five to ten years, $\lambda$ is set to 128.
+    \item Long-term security requires $\lambda$ of 256.
+\end{itemize}
+
+\subsection{Standard block ciphers}
+The Advanced Encryption Standard (AES) operates on a 128-bit block size and offers three key lengths: 128, 192, and 256 bits.
+Chosen as a result of a three-year public competition by NIST on February 2, 2000, AES emerged as the preferred standard out of 15 candidates and has since been standardized by ISO.
+Modern processor architectures such as ARMv8 and AMD64 include dedicated instructions to accelerate the computation of AES.
+
+The predecessor to AES, known as the Data Encryption Standard (DES), was established by NIST in 1977. 
+DES operated with a relatively short 56-bit key length, leading to security concerns. 
+It was bolstered through triple encryption, effectively achieving an equivalent security level of $\lambda=112$. 
+Although still present in some legacy systems, DES has been officially deprecated.
