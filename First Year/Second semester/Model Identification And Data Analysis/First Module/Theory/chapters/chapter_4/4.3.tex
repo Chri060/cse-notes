@@ -1,21 +1,94 @@
-\section{Purely deterministic processes}
+\section{Spectral factorization}
 
-Wold's decomposition conceptualizes a stochastic process as the sum of a purely nondeterministic component and a purely deterministic one:
-\[v(t)=\tilde{v}(t)+\hat{v}(t)\]
-he purely deterministic part of the process $v(t)$ can be represented as:
-\[v(t) = \alpha_1v(t-1) + \alpha_2v(t-2) + \dots + \alpha_nv(t-n)\]
+Here are four distinct representations of a stochastic process resulting from filtering white noise through a stable digital filter:
+\begin{itemize}
+    \item Time-domain representation: 
+        \[V(T)=a_1v(t-1)+\dots+a_{n_a}(t-n_a)+c_o\eta(t-1)+\dots+c_{n_c}\eta(t-n_c)\]
+    \item Operatorial representation: 
+        \[v(t)=\dfrac{C(z)}{A(z)}\eta(t)\]
+    \item Probabilistic representation:
+        \[\mu,\gamma(\tau)\]
+    \item Frequency domain representation:
+        \[\mu,\Gamma(\omega)\]
+\end{itemize}
+These representations are interchangeable, allowing for translation between them. 
+While calculating the spectrum of a process from the transfer function has been addressed, in practice, it's often more useful to do the reverse. 
+Given data with specific spectral characteristics, the challenge lies in describing the generating process, or finding the pair $(W(z), \eta(\cdot))$.
 
-\subsection{Constant process}
-Let's examine the constant process $v(t)=v(t-1)=v$ with a correlation function $\tilde{\gamma}(\tau)=v^2$. 
-Consequently, the power spectral density is:
-\[\Gamma(\omega)=v^2\delta(\omega)\]
+However, not every spectrum corresponds to a transfer function due to the constraints on spectrum shapes. 
+Furthermore, even if a transfer function exists, it may not be unique. 
+Multiple combinations of transfer functions and white noise can represent the same process.
 
-\subsection{Alternated process}
-Now, consider the alternating process $v(t)=-v(t-1)=v$ with a correlation function $\tilde{\gamma}(\tau)=(-1)^\tau v^2$. 
-This leads to the power spectral density:
-\[\Gamma(\omega)=v^2\delta(\omega-\pi)\]
-
-\subsection{Sinusoidal process}
-Lastly, let's consider the sinusoidal process $v(t)=A\cos(\omega_0 t)$ with a correlation function $\tilde{\gamma}(\tau)=\dfrac{A^2}{2}\mathbb{E}\left[\cos(\omega_0\tau)\right]$. 
-This yields the power spectral density:
-\[\Gamma(\omega)=\dfrac{A^2}{4}\left[\delta(\omega-\omega_0)+\delta(\omega+\omega_0)\right]\]
+\subsection{Representation choices}
+Consider a generic process:
+\[v(t)=W(z)\eta(t) \]
+Here, $\eta(\cdot)\sim WN(o,\lambda^2)$
+The complex spectrum is given by:
+\[\Phi(z)=W(z)W(z^{-1})\lambda^2\]
+The following are examples of equivalent representations for $v(t)=\tilde{W}(z),\tilde{\eta}(t)$ where $\tilde{\eta}\sim WN(0,\tilde{\lambda^2})$: 
+\begin{enumerate}
+    \item Multiplication by a constant $\alpha$:  
+        \[\tilde{W}(z)=\dfrac{1}{\alpha}W(z) \qquad \tilde{\eta}\sim WN(0,\alpha^2\lambda^2)\]
+        To demonstrate their equivalence, we show they have the same spectrum:
+        \[\tilde{\Phi}(z)=\tilde{W}(z)\tilde{W}(z^{-1})\tilde{\lambda}^{2}=\dfrac{1}{\alpha}W(z)\cdot\dfrac{1}{\alpha}W(z^{-1})\cdot\alpha^2\lambda^2=W(z)W(z^{-1})\lambda^2=\Phi(z)\]
+    \item Multiplication by $z^n$: 
+        \[\tilde{W}(z)=z^nW(z) \qquad \tilde{\eta}=z^{-n}\eta(t)=\eta(t-n)\]
+        To demonstrate their equivalence, we show they have the same spectrum:
+        \[\tilde{\Phi}(z)=\tilde{W}(z)\tilde{W}(z^{-1})\lambda^{2}=z^nW(z)z^{-n}W(z^{-1})\lambda^2=W(z)W(z^{-1})\lambda^2=\Phi(z)\]
+    \item Multiplication of both the numerator and the denominator by the same factor:
+        \[\tilde{W}(z)=W(z)\dfrac{z-p}{z-p} \qquad \tilde{\eta}=\eta(t)\]
+        To demonstrate their equivalence, we show they have the same spectrum, obtained after simplification:
+        \[\tilde{\Phi}(z)=\dfrac{z-p}{z-p}\Phi(z)=\Phi(z)\]
+    \item Multiplication by an all-pass filter:
+        \[\tilde{W}(z)=W(z)T(z) \qquad \tilde{\eta}=\eta(t)\]
+        Here, $T(z)=\dfrac{1}{q}\left(\dfrac{z-q}{z-\frac{1}{q}}\right)$
+        To demonstrate their equivalence, we show they have the same spectrum: 
+        \[\tilde{\Phi}(z)=\tilde{W}(z)\tilde{W}(z^{-1})\lambda^{2}=W(z)T(z)T(z^{-1})W(z^{-1})\lambda^2=W(z)W(z^{-1})\lambda^2=\Phi(z)\]
+\end{enumerate}
+We require a representation that is more suitable than others for solving the prediction problem. 
+The following theorem facilitates the selection of the so-called canonical representation, which eliminates all potential sources of redundancy as outlined.
+\begin{theorem}
+    Let $v(t)$ be a stationary stochastic process with a rational spectrum.
+    There exists a unique pair $\left\{ \hat{W}(z)=\dfrac{C(z)}{A(z)},\xi(t) \right\}$ such that:
+    \begin{enumerate}
+        \item $C(z)$ and $A(z)$ are monic (with the first coefficient being one).
+        \item $C(z)$ and $A(z)$ have the same degree (relative degree equal to zero).
+        \item $C(z)$ and $A(z)$ are co-prime (no common roots).
+        \item $C(z)$ and $A(z)$ have all their roots in the closed and open unit circle, respectively ($\left\lvert z \right\rvert \leq 1, \forall z \text{ s.t. } C(z)=0$, $\left\lvert z \right\rvert < 1, \forall z \text{ s.t. } A(z)=0$).
+    \end{enumerate}
+\end{theorem}  
+The function $\hat{W}(z)$ is termed the canonical spectral factor.
+\begin{example}
+    Let's examine the ARMA(1,1) process given by:
+    \[v(t)=av(t-1)+\eta(t)+c\eta(t-1) \qquad \eta(\cdot)\sim WN(0,\lambda^2)\]
+    For this process to be stationary, the condition $\left\lvert a \right\rvert < 1$ must be satisfied. 
+    The spectrum is given by:
+    \[\Gamma(\omega)=\dfrac{1+c^2+2c\cos(\omega)}{1+a^2-2a\cos(\omega)}\lambda^2\]
+    If $\left\lvert c\right\rvert \leq 1$, the representation is canonical:
+    \[\hat{W}(z)=W(z)=\frac{1+cz^{-1}}{1-az^{-1}} \qquad \xi(\cdot)=\eta(\cdot)\]
+    On the other hand, if $\left\lvert c\right\rvert > 1$, the canonical representation changes to:
+    \[\hat{W}(z)=W(z)=\frac{1+\frac{1}{c}z^{-1}}{1-az^{-1}} \qquad \xi(\cdot)\sim WN(0, c^2\lambda^2)\]
+\end{example}
+\begin{example}
+    Let's examine the given process:
+    \[v(t)=\eta_1(t-1)+\eta_2(t)-\eta_2(t-1)\]
+    where $\eta_1\sim WN(0,lambda_1^2)$ and $\eta_2\sim WN(0,lambda_2^2)$ are independent white noise processes.
+    This process is constructed as the sum of two independent and stationary processes, thus it is also stationary.
+    The auto-covariance function is null for $\left\lvert \tau\right\rvert  > 1$. 
+    The process can be reformulated as an MA(1):
+    \[v(t)=\xi (t)+c\xi (t-1)\]
+    where $\xi (\cdot)\sim WN(0,\lambda^2)$, provided it has the same spectral characteristics, or equivalently, the same auto-covariance function (same covariance implies same spectral representation).
+    Now, considering the auto-covariance function:
+    \[\gamma(0)=(1+c^2)\lambda^2=\lambda_1^2+2\lambda_2^2\]
+    \[\gamma(1)=c\lambda^2=-\lambda_2^2\]
+    Solving this system of equations yields only one solution with $\left\lvert c \right\rvert  < 1$ to this system of equations. 
+    For instance, if $\lambda_1^2=\frac{1}{4}$ and $\lambda_2^2=\frac{1}{2}$, we have:
+    \[\begin{cases}
+        (1+c^2)\lambda^2=\frac{5}{4} \\
+        c\lambda^2=-\frac{1}{2}
+    \end{cases} \implies \begin{cases}
+        c=-\frac{1}{2} \quad \lambda^2=1 \\
+        c=-2 \quad \lambda^2=\frac{1}{4}
+    \end{cases}\]
+    Note that only the first solution is canonical.
+\end{example}

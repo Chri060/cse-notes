@@ -1,0 +1,57 @@
+\section{Purely deterministic processes}
+
+A purely deterministic process lacks any white noise component and can be expressed as:
+\[\tilde{v}(t)=a_1\tilde{v}(t-1)+a_2\tilde{v}(t-2)+\dots+a_n\tilde{v}(t-n)\]
+In operator notation, this becomes:
+\begin{align*}
+    \tilde{v}(t)    &= a_1z^{-1}\tilde{v}(t)+a_2z^{-2}\tilde{v}(t)+\dots+a_nz^{-n}\tilde{v}(t) \\
+    \tilde{v}(t)    &= \underbrace{\left(a_1z^{-1}+a_2z^{-2}+\dots+a_nz^{-n}\right)}_{P(z)} \tilde{v}(t) \\
+    0               &= P(z)\tilde{v}(t)
+\end{align*}
+This implies that $P(z)$ acts as a filter for $\tilde{v}(t)$. 
+Consequently, we can predict all future values exactly.
+The only restriction is that if such filtering is possible, then the function $\tilde{v}(t)$ has the following form:
+\[\tilde{v}(t)=\alpha_1\lambda_1^t+\alpha_2\lambda_2^t+\dots+\alpha_n\lambda_n^t\]
+Here, $\lambda_i$ are the zeros of $P(z)$, with $\left\lvert \lambda_i\right\rvert < 1$ for all $i$.
+\begin{example}
+    Consider a constant process $v(t)=v(t-1)$, which can be rewritten as $v(t)=\alpha 1^t$. 
+    To extract the $P(z)$ function, we proceed as follows:
+    \begin{align*}
+        v(t)    &=z^{-1}v(t) \\
+        0       &=v(t) - z^{-1}v(t) \\
+        0       &=\left(1-z^{-1}\right)v(t)
+    \end{align*}
+    Hence, $P(z)=\left(1-z^{-1}\right)$. 
+\end{example}
+\begin{example}
+    Consider a constant alternated process $v(t)=-v(t-1)$, which can be rewritten as $v(t)=\alpha (-1)^t$. 
+    To extract the $P(z)$ function, we proceed as follows:
+    \begin{align*}
+        v(t)    &=-z^{-1}v(t) \\
+        0       &=z^{-1}v(t) + v(t) \\
+        0       &=\left(1+z^{-1}\right)v(t)
+    \end{align*}
+    Hence, $P(z)=\left(1+z^{-1}\right)$. 
+\end{example}
+\begin{example}
+    Consider a constant sinusoidal process $v(t)=A \cos \left( \omega_0 t\right)$. 
+    We can derive $P(z)$ as follows: 
+    \begin{align*}
+        P(z) &= \left(z-e^{j\omega_0}\right)\left(z-e^{-j\omega_0}\right) \\
+             &= z^2+1-z\left(e^{j\omega_0}+e^{-j\omega_0}\right) \\
+             &= z^2+1-2z\left(\dfrac{e^{j\omega_0}+e^{-j\omega_0}}{2}\right) \\
+             &= z^2+1-2\cos (\omega_0)z
+    \end{align*}
+    To verify if $P(z)v(t)=0$, we perform a time shift of two:
+    \begin{align*}
+        P(z)v(t)&= \left(1-2\cos (\omega_0)z^{-2} z^{-2} \right)v(t) \\
+                &= A \cos(\omega_0 t)-2\cos (\omega_0)A\cos(\omega_0(t-1))+A\cos(\omega_0(t-2)) \\
+                &= A \cos(\omega_0 t)-2A \left[ \dfrac{1}{2}\cos\left( \omega_0t\right) +\cos\left(\omega_0(t-2)\right)  \right]+A\cos(\omega_0(t-2)) \\
+                &= A \cos(\omega_0 t)-A\cos\left( \omega_0t\right) -A\cos\left(\omega_0(t-2)\right) +A\cos(\omega_0(t-2)) \\
+                &= 0
+    \end{align*}
+    Thus, the process can also be written as a sum of exponential:
+    \[v(t)=\alpha_1\lambda_1^t+\alpha_2\lambda_2^t\]
+    Here, $\lambda_1$ and $\lambda_2$ needs to be replaced with the zeros of $P(z)$: 
+    \[v(t)=\dfrac{A}{2}e^{j\omega_0t}+\dfrac{A}{2}e^{-j\omega_0t}\]
+\end{example}

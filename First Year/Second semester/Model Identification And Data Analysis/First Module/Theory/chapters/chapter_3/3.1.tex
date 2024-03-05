@@ -1,37 +1,48 @@
-\section{Introduction}
+\section{Power spectral density}
 
-Let's consider the constant process $v(t,s)=v(s)$. 
-In this scenario, once we determine the value of the experiment $v(s)$, we can derive the value of $v(t,s)$ for all time instants since its value remains unchanged.
-This process is perfectly predictable.
+The power spectral density (or spectrum) of a stationary stochastic process is defined as the Fourier transform of its correlation function:
+\[\Gamma (\omega)=\mathcal{F} \left[ \tilde{\gamma}(\tau) \right]=\sum_{\tau = -\infty}^{\infty}\tilde{\gamma}(\tau)e^{-j\omega\tau}\]
+Here, $\omega$ represents the angular frequency measured in $rad/s$. 
+The Fourier series sum exists for stationary processes, specifically those with a correlation function $\tilde{\gamma}(\tau)$ that rapidly tends to 0 as $\tau$ approaches infinity.
 
-In contrast, white noise is the opposite: it is a completely unpredictable process. 
+A sufficient condition for the existence of the Fourier transform is the absolute convergence of $\tilde{\gamma}(\tau)$:
+\[\sum_{\tau=-\infty}^{\infty}\left\lvert \tilde{\gamma}(\tau) \right\rvert < \infty\]
+The anti-transformation formula establishes a one-to-one correspondence between $\tilde{\gamma}(\tau)$ and $\Gamma (\omega)$: 
+\[\tilde{\gamma}(\tau)=\mathcal{F}^{-1}\left[ \Gamma (\omega) \right]=\dfrac{1}{2\pi}\int_{-\pi}^{\pi}\Gamma(\omega)e^{j\omega\tau}d\omega\]
 
-Other processes lie between these two extremes.
-Consequently, we can decompose a process into two parts: one purely deterministic and one purely non-deterministic:
-\[v(t)=\tilde{v}(t)+\hat{v}(t)\]
-For $\tilde{v}(t)$, the knowledge of the past is sufficient to predict a value at a certain instant.
-Note that $\tilde{v}(t)$ and $\hat{v}(t)$ are independent: 
-\[\mathbb{E}\left[ \tilde{v}(t_1)\hat{v}(t_2) \right]=\mathbb{E}\left[ \tilde{v}(t_1)\right]\underbrace{\mathbb{E}\left[\hat{v}(t_2) \right]}_0 =0\]
-The correlation is given by:
+From the definition, we derive that:
 \begin{align*}
-    \tilde{\gamma}_v(\tau)  &=\mathbb{E}\left[v(t)v(t+\tau)\right] \\
-                            &=\mathbb{E}\left[\left(\tilde{v}(t)+\hat{v}(t)\right)\left(\tilde{v}(t+\tau)+\hat{v}(t+\tau)\right)\right] \\
-                            &=\mathbb{E}\left[\tilde{v}(t)+\tilde{v}(t+\tau)\right]\mathbb{E}\left[\hat{v}(t)+\hat{v}(t+\tau)\right] \\
-                            &=\tilde{\gamma}_{\tilde{v}}(\tau)+\tilde{\gamma}_{\hat{v}}(\tau)
+    \Gamma(\omega)  &=\dots+\tilde{\gamma}(-2)e^{j2\omega}+\tilde{\gamma}(-1)e^{j\omega}+\tilde{\gamma}(0)+\tilde{\gamma}(1)e^{-j\omega}+\tilde{\gamma}(2)e^{-j2\omega}+\dots \\
+                    &=\tilde{\gamma}(0)+\tilde{\gamma}(1)(e^{j\omega}+e^{-j\omega})+\tilde{\gamma}(2)(e^{j2\omega}+e^{-j2\omega}) \\
+                    &=\tilde{\gamma}(0)+2\tilde{\gamma}(1)\cos\omega+2\tilde{\gamma}(2)\cos2\omega 
 \end{align*}
+Therefore, the spectrum $\Gamma(\omega)$ is a non-negative, real, even, and periodic function with a period of $2\pi$. 
 
-The purely nondeterministic component can be expressed as:
-\[\hat{v}(t)=\sum_{i=-\infty}^{t}W(t,1)\eta(i)=\sum_{i=-\infty}^{t}W(t-1)\eta(i)=\sum_{k=0}^\infty W(k)\eta(t-k)\]
-Here, $\eta(\cdot) \sim WN(0,\lambda^2)$. 
-This formula can be expanded as:
-\begin{align*}
-\hat{v}(t)  &= W(0)\eta(t) + W(1)\eta(t-1) + W(2)\eta(t-2) + \dots \\
-                &= W(0)\eta(t) + W(1)z^{-1}\eta(t) + W(2)z^{-2}\eta(t) + \dots \\
-                &= \underbrace{\left(W(0) + W(1)z^{-1} + W(2)z^{-2} + \dots\right)}_{\text{transfer function }W(z)} \eta(t)  \\
-\end{align*}
-The stability of this function $W(z)$ implies the stationarity of the process $\hat{v}(t)$.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.4\linewidth]{images/dynamic.png} 
-    \caption{Stochastic process composition}
-\end{figure}
+The maximum angular frequency for sinusoidal discrete-time signals is $\omega_{max} = \pi$.
+This is due to the minimum period of a discrete signal, $T = 2 \left(f = \frac{1}{2}\right)$, corresponding to $\omega = \frac{2\pi}{2} = \pi = \omega_{max}$.
+
+For processes with zero expected value, the variance of the process equals the area below the spectral density curve:
+\[\gamma(0)=\tilde{\gamma}(0)=\dfrac{1}{2\pi}\int_{-\pi}^{\pi}\Gamma(\omega)d\omega\]
+This can be directly derived from the anti-transformation formula with $\tau = 0$.
+
+The area below the spectrum in a given angular frequency range represents the contribution to the overall variability of the process at those angular frequencies.
+\begin{example}
+    Consider a white noise with zero mean and variance equal to $\lambda^2$. 
+    Both the covariance and correlation functions are zero everywhere except for $\tau = 0$, where $\gamma(0) = \lambda^2$. 
+    Therefore, $\Gamma(\omega)=\lambda^2$ for all $\omega$: 
+    \[\tilde{\gamma}(\tau)=\gamma(\tau)=\begin{cases}
+        0 \qquad \tau \neq 0 \\
+        \lambda^2 \qquad \tau = 0
+    \end{cases}\]
+    In the frequency domain, this translates to:
+    \[\Gamma(\omega)=\tilde{\gamma}(0)e^{-j\omega 0}=\lambda^2\]
+    This indicates that the power spectral density of a white noise is constant across all frequencies. 
+    In other words, all frequencies contribute equally to the process variability, affirming the absolute unpredictability of a white noise.
+\end{example}
+The spectrum can be equivalently defined in two steps:
+\begin{enumerate}
+    \item Take the (bilateral) Z-transform of the correlation function:
+        \[\Phi(z)=\sum_{\tau=-\infty}^{+\infty}\tilde{\gamma}(\tau)z^{-\tau}\]
+    \item Evaluate $\Phi(z)$ at $z=e^{j\omega}$: 
+        \[\Gamma(\omega)=\Phi(e^{j\omega})\]
+\end{enumerate}

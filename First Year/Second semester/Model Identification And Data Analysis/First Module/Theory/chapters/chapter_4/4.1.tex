@@ -1,48 +1,61 @@
-\section{Power spectral density}
+\section{Estimation of mean and covariance function}
 
-The power spectral density (or spectrum) of a stationary stochastic process is defined as the Fourier transform of its correlation function:
-\[\Gamma (\omega)=\mathcal{F} \left[ \tilde{\gamma}(\tau) \right]=\sum_{\tau = -\infty}^{\infty}\tilde{\gamma}(\tau)e^{-j\omega\tau}\]
-Here, $\omega$ represents the angular frequency measured in $rad/s$. 
-The Fourier series sum exists for stationary processes, specifically those with a correlation function $\tilde{\gamma}(\tau)$ that rapidly tends to 0 as $\tau$ approaches infinity.
+Let $v(t)$ represent a stationary stochastic process with unknown probabilistic properties, for which we have a finite realization $\left\{ v(1),v(2),\dots,v(n) \right\}$. 
+Our objective is to estimate the probabilistic properties of $v(t)$ from this data:
+\begin{itemize}
+    \item \textit{Mean}: $\mu=\mathbb{E}\left[ v(t) \right]\rightarrow\hat{\mu}=\hat{\mu}_N\left( v(1),v(2),\dots,v(N) \right)$
+    \item \textit{Autocovariance}: $\gamma(\tau)=\mathbb{E}\left[\left(v(t)-\mu\right)\left(v(t-\tau)-\mu\right)\right] \rightarrow \hat{\gamma}(\tau)=\hat{\gamma}_N\left(\tau;v(1),v(2),\dots,v(n)\right)$
+\end{itemize}
+The functions $\hat{\mu}$ and $\hat{\gamma}(\tau)$ are derived from the available data and are referred to as sample estimators.
+Their primary objective is to provide estimates that closely match the underlying probabilistic properties being estimated, regardless of the specific data sequence available.
 
-A sufficient condition for the existence of the Fourier transform is the absolute convergence of $\tilde{\gamma}(\tau)$:
-\[\sum_{\tau=-\infty}^{\infty}\left\lvert \tilde{\gamma}(\tau) \right\rvert < \infty\]
-The anti-transformation formula establishes a one-to-one correspondence between $\tilde{\gamma}(\tau)$ and $\Gamma (\omega)$: 
-\[\tilde{\gamma}(\tau)=\mathcal{F}^{-1}\left[ \Gamma (\omega) \right]=\dfrac{1}{2\pi}\int_{-\pi}^{\pi}\Gamma(\omega)e^{j\omega\tau}d\omega\]
+\subsection{Mean function}
+A natural sample estimator for the mean is:
+\[\hat{\mu}_N=\dfrac{1}{N}\sum_{t=1}^Nv(t)\]
+It's important to note that $\hat{\mu}_N$ is a random variable because it depends on the realization of  $v(t)$. 
+\begin{definition}[\textit{Unbiased estimator}]
+    An estimator is unbiased if its expected value (taken over all possible finite realizations of $v(t)$) equals the property being estimated.
+\end{definition}
+For our estimator to be unbiased, we require $\mathbb{E}\left[ \hat{\mu}_N \right]=\mu$. 
+In our case:
+\[\mathbb{E}\left[ \hat{\mu}_N \right]=\mathbb{E}\left[ \dfrac{1}{N}\sum_{t=1}^Nv(t) \right]=\dfrac{1}{N}\sum_{t=1}^N\mathbb{E}\left[ v(t) \right]=\dfrac{1}{N}\sum_{t=1}^N \mu =\mu\]
+Consider a fixed $s = \bar{s}$, where the process realization is constant over time:
+\begin{itemize}
+    \item $\hat{\mu}_N=\dfrac{1}{N}\sum_{t=1}^Nv(t,\bar{s})=\dfrac{1}{N}\sum_{t=1}^Nv(\bar{s})=v(\bar{s})$
+    \item $\mu=\mathbb{E}\left[v(t,s)\right]=\mathbb{E}\left[v(s)\right]=0$
+\end{itemize}
+While $\hat{\mu}_N$  is unbiased, it may not provide a good estimate of the expected value of $v(t)$, even with infinite data.
 
-From the definition, we derive that:
-\begin{align*}
-    \Gamma(\omega)  &=\dots+\tilde{\gamma}(-2)e^{j2\omega}+\tilde{\gamma}(-1)e^{j\omega}+\tilde{\gamma}(0)+\tilde{\gamma}(1)e^{-j\omega}+\tilde{\gamma}(2)e^{-j2\omega}+\dots \\
-                    &=\tilde{\gamma}(0)+\tilde{\gamma}(1)(e^{j\omega}+e^{-j\omega})+\tilde{\gamma}(2)(e^{j2\omega}+e^{-j2\omega}) \\
-                    &=\tilde{\gamma}(0)+2\tilde{\gamma}(1)\cos\omega+2\tilde{\gamma}(2)\cos2\omega 
-\end{align*}
-Therefore, the spectrum $\Gamma(\omega)$ is a non-negative, real, even, and periodic function with a period of $2\pi$. 
-
-The maximum angular frequency for sinusoidal discrete-time signals is $\omega_{max} = \pi$.
-This is due to the minimum period of a discrete signal, $T = 2 \left(f = \frac{1}{2}\right)$, corresponding to $\omega = \frac{2\pi}{2} = \pi = \omega_{max}$.
-
-For processes with zero expected value, the variance of the process equals the area below the spectral density curve:
-\[\gamma(0)=\tilde{\gamma}(0)=\dfrac{1}{2\pi}\int_{-\pi}^{\pi}\Gamma(\omega)d\omega\]
-This can be directly derived from the anti-transformation formula with $\tau = 0$.
-
-The area below the spectrum in a given angular frequency range represents the contribution to the overall variability of the process at those angular frequencies.
+We need another property to ensure a good estimate. 
+\begin{definition}[\textit{Consistent estimator}]
+    An estimator is consistent if the variance of its estimation error tends to zero as the data size tends to infinity:
+    \[\mathbb{E}\left[\left(\hat{\mu}_N-\mu\right)^2\right]\overset{N\rightarrow\infty}{\longrightarrow}0\]
+\end{definition}
+This property doesn't hold for all stationary processes. 
+A good estimator satisfies both correctness and consistency.
 \begin{example}
-    Consider a white noise with zero mean and variance equal to $\lambda^2$. 
-    Both the covariance and correlation functions are zero everywhere except for $\tau = 0$, where $\gamma(0) = \lambda^2$. 
-    Therefore, $\Gamma(\omega)=\lambda^2$ for all $\omega$: 
-    \[\tilde{\gamma}(\tau)=\gamma(\tau)=\begin{cases}
-        0 \qquad \tau \neq 0 \\
-        \lambda^2 \qquad \tau = 0
-    \end{cases}\]
-    In the frequency domain, this translates to:
-    \[\Gamma(\omega)=\tilde{\gamma}(0)e^{-j\omega 0}=\lambda^2\]
-    This indicates that the power spectral density of a white noise is constant across all frequencies. 
-    In other words, all frequencies contribute equally to the process variability, affirming the absolute unpredictability of a white noise.
+    Consider the constant process $v(t,s)=v(s)$, where $v(s) \sim N(0,1)$: 
+    \[\mathbb{E}\left[\left(\hat{\mu}_N-\mu\right)^2\right]=\mathbb{E}\left[\left(\dfrac{1}{N}\sum_{t=1}^{N}v(s)-0\right)^2\right]=\mathbb{E}\left[v(s)^2\right]=1\neq 0\]
 \end{example}
-The spectrum can be equivalently defined in two steps:
-\begin{enumerate}
-    \item Take the (bilateral) Z-transform of the correlation function:
-        \[\Phi(z)=\sum_{\tau=-\infty}^{+\infty}\tilde{\gamma}(\tau)z^{-\tau}\]
-    \item Evaluate $\Phi(z)$ at $z=e^{j\omega}$: 
-        \[\Gamma(\omega)=\Phi(e^{j\omega})\]
-\end{enumerate}
+
+For stationary ARMA processes, the mean estimator is consistent.
+
+\subsection{Covariance function}
+Let $v(t)$ be a stationary stochastic process with a zero mean. 
+In this scenario:
+\[\gamma(\tau)=\tilde{\gamma}(\tau)=\mathbb{E}\left[ v(t)v(t-\tau) \right]=\mathbb{E}\left[v(t)v(t+\tau)\right]\]
+The sample estimator of $\gamma(\tau)$ is given by: 
+\[\hat{\gamma}_N(\tau)=\dfrac{1}{N-\tau}\sum_{t=1}^{N-\tau}v(t)v(t+\tau) \qquad 0 \leq \tau N-1\]
+It's noteworthy that given $\left\{v(1), v(2), \dots, v(N)\right\}$, we have:
+\begin{itemize}
+    \item $\hat{\gamma}_N(0)$ is computed from a sum of $N$ elements.
+    \item $\hat{\gamma}_N(1)$ is computed from a sum of $N-1$ elements.
+    \item $\hat{\gamma}_N(N-1)$ is computed from just one element.
+\end{itemize}
+The accuracy of $\hat{\gamma}_N(\tau)$ decreases as $\tau$ (the approximation is reliable only for $\tau \ll N$).
+The provided sample estimator $\hat{\gamma}_N(\tau)$ is both correct and consistent for ARMA processes.
+
+Another estimator of $\gamma(\tau)$ can be considered:
+\[\hat{\gamma}_N^{\prime}(\tau)=\dfrac{1}{N}\sum_{t=1}^{N-\tau}v(t)v(t+\tau) \qquad 0 \leq \tau N-1\]
+This estimator is biased for finite $N$, but it becomes unbiased as $N\rightarrow\infty$ (asymptotically correct).
+Only $\hat{\gamma}_N^{\prime}(\tau)$ satisfies the positive semi-definiteness property of a covariance function.
