@@ -1,7 +1,7 @@
 \section{Prediction problem}
 
 To predict the value of $v(t)$ given a set of observations $\left\{v(1), v(2),\dots, v(t-1)\right\}$, we can devise a predictor using the formula:
-\[\widehat{v}(t | t-1)=f\left(v(t-1), v(t-2),\dots, v(1)\right)\]
+\[\hat{v}(t | t-1)=f\left(v(t-1), v(t-2),\dots, v(1)\right)\]
 In this formulation, we impose certain constraints:
 \begin{itemize}
     \item The function $f$ is linear. 
@@ -9,7 +9,7 @@ In this formulation, we impose certain constraints:
     \item The function remains invariant over time.
 \end{itemize}
 Under these simplifications, the predictor takes the form:
-\[\widehat{v}(t | t-1)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)\]
+\[\hat{v}(t | t-1)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)\]
 Here, $v$ is represented as a vector:
 \[v=\begin{bmatrix} a_1 & a_2 & \dots & a_n \end{bmatrix}^T\]
 A reliable prediction is one that yields estimates closely aligned with the actual values.
@@ -22,16 +22,16 @@ Uncertainty represents a critical aspect of noise in prediction problems, yet it
 The sole method to calculate an estimate of uncertainty is by comparing known values with those provided by the estimator at corresponding instants.
 \begin{example}
     Consider the predictor given by:
-    \[\widehat{v}(t | t-1)=a_1v(t-1)+a_2v(t-2)+a_3v(t-3)\]
+    \[\hat{v}(t | t-1)=a_1v(t-1)+a_2v(t-2)+a_3v(t-3)\]
     The values to be examined are:
     \begin{itemize}
-        \item $\widehat{v}(4 | 3)=v(1)v(2)v(3)$: to be compared with $v(4)$.
-        \item $\widehat{v}(5 | 4)=v(2)v(3)v(4)$: to be compared with $v(5)$.
+        \item $\hat{v}(4 | 3)=v(1)v(2)v(3)$: to be compared with $v(4)$.
+        \item $\hat{v}(5 | 4)=v(2)v(3)v(4)$: to be compared with $v(5)$.
     \end{itemize}
 \end{example}
 
 After comparing all possible sequences, we can generate a sequence of residuals using the formula:
-\[\varepsilon(i) = v(i) - \widehat{v}(i | i - 1) \qquad i = n+1,\dots,N\]
+\[\varepsilon(i) = v(i) - \hat{v}(i | i - 1) \qquad i = n+1,\dots,N\]
 From this sequence, we seek to find $v$  by minimizing the following function:
 \[\mathcal{J}(v)=\sum_{n+1}^N\varepsilon(i)^2\]
 It's worth noting that the error is squared to ensure it is always considered as positive.
@@ -43,7 +43,7 @@ Consequently, if the residual is white noise, it signifies that there's no meani
 
 Finally, to derive the accurate value from an estimate, we must incorporate the residual into the estimate. 
 Thus, the previous formula transforms to:
-\[\widehat{v}(t)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\varepsilon(t)\]
+\[\hat{v}(t)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\varepsilon(t)\]
 This implies that addressing the prediction problem involves examining a stochastic system.
 
 \subsection{Zeta transform}
@@ -52,7 +52,7 @@ The same system can be reformulated using the Z-transform defined as:
 When considering the same system at a time $t-1$ in the Z-transform formulation, we have:
 \[\underbrace{z^{-1}}_{\text{unity delay operator}} \cdot V(z) =\left[v(t-1)\right]\]
 By incorporating the system described above with the time-domain equation:
-\[\widehat{v}(t)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\varepsilon(t)\]
+\[\hat{v}(t)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\varepsilon(t)\]
 It's feasible to rewrite the same model in the frequency domain with the Z-transform, resulting in:
 \[V(z)=\mathcal{Z}\left[ a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\varepsilon(t) \right]\]
 This simplifies to:
