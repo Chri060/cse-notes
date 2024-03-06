@@ -1,35 +1,44 @@
 \section{Performance measures}
 
-The system's performance can be described as follows:
+The system's performance can be characterized by the following components:
 \begin{itemize}
-    \item \textit{Response time}: this encompasses the latency resulting from completing a task, which includes factors like disk accesses, I/O activity, and operating system overhead. 
-        The elapsed time is calculated as the sum of CPU time and I/O wait time:
-        \[\text{elapsed time}=\text{CPU time} + \text{I/O wait}\]
-    \item \textit{CPU time}: this includes the time spent waiting for I/O operations and corresponds to the CPU's processing time. 
-        It can be calculated as follows:
-        \[\text{CPU time }(P) = \dfrac{\text{clock cycles needed to execute } P}{\text{clock frequency}}\] 
-        \[\text{CPU time }(P) = \text{clock cycles needed to execute } P \times \text{clock cycles time}\] 
+    \item \textit{Response time}: this encompasses the latency incurred while completing a task, which includes factors such as disk accesses, I/O activity, and operating system overhead. 
+        The elapsed time is determined by the sum of CPU time and I/O wait time:
+        \[T_{elapsed}=T_{CPU} + T_{I/O\: wait}\]
+    \item \textit{CPU time}: this denotes the time spent waiting for I/O operations and corresponds to the CPU's processing time. 
+        It can be computed as:
+        \[T_{CPU}(P) = \dfrac{\text{clock cycles needed to execute } P}{\text{clock frequency}}\] 
+        \[T_{CPU}(P) = \text{clock cycles needed to execute } P \cdot \text{clock cycles time}\] 
 \end{itemize}
 
-SLIDE 42
+\subsection{CPU time}
+The CPU time can be determined by the following formula:
+\[T_{CPU}=\underbrace{\dfrac{\text{Instructions}}{\text{Program}}}_{\text{IC}} \cdot \underbrace{\dfrac{\text{Cycles}}{\text{Instruction}}}_{\text{CPI}} \cdot \underbrace{\dfrac{\text{Seconds}}{\text{Cycle}}}_{\text{CT}} \]
+Here are the components involved:
+\begin{itemize}
+    \item \textit{Instruction count} (IC): this denotes the number of instructions executed, not the static code size. 
+        It is influenced by the algorithm, compiler, and Instruction Set Architecture (ISA).
+    \item \textit{Cycles per instructions} (CPI): determined by the ISA and CPU organization, this metric accounts for overlap among instructions (pipelining) which reduces this term.
+    \item \textit{Cycle time} (CT): determined by technology, organization, and circuit design.
+\end{itemize}
+The objective of CPU performance is to minimize time, which is the product of these three terms because they are interconnected.
 
+\paragraph*{Cycles per instruction}
+As mentioned, cycles per instruction are defined as:
+\[\text{CPI}(P)=\dfrac{\text{clock cycles needed to execute }P}{\text{number of instructions}}\]
+We can also define the CPU time for every single instruction as:
+\[T_{CPU}=\text{CT} \cdot \sum_{i=1}^{n}\text{CPI}_i \cdot \text{I}_i\]
+Thus, better results are obtained by allocating resources to the instructions where time is spent.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\subsection{Other metrics}
+Other metrics utilized to evaluate hardware performance include:
+\begin{itemize}
+    \item \textit{Million of instructions per second} (MIPS): 
+        \[\text{MIPS}=\dfrac{\text{IC}}{T_{execution} \cdot 10^6}=\dfrac{\text{Clock frequency}}{\text{CPI} \cdot 10^6}\]
+        MIPS quantifies the rate of operations per unit time, with faster machines having higher MIPS ratings. 
+        However, MIPS has significant limitations.
+    \item \textit{Million of floating point operations} (MFLOPS): 
+        \[\text{MFLOPS}=\dfrac{\text{Floating point operations in a program}}{T_{CPU} \cdot 10^6}\]
+        Assuming floating-point operations are independent of compiler and ISA, MFLOPS can be a reliable metric for numeric codes based on the matrix size, determining the number of floating-point operations in a program. 
+        However, it's not always reliable due to factors like missing instructions or optimizing compilers.
+\end{itemize}
