@@ -25,7 +25,7 @@ Certain large storage servers employ SSDs as caches for multiple HDDs.
 Similarly, some latest-generation main boards integrate a small SSD with a larger HDD to enhance disk speed. 
 Additionally, certain HDD manufacturers produce Solid State Hybrid Disks (SSHDs) that combine a small SSD with a large HDD within a single unit.
 
-\subsection{Hard disk drive}
+\subsection{Disk drives}
 In the view of an operating system, disks are perceived as a compilation of data blocks capable of independent reading or writing. 
 To facilitate their organization and management, each block is assigned a unique numerical address known as the Logical Block Address (LBA). 
 Usually, the operating system groups these blocks into clusters, which serve as the smallest unit that the OS can read from or write to on a disk. 
@@ -56,31 +56,306 @@ Hence, the disk can harbor various types of clusters:
     \item \textit{Unused space}: available to accommodate new files and folders.
 \end{itemize}
 
+\paragraph*{Reading}
+To read a file, the process involves:
+\begin{enumerate}
+    \item Accessing the metadata to locate its blocks.
+    \item Accessing the blocks to read its content.
+\end{enumerate}
 
+\paragraph*{Writing}
+The process of writing a file involves the following steps:
+\begin{enumerate}
+    \item Accessing the metadata to locate free space.
+    \item Writing the data into the assigned blocks.
+\end{enumerate}
+Since the file system operates on clusters, the actual space occupied by a file on a disk is always a multiple of the cluster size, denoted by $c$. 
+This is given by the formula:
+\[a=\left\lfloor \dfrac{s}{c} \right\rfloor\cdot c\]
+Here, $a$ is the actual size on disk, $s$ is the file size, and $c$ is the cluster size.
+The wasted disk space, denoted by $w$, due to organizing the file into clusters can be computed as:
+\[w=a-s\]
+This unused space is referred to as the internal fragmentation of files.
+\begin{example}
+    Let's consider a hard disk with a cluster size of $8$ bytes and a file with a size of $27$ bytes. 
+    The actual size on the disk would be:
+    \[a=\left\lfloor \dfrac{s}{c} \right\rfloor\cdot c=\left\lfloor \dfrac{27}{8} \right\rfloor\cdot 8=32\:byte\]
+    And the wasted disk space would be:
+    \[w=a-s=32-27=5\:byte\]
+\end{example}
 
+\paragraph*{Deleting}
+Deleting a file involves updating the metadata to indicate that the blocks previously allocated to the file are now available for use by the operating system. 
+However, the deletion process does not physically remove the data from the disk. 
+Instead, the data remains intact until new data is written to the same clusters. 
+In other words, when new files are written to the same clusters, the old data is overwritten by the new data.
 
+\paragraph*{External fragmentation}
+As the lifespan of the disk progresses, there may not be sufficient contiguous space available to store a file. 
+In such instances, the file is divided into smaller chunks and distributed across the free clusters scattered throughout the disk. 
+This process of splitting a file into non-contiguous clusters is known as external fragmentation. 
+It's important to note that external fragmentation can significantly degrade the performance of a hard disk drive (HDD).
 
+\subsection{Hard disk drives}
+A hard disk drive (HDD) utilizes rotating disks (platters) coated with magnetic material for data storage. 
+Information can be accessed in a random-access manner, allowing for the storage or retrieval of individual data blocks in any order, rather than sequentially. 
+The HDD comprises one or more rigid ("hard") rotating disks (platters) with magnetic heads positioned on a moving actuator arm, facilitating the reading and writing of data onto the surfaces.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/hdds.png}
+    \caption{Hard disk drive structure}
+\end{figure}
+Externally, hard drives present a multitude of sectors (blocks), typically comprising 512 or 4096 bytes each. 
+Each sector write is indivisible and comprises a header along with an error correction code. 
+However, the writing of multiple sectors can be susceptible to interruption, resulting in what is known as a torn write scenario, where only a portion of a multi-sector update is successfully written to the disk.
 
+Regarding drive geometry, sectors are organized into tracks, with a cylinder representing a specific track across multiple platters. 
+These tracks are arranged in concentric circles on the platters, and a disk may consist of multiple double-sided platters.
+The drive motor maintains a constant rate of rotation for the platters, typically measured in revolutions per minute (RPM).
 
+Present-day technology specifications include:
+\begin{itemize}
+    \item \textit{Diameter}: approximately 9 cm (3.5 inches), accounting for two surfaces.
+    \item \textit{Rotation speed}: ranges from 7200 to 15000 revolutions per minute (RPM).
+    \item \textit{Track density}: reaching up to 16,000 Tracks Per Inch (TPI).
+    \item \textit{Heads}: can be parked either close to the center or towards the outer diameter, particularly in mobile drives.
+    \item \textit{Disk buffer cache}: embedded memory within a hard disk drive, serving as a buffer between the disk and the computer.
+\end{itemize}
 
+\paragraph*{Cache}
+Numerous disks integrate caches, often referred to as track buffers, which typically consist of a small amount of RAM ranging from 16 to 64 MB. These caches serve several purposes:
+\begin{enumerate}
+    \item \textit{Read caching}: This minimizes read delays caused by seeking and rotation.
+    \item \textit{Write caching}: There are two primary types of write caching:
+        \begin{itemize}
+            \item Write back cache: In this mode, the drive acknowledges writes as complete once they have been cached. 
+                However, this feature can be risky as it may lead to an inconsistent state if power is lost before the write back event.
+            \item Write through cache: Here, the drive acknowledges writes as complete only after they have been written to the disk.
+        \end{itemize}
+\end{enumerate}
+Today, some disks incorporate flash memory for persistent caching, resulting in hybrid drives.
 
+\paragraph*{Standard disk interfaces}
+The standard disk interfaces are: 
+\begin{itemize}
+    \item \textit{ST-506}: an ancient standard characterized by commands (read/write) and addresses in cylinder/head/sector format stored in device registers.
+    \item \textit{ATA}: advanced Technology Attachment, evolved from ST-506, and eventually standardized as IDE (Integrated Drive Electronics).
+    \item \textit{IDE}: integrated Drive Electronics, also known as Parallel ATA, used primarily in older systems.
+    \item \textit{SATA}: serial ATA, the current standard for connecting storage devices, featuring recent versions that support Logical Block Addresses (LBA).
+    \item \textit{SCSI}: a packet-based interface, akin to TCP/IP, with devices translating Logical Block Addresses (LBA) to internal formats such as cylinder/head/sector.
+        It is transport-independent and utilized in various devices including USB drives, CD/DVD/Blu-ray drives, and Firewire connections.
+    \item \textit{iSCSI}: a variant of SCSI over TCP/IP and Ethernet, enabling storage over network connections.
+\end{itemize}
 
+\paragraph*{Transfer time}
+With hard disk drives we can have four types of delay: 
+\begin{itemize}
+    \item \textit{Rotational delay}: this delay represents the time it takes for the desired sector to rotate under the read head. 
+        It's influenced by the disk's rotational speed, measured in revolutions per minute (RPM).
+        The full rotation delay is calculated as: 
+        \[R=\dfrac{1}{DiskRPM}\]
+        While the average rotation time is typically half of the full rotation delay, given by: 
+        \[T_{rotation}=\dfrac{60\cdot R}{2}\]
+        in seconds.
+    \item \textit{Seek delay}: this delay refers to the time it takes for the read head to move to a different track on the disk. 
+        The seek time includes components such as acceleration, coasting, deceleration, and settling. 
+        Modeling seek time with a linear dependency on distance, we find that the average seek time $t_{seek_{AVG}}$ is one-third of the maximum seek time $t_{seek_{MAX}}$. 
+    \item \textit{Transfer time}: this delay is the time required to read or write bytes of data from or to the disk. 
+        It encompasses the final phase of the input/output (I/O) process, considering the data being read from or written to the disk surface. 
+        This includes the time for the head to pass over the sectors and the I/O transfer process, taking into account factors such as rotation speed and storage density.
+    \item \textit{Controller overhead}: this delay encompasses the additional time incurred for managing the requests sent to the disk controller.
+        It involves tasks such as buffer management for data transfer and the time taken to send interrupts.
+\end{itemize}
+The service time, also known as I/O time, is determined by summing up various elements:
+\[T_{I/O}=T_{seek}+T_{rotation}+T_{transfer}+T_{overhead}\]
+When factoring in the queue time, which represents the wait time for the resource, we can calculate the response time $\tilde{R}$ as follows:
+\[\tilde{R}=T_{queue}+T_{I/O}\]
+Here, $T_{queue}$ is influenced by factors such as queue length, resource utilization, the mean and variance of disk service time distribution, and the distribution of request arrivals.
+\begin{example}
+    Let's consider a hard disk with the following specifications: a read/write sector size of $512$ bytes ($0.5$ KB), a data transfer rate of $50$ MB/s, a rotation speed of $10000$ RPM, a mean seek time of $6$ ms, and an overhead controller time of $0.2$ ms.
+    The service time is calculated as:
+    \[T_{I/O}=T_{seek}+T_{rotation}+T_{transfer}+T_{overhead}=6+T_{rotation}+T_{transfer}+0.2\]
+    Given:
+    \[T_{rotation}=60\cdot\dfrac{1000}{2 \cdot DiskRPM}=60\cdot\dfrac{1000}{2 \cdot 10000}=3.0\:ms\]
+    \[T_{transfer}=0.5\cdot\dfrac{1000}{50 \cdot 1024}=0.01\:ms\]
+    Hence:
+    \[T_{I/O}=6+T_{rotation}+T_{transfer}+0.2=6+3+0.01+0.2=9.21\:ms\]
+\end{example}
+The previous analysis of service times reflects a highly pessimistic scenario, assuming the worst-case conditions where disk sectors are extensively fragmented. 
+This scenario occurs when files are tiny, typically occupying just one block, or when the disk suffers from significant external fragmentation. 
+Consequently, each access to a sector necessitates both rotational latency and seek time.
+
+However, in many practical situations, these extreme conditions are not encountered. 
+Files tend to be larger than a single block and are stored contiguously, mitigating the need for frequent seeks and rotational latency.
+
+We can assess the data locality of a disk by quantifying the percentage of blocks that can be accessed without requiring seek or rotational latency: 
+\[T_{I/0}=(1-DL)(T_{seek}+T_{rotation})+T_{transfer}+T_{overhead}\]
+\begin{example}
+    Let's revisit the previous scenario but now with a data locality of $75\%$. 
+    In this case, the time is computed as:
+    \[T_{I/0}=(1-DL)(T_{seek}+T_{rotation})+T_{transfer}+T_{overhead}=(0.25)(6+3)+0.01+0.2=2.46\:ms\]
+    Here, DL represents the data locality factor. 
+    Substituting the given values, we find the resulting time to be $2.46$ ms.
+\end{example}
+
+\paragraph*{Disk scheduling}
+Caching is instrumental in enhancing disk performance, although it cannot fully compensate for inadequate random access times. 
+The core concept lies in reordering a queue of disk requests to optimize performance. 
+Estimating the request length becomes viable by considering the data's position on the disk.
+Various scheduling algorithms facilitate this optimization process:
+\begin{itemize}
+    \item \textit{First come, first served} (FCFS): this is the most basic scheduler, serving requests in the order they arrive. 
+        However, it often results in a significant amount of time being spent seeking.
+    \item \textit{Shortest seek time first} (SSTF): this scheduler minimizes seek time by always selecting the block with the shortest seek time. 
+        SSTF is optimal and relatively easy to implement, but it may suffer from starvation.
+    \item \textit{SCAN}, also known as the elevator algorithm: in SCAN, the head of the disk sweeps across the disk, servicing requests in a linear order. 
+        This approach offers reasonable performance and avoids starvation, but average access times are higher for requests at the extremes of the disk.
+    \item \textit{C-SCAN}: Similar to SCAN, but it only services requests in one direction, providing fairer treatment to requests. 
+        However, it typically exhibits worse performance compared to SCAN.
+    \item \textit{C-LOOK}: this is akin to C-SCAN, but with a twist: the head of the disk only moves as far as the last request in the queue, effectively reducing the range of movement.
+\end{itemize}
+These scheduling algorithms can be implemented in various ways:
+\begin{itemize}
+    \item \textit{Operating system scheduling}: requests are reordered based on Logical Block Address (LBA). 
+        However, the OS lacks the ability to account for rotation delay.
+    \item \textit{On-disk scheduling}: the disk possesses precise knowledge of the head and platter positions, allowing for the implementation of more advanced schedulers. 
+        However, this approach requires specialized hardware and drivers.
+    \item \textit{Disk command queue}: found in all modern disks, this queue stores pending read/write requests, known as Native Command Queuing (NCQ). 
+        The disk may reorder items in the queue to enhance performance.
+\end{itemize}
+Joint operating system and on-disk scheduling can introduce challenges and potential issues.
 
 \subsection{Solid state drive}
+Solid-state storage devices, in contrast to traditional hard disk drives (HDDs), do not contain any mechanical or moving parts. 
+Instead, they are constructed using transistors, similar to memory and processors. 
+Unlike typical RAM, they can retain information even in the event of power loss.
+These devices include a controller and one or more solid-state memory components. 
+They are designed to utilize traditional HDD interfaces and form factors, although this may be less true as technology evolves. 
+Furthermore, they offer higher performance compared to HDDs.
 
+An SSD's components are arranged in a grid structure. 
+Each cell within this grid can store varying amounts of data, ranging from one bit (single-level cell) to multiple bits (multi-level cell, triple-level cell, etc.).
 
+\paragraph*{Internal organization}
+NAND flash memory is structured into pages and blocks. 
+Each page contains several logical block addresses (LBAs), while a block generally comprises multiple pages, collectively holding approximately $128-256\:KB$ of data: 
+\begin{itemize}
+    \item \textit{Blocks} (or erase blocks): these are the smallest units that can be erased, typically consisting of multiple pages. 
+        They can be cleaned using the ERASE command.
+    \item \textit{Pages}: these are the smallest units that can be read/written. 
+        They are subunits of an erase block and contain a specific number of bytes that can be read/written in a single operation through the READ or PROGRAM commands. 
+        Pages can exist in three states:
+        \begin{itemize}
+            \item \textit{Empty} (or ERASED): these pages do not contain any data.
+            \item \textit{Dirty} (or INVALID): these pages contain data, but this data is either no longer in use or has never been used.
+            \item \textit{In use} (or VALID): these pages contain data that can be read.
+        \end{itemize}
+\end{itemize}
+Pages that are empty are the only ones that can be written to. 
+Erasing is limited to pages that are dirty, and this must occur at the block level, where all pages within the block must be dirty or empty. 
+Reading is only meaningful for pages in the "in use" or "valid" state. If there are no empty pages available, a dirty page must be erased. 
+If there are no blocks containing only dirty or empty pages available, special procedures should be followed to gather empty pages across the disk.
+Resetting the original voltage to neutral is necessary before applying a new voltage to erase the value in flash memory. 
 
+It's worth noting that while writing and reading a single page of data from an SSD is possible, an entire block must be deleted to release it.
+This discrepancy is one of the underlying causes of the write amplification issue. 
+Write amplification occurs when the actual volume of data physically written to the storage media is a multiple of the intended logical amount.
+\begin{example}
+    Let's examine an SSD with these specifications: page size of $4\:KB$, block size of $5$ pages, drive size of $1$ block, read speed of $2\:KB/s$, and write speed of $1\:KB/$s.
+    
+    First, let's write a $4:KB$ text file to the brand-new SSD. 
+    The overall writing time will be $4$ seconds.
 
+    Next, let's write a $8:KB$ picture file to the almost brand-new SSD.
+    The overall writing time will be $8$ seconds.
 
+    Now, suppose the text file in the first page is no longer needed.
 
+    Finally, let's write a $12:KB$ picture to the SSD. 
+    It will take $24$ seconds. 
+    In this case, we need to perform the following steps:
+    \begin{itemize}
+        \item Read the block into the cache.
+        \item Delete the page from the cache.
+        \item Write the new picture into the cache.
+        \item ERASE the old block on the SSD.
+        \item Write the cache to the SSD.
+    \end{itemize}
+    The operating system only thought it was writing $12:KB$ of data when, in fact, the SSD had to read $8:KB$ ($2:KB/s$) and then write $20:KB$ ($1:KB/s$), the entire block.
+    The writing should have taken $12$ seconds but actually took $4 + 20 = 24$ seconds, resulting in a write speed of $0.5:KB/s$ instead of $1:KB/s$.
+\end{example}
+As time goes on, write amplification significantly diminishes the performance of an SSD. 
+This degradation occurs due to the wear-out of flash cells, resulting from the breakdown of the oxide layer within the floating-gate transistors of NAND flash memory. 
+During the erasing process, the flash cell is subjected to a relatively high charge of electrical energy.
 
+Each time a block is erased, this high electrical charge progressively degrades the silicon material. 
+After numerous write-erase cycles, the electrical characteristics of the flash cell start to deteriorate, leading to unreliability in operation.
 
+\paragraph*{Flash transition layer}
+Establishing a direct mapping between logical and physical pages is not practical. 
+To address this, an SSD component called the FTL (Flash Translation Layer) is utilized to emulate the functionality of a traditional HDD. 
+The FTL manages data allocation and performs address translation efficiently to mitigate the effects of Write Amplification.
+One method used by the FTL to reduce Write Amplification is through a technique called Log-Structured FTL. 
+This involves programming pages within an erased block sequentially, from low to high pages.
 
+\paragraph*{Garbage collection}
+Additionally, the FTL employs garbage collection to recycle pages containing old data (marked as Dirty/Invalid) and wear leveling to evenly distribute write operations across the flash blocks. 
+This ensures that all blocks within the device wear out at approximately the same rate.
+Garbage collection incurs significant costs due to the necessity of reading and rewriting live data. 
+Ideally, garbage collection should reclaim blocks composed entirely of dead pages. 
+The expense of garbage collection is directly related to the volume of data blocks requiring migration. 
+To address this challenge, several solutions can be implemented:
+\begin{itemize}
+    \item Increase device capacity by over provisioning with extra flash storage.
+    \item Postpone cleaning operations to less critical periods.
+    \item Execute garbage collection tasks in the background during periods of lower disk activity.
+\end{itemize}
+During background garbage collection, SSDs operate under the assumption that they can identify which pages are invalid. 
+However, a prevalent issue arises as most file systems do not permanently delete data. 
+To address this challenge, a new SATA command called TRIM has been introduced.
+With TRIM, the operating system informs the SSD about specific logical block addresses (LBAs) that are invalid and can be subjected to garbage collection. 
+Operating system support for TRIM is available in various platforms such as Windows 7, OSX Snow Leopard, Linux 2.6.33, and Android 4.3.
 
+\paragraph*{Mapping table}
+The size of the page-level mapping table can be excessively large, particularly in scenarios like a $1\:TB$ SSD where each $4\:KB$ page requires a 4-byte entry, necessitating $1\:GB$ of DRAM for mapping. 
+To mitigate the costs associated with mapping, several approaches have been developed:
+\begin{itemize}
+    \item \textit{Block-based mapping}: employing a coarser grain approach to mapping.
+        This approach encounters a write issue: the FTL needs to read a significant amount of live data from the old block and transfer it to a new one.
+    \item \textit{Hybrid mapping}: utilizing multiple tables for mapping.
+        The Flash Translation Layer (FTL) manages two distinct tables:
+        \begin{itemize}
+            \item \textit{Log blocks}: for page-level mapping.
+            \item \textit{Data blocks}: for block-level mapping.
+        \end{itemize}
+        When searching for a specific logical block, the FTL consults both the page mapping table and the block mapping table sequentially.
+    \item \textit{Page mapping combined with caching}: implementing strategies to exploit data locality and optimize mapping efficiency.
+        The fundamental concept is to cache the active portion of the page-mapped FTL. 
+        When a workload primarily accesses a limited set of pages, the translations for those pages are retained in the FTL memory. 
+        This approach offers high performance without incurring high memory costs, provided that the cache can accommodate the required working set. 
+        However, there is a potential overhead associated with cache misses.
+\end{itemize}
 
+\paragraph*{Wear leveling}
+The Flash memory's Erase/Write (EW) cycle is limited, leading to skewness in the cycles that can shorten the SSD's lifespan. 
+It's essential for all blocks to wear out at a similar pace to maintain longevity.
+While the Log-Structured approach and garbage collection aid in spreading writes, blocks may still contain cold data. 
+To address this, the FTL periodically reads all live data from these blocks and rewrites it elsewhere. 
+However, wear leveling can increase the SSD's write amplification and reduce performance. 
+A simple policy involves assigning each Flash Block an EW cycle counter, ensuring that the difference between the maximum and minimum EW cycles remains below a certain threshold, denoted as $e$.
 
+\paragraph*{Summary}
+Flash-based SSDs are increasingly common in laptops, desktops, and datacenter servers, despite their higher cost compared to conventional HDDs. 
+Flash memory has limitations, including a finite number of write cycles, shorter lifespan, and the need for error correcting codes and over-provisioning (extra capacity). 
+SSDs also exhibit different read/write speeds compared to HDDs. Unlike HDDs, SSDs are not affected by data locality and do not require defragmentation.
 
+The Flash Translation Layer (FTL) is a crucial component of SSDs, responsible for tasks such as data allocation, address translation, garbage collection, and wear leveling. 
+However, the controller often becomes the bottleneck for transfer rates in SSDs.
 
-
-
-
+\subsection{Comparison}
+To assess these two memory types, we can utilize two metrics:
+\begin{itemize}
+    \item \textit{Unrecoverable Bit Error Ratio} (UBER): this metric indicates the rate of data errors, expressed as the number of data errors per bits read.
+    \item \textit{Endurance rating}: measured in Terabytes Written (TBW), this indicates the total data volume that can be written into an SSD before it's likely to fail. 
+        It represents the number of terabytes that can be written while still meeting the specified requirements.
+\end{itemize}
