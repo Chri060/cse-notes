@@ -21,12 +21,12 @@ Being a header-only library simplifies compilation and linking processes.
 Leveraging C++ operator overloading capabilities, complex mathematical operations can be expressed using a simple syntax.
 
 The necessary headers to include are:
-\begin{itemize}
-    \item \texttt{\#define GLM\_FORCE\_RADIANS}
-    \item \texttt{\#include glm/glm.hpp}
-    \item \texttt{\#include glm/gtc/matrix\_transform.hpp}
-    \item \texttt{\#include glm/gtx/matrix\_transform2.hpp}
-\end{itemize}
+\begin{verbatim}
+#define GLM_FORCE_RADIANS    
+#include glm/glm.hpp
+#include glm/gtc/matrix_transform.hpp
+#include glm/gtx/matrix_transform2.hpp
+\end{verbatim}
 The initial \texttt{define} ensures that all angles are interpreted as radians. 
 The first \texttt{include} imports the entire library, while the other two imports the four principal transformations.
 
@@ -34,63 +34,72 @@ The first \texttt{include} imports the entire library, while the other two impor
 The following commands utilize GLM's functionality to define and manipulate matrices and vectors in the context of computer graphics:
 \begin{itemize}
     \item To define $4 \times 4$ matrices: \\
-        \texttt{glm::mat4}
+        \texttt{glm::mat4 M;}
     \item To create a matrix from its elements (passed per column): \\
-        \texttt{glm::mat4(m11, m21, m31, m41, ..., m14, m24, m34, m44)}
+        \texttt{M = glm::mat4(m11, m21, m31, m41, ..., m14, m24, m34, m44);}
     \item To create an identity matrix: \\
-        \texttt{glm::mat4(1)}
+        \texttt{M = glm::mat4(1);}
     \item To define three-component vectors: \\
-        \texttt{glm::vec3(m1, m2, m3)}
+        \texttt{v = glm::vec3(m1, m2, m3);}
     \item To define four-component vectors: \\
-        \texttt{glm::vec4(m1, m2, m3, m4)} 
+        \texttt{v = glm::vec4(m1, m2, m3, m4);} 
 \end{itemize}
-Note that to access the elements of a matrix we have to specify the index of the column followed by the index of the row: \\
-\texttt{matrix[column\_index][row\_index]} 
+Note that to access the elements of a matrix we have to specify the index of the column followed by the index of the row: 
+\begin{verbatim}
+elem = matrix[column_index][row_index];
+\end{verbatim}
 
 \paragraph*{Matrix and vectors operations}
 The possible operations, that needs to respect the dimensionality of them, are: 
 \begin{itemize}
     \item To compute matrix product: \\ 
-        \texttt{matrix1 * matrix2}
+        \texttt{Mprod = matrix1 * matrix2;}
     \item To invert a matrix: \\ 
-        \texttt{glm::inverse(matrix)}
+        \texttt{Minv = glm::inverse(matrix);}
     \item To transpose a matrix: \\ 
-        \texttt{glm::transpose(matrix)}
+        \texttt{Mtran = glm::transpose(matrix);}
     \item To perform algebraic operations between matrices and vectors: \\ 
-        \texttt{matrix + matrix} \\
-        \texttt{matrix - matrix} \\
-        \texttt{matrix * matrix} 
+        \texttt{Msum = matrix + matrix;} \\
+        \texttt{Msub = matrix - matrix;} 
 \end{itemize}
 
 \paragraph*{Transposition}
 The transposition of a matrix can be done with the following command: 
-\texttt{glm::mat4 T = glm::translate(glm::mat4(1), glm::vec3(dx, dy, dz))} \\
+\begin{verbatim}
+glm::mat4 T = glm::translate(glm::mat4(1), glm::vec3(dx, dy, dz));
+\end{verbatim}
 This command creates a $4 \times 4$ translation matrix (\texttt{T}) with displacements \texttt{dx}, \texttt{dy}, and \texttt{dz}.
 
 \paragraph*{Scaling}
-The scaling of a matrix can be done with the following command: \\
-\texttt{glm::mat4 S = glm::scale(glm::mat4(1), glm::vec3(sx, sy, sz))} \\
+The scaling of a matrix can be done with the following command:
+\begin{verbatim}
+glm::mat4 S = glm::scale(glm::mat4(1), glm::vec3(sx, sy, sz)); 
+\end{verbatim}
 This command generates a $4 \times 4$ scaling matrix (\texttt{S}) with scaling factors \texttt{sx}, \texttt{sy}, and \texttt{sz}. 
 A shortcut for proportional scaling is:
-\texttt{glm::mat4 Sp = glm::scale(glm::mat4(1), glm::vec3(s))}
+\begin{verbatim}
+glm::mat4 Sp = glm::scale(glm::mat4(1), glm::vec3(s)); 
+\end{verbatim}
 
 \paragraph*{Rotation}
-The rotation of a matrix can be done with the following command: \\
-\texttt{glm::mat4 R = glm::rotate(glm::mat4(1), ang, glm::vec3(ax, ay, az))} \\
+The rotation of a matrix can be done with the following command:
+\begin{verbatim}
+glm::mat4 R = glm::rotate(glm::mat4(1), ang, glm::vec3(ax, ay, az));
+\end{verbatim}
 This command produces a $4 \times 4$ rotation matrix (\texttt{R}) of an angle \texttt{ang} along an axis specified by vector \texttt{ax}, \texttt{ay}, and \texttt{az}. 
 Angles can be specified in radians using \texttt{glm::radians()} function. 
 For rotations along the $x$, $y$, and $z$ axes:
-\begin{itemize}
-    \item \texttt{glm::mat4 Rx = glm::rotate(glm::mat4(1), ang, glm::vec3(1, 0, 0))}
-    \item \texttt{glm::mat4 Ry = glm::rotate(glm::mat4(1), ang, glm::vec3(0, 1, 0))}
-    \item \texttt{glm::mat4 Rz = glm::rotate(glm::mat4(1), ang, glm::vec3(0, 0, 1))}
-\end{itemize}
+\begin{verbatim}
+glm::mat4 Rx = glm::rotate(glm::mat4(1), ang, glm::vec3(1, 0, 0));
+glm::mat4 Ry = glm::rotate(glm::mat4(1), ang, glm::vec3(0, 1, 0)); 
+glm::mat4 Rz = glm::rotate(glm::mat4(1), ang, glm::vec3(0, 0, 1));
+\end{verbatim}
 
 \paragraph*{Shear}
 The shear of a matrix can be done with the following commands:
-\begin{itemize}
-    \item \texttt{glm::mat4 Rx = glm::shearX3D(glm::mat4(1), hy, hz)}
-    \item \texttt{glm::mat4 Ry = glm::shearY3D(glm::mat4(1), hx, hz)}
-    \item \texttt{glm::mat4 Rz = glm::shearZ3D(glm::mat4(1), hx, hy)}
-\end{itemize}
+\begin{verbatim}
+glm::mat4 Rx = glm::shearX3D(glm::mat4(1), hy, hz);
+glm::mat4 Ry = glm::shearY3D(glm::mat4(1), hx, hz); 
+glm::mat4 Rz = glm::shearZ3D(glm::mat4(1), hx, hy);
+\end{verbatim}
 These commands create $4 \times 4$ shear matrices along the $x$, $y$, and $z$ axes with shear factors \texttt{hx}, \texttt{hy}, and \texttt{hz}.

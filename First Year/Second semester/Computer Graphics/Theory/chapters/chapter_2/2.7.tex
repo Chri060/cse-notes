@@ -115,15 +115,19 @@ For parallel projection, since it's implemented using a sequence of conventional
 This implies that Normalized Screen Coordinates can be obtained by simply discarding the fourth element of the vector resulting from the product of the homogeneous coordinates with the projection matrix.
 
 \paragraph*{Orthogonal projections in GLM}
-GLM gives the \texttt{ortho()} function to compute the orthographic projection matrix specifying the boundaries: \\
-\texttt{glm::mat4 Port = glm::ortho(l, r, b, t, n, f)} \\
+GLM gives the \texttt{ortho()} function to compute the orthographic projection matrix specifying the boundaries:
+\begin{verbatim}
+glm::mat4 Port = glm::ortho(l, r, b, t, n, f);
+\end{verbatim}
 Here, $l$, $r$, $b$, $t$, $n$, $f$ are the positions in world coordinates respectively of the left, right, bottom, top, near and far boundaries of the visible region.
 Keep however in mind that such procedure was created for the Normalized Screen Coordinates conventions of OpenGL, and the result will not work correctly in Vulkan without further modifications.
-In order to make it work, the following additions must be done: \\
-\texttt{\#define GLM\_FORCE\_DEPTH\_ZERO\_TO\_ONE} \\
-\texttt{Port = glm::scale(glm::mat4(1.0f), glm::vec3(1,-1,1)) *} 
+In order to make it work, the following additions must be done: 
+\begin{verbatim}
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE    
 
-\qquad\:\texttt{glm::ortho(l, r, b, t, n, f);} 
+Port = glm::scale(glm::mat4(1.0f), glm::vec3(1,-1,1)) * 
+                  glm::ortho(l, r, b, t, n, f);
+\end{verbatim}
 
 \subsection{Axonometric projections}
 Many objects conform to shapes that align with the sides of a box. 

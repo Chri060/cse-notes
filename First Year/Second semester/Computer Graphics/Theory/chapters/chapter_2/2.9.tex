@@ -1,0 +1,168 @@
+\section{World coordinates}
+
+To simplify positional and directional references, we'll establish the origin at the center of the 3D world and utilize a compass for directional definitions. 
+Specifically, we'll designate the negative $z$-axis as North and the positive $x$-axis as east.
+
+The projection matrices we've encountered assume a projection plane parallel to the $xy$-plane. 
+For parallel projections, we assume the projection rays align with the negative $z$-axis. 
+In perspective, the projection center is at the origin, akin to a camera facing north.
+
+In practical applications, generating a 2D view for a plane positioned anywhere in space involves additional transformations before projection.
+
+Though our focus is on perspective, the same principles apply to parallel projection. 
+The projection plane resembles a camera sensor viewing the scene from the projection center. 
+This camera is defined by its position, aiming direction, and angle around this direction. 
+The projection matrices we've discussed compute the view from a camera initially at the origin, facing the negative $z$-axis. 
+This camera can be conceptualized as a 3D object.
+
+We can then define a transformation matrix $M_C$ that relocates this camera object to its target position, aligning the negative $z$-axis with the desired direction. 
+This matrix is termed the camera matrix. 
+By applying the inverse of $M_C$ to all scene objects, we transform them into a new 3D space where the projection plane aligns as needed.
+
+In this transformed space, the view from the arbitrarily oriented camera can be computed by applying the projection matrices.
+
+The inverse of matrix $M_C$, denoted as $M_V$, is known as the view matrix:
+\[M_V=M_C^{-1}\]
+The view matrix precedes the projection matrix $M_{prj}$, enabling the determination of normalized screen coordinates of points in space as observed by the specified camera. 
+This combined matrix is often referred to as the view-projection matrix:
+\[M_{VP}=M_{prj} \cdot M_V\]
+It transforms a point from world coordinates (in homogeneous coordinates) to 3D normalized screen coordinates (in Cartesian coordinates) at a specific location and direction in space according to matrix $M_V$.
+Various techniques exist for creating a view matrix in a user-friendly manner, with the two most popular being:
+\begin{itemize}
+    \item \textit{Look-in-direction} technique.
+    \item \textit{Look-at} technique.
+\end{itemize}
+
+\subsection{Look-in-direction}
+This technique is commonly employed in first-person applications where the user directly controls the camera's position and view direction. 
+In the look-in-direction model, the camera's position $(c_x, c_y, c_z)$ is given in world coordinates. 
+The direction where the camera is facing is specified using three angles: the compass direction (angle $\alpha$), the elevation (angle $\beta$), and the roll over the viewing direction (angle $\rho$). 
+The roll parameter is seldom used.
+
+Specifically, with $\alpha=0^\circ$, the camera faces north, while $\alpha=90^\circ$ implies the camera is facing west. 
+South corresponds to $\alpha=180^\circ$, and East is $\alpha=270^\circ$. 
+A positive angle $\beta > 0^\circ$ makes the camera look up, while a positive angle $\rho > 0^\circ$ rotates the camera counterclockwise. 
+In terms of the camera object, roll corresponds to rotation around the $z$-axis, elevation (or pitch) along the $x$-axis, and direction (or yaw) around the $y$-axis. 
+Rotations must follow a specific order, discussed later: roll first, then elevation, and finally direction. 
+Translation is applied after rotations. 
+The camera matrix is composed as follows:
+\[M_C=T(c_x, c_y, c_z) \cdot R_y(\alpha) \cdot R_x(\beta) \cdot R_z(\rho)\]
+The view matrix, being the inverse of the camera matrix, follows the rules for inverting a chain of transformations:
+\[M_V=M_C^{-1}=R_z(-\rho) \cdot R_x(-\beta) \cdot R_y(-\alpha) \cdot T(-c_x, -c_y, -c_z)\]
+
+\paragraph*{Look-in in GLM}
+GLM does not offer specific support for constructing a look-in-direction matrix. 
+However, due to its simplicity, it can be easily implemented as follows:
+\begin{verbatim}
+glm::mat4 Mv = glm::rotate(glm::mat4(1.0), -rho, glm::vec3(0,0,1)) *
+               glm::rotate(glm::mat4(1.0), -beta, glm::vec3(1,0,0)) *
+               glm::rotate(glm::mat4(1.0), -alpha, glm::vec3(0,1,0)) *
+               glm::translate(glm::mat4(1.0), glm::vec3(-cx, -cy, -cz));
+\end{verbatim}
+
+\subsection{Look-at}
+The look-at model is typically utilized in third-person applications, where the camera tracks a specific point or object. 
+In this scenario, the camera's position $(c_x, c_y, c_z)$ is given in world coordinates. 
+This technique also requires the definition of an up vector, denoted as $u=(u_x, u_y, u_z)$, perpendicular to the ground plane of the scene. 
+In $y$-up coordinate systems, the up vector is commonly set to $u=(0, 1, 0)$, aligning the camera's $y$-axis perpendicular to the horizon.
+
+The view matrix is computed by first determining the direction of its axes in world coordinates, and then constructing the camera matrix accordingly. 
+Initially, we establish the transformed (negative) $z$-axis as the normalized vector originating from the point the camera is looking at and ending at the camera center:
+\[v_z=\dfrac{c-a}{\left\lvert c-a \right\rvert }\]
+where $a$ represents the point the camera is aimed at.
+
+The new $x$-axis must be perpendicular to both the new $z$-axis and the up vector. 
+This can be calculated using the normalized cross product of the two vectors:
+\[v_x=\dfrac{u \cdot v_z}{\left\lvert u \cdot v_z \right\rvert }\]
+It's important to note that the cross product yields zero if the vectors $u$ and $v_z$ are collinear, making it impossible to determine $v_x$. 
+This situation arises when the viewer is perfectly vertical, hindering the alignment of the camera with the ground. 
+In such cases, the simplest solution is to use the previously computed matrix or select a random orientation for the $x$-axis.
+
+Finally, the new $y$-axis should be perpendicular to both the new $z$-axis and the new $x$-axis, and it can be computed via the cross product of the two previously obtained vectors:
+\[v_y=v_z \cdot v_x\]
+
+The camera matrix, denoted as $M_C$, is then constructed by arranging vectors $v_x$, $v_y$, and $v_z$ in the first three columns, and the position of the camera center $c$ in the fourth column:
+\[M_C=\begin{bmatrix}
+    v_x & v_y & v_z & c \\ 
+    0 & 0 & 0 & 1
+\end{bmatrix}\]
+The view matrix can be obtained by inverting $M_C$.
+Since the vectors are orthogonal, the inversion of a look-at camera matrix can be computed easily with a transposition and a matrix-vector product:
+\[M_V=M_C^{-1}=M_C=\begin{bmatrix}
+    R_C^T & -R_C^T\cdot c \\ 
+    0 & 1
+\end{bmatrix}\]
+
+\paragraph*{Look-at in GLM}
+GLM provides convenient functions for vector operations and matrix construction, simplifying the computation of view matrices.
+
+To compute the cross product of two vectors, GLM offers the \texttt{cross()} function:
+\begin{verbatim}
+glm::vec3 uXvz = glm::cross(u, vz);
+\end{verbatim}
+To normalize a vector, use the \texttt{normalize()} function:
+\begin{verbatim}
+glm::vec3 vx = glm::normalize(uXvz);
+\end{verbatim}
+Constructing a $4 \times 4$ matrix from four column vectors can be achieved using the appropriate constructor:
+\begin{verbatim}
+glm::mat4 Mc = glm::mat4(vx, vy, vz, glm::vec4(c.x, c.y, c.z, 1));
+\end{verbatim}
+This construction can be implemented as follows:
+\begin{verbatim}
+glm::vec3 vz = glm::normalize(c - a);
+glm::vec3 vx = glm::normalize(glm::cross(u, vz));
+glm::vec3 vy = glm::cross(vz, vx);
+glm::mat4 Mc = glm::mat4(glm::vec4(vx), glm::vec4(vy), 
+                         glm::vec4(vz), glm::vec4(c, 1));
+\end{verbatim}
+Here, $c$, $a$, and $u$ are three \texttt{glm::vec3} vectors representing, respectively, the position of the camera, the target point, and the up vector. 
+To obtain the view matrix, simply compute the inverse of the camera matrix:
+\begin{verbatim}
+glm::mat4 Mv = glm::inverse(Mc);
+\end{verbatim}
+
+Additionally, GLM provides the \texttt{lookAt()} function to create a look-at matrix directly from three vectors representing the camera center, target point, and up vector:
+\begin{verbatim}
+glm::mat4 Mv = glm::lookAt(glm::vec3(cx, cy, cz), glm::vec3(ax, ay, az),
+glm::vec3(ux, uy, uz));
+\end{verbatim}
+Or using vectors directly:
+\begin{verbatim}
+glm::mat4 Mv = glm::lookAt(c, a, u);
+\end{verbatim}
+
+\paragraph*{Roll in GLM}
+Roll in look-at matrices can be implemented in two ways:
+\begin{enumerate}
+    \item Rotating the $u$ vector.
+    \item Adding a rotation of an angle $\rho$ around the $z$-axis.
+\end{enumerate}
+For the second method, it can be implemented as follows:
+\begin{verbatim}
+glm::mat4 Mv = glm::rotate(glm::mat4(1.0), -Roll, glm::vec3(0,0,1)) *
+               glm::lookAt(c, a, u);
+\end{verbatim}
+
+\subsection{Local coordinates and world matrix}
+A fundamental aspect of 3D computer graphics is the capability to position and manipulate objects within the virtual environment. 
+Object manipulation is typically achieved using a transformation matrix known as the World Matrix, denoted as $M_W$.
+
+Each object possesses a set of local coordinates, representing the positions of its points within its creation space. 
+When assembling a scene, these object points undergo a transformation from their original modeled positions to the positions where they are displayed. 
+These transformed coordinates are referred to as the object's global or world coordinates.
+
+The World Matrix $M_W$ facilitates this transformation from local to global coordinates. 
+It applies a sequence of translations, rotations (and possibly scaling or shears) to the object's local coordinates. 
+As discussed previously, the order of transformations is crucial as matrix multiplication is not commutative. 
+While there may not be a single solution, adhering to best practices generally yields the desired outcome.
+
+When working with objects described in local coordinates, users typically aim to:
+\begin{itemize}
+    \item Position the object.
+    \item Rotate the object.
+    \item Scale or mirror the object.
+\end{itemize}
+
+Advanced transformations like shearing or scaling along arbitrary axes are generally avoided as they are not easily generalized. 
+If such transformations are required, custom procedures must be developed to handle them.

@@ -208,19 +208,26 @@ Plugging the values $l$, $r$, $t$ and $b$ in the $P_{persp}$ matrix we obtain:
 \end{bmatrix}\]
 
 \paragraph*{Perspective projections in GLM}
-GLM provides the \texttt{frustum()} function for computing the perspective projection matrix, defining the boundaries of the visible region: \\
-\texttt{glm::mat4 Port = glm::frustum(l, r, b, t, n, f)} \\
+GLM provides the \texttt{frustum()} function for computing the perspective projection matrix, defining the boundaries of the visible region:
+\begin{verbatim}
+glm::mat4 Port = glm::frustum(l, r, b, t, n, f);
+\end{verbatim}
 Here, $l$, $r$, $b$, $t$, $n$, $f$ represent the left, right, bottom, top, near, and far boundaries in world coordinates, respectively.
 
-The \texttt{perspective()} function computes the perspective projection matrix based on the field of view ($fov$) and aspect ratio ($a$): \\
-\texttt{glm::mat4 Port = glm::perspective(fov, a, n, f)} \\
+The \texttt{perspective()} function computes the perspective projection matrix based on the field of view ($fov$) and aspect ratio ($a$):
+\begin{verbatim}
+glm::mat4 Port = glm::perspective(fov, a, n, f);
+\end{verbatim}
 Where $fov$, $a$, $n$, and $f$ denote the vertical field of view, aspect ratio, near plane distance, and far plane distance, respectively.
 
-As for the \texttt{ortho()} function, originally designed for OpenGL, adjustments are necessary for Vulkan compatibility. To achieve this, the following steps are required: \\
-\texttt{\#define GLM\_FORCE\_DEPTH\_ZERO\_TO\_ONE} \\
-\texttt{M2glm = glm::scale(glm::mat4(1.0), glm::vec3(1,-1,1)) *} 
+As for the \texttt{ortho()} function, originally designed for OpenGL, adjustments are necessary for Vulkan compatibility. 
+To achieve this, the following steps are required: 
+\begin{verbatim}
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
-\qquad\:\:\:\texttt{glm::frustum(l, r, b, t, n, f);} \\
-\\
-\texttt{M1glm = glm::perspective(fovy, a, n, f);}  \\
-\texttt{M1glm[1][1] *= -1} 
+M2glm = glm::scale(glm::mat4(1.0), glm::vec3(1,-1,1)) * 
+        glm::frustum(l, r, b, t, n, f);
+M1glm = glm::perspective(fovy, a, n, f);
+M1glm[1][1] *= -1;
+\end{verbatim}
+
