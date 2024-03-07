@@ -1,0 +1,51 @@
+\section{Static modeling}
+
+The typical scenario in the identification problem involves observing input and output data from a system:
+\begin{itemize}
+    \item Input data: $\{u(1), u(2), ..., u(N)\}$.
+    \item Output data: $\{y(1), y(2), ..., y(N)\}$. 
+\end{itemize}
+The objective is to find a model that elucidates the relationship between input and output variables.
+
+Before delving into the intricate task of identifying dynamic systems, let's first address a relatively simpler scenario, focusing on the static relationship between the variables. 
+In this case, the model can be expressed as:
+\[\hat{y}(t)=f\left(u(t),\theta\right)\]
+Here, $t$ uniquely identifies an input/output pair, $\theta$ represents the model parameters, and $y(t)$ solely depends on $u(t)$ at the corresponding index $t$.
+
+To tackle this problem, we initially hypothesize about the nature of the relationship and then seek the optimal model within the assumed category. 
+This is achieved through a fitting technique, such as the least squares method, which minimizes the disparity between the model-generated data and the observed data.
+Two primary classes of problems can be envisioned:
+\begin{itemize}
+    \item \textit{Interpolation}: the model is expected to pass through each data point.
+    \item \textit{Fitting}: the model approximates the data points as closely as possible.
+\end{itemize}
+However, aiming to find a value for $\vartheta$ such that $\hat{y}(t) = y(t)$ (interpolation) is often not advisable due to several reasons:
+\begin{itemize}
+    \item Interpolation assumes data are devoid of disturbances.
+        However, in reality, data are often affected by uncertainty, such as measurement errors, distortions, or approximations. 
+            Attempting to replicate data exactly through a model could inadvertently encompass noise effects (overfitting), thereby modeling the noise rather than the underlying mechanism generating the data.
+    \item Interpolation typically necessitates a model with a degree of complexity matching the size of the dataset, such as polynomial approximation.
+    \item Extrapolation (generalization) capabilities of the model may be poor and potentially misleading.
+\end{itemize}
+For fitting, it is important to consider the following:
+\begin{itemize}
+    \item When dealing with noisy data, the function $f(u,\vartheta)$ should accurately fit the data, while avoiding fitting too closely to account for noise effects and prevent overfitting.
+    \item The robustness of a model decreases as the number of parameters $(\vartheta)$ increases.
+    \item If a model with fewer degrees of freedom than the dataset size $N$ is used, exact interpolation cannot be achieved, and the data can only be approximated.
+    \item A fitted function will not precisely match the data used in the identification process, but it is expected to possess better generalization properties.
+    \item In many cases, interpolation is not feasible because there may be multiple different values of $y$ for the same $u$. 
+        In such scenarios, only fitting is possible.
+\end{itemize}
+
+\subsection{Parametric function}
+One common approach to describe the parametric function $f(u,\vartheta)$ is through a functional expansion:
+\[f(u,\vartheta)=\varphi^T\vartheta=\sum_i \vartheta_i\varphi_i(u)\]
+Here, the $\varphi_i(u)$ functions are referred to as basis functions. 
+This representation is particularly straightforward and useful because it is linear in the parameters (assuming fixed basis functions), thereby framing the problem as a linear regression for estimating $\vartheta$.
+Hence, the $\varphi_i$ terms are sometimes called regressors.
+
+In vector form, the model is expressed as:
+\[\mathcal{M}:\hat{y}(t)=\varphi(u(t))^T\vartheta\]
+Here, any nonlinearity (if present) is encapsulated within the regressors. 
+A fundamental requirement of this functional expansion is that $f(u,\vartheta)$ serves as a universal approximating function. 
+In other words, it should be capable of approximating any continuous function on a compact domain with arbitrary precision, provided it possesses a sufficiently large number of parameters.

@@ -1,0 +1,41 @@
+\section{Prediction of AR processes}
+
+Let's examine the AR(1) process:
+\[v(t)=av(t-1)+\eta(t)\quad \eta(cdot)\sim WN(0,\lambda^2)\]
+Performing long division on the transfer function for three steps, we obtain:
+\begin{align*}
+    \hat{W}_1(z)=\dfrac{a}{1-az^{-1}} \qquad \lambda_\varepsilon^2=\lambda^2 \\
+    \hat{W}_2(z)=\dfrac{a^2}{1-az^{-1}} \qquad \lambda_\varepsilon^2=(1+a^2)\lambda^2 \\ 
+    \hat{W}_3(z)=\dfrac{a^3}{1-az^{-1}} \qquad \lambda_\varepsilon^2=(1+a^2+a^4)\lambda^2
+\end{align*}
+For a generic prediction horizon $r$, we have:
+\[\hat{W}_r(z)=\dfrac{a^r}{1-az^{-1}} \qquad \lambda_\varepsilon^2=(1+a^2+a^4+\dots+a^{2(r-1)})\lambda^2\]
+As $r$ tends to infinity, $a^r$ approaches zero, and thus $\hat{v}(t+r|t)=0$. 
+Moreover, since $\left\lvert a\right\rvert < 1$, the variance of the residual equals:
+\[\lambda_{\varepsilon}^2=\sum_{i=0}^\infty a^{2i}=\sum_{i=0}^\infty (a^2)^{i}=\dfrac{1}{1-a^2}\]
+This coincides with the variance of the process $\text{Var}\left[v(t)\right]$.
+
+The most effective one-step ahead predictor is expressed as follows:
+\[\hat{v}(t+1|t)=\hat{W}_1\eta(t)=\dfrac{a}{1-az^{-1}}\eta(t)=a\hat{v}(t|t-1)+a\eta(t)\]
+Where the prediction error is given by $\varepsilon(t) = v(t) +\hat{v}(t|t-1)$, and its dynamics are determined by subtracting the predictor equation from the model equation:
+\[v(t+1)- \hat{v}(t+1|t) = av(t) + \eta(t+1) - a\hat{v}(t|t-1) - a\eta(t) \qquad \varepsilon(t+1) = a\varepsilon(t) + \eta(t+1) - a\eta(t) \]
+Subsequently, the variance of the prediction error can be computed as:
+\[\text{Var}\left[\varepsilon(t+1)\right]=\text{Var}\left[\varepsilon(t)\right]=\lambda^2\]
+It's worth noting that the predictor:
+\[\hat{v}(t+1|t)=v(t)\]
+is not the optimal choice. 
+In fact,
+\[\varepsilon(t+1)=v(t+1)-\hat{v}(t+1|t)=v(t+1)-v(t)\]
+Thus, we can deduce that:
+\[\mathbb{E}\left[ \varepsilon(t+1)^2 \right]=\dfrac{2}{1+a}\lambda^2\]
+Given that $\left\lvert a\right\rvert < 1$, the mean squared prediction error (MSPE) of the basic predictor exceeds that of the optimal predictor.
+
+Recalling that: 
+\[\hat{W}_1(z)=\dfrac{1}{1-az^{-1}} \rightarrow F_r(z)=1\]
+This implies $W_R(z)=a$, leading to the optimal one-step ahead predictor derived from data as:
+\[\hat{v}(t+1|t)=av(t)\]
+This is not surprising, if one considers the model: 
+\[v(t+1) = av(t) + \eta(t+1) = \hat{v}(t+1|t) + \eta(t+1) \]
+This implies that the predicted value differs from the true value by a white noise term, which is inherently unpredictable.
+Consequently, there's no additional information in the data that could enhance the predictor, validating its optimality.
+Thus, the prediction error follows a white noise process $\varepsilon(t+1)=\eta(t+1)$ with a variance of $\text{Var}\left[\varepsilon(t)\right]=\lambda^2$.
