@@ -157,6 +157,7 @@ It applies a sequence of translations, rotations (and possibly scaling or shears
 As discussed previously, the order of transformations is crucial as matrix multiplication is not commutative. 
 While there may not be a single solution, adhering to best practices generally yields the desired outcome.
 
+\subsection{World matrix definition}
 When working with objects described in local coordinates, users typically aim to:
 \begin{itemize}
     \item Position the object.
@@ -166,3 +167,75 @@ When working with objects described in local coordinates, users typically aim to
 
 Advanced transformations like shearing or scaling along arbitrary axes are generally avoided as they are not easily generalized. 
 If such transformations are required, custom procedures must be developed to handle them.
+
+\paragraph*{Positioning}
+When positioning an object in 3D space, the user aims to define coordinates that remain consistent regardless of the object's size or orientation. 
+Thus, specifying the placement at point $p=(p_x,p_y,p_z)$ necessitates applying translation $T(p_x,p_y,p_z)$ as the final transformation. 
+This ensures that the object's location remains unchanged despite any prior rotations or scaling.
+The parameters $p=(p_x,p_y,p_z)$ of the translation $T(p_x,p_y,p_z)$ determine the position where the origin of the object, in its local space, will be located after it has been translated in the world space.
+
+It's crucial that the object being positioned is modeled with its origin set at the point most accurately representing its location. 
+This specific point varies for each object and should be carefully chosen during the modeling process.
+
+If the object is to have dimensions $s_x,s_y,s_z$, rotations should be applied afterward. 
+Otherwise, the scaling direction would be altered. 
+
+Therefore, scaling by $S(s_x,s_y,s_z)$ must be the initial transformation applied.
+When scaling by a factor $s_x$, it means that a unitary segment in local coordinates (along the $x$-axis) becomes $s_x$ units in global coordinates. 
+This principle similarly applies to scaling factors $s_y$ and $s_z$.
+
+\paragraph*{Rotation}
+Rotation should be conducted between scaling and translation operations. 
+In order to establish an orientation in 3D space, the fundamental rotations along the three axes, namely $x$, $y$, and $z$, need to be combined.
+
+There are various methods to compute the rotation matrix for an object. 
+One objective in constructing the rotation component of the world matrix is to streamline the specification of parameters needed by the application to define the direction of an object. 
+Euler Angles, comprising three parameters that describe an object's orientation in 3D space, are commonly referred to as Roll, Pitch, and Yaw.
+
+Euler's angles were initially introduced for $z$-up coordinate systems, making them easier to remember in that context.
+Therefore, we will initially explain them in a $z$-up coordinate system, where the World's North aligns with the positive $y$-axis.
+Objects should be modeled in a way that they face along the positive $x$-axis, their side is aligned with the $y$-axis, and their vertical line is oriented along the $z$-axis.
+
+The Roll, denoted as $\phi$, represents the rotation of the object along its facing axis (the $x$-axis).
+A positive roll turns the object clockwise.
+
+The Pitch, denoted as $\theta$, defines the elevation of the object and corresponds to a rotation around its $y$-axis (the side axis).
+A positive pitch turns the head of the object facing down.
+
+The Yaw, denoted as $\psi$, defines the direction of the object and corresponds to a rotation along the $z$-axis (the vertical axis).
+It indicates the direction where the object is heading: $\psi=0^\circ$represents East, while $\psi=90^\circ$ corresponds to North.
+
+Following this convention, rotations are performed in alphabetical order: $x$-axis, $y$-axis, and finally $z$-axis.
+For different conventions, the axes must always be rotated in the roll, pitch, yaw order (RPY).
+When considering a $y$-up system, where the object faces the positive $z$-axis, rotations should be performed in the $z$, $x$, and $y$ order.
+
+\paragraph*{Final world matrix}
+With this convention, positioning an object in space requires nine parameters: three for position, three for Euler angles, and three for scaling factors. 
+Each parameter holds an intuitive physical significance.
+
+The World Matrix $M_W$ is then computed by factoring the five transformations in the specified order:
+\[M_W=T(p_x,p_y,p_z)\times R_y(\phi)\times R_x(\theta)\times R_z(\varphi) \times S(s_x,s_y,s_z)\]
+
+\paragraph*{World matrix in GLM}
+GLM does not provide dedicated functions for constructing a World matrix directly from basic position, scales, and rotations. 
+However, within a specific package of the library, there exists a specialized function for generating a rotation matrix from Euler angles:
+\begin{verbatim}
+#include <glm/gtx/euler_angles.hpp>
+
+glm::mat4 MEa = glm::eulerAngleYXZ(glm::radians(yaw),
+                                    glm::radians(pitch),
+                                    glm::radians(roll));
+\end{verbatim}
+It is typically more practical to define the entire sequence of transformations ourselves:
+\begin{verbatim}
+glm::mat4 Mw = glm::translate(glm::mat4(1.0), glm::vec3(px, py, pz)) *
+               glm::rotate(glm::mat4(1.0), yaw , glm::vec3(0,1,0)) *
+               glm::rotate(glm::mat4(1.0), pitch , glm::vec3(1,0,0)) *
+               glm::rotate(glm::mat4(1.0), roll , glm::vec3(0,0,1)) *
+               glm::scale(glm::mat4(1.0), glm::vec3(sx, sy, sz));
+\end{verbatim}
+
+\paragraph*{Conventions}
+In a real application, modelers and developers collaborate to define the convention that should be used to create assets suitable for integration into the project. 
+An adaptation transformation matrix $M_A$ can be appended before the world matrix to adapt the convention followed by third-party assets to the one required by the application:
+\[M_W=T(p_x,p_y,p_z)\times R_y(\phi)\times R_x(\theta)\cdot R_z(\varphi) \times S(s_x,s_y,s_z) \cdot M_A\]
