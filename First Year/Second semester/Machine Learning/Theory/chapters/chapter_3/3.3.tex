@@ -1,0 +1,49 @@
+\section{Model complexity}
+
+Introducing an additional feature leads to an exponential growth in the volume of the input space.
+This growth leads to the following problems: 
+\begin{itemize}
+    \item \textit{Computational cost}: the computational resources required to process and analyze the expanded input space increase significantly.
+    \item \textit{Data quantity}: the amount of data needed to effectively explore and train models in the expanded input space may be substantial.
+    \item \textit{Large model variance} (overfitting): with the increased complexity of the input space, there is a higher risk of models capturing noise or irrelevant patterns, leading to overfitting and decreased generalization performance.
+\end{itemize}
+
+Our goal is to choose the model with the minimal prediction error, which can be attained by decreasing the variance of the model:
+\begin{itemize}
+    \item \textit{Feature selection}: by carefully designing the feature space, we can choose the most impactful subset from all available features.
+    \item \textit{Dimensionality reduction}: mapping the input space to a lower-dimensional representation can effectively reduce complexity and variance.
+    \item \textit{Regularization}: shrinkage of parameter values towards zero helps control model complexity and mitigate overfitting.
+\end{itemize}
+These approaches are not mutually exclusive and can be combined to enhance model performance.
+
+\subsection{Feature selection}
+The most straightforward approach appears to be comparing all possible combinations of features.
+Given $M$ features, for each $k=1,\dots,M$, we would need to train all $\binom{M}{k}=\frac{M!}{k!(M-k)!}$ models with exactly $k$ features and select the optimal one. 
+However, this procedure quickly becomes computationally impractical.
+
+In practical scenarios, feature selection is often carried out based on the specific model being utilized:
+\begin{itemize}
+    \item \textit{Filter}: features are assessed individually using certain evaluation metrics (e.g., correlation, variance, information gain), and the top $k$ features are selected. 
+        While this method is very fast, it fails to capture any subset of mutually dependent features.
+    \item \textit{Embedded}: feature selection is integrated into the machine learning approach itself (e.g., lasso, decision trees).
+        Although this method is not computationally expensive, the features identified are specific to the chosen learning approach.
+    \item \textit{Wrapper}: a search algorithm is employed to identify a subset of features by iteratively training a model with different feature subsets and evaluating their performance. 
+        This method utilizes either a simpler model or a basic machine learning approach to evaluate the features. 
+        Greedy algorithms are typically employed to search for the best feature subset.
+\end{itemize}
+
+\subsection{Dimensionality reduction}
+Dimensionality reduction aims to decrease the dimensions of the input space, but it differs from feature selection in two significant ways:
+\begin{itemize}
+    \item It utilizes all features and transforms them into a lower-dimensional space.
+    \item It is an unsupervised approach, meaning it doesn't rely on labeled data for training.
+\end{itemize}
+There are numerous methods for performing dimensionality reduction, including:
+\begin{itemize}
+    \item Principal Component Analysis (PCA).
+    \item Independent Component Analysis (ICA).
+    \item Self-Organizing Maps.
+    \item Autoencoders.
+    \item ISOMAP.
+    \item t-SNE.
+\end{itemize}
