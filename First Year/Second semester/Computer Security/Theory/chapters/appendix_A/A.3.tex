@@ -1,0 +1,139 @@
+\section{Syntax}
+
+In the x86 architecture, two primary syntaxes are commonly used:
+\begin{itemize}
+    \item Intel syntax: This is the default syntax in most Windows programs.
+    \item AT\&T syntax: This syntax is default in most UNIX tools.
+\end{itemize}
+The Intel syntax is the simpler of the two. 
+Additionally, in x86, instructions have variable length.
+
+\subsection{Basic instructions}
+\paragraph*{Data transfer}
+Data transfer is accomplished using the following command:
+\begin{verbatim}
+mov destination, source
+\end{verbatim}
+Where:
+\begin{itemize}
+    \item \texttt{source}: immediate value, register, or memory location.
+    \item \texttt{destination}: register or memory location.
+\end{itemize}
+This command facilitates basic load and store operations, allowing for register-to-register, register-to-memory, immediate-to-register, and immediate-to-memory transfers. 
+It's important to note that memory-to-memory transfers are invalid in every instruction.
+
+\paragraph*{Addition and subtraction}
+Addition and subtraction operations are executed using the following commands:
+\begin{verbatim}
+// destination = destination + source
+add destination, source
+// destination = destination - source
+sub destination, source
+\end{verbatim}
+Where: 
+\begin{itemize}
+    \item \texttt{source}: immediate value, register, or memory location
+    \item \texttt{destination}: register or memory location
+\end{itemize}
+It's important to note that the size of the \texttt{destination} operand must be at least as large as the \texttt{source} operand.
+
+\paragraph*{Multiplication}
+Multiplication is performed using the following commands:
+\begin{verbatim}
+// destination = implied_op * source
+mul source
+// signed multiplication
+imul source
+\end{verbatim}
+Here, \texttt{source} represents a register or memory location.
+Depending on the size of \texttt{source}, the implied operands are as follows:
+\begin{itemize}
+    \item First operand: AL, AX, or EAX.
+    \item Destination: AX, DX:AX, EDX:EAX (twice the size of \texttt{source}).
+\end{itemize}
+
+\paragraph*{Division}
+Division is carried out using the following command:
+\begin{verbatim}
+div source
+// signed division
+idiv source
+\end{verbatim}
+Here, \texttt{source} represents a register or memory location. 
+These commands compute both the quotient and remainder. 
+The implied operand for the division operation is EDX:EAX.
+
+\paragraph*{Logical operators}
+To perform logical operations such as negation or bitwise operations, the following commands are used: \texttt{neg}, \texttt{and}, \texttt{or}, \texttt{xor}, and \texttt{not}.
+
+\paragraph*{Compare and test}
+To compare two operands or perform bitwise AND operation between them, the following commands are used:
+\begin{verbatim}
+// computes op1 - op2
+cmp op1, op2
+// computes op1 AND op2
+test op1, op2
+\end{verbatim}
+These operators set the flags ZF (Zero Flag), CF (Carry Flag), and OF (Overflow Flag) based on the result of the operation but discard the actual result.
+
+\paragraph*{Conditional jump}
+Conditional jumps are executed using the following command:
+\begin{verbatim}
+j<cc> address or offset
+\end{verbatim}
+This command jumps to the specified address or offset only if a certain condition \texttt{<cc>} is met. 
+The condition is checked based on one or more status flags of EFLAGS and can include conditions such as O (overflow), NO (not overflow), S (sign), NS (not sign), E (equal), Z (zero), and NE (not equal).
+
+Other possible jump instructions include:
+\begin{verbatim}
+// jump if zero
+jz
+// jump if greater than
+jg
+// jump if less than
+jlt
+\end{verbatim}
+These instructions allow for conditional branching based on specific conditions evaluated by the processor's status flags.
+
+\paragraph*{Unconditional jump}
+Unconditional jumps are executed using the following command:
+\begin{verbatim}
+jmp address or offset
+\end{verbatim}
+This command unconditionally transfers control to the specified address or offset by setting the Instruction Pointer (EIP) to the designated location.
+
+The offset can also be relative, causing the EIP to be incremented or decremented by the specified offset value.
+
+\paragraph*{Load effective address}
+The load effective address instruction is performed with the following syntax:
+\begin{verbatim}
+lea destination, source
+\end{verbatim}
+In this command:
+\begin{itemize}
+    \item \texttt{source} represents a memory location.
+    \item \texttt{destination} denotes a register.
+\end{itemize}
+Functionally similar to a \texttt{mov} instruction, \texttt{lea} doesn't access memory to retrieve a value.
+Instead, it calculates the effective address of the \texttt{source} operand and stores it in the \texttt{destination} register, effectively storing a pointer rather than a value.
+
+\paragraph*{No operations}
+The \texttt{nop} instruction simply advances to the next instruction without performing any operation. 
+Its hexadecimal opcode, \texttt{0x90}, is widely recognized. 
+This command holds significant utility in exploitation scenarios.
+
+\paragraph*{Interrupts and syscall}
+Interrupts return an integer ranging from 0 to 255. 
+System calls are invoked using the instructions \texttt{syscall} in Linux and \texttt{sysenter} in Windows.
+
+\subsection{Conventions}
+In x86 architectures, a convention known as endianness is employed. 
+This convention dictates the sequential ordering of bytes within a data word in memory.
+
+\paragraph*{Big endian}
+Big endian systems store the most significant byte of a word in the lowest memory address.
+
+\paragraph*{Little endian}
+Little endian systems store the least significant byte of a word in the lowest memory address.
+
+Note IA-32 architecture follows the little endian convention.
