@@ -1,0 +1,36 @@
+\section{Spectral density estimation}
+
+Given a stationary stochastic process $y(t)$ and a dataset $\mathcal{D}_N=\left\{ y(1),y(2),\dots,y(n) \right\}$, we aim to estimate the spectral density:
+\[\Gamma_y(\omega)=\sum_{\tau=-\infty}^{+\infty}\gamma_y(\tau)e^{-j\omega\tau}\]
+
+We can estimate this value as:
+\[\hat{\Gamma}_N(\omega)=\sum_{\tau=-N+1}^{N-1}\hat{\gamma}_N(\tau)e^{-j\omega\tau}\]
+The sources of approximation lie in the limits of the sum and the function $\hat{\gamma}_N$. 
+
+\paragraph*{Alternative estimator}
+We can consider an alternative estimator $\hat{\gamma}_N^\prime(\tau)$ instead of $\hat{\gamma}_N(\tau)$: 
+\[\hat{\gamma}_N^\prime(\tau)=\dfrac{1}{N}\sum_{\tau=-N+1}^{N-1} y(t)y(t+\tau)\]
+With this alternative estimator, we can prove that:
+\[\hat{\Gamma}_N^\prime(\omega)=\sum_{\tau=-N+1}^{N-1}\hat{\gamma}_N^\prime(\tau)e^{-j\omega\tau}=\dfrac{1}{N}\left\lvert \sum_{\tau=-N+1}^{N-1}y(t)e^{-j\omega\tau}\right\rvert^2 \]
+The last part is known as the Fast Fourier Transform (FFT), which can be computed very efficiently.
+
+\subsection{Correctness}
+Now, let's check the correctness of the estimator:
+\[\mathbb{E}\left[ \hat{\Gamma}_N(\omega) \right]=\mathbb{E}\left[ \sum_{\tau=-N+1}^{N-1}\hat{\gamma}_N(\tau)e^{-j\omega\tau}\right]=\sum_{\tau=-N+1}^{N-1}\underbrace{\mathbb{E}\left[\hat{\gamma}_N(\tau)\right]}_{\gamma_y(\tau)} e^{-j\omega\tau}=\sum_{\tau=-N+1}^{N-1}\gamma_y(\tau) e^{-j\omega\tau}\neq\Gamma_y(\tau) \]
+This discrepancy arises because the sum's limits are not infinite as in the standard spectrum. 
+However, we can assert that $\mathbb{E}\left[ \hat{\Gamma}_N(\omega) \right]$ tends to the real spectrum as $N$ tends to infinity. 
+Therefore, with a large dataset, this estimator is correct, also termed asymptotically correct.
+
+\subsection{Consistency}
+This estimator remains inconsistent even for ARMA processes, resulting in a spectrum with significant noise.
+
+To improve the final result, we can employ a technique known as regularization. 
+By dividing the dataset into four equal sections, we obtain estimators for each subset:
+\[\hat{\Gamma}_{\frac{N}{4}}^{(1)}(\omega) \qquad \hat{\Gamma}_{\frac{N}{4}}^{(2)}(\omega) \qquad \hat{\Gamma}_{\frac{N}{4}}^{(3)}(\omega) \qquad \hat{\Gamma}_{\frac{N}{4}}^{(4)}(\omega)\]
+Then, we compute a new estimator as the average of these four:
+\[\tilde{\hat{\Gamma}}_N(\omega)=\dfrac{1}{4}\sum_{i=1}^{4}\hat{\Gamma}_{\frac{N}{4}}^{(i)}(\omega)\]
+This results in a smoother spectral density function.
+
+It's worth noting that:
+\[\mathbb{E}\left[\left(\tilde{\hat{\Gamma}}_N(\omega)-\Gamma_y(\omega)\right)^2\right] \approx \dfrac{1}{4}\mathbb{E}\left[\left(\hat{\Gamma}_N(\omega)-\Gamma_y(\omega)\right)^2\right]\]
+Increasing the number of sectors will increase bias and decrease variance.

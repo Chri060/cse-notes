@@ -1,48 +1,29 @@
-\section{Power spectral density}
+\section{Spectral density}
 
-The power spectral density (or spectrum) of a stationary stochastic process is defined as the Fourier transform of its correlation function:
-\[\Gamma (\omega)=\mathcal{F} \left[ \tilde{\gamma}(\tau) \right]=\sum_{\tau = -\infty}^{\infty}\tilde{\gamma}(\tau)e^{-j\omega\tau}\]
-Here, $\omega$ represents the angular frequency measured in $rad/s$. 
-The Fourier series sum exists for stationary processes, specifically those with a correlation function $\tilde{\gamma}(\tau)$ that rapidly tends to 0 as $\tau$ approaches infinity.
+The spectral density of a stochastic stationary process $y(t)$ is expressed as follows:
+\[\Gamma_y(\omega)=\sum_{\tau=-\infty}^{+\infty}\gamma_y(\tau)e^{-j\omega\tau}=\mathcal{F}\left\{ \gamma_y(\tau) \right\}\]
+In simpler terms, it is the Fourier transform of the auto-covariance function $\gamma_y(\tau)$.
 
-A sufficient condition for the existence of the Fourier transform is the absolute convergence of $\tilde{\gamma}(\tau)$:
-\[\sum_{\tau=-\infty}^{\infty}\left\lvert \tilde{\gamma}(\tau) \right\rvert < \infty\]
-The anti-transformation formula establishes a one-to-one correspondence between $\tilde{\gamma}(\tau)$ and $\Gamma (\omega)$: 
-\[\tilde{\gamma}(\tau)=\mathcal{F}^{-1}\left[ \Gamma (\omega) \right]=\dfrac{1}{2\pi}\int_{-\pi}^{\pi}\Gamma(\omega)e^{j\omega\tau}d\omega\]
+This spectral density possesses several key properties:
+\begin{itemize}
+    \item It is a real function of a real variable $\omega$:
+        \[Im(\Gamma_y(\omega))=0\quad\forall\omega\in\mathbb{R}\]
+    \item It is always non-negative:
+        \[\Gamma_y(\omega) \geq 0\quad\forall\omega\in\mathbb{R}\]
+    \item It exhibits symmetry (even function):
+        \[\Gamma_y(\omega)=\Gamma_y(-\omega)\quad\forall\omega\in\mathbb{R}\] 
+    \item It follows a 2$\pi$ periodic pattern: 
+        \[\Gamma_y(\omega)=\Gamma_y(\omega+2\pi k)\quad\forall\omega\in\mathbb{R},k\in\mathbb{Z}\]
+\end{itemize}
+The Nyquist frequency is denoted as $\pi$, implying that $\pi$ equals the maximum value of $\omega$. 
+Consequently,
+\[\omega=\dfrac{2\pi}{T} \leq \pi \rightarrow T_{min}\leq 2\]
+This signifies that a periodic signal must be represented with a minimum period of two samples.
 
-From the definition, we derive that:
-\begin{align*}
-    \Gamma(\omega)  &=\dots+\tilde{\gamma}(-2)e^{j2\omega}+\tilde{\gamma}(-1)e^{j\omega}+\tilde{\gamma}(0)+\tilde{\gamma}(1)e^{-j\omega}+\tilde{\gamma}(2)e^{-j2\omega}+\dots \\
-                    &=\tilde{\gamma}(0)+\tilde{\gamma}(1)(e^{j\omega}+e^{-j\omega})+\tilde{\gamma}(2)(e^{j2\omega}+e^{-j2\omega}) \\
-                    &=\tilde{\gamma}(0)+2\tilde{\gamma}(1)\cos\omega+2\tilde{\gamma}(2)\cos2\omega 
-\end{align*}
-Therefore, the spectrum $\Gamma(\omega)$ is a non-negative, real, even, and periodic function with a period of $2\pi$. 
+\subsection{Inverse transformation}
+It's feasible to derive the covariance function from the spectral density:
+\[\gamma_y(\omega)=\mathcal{F}^{-1}\left(\gamma_y(\omega)\right)=\dfrac{1}{2\pi}\int_{-\pi}^{\pi}\Gamma_y(\omega)e^{j\omega\tau}\,d\omega\]
+This transformation is valid because both $\gamma_y(\omega)$ and $\Gamma_y(\omega)$ encapsulate identical information about the process $y(t)$.
 
-The maximum angular frequency for sinusoidal discrete-time signals is $\omega_{max} = \pi$.
-This is due to the minimum period of a discrete signal, $T = 2 \left(f = \frac{1}{2}\right)$, corresponding to $\omega = \frac{2\pi}{2} = \pi = \omega_{max}$.
-
-For processes with zero expected value, the variance of the process equals the area below the spectral density curve:
-\[\gamma(0)=\tilde{\gamma}(0)=\dfrac{1}{2\pi}\int_{-\pi}^{\pi}\Gamma(\omega)d\omega\]
-This can be directly derived from the anti-transformation formula with $\tau = 0$.
-
-The area below the spectrum in a given angular frequency range represents the contribution to the overall variability of the process at those angular frequencies.
-\begin{example}
-    Consider a white noise with zero mean and variance equal to $\lambda^2$. 
-    Both the covariance and correlation functions are zero everywhere except for $\tau = 0$, where $\gamma(0) = \lambda^2$. 
-    Therefore, $\Gamma(\omega)=\lambda^2$ for all $\omega$: 
-    \[\tilde{\gamma}(\tau)=\gamma(\tau)=\begin{cases}
-        0 \qquad \tau \neq 0 \\
-        \lambda^2 \qquad \tau = 0
-    \end{cases}\]
-    In the frequency domain, this translates to:
-    \[\Gamma(\omega)=\tilde{\gamma}(0)e^{-j\omega 0}=\lambda^2\]
-    This indicates that the power spectral density of a white noise is constant across all frequencies. 
-    In other words, all frequencies contribute equally to the process variability, affirming the absolute unpredictability of a white noise.
-\end{example}
-The spectrum can be equivalently defined in two steps:
-\begin{enumerate}
-    \item Take the (bilateral) Z-transform of the correlation function:
-        \[\Phi(z)=\sum_{\tau=-\infty}^{+\infty}\tilde{\gamma}(\tau)z^{-\tau}\]
-    \item Evaluate $\Phi(z)$ at $z=e^{j\omega}$: 
-        \[\Gamma(\omega)=\Phi(e^{j\omega})\]
-\end{enumerate}
+It's worth noting that the variance determined when $\tau=0$ is equal to:
+\[\gamma_y(0)=\dfrac{1}{2\pi}\int_{-\pi}^{\pi}\Gamma_y(\omega)\,d\omega\]

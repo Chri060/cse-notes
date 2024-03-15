@@ -1,0 +1,21 @@
+\section{Predictor implementation}
+
+We have determined that the general form of the optimal predictor is:
+\[\hat{y}(t+k|t)=\dfrac{F(z)}{C(z)}y(t)\]
+
+Now, let's focus on a specific form of the optimal predictor:
+\[\hat{y}(t+k|t)=\dfrac{1}{1+cz^{-1}}y(t)\]
+For implementation in a program, it needs to be converted into a time-domain representation:
+\[\hat{y}(t+k|t)=y(t)-c\hat{y}(t+k-1|t-1) \]
+This form represents an AutoRegressive model.
+
+However, there's a problem with the second term on the right side of the equation.
+When trying to compute $\hat{y}(-1+k|-1)$ , we encounter an initialization problem because we only have samples for $t\geq 0$.
+
+\paragraph*{Heuristic}
+To solve this problem, a heuristic solution is employed. 
+It sets $\hat{y}=m_y$ when data is not available. 
+This effectively utilizes the trivial predictor.
+
+This heuristic is acceptable due to the asymptotic stability of $\frac{F(z)}{C(z)}$, causing the effect of this initialization to rapidly diminish. 
+Consequently, this approximation becomes negligible as $t$ grows sufficiently large.

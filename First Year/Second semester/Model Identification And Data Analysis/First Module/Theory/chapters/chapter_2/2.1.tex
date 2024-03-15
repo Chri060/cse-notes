@@ -1,75 +1,47 @@
-\section{Prediction problem}
+\section{Introduction} 
 
-To predict the value of $v(t)$ given a set of observations $\left\{v(1), v(2),\dots, v(t-1)\right\}$, we can devise a predictor using the formula:
-\[\hat{v}(t | t-1)=f\left(v(t-1), v(t-2),\dots, v(1)\right)\]
-In this formulation, we impose certain constraints:
-\begin{itemize}
-    \item The function $f$ is linear. 
-    \item Older data have diminishing importance compared to recent ones (finite memory predictor).
-    \item The function remains invariant over time.
-\end{itemize}
-Under these simplifications, the predictor takes the form:
-\[\hat{v}(t | t-1)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)\]
-Here, $v$ is represented as a vector:
-\[v=\begin{bmatrix} a_1 & a_2 & \dots & a_n \end{bmatrix}^T\]
-A reliable prediction is one that yields estimates closely aligned with the actual values.
-The accuracy of these estimates hinges on the parameters $a_i$ in the $v$ vector. 
-Determining these parameter values equates to identifying the model that best characterizes the data distribution. 
-This task translates into an optimization problem.
-
-\subsection{Model quality}
-Uncertainty represents a critical aspect of noise in prediction problems, yet its precise magnitude cannot be predetermined.
-The sole method to calculate an estimate of uncertainty is by comparing known values with those provided by the estimator at corresponding instants.
-\begin{example}
-    Consider the predictor given by:
-    \[\hat{v}(t | t-1)=a_1v(t-1)+a_2v(t-2)+a_3v(t-3)\]
-    The values to be examined are:
-    \begin{itemize}
-        \item $\hat{v}(4 | 3)=v(1)v(2)v(3)$: to be compared with $v(4)$.
-        \item $\hat{v}(5 | 4)=v(2)v(3)v(4)$: to be compared with $v(5)$.
-    \end{itemize}
-\end{example}
-
-After comparing all possible sequences, we can generate a sequence of residuals using the formula:
-\[\varepsilon(i) = v(i) - \hat{v}(i | i - 1) \qquad i = n+1,\dots,N\]
-From this sequence, we seek to find $v$  by minimizing the following function:
-\[\mathcal{J}(v)=\sum_{n+1}^N\varepsilon(i)^2\]
-It's worth noting that the error is squared to ensure it is always considered as positive.
-A predictor is considered effective if the remaining error exhibits no discernible pattern, indicating that any remaining error is attributable solely to white noise.
-\begin{definition}[\textit{White noise}]
-    White noise refers to an error characterized by its lack of correlation between values at different points in time.
+\begin{definition}[\textit{Stochastic process}]
+    A stochastic process (SP) is an infinite sequence of random variables, all defined on the same probabilistic space.
 \end{definition}
-Consequently, if the residual is white noise, it signifies that there's no meaningful information within it that can enhance predictions.
+A stochastic process can be represented as an infinite sequence:
+\[\dots,v(1,s),v(2,s),v(3,s),\dots\]
+Here, $s$ represents the realization of the random experiment, and it is the same for all elements of the sequence.
 
-Finally, to derive the accurate value from an estimate, we must incorporate the residual into the estimate. 
-Thus, the previous formula transforms to:
-\[\hat{v}(t)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\varepsilon(t)\]
-This implies that addressing the prediction problem involves examining a stochastic system.
+In general, each random variable in a sequence is indexed by $t$, representing the sequence index, and denoted by the realization of the random experiment, $s$.
 
-\subsection{Zeta transform}
-The same system can be reformulated using the Z-transform defined as:
-\[V(z)=\mathcal{Z} \left[v(t)\right]\]
-When considering the same system at a time $t-1$ in the Z-transform formulation, we have:
-\[\underbrace{z^{-1}}_{\text{unity delay operator}} \cdot V(z) =\left[v(t-1)\right]\]
-By incorporating the system described above with the time-domain equation:
-\[\hat{v}(t)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\varepsilon(t)\]
-It's feasible to rewrite the same model in the frequency domain with the Z-transform, resulting in:
-\[V(z)=\mathcal{Z}\left[ a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\varepsilon(t) \right]\]
-This simplifies to:
-\[V(z)=a_1z^{-1}V(z)+a_2z^{-2}V(z)+\dots+a_nz^{-n}V(z)+\xi(z) \]
-Note that this formula can also be expressed using operatorial notation:
-\[V(z)=a_1z^{-1}v(t-1)+a_2z^{-2}v(t-2)+\dots+a_nz^{-n}v(t-n)+\xi(t) \]
-Rearranging terms such that all elements multiplied by $V(z)$ are on the left side and the residual $\xi(z)$ is on the right side, we obtain:
-\[V(z)\left(1 -a_1z^{-1}-a_2z^{-2}-\dots-a_nz^{-n}\right)=\xi(z) \]
-Finally, from this expression, we can derive the transfer function as the ratio of $V(z)$ to the residual $\xi(z)$: 
-\[\dfrac{V(z)}{\xi(z)}=\dfrac{1}{1 -a_1z^{-1}-a_2z^{-2}-\dots-a_nz^{-n}}\]
+When we set $s=\bar{s}$, we obtain a deterministic time signal. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\linewidth]{images/outcome.png}
+    \caption{Fixed realization}
+\end{figure}
+Alternatively, if we constrain the value of time to $t=\bar{t}$, we acquire a simple random variable. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\linewidth]{images/time.png}
+    \caption{Fixed time}
+\end{figure}
 
-\subsection{Summary}
-The components of an identification problem consist of:
-\begin{itemize}
-    \item A system $\mathcal{S}$ requiring modeling.
-    \item A model $\mathcal{M}$ to be ascertained, describing the system.
-    \item An identification algorithm $\mathcal{J}$ governing data processing.
-    \item An identification experiment $\mathcal{E}$ providing the data.
-\end{itemize}
-From these elements, it's crucial to emphasize that the model cannot convey more information than what is inherent in the data.
+\begin{definition}[\textit{Signal equivalence}]
+    Two signals are considered equivalent from a stochastic perspective if they are realizations of the same stochastic process.
+\end{definition}
+
+\paragraph*{Wide-sense characterization}
+A stochastic process is fully characterized by the probability distribution of $v(t,s)$.
+ Wide-sense characterization is the description of a stochastic process solely through its mean and covariance functions.
+
+\subsection{Mean value}
+The mean value of a stochastic process $v(t,s)$ is defined as:
+\[m(t)=\mathbb{E}\left[ v(t,s) \right]=\int_{\mathbb{P}}v(t,s)pdf(s)ds\]
+Graphically, the mean value can be computed by inspecting each time instant and determining the average point for each.
+
+\subsection{Covariance function}
+The covariance of a stochastic process $v(t,s)$ is defined as:
+\[\gamma(t_1,t_2)=\mathbb{E}\left[ \left(v(t_1,s)-m(t_1)\right)\left(v(t_2,s)-m(t_2)\right) \right]\]
+This function expresses the degree of correlation between two points at time instants $t_1$ and $t_2$.
+
+\paragraph*{Variance}
+When the two time instants coincide ($t_1=t_2=t$), we have:
+\[\gamma(t_1,t_2)=\mathbb{E}\left[ \left(v(t_1,s)-m(t_1)\right)\left(v(t_2,s)-m(t_2)\right) \right]=\mathbb{E}\left[ \left(v(t,s)-m(t)\right)^2 \right] =\text{Var}\left[v(t,s)\right]=\gamma(\bar{s})\]
+This function is referred to as the variance. 
+It contains information about the variability of the stochastic process around its mean.

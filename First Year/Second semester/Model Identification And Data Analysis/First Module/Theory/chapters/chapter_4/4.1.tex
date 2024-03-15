@@ -1,61 +1,54 @@
-\section{Estimation of mean and covariance function}
+\section{Possible representations}
 
-Let $v(t)$ represent a stationary stochastic process with unknown probabilistic properties, for which we have a finite realization $\left\{ v(1),v(2),\dots,v(n) \right\}$. 
-Our objective is to estimate the probabilistic properties of $v(t)$ from this data:
-\begin{itemize}
-    \item \textit{Mean}: $\mu=\mathbb{E}\left[ v(t) \right]\rightarrow\hat{\mu}=\hat{\mu}_N\left( v(1),v(2),\dots,v(N) \right)$
-    \item \textit{Autocovariance}: $\gamma(\tau)=\mathbb{E}\left[\left(v(t)-\mu\right)\left(v(t-\tau)-\mu\right)\right] \rightarrow \hat{\gamma}(\tau)=\hat{\gamma}_N\left(\tau;v(1),v(2),\dots,v(n)\right)$
-\end{itemize}
-The functions $\hat{\mu}$ and $\hat{\gamma}(\tau)$ are derived from the available data and are referred to as sample estimators.
-Their primary objective is to provide estimates that closely match the underlying probabilistic properties being estimated, regardless of the specific data sequence available.
+An ARMA process can be expressed equivalently in various representations:
+\begin{enumerate}
+    \item Time domain representation: 
+        \[y(t)=a_1y(t-1)+\dots+a_my(t-m)+c_0e(t)+\dots+c_ne(t-n) \]
+    \item Operatorial representation: 
+        \[y(t)=\dfrac{C(z)}{A(z)}e(t)\]
+    \item Probabilistic representation: 
+        \[m_y,\gamma_y(\tau)\]
+    \item Frequency domain representation: 
+        \[m_y,\Gamma_y(\omega)\]
+\end{enumerate}
 
-\subsection{Mean function}
-A natural sample estimator for the mean is:
-\[\hat{\mu}_N=\dfrac{1}{N}\sum_{t=1}^Nv(t)\]
-It's important to note that $\hat{\mu}_N$ is a random variable because it depends on the realization of  $v(t)$. 
-\begin{definition}[\textit{Unbiased estimator}]
-    An estimator is unbiased if its expected value (taken over all possible finite realizations of $v(t)$) equals the property being estimated.
-\end{definition}
-For our estimator to be unbiased, we require $\mathbb{E}\left[ \hat{\mu}_N \right]=\mu$. 
-In our case:
-\[\mathbb{E}\left[ \hat{\mu}_N \right]=\mathbb{E}\left[ \dfrac{1}{N}\sum_{t=1}^Nv(t) \right]=\dfrac{1}{N}\sum_{t=1}^N\mathbb{E}\left[ v(t) \right]=\dfrac{1}{N}\sum_{t=1}^N \mu =\mu\]
-Consider a fixed $s = \bar{s}$, where the process realization is constant over time:
-\begin{itemize}
-    \item $\hat{\mu}_N=\dfrac{1}{N}\sum_{t=1}^Nv(t,\bar{s})=\dfrac{1}{N}\sum_{t=1}^Nv(\bar{s})=v(\bar{s})$
-    \item $\mu=\mathbb{E}\left[v(t,s)\right]=\mathbb{E}\left[v(s)\right]=0$
-\end{itemize}
-While $\hat{\mu}_N$  is unbiased, it may not provide a good estimate of the expected value of $v(t)$, even with infinite data.
+\subsection{Canonical representation}
+\paragraph*{Equivalent form one}
+Let's introduce a parameter $\alpha \in \mathbb{R}$ and define a process as:
+\[y(t)=W(z)\xi(t)\]
+We can express it as:
+\[y(t)=W(z)\xi(t)=W(z)\dfrac{\alpha}{\alpha}\xi(t)=\tilde{W}(z)\tilde{\xi}(t)\]
+Here, $\tilde{W}(z)=\frac{1}{\alpha}W(z)$, and $\tilde{\xi}\sim WN(0,\alpha^2,\lambda^2)$. 
 
-We need another property to ensure a good estimate. 
-\begin{definition}[\textit{Consistent estimator}]
-    An estimator is consistent if the variance of its estimation error tends to zero as the data size tends to infinity:
-    \[\mathbb{E}\left[\left(\hat{\mu}_N-\mu\right)^2\right]\overset{N\rightarrow\infty}{\longrightarrow}0\]
-\end{definition}
-This property doesn't hold for all stationary processes. 
-A good estimator satisfies both correctness and consistency.
-\begin{example}
-    Consider the constant process $v(t,s)=v(s)$, where $v(s) \sim N(0,1)$: 
-    \[\mathbb{E}\left[\left(\hat{\mu}_N-\mu\right)^2\right]=\mathbb{E}\left[\left(\dfrac{1}{N}\sum_{t=1}^{N}v(s)-0\right)^2\right]=\mathbb{E}\left[v(s)^2\right]=1\neq 0\]
-\end{example}
+\paragraph*{Equivalent form two}
+Consider the process defined as:
+\[y(t)=W(z)\xi(t)\]
+We can represent it as:
+\[y(t)=W(z)\xi(t)=W(z)\dfrac{z^n}{z^n}\xi(t)=\tilde{W}(z)\tilde{\xi}(t)\]
+Here, $\tilde{W}(z)=z^nW(z)$, and $\tilde{\xi}=\xi(t-n)$. 
 
-For stationary ARMA processes, the mean estimator is consistent.
+\paragraph*{Equivalent form three}
+Let's introduce a complex number $p$ such that $\left\lvert p \right\rvert < 1$ and define a process as:
+\[y(t)=W(z)\xi(t)\]
+We can rewrite it as:
+\[y(t)=W(z)\xi(t)=W(z)\dfrac{z-p}{z-p}\xi(t)=\tilde{W}(z)\xi(t)\]
+Here, $\tilde{W}(z)=W(z)\frac{z-p}{z-p}$. 
 
-\subsection{Covariance function}
-Let $v(t)$ be a stationary stochastic process with a zero mean. 
-In this scenario:
-\[\gamma(\tau)=\tilde{\gamma}(\tau)=\mathbb{E}\left[ v(t)v(t-\tau) \right]=\mathbb{E}\left[v(t)v(t+\tau)\right]\]
-The sample estimator of $\gamma(\tau)$ is given by: 
-\[\hat{\gamma}_N(\tau)=\dfrac{1}{N-\tau}\sum_{t=1}^{N-\tau}v(t)v(t+\tau) \qquad 0 \leq \tau N-1\]
-It's noteworthy that given $\left\{v(1), v(2), \dots, v(N)\right\}$, we have:
-\begin{itemize}
-    \item $\hat{\gamma}_N(0)$ is computed from a sum of $N$ elements.
-    \item $\hat{\gamma}_N(1)$ is computed from a sum of $N-1$ elements.
-    \item $\hat{\gamma}_N(N-1)$ is computed from just one element.
-\end{itemize}
-The accuracy of $\hat{\gamma}_N(\tau)$ decreases as $\tau$ (the approximation is reliable only for $\tau \ll N$).
-The provided sample estimator $\hat{\gamma}_N(\tau)$ is both correct and consistent for ARMA processes.
+\paragraph*{Equivalent form four}
+Consider the process defined as:
+\[y(t)=W(z)\xi(t)\]
+Suppose $W(z)=W_1(z)(z-q)$, then:
+\[y(t)=W(z)\xi(t)=W_1(z)(z-q)\dfrac{z-\frac{1}{q}}{z-q}\xi(t)=W_(z)\left(z-\dfrac{1}{q}\right)\xi(t)=\tilde{W}(z)\tilde{\xi}(t)\]
+Here, $\tilde{\xi}(z)=\dfrac{z-q}{z-\frac{1}{q}}\xi(t)$. 
+The fraction $\frac{z-q}{z-\frac{1}{q}}$ is called an all-pass filter.
 
-Another estimator of $\gamma(\tau)$ can be considered:
-\[\hat{\gamma}_N^{\prime}(\tau)=\dfrac{1}{N}\sum_{t=1}^{N-\tau}v(t)v(t+\tau) \qquad 0 \leq \tau N-1\]
-This estimator is biased for finite $N$, but it becomes unbiased as $N\rightarrow\infty$ (asymptotically correct).
-Only $\hat{\gamma}_N^{\prime}(\tau)$ satisfies the positive semi-definiteness property of a covariance function.
+\paragraph*{Canonical representation}
+\begin{theorem}[Spectral factorization]
+    Let $y(t)$ be a stationary stochastic process with a rational spectral density $\Gamma_y(\omega)$, there exists a unique pair $\xi(t)$ and $W(z)$ such that $y(t)=W(z)\xi(t)$ if and only if:
+\end{theorem}
+\begin{enumerate}
+    \item \textit{$C(z)$ and $A(z)$ are monic, i.e., $c_0=1$ and $a_0=1$}. 
+    \item \textit{$C(z)$ and $A(z)$ have null relative degree (they have the same degree)}.
+    \item \textit{$C(z)$ and $A(z)$ are co-prime (they do not have common factors)}.
+    \item \textit{The absolute value of poles and zeros of $W(z)$ is less than one}.
+\end{enumerate}

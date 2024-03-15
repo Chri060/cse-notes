@@ -1,94 +1,123 @@
-\section{Spectral factorization}
+\subsection{Optimal predictor}
 
-Here are four distinct representations of a stochastic process resulting from filtering white noise through a stable digital filter:
+The quality of prediction can be quantified through the Mean Square Prediction Error (MSPE), defined as:
+\[\text{MSPE}=\mathbb{E}\left[ \left(y(t+k)-\hat{y}(t+k|t) \right)^2 \right]\]
+
+\paragraph*{Minimization}
+Our goal is to minimize the squares of prediction errors. 
+The prediction depends on past samples through a function:
+\[\hat{y}(t+k|t)=f(y(t),y(t-1),\dots)\]
+Therefore, we would need to minimize all suitable functions for prediction and select the best one, which is generally impractical due to the vast number of possible functions. 
+However, by constraining ourselves to linear predictors, this task becomes more manageable.
+
+Linear predictors take the form:
+\[\hat{y}(t+k|t)=\alpha_0y(t)+\alpha_1y(t-1)+\dots=\sum_{i=0}^{+\infty}\alpha_iy(t-i)\]
+Here, $\alpha_i \in \mathbb{R}$ such that $\sum_{i=0}^{+\infty}\alpha_i<+\infty$. 
+We can express this general formulation using operatorial representation as:
+\[\hat{y}(t+k|t)=\left(\alpha_0+\alpha_1z^{-1}\alpha_2z^{-2}+\dots\right)y(t)=F_{\alpha}(z)y(t)\]
+We assume that $\hat{y}(t+k|t)$ is the steady-state output of a linear digital filter with transfer function $F_{\alpha}(z)$.
+
+\subsection{Optimal predictor design}
+We aim to determine the optimal coefficients $\alpha_0^{\circ},\alpha_1^{\circ},\alpha_2^{\circ},\dots$ of the linear predictor:
+\[\hat{y}(t+k|t,\alpha)=\sum_{i=0}^{+\infty}\alpha_iy(t-i)\]
+such that the mean squared prediction error is minimized:
+\[\min_{\alpha_0,\alpha_1,\alpha_2,\dots}\mathbb{E}\left[\left( y(t+k)-\hat{y}(t+k|t,\alpha) \right)^2\right] \]
+
+We begin by considering a generic ARMA process:
+\[y(t)=W(z)e(t) =\sum_{i=0}^{+\infty}w_ie(t-i) \qquad e(t)\sim WN(0,\lambda^2)\]
+When we perform a time shift, we have:
+\[y(t-1)=\sum_{i=0}^{+\infty}w_ie(t-1-i)\]
+We can then insert this expression into the predictor, resulting in:
+\begin{align*}
+    \hat{y}(t+k|t)  &=\alpha_0\sum_{i=0}^{+\infty}w_ie(t-i)+\alpha_1\sum_{i=0}^{+\infty}w_ie(t-1-i)+\dots \\
+                    &=\beta_0e(t)+\beta_1e(t-1)+\dots \\
+                    &=\sum_{i=0}^{+\infty}\beta_ie(t-1)
+\end{align*}
+where the factor $\beta$ is found by grouping all elements referring to the same time instant.
+
+We can reformulate the optimization problem with respect to $\alpha$ as a new optimization problem with respect to $\beta$. 
+This can be expressed as:
+\[\min_{\beta_0,\beta_1,\beta_2,\dots}\mathbb{E}\left[\left( y(t+k)-\hat{y}(t+k|t,\beta) \right)^2\right]\]
+
+Considering that $y(t+k)$ admits the Moving Average representation, we write:
+\[y(t+k)=\sum_{i=0}^{+\infty}w_ie(t+k-i)=\underbrace{\sum_{j=0}^{k-1}w_je(t+k-j)}_{\text{future } e(t)} +\underbrace{\sum_{i=0}^{+\infty}w_{k+i}e(t-i)}_{\text{past and present } e(t)} \]
+
+We can express the prediction error as follows:
+\begin{align*}
+    \mathbb{E}\left[ \left(\varepsilon(t+k|t)\right)^2 \right]  &= \mathbb{E}\left[ \left(\sum_{i=0}^{k-1}w_je(t+k-i)+\sum_{i=0}^{+\infty}w_{k+i}e(t-i)-\sum_{i=0}^{+\infty}\beta_ie(t-1)\right)^2 \right] \\
+                                                                &= \mathbb{E}\left[ \left(\sum_{i=0}^{k-1}w_je(t+k-i)+\sum_{i=0}^{+\infty}w_{k+i}e(t-i)-\beta_ie(t-1)\right)^2 \right] 
+\end{align*}
+Expanding the square, we have:
+\begin{multline*}
+    \mathbb{E}\left[ \left(\varepsilon(t+k|t)\right)^2 \right] = \mathbb{E}\left[ \underbrace{\left(\sum_{i=0}^{k-1}w_je(t+k-i)\right)^2}_{\beta \text{ independent}}\right]  +\mathbb{E}\left[\underbrace{\left(\sum_{i=0}^{+\infty}w_{k+i}e(t-i)-\beta_ie(t-1)\right)^2}_{\beta \text{ dependent}}\right]  +\\ +2\mathbb{E}\left[\underbrace{\left(\sum_{i=0}^{k-1}w_je(t+k-i)\sum_{i=0}^{+\infty}w_{k+i}e(t-i)-\beta_ie(t-1)\right)}_0 \right]                       
+\end{multline*}
+The first term cannot be minimized since there will always be some error in predicting future samples, while the second term depends on $\beta$, requiring minimization to solve the optimization problem:
+\[\sum_{i=0}^{+\infty}\beta_ie(t-i)=\sum_{i=0}^{+\infty}w_{k+i}e(t-i)\]
+
+Thus, an optimal predictor satisfies:
+\[\beta_i^\circ=w_{k+i} \qquad i=0,1,2,\dots\]
+This is termed the optimal predictor from the White Noise, and its expression is:
+\[\hat{y}^\circ=\sum_{i=0}^{+\infty}w_{k+i}e(t-i)\]
+
+\paragraph*{Operatorial representation}
+The operatorial representation of a process is:
+\[W(z)=\dfrac{C(z)}{A(z)}=w_0+w_1z^{-1}+\dots\]
+By performing long division between $C(z)$ and $A(z)$, we obtain:
+\[\dfrac{C(z)}{A(z)}=E(z)+\dfrac{z^{-k}F(z)}{A(z)}\]
+Here, $k$ is the number of steps in the long division.
+This equation is termed the Diophantine equation, useful for rewriting the process at a specific time lag $k$ as:
+\begin{align*}
+    y(t+k)  &=\dfrac{C(z)}{A(z)}e(t+k) \\
+            &=\left[E(z)+\dfrac{z^{-k}F(z)}{A(z)}\right]e(t+k) \\
+            &=E(z)e(t+k)+\dfrac{z^{-k}F(z)}{A(z)}e(t+k) \\
+            &=E(z)e(t+k)+\dfrac{F(z)}{A(z)}e(t) \\
+            &=\underbrace{e_0e(t+k)+e_1e(t+k-1)+...+e_{k-1}e(t+1)}_{\text{future } e(t)} +\underbrace{\dfrac{F(z)}{A(z)}e(t)}_{\text{past and present } e(t)} 
+\end{align*}
+Thus, the optimal predictor in this representation is:
+\[\hat{y}(t+k|t)=\dfrac{F(z)}{A(z)}e(t)\]
+characterized by a finite set of coefficients (those of $F(z)$ and $A(z)$).
+
+\subsection{White Noise reconstruction}
+To practically utilize the optimal predictor we've derived, we require the White Noise values at each time step. However, obtaining these values directly is often impractical. 
+Therefore, we need to reconstruct plausible White Noise values from the available samples.
+
+The ARMA process under consideration is formulated as:
+\[y(t)=W(z)e(t)=\dfrac{C(z)}{A(z)}e(t)\]
+Given our assumption that the zeros lie inside the unit circle and that $W(z)$ is asymptotically stable, we can invert the formula to find:
+\[e(t)=\dfrac{A(z)}{C(z)}y(t)\]
+The transfer function $W(z)^{-1}$ is termed the whitening filter.
+
+\paragraph*{Optimal predictor}
+Finally, we can express the optimal predictor from data as:
+\[\hat{y}(t+k|t)=\dfrac{F(z)}{C(z)}y(t)\]
+
+\subsection{Summary}
+We summarize our findings as follows:
 \begin{itemize}
-    \item Time-domain representation: 
-        \[V(T)=a_1v(t-1)+\dots+a_{n_a}(t-n_a)+c_o\eta(t-1)+\dots+c_{n_c}\eta(t-n_c)\]
-    \item Operatorial representation: 
-        \[v(t)=\dfrac{C(z)}{A(z)}\eta(t)\]
-    \item Probabilistic representation:
-        \[\mu,\gamma(\tau)\]
-    \item Frequency domain representation:
-        \[\mu,\Gamma(\omega)\]
+    \item The optimal predictor, denoted as $\hat{y}(t+k|t,s)$, can be expressed as $\dfrac{F(z)}{C(z)}y(t,s)$. 
+    \item Due to the presence of roots of $C(z)$ inside the unit circle, $\hat{y}(t+k|t)$ represents a stationary stochastic process.
+        Thus, we can represent it equivalently as:
+        \begin{itemize}
+            \item $\hat{y}(t+k|t)=\dfrac{F(z)}{C(z)}y(t)$. 
+            \item $\hat{y}(t+k|t-k)=\dfrac{F(z)}{C(z)}y(t-k)$. 
+        \end{itemize}
 \end{itemize}
-These representations are interchangeable, allowing for translation between them. 
-While calculating the spectrum of a process from the transfer function has been addressed, in practice, it's often more useful to do the reverse. 
-Given data with specific spectral characteristics, the challenge lies in describing the generating process, or finding the pair $(W(z), \eta(\cdot))$.
 
-However, not every spectrum corresponds to a transfer function due to the constraints on spectrum shapes. 
-Furthermore, even if a transfer function exists, it may not be unique. 
-Multiple combinations of transfer functions and white noise can represent the same process.
+\subsection{Optimal prediction error}
+The optimal prediction error is defined as:
+\[\varepsilon(t+k|t)=E(z)e(t+k)\]
+Alternatively, it can be expressed as:
+\[\varepsilon(t|t-k)=E(z)e(t)\]
+This equivalence holds because the prediction error is also a stationary stochastic process, specifically an MA($-1$).
 
-\subsection{Representation choices}
-Consider a generic process:
-\[v(t)=W(z)\eta(t) \]
-Here, $\eta(\cdot)\sim WN(o,\lambda^2)$
-The complex spectrum is given by:
-\[\Phi(z)=W(z)W(z^{-1})\lambda^2\]
-The following are examples of equivalent representations for $v(t)=\tilde{W}(z),\tilde{\eta}(t)$ where $\tilde{\eta}\sim WN(0,\tilde{\lambda^2})$: 
-\begin{enumerate}
-    \item Multiplication by a constant $\alpha$:  
-        \[\tilde{W}(z)=\dfrac{1}{\alpha}W(z) \qquad \tilde{\eta}\sim WN(0,\alpha^2\lambda^2)\]
-        To demonstrate their equivalence, we show they have the same spectrum:
-        \[\tilde{\Phi}(z)=\tilde{W}(z)\tilde{W}(z^{-1})\tilde{\lambda}^{2}=\dfrac{1}{\alpha}W(z)\cdot\dfrac{1}{\alpha}W(z^{-1})\cdot\alpha^2\lambda^2=W(z)W(z^{-1})\lambda^2=\Phi(z)\]
-    \item Multiplication by $z^n$: 
-        \[\tilde{W}(z)=z^nW(z) \qquad \tilde{\eta}=z^{-n}\eta(t)=\eta(t-n)\]
-        To demonstrate their equivalence, we show they have the same spectrum:
-        \[\tilde{\Phi}(z)=\tilde{W}(z)\tilde{W}(z^{-1})\lambda^{2}=z^nW(z)z^{-n}W(z^{-1})\lambda^2=W(z)W(z^{-1})\lambda^2=\Phi(z)\]
-    \item Multiplication of both the numerator and the denominator by the same factor:
-        \[\tilde{W}(z)=W(z)\dfrac{z-p}{z-p} \qquad \tilde{\eta}=\eta(t)\]
-        To demonstrate their equivalence, we show they have the same spectrum, obtained after simplification:
-        \[\tilde{\Phi}(z)=\dfrac{z-p}{z-p}\Phi(z)=\Phi(z)\]
-    \item Multiplication by an all-pass filter:
-        \[\tilde{W}(z)=W(z)T(z) \qquad \tilde{\eta}=\eta(t)\]
-        Here, $T(z)=\dfrac{1}{q}\left(\dfrac{z-q}{z-\frac{1}{q}}\right)$
-        To demonstrate their equivalence, we show they have the same spectrum: 
-        \[\tilde{\Phi}(z)=\tilde{W}(z)\tilde{W}(z^{-1})\lambda^{2}=W(z)T(z)T(z^{-1})W(z^{-1})\lambda^2=W(z)W(z^{-1})\lambda^2=\Phi(z)\]
-\end{enumerate}
-We require a representation that is more suitable than others for solving the prediction problem. 
-The following theorem facilitates the selection of the so-called canonical representation, which eliminates all potential sources of redundancy as outlined.
-\begin{theorem}
-    Let $v(t)$ be a stationary stochastic process with a rational spectrum.
-    There exists a unique pair $\left\{ \hat{W}(z)=\dfrac{C(z)}{A(z)},\xi(t) \right\}$ such that:
-    \begin{enumerate}
-        \item $C(z)$ and $A(z)$ are monic (with the first coefficient being one).
-        \item $C(z)$ and $A(z)$ have the same degree (relative degree equal to zero).
-        \item $C(z)$ and $A(z)$ are co-prime (no common roots).
-        \item $C(z)$ and $A(z)$ have all their roots in the closed and open unit circle, respectively ($\left\lvert z \right\rvert \leq 1, \forall z \text{ s.t. } C(z)=0$, $\left\lvert z \right\rvert < 1, \forall z \text{ s.t. } A(z)=0$).
-    \end{enumerate}
-\end{theorem}  
-The function $\hat{W}(z)$ is termed the canonical spectral factor.
-\begin{example}
-    Let's examine the ARMA(1,1) process given by:
-    \[v(t)=av(t-1)+\eta(t)+c\eta(t-1) \qquad \eta(\cdot)\sim WN(0,\lambda^2)\]
-    For this process to be stationary, the condition $\left\lvert a \right\rvert < 1$ must be satisfied. 
-    The spectrum is given by:
-    \[\Gamma(\omega)=\dfrac{1+c^2+2c\cos(\omega)}{1+a^2-2a\cos(\omega)}\lambda^2\]
-    If $\left\lvert c\right\rvert \leq 1$, the representation is canonical:
-    \[\hat{W}(z)=W(z)=\frac{1+cz^{-1}}{1-az^{-1}} \qquad \xi(\cdot)=\eta(\cdot)\]
-    On the other hand, if $\left\lvert c\right\rvert > 1$, the canonical representation changes to:
-    \[\hat{W}(z)=W(z)=\frac{1+\frac{1}{c}z^{-1}}{1-az^{-1}} \qquad \xi(\cdot)\sim WN(0, c^2\lambda^2)\]
-\end{example}
-\begin{example}
-    Let's examine the given process:
-    \[v(t)=\eta_1(t-1)+\eta_2(t)-\eta_2(t-1)\]
-    where $\eta_1\sim WN(0,lambda_1^2)$ and $\eta_2\sim WN(0,lambda_2^2)$ are independent white noise processes.
-    This process is constructed as the sum of two independent and stationary processes, thus it is also stationary.
-    The auto-covariance function is null for $\left\lvert \tau\right\rvert  > 1$. 
-    The process can be reformulated as an MA(1):
-    \[v(t)=\xi (t)+c\xi (t-1)\]
-    where $\xi (\cdot)\sim WN(0,\lambda^2)$, provided it has the same spectral characteristics, or equivalently, the same auto-covariance function (same covariance implies same spectral representation).
-    Now, considering the auto-covariance function:
-    \[\gamma(0)=(1+c^2)\lambda^2=\lambda_1^2+2\lambda_2^2\]
-    \[\gamma(1)=c\lambda^2=-\lambda_2^2\]
-    Solving this system of equations yields only one solution with $\left\lvert c \right\rvert  < 1$ to this system of equations. 
-    For instance, if $\lambda_1^2=\frac{1}{4}$ and $\lambda_2^2=\frac{1}{2}$, we have:
-    \[\begin{cases}
-        (1+c^2)\lambda^2=\frac{5}{4} \\
-        c\lambda^2=-\frac{1}{2}
-    \end{cases} \implies \begin{cases}
-        c=-\frac{1}{2} \quad \lambda^2=1 \\
-        c=-2 \quad \lambda^2=\frac{1}{4}
-    \end{cases}\]
-    Note that only the first solution is canonical.
-\end{example}
+\paragraph*{Variance function}
+In the optimal scenario, the variance of the prediction error is given by:
+\[\text{Var}\left[\varepsilon(t+k|t)\right]=\left(w_0^2+w_1^2+\dots+w_{k-1}^2\right)\lambda^2\]
+Since we're dealing with a stationary stochastic process, the variance must converge to a specific value, namely the steady-state variance of the process.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/var.png}
+    \caption{Variance of the optimal predictor}
+\end{figure}
+Generally, the following inequality holds:
+\[\text{Var}\left[e(t)\right] \leq \text{Var}\left[\varepsilon(t+k|t)\right] < \text{Var}\left[y(t)\right]\]

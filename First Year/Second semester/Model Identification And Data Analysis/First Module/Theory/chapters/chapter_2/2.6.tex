@@ -1,57 +1,76 @@
-\section{Purely deterministic processes}
+\section{ARMA process}
 
-A purely deterministic process lacks any white noise component and can be expressed as:
-\[\tilde{v}(t)=a_1\tilde{v}(t-1)+a_2\tilde{v}(t-2)+\dots+a_n\tilde{v}(t-n)\]
-In operator notation, this becomes:
+We can define a process that combines elements from both the AutoRegressive (AR) and Moving Average (MA) processes as follows:
+\[y(t)=a_1y(t-1)+a_2y(t-2)+\dots+a_my(t-m)+c_0e(t)+c_1e(t-1)+\dots+c_ne(t-n) \]
+Here, $e(t)\sim WN(0,\lambda^2)$.
+
+This process comprises two components: one being the AR($m$) process and the other being the MA($n$) process. 
+It is denoted as an ARMA($m,n$) process.
+Since it combines elements from two distinct processes, we can make the following observations:
+\begin{itemize}
+    \item The MA($n$) process is equivalent to an ARMA($0,n$) process.
+    \item The AR($m$) process is equivalent to an ARMA($m,0$) process. 
+\end{itemize}
+This relationship is illustrated in the diagram below:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\linewidth]{images/set.png}
+    \caption{Inclusion of ARMA processes}
+\end{figure}
+
+\subsection{Operatorial representation}
+Given an ARMA($m,n$) process defined as:
+\[y(t)=a_1y(t-1)+a_2y(t-2)+\dots+a_my(t-m)+c_0e(t)+c_1e(t-1)+\dots+c_ne(t-n)\]
+Here, $e(t)\sim WN(0,\lambda^2)$.
+
+We can rewrite it using operatorial representation as:
+\[y(t)=a_1z^{-1}y(t)+a_2z^{-2}y(t)+\dots+a_mz^{-m}y(t)+c_0e(t)+c_1z^{-1}e(t)+\dots+c_nz^{-n}e(t)\]
+Rearranging terms, we get:
+\[\left(1- a_1z^{-1}-a_2z^{-2}-\dots-a_mz^{-m}\right)y(t)=\left(c_0+c_1z^{-1}+\dots+c_nz^{-n}\right)e(t)\]
+Finally, we can express $y(t)$ in terms of $e(t)$ using the transfer function notation:
+\[y(t)=\dfrac{c_0+c_1z^{-1}+\dots+c_nz^{-n}}{1- a_1z^{-1}-a_2z^{-2}-\dots-a_mz^{-m}}e(t)=\dfrac{C(z)}{A(z)}e(t)\]
+Here, $C(z)$ and $A(z)$ are polynomials representing the coefficients of the MA and AR parts, respectively. 
+This ratio, denoted as $W(z)$, is a discrete-time transfer function. 
+This operator acts as a digital filter, transforming the input noise sequence $e(t)$ into the output sequence $y(t)$.
+
+\subsection{Mean value}
+Given an ARMA($m,n$) model defined as:
+\[y(t)=a_1y(t-1)+a_2y(t-2)+\dots+a_my(t-m)+c_0e(t)+c_1e(t-1)+\dots+c_ne(t-n)\]
+where $e(t)\sim WN(0,\lambda^2)$, we can compute its mean as follows:
 \begin{align*}
-    \tilde{v}(t)    &= a_1z^{-1}\tilde{v}(t)+a_2z^{-2}\tilde{v}(t)+\dots+a_nz^{-n}\tilde{v}(t) \\
-    \tilde{v}(t)    &= \underbrace{\left(a_1z^{-1}+a_2z^{-2}+\dots+a_nz^{-n}\right)}_{P(z)} \tilde{v}(t) \\
-    0               &= P(z)\tilde{v}(t)
+    \mathbb{E}\left[y(t)\right] &= \mathbb{E}\left[a_1y(t-1)+\dots+a_my(t-m)+c_0e(t)+\dots+c_ne(t-n)\right] \\
+                                &= a_1\mathbb{E}\left[y(t-1)\right]+\dots+a_m\mathbb{E}\left[y(t-m)\right] +c_0\underbrace{\mathbb{E}\left[e(t)\right]}_0 +\dots+c_n\underbrace{\mathbb{E}\left[e(t-n)\right]}_0
 \end{align*}
-This implies that $P(z)$ acts as a filter for $\tilde{v}(t)$. 
-Consequently, we can predict all future values exactly.
-The only restriction is that if such filtering is possible, then the function $\tilde{v}(t)$ has the following form:
-\[\tilde{v}(t)=\alpha_1\lambda_1^t+\alpha_2\lambda_2^t+\dots+\alpha_n\lambda_n^t\]
-Here, $\lambda_i$ are the zeros of $P(z)$, with $\left\lvert \lambda_i\right\rvert < 1$ for all $i$.
-\begin{example}
-    Consider a constant process $v(t)=v(t-1)$, which can be rewritten as $v(t)=\alpha 1^t$. 
-    To extract the $P(z)$ function, we proceed as follows:
-    \begin{align*}
-        v(t)    &=z^{-1}v(t) \\
-        0       &=v(t) - z^{-1}v(t) \\
-        0       &=\left(1-z^{-1}\right)v(t)
-    \end{align*}
-    Hence, $P(z)=\left(1-z^{-1}\right)$. 
-\end{example}
-\begin{example}
-    Consider a constant alternated process $v(t)=-v(t-1)$, which can be rewritten as $v(t)=\alpha (-1)^t$. 
-    To extract the $P(z)$ function, we proceed as follows:
-    \begin{align*}
-        v(t)    &=-z^{-1}v(t) \\
-        0       &=z^{-1}v(t) + v(t) \\
-        0       &=\left(1+z^{-1}\right)v(t)
-    \end{align*}
-    Hence, $P(z)=\left(1+z^{-1}\right)$. 
-\end{example}
-\begin{example}
-    Consider a constant sinusoidal process $v(t)=A \cos \left( \omega_0 t\right)$. 
-    We can derive $P(z)$ as follows: 
-    \begin{align*}
-        P(z) &= \left(z-e^{j\omega_0}\right)\left(z-e^{-j\omega_0}\right) \\
-             &= z^2+1-z\left(e^{j\omega_0}+e^{-j\omega_0}\right) \\
-             &= z^2+1-2z\left(\dfrac{e^{j\omega_0}+e^{-j\omega_0}}{2}\right) \\
-             &= z^2+1-2\cos (\omega_0)z
-    \end{align*}
-    To verify if $P(z)v(t)=0$, we perform a time shift of two:
-    \begin{align*}
-        P(z)v(t)&= \left(1-2\cos (\omega_0)z^{-2} z^{-2} \right)v(t) \\
-                &= A \cos(\omega_0 t)-2\cos (\omega_0)A\cos(\omega_0(t-1))+A\cos(\omega_0(t-2)) \\
-                &= A \cos(\omega_0 t)-2A \left[ \dfrac{1}{2}\cos\left( \omega_0t\right) +\cos\left(\omega_0(t-2)\right)  \right]+A\cos(\omega_0(t-2)) \\
-                &= A \cos(\omega_0 t)-A\cos\left( \omega_0t\right) -A\cos\left(\omega_0(t-2)\right) +A\cos(\omega_0(t-2)) \\
-                &= 0
-    \end{align*}
-    Thus, the process can also be written as a sum of exponential:
-    \[v(t)=\alpha_1\lambda_1^t+\alpha_2\lambda_2^t\]
-    Here, $\lambda_1$ and $\lambda_2$ needs to be replaced with the zeros of $P(z)$: 
-    \[v(t)=\dfrac{A}{2}e^{j\omega_0t}+\dfrac{A}{2}e^{-j\omega_0t}\]
-\end{example}
+Under the assumption that $a_1,a_2,\dots,a_m$ are chosen such that $y(t)$ constitutes a stationary stochastic process, thus exhibiting a constant mean value, we can simplify the above to:
+\[m_y=a_1m_y+a_2m_y+\dots+a_mm_y \rightarrow m_y=0\]
+
+\subsection{Covariance function}
+Given an ARMA($m,n$) model defined as:
+\[y(t)=a_1y(t-1)+a_2y(t-2)+\dots+a_my(t-m)+c_0e(t)+c_1e(t-1)+\dots+c_ne(t-n)\]
+where $e(t)\sim WN(0,\lambda^2)$, we aim to compute the covariance function at $\tau=0$, considering $m_y=0$:
+\begin{align*}
+    \gamma_y(0) &=\mathbb{E}\left[ \left(y(t)-m_y\right)\left(y(t)-m_y\right) \right] \\
+                &=\mathbb{E}\left[ \left(y(t)\right)^2 \right] \\
+                &=\mathbb{E}\left[ \left(a_1y(t-1)+\dots+a_my(t-m)+c_0e(t)+\dots+c_ne(t-n)\right)^2 \right] \\      
+                &=a_1^2\underbrace{\mathbb{E}\left[ y(t-1)^2 \right]}_{\gamma_y(0)} +\dots+c_0^2\underbrace{\mathbb{E}\left[ e(t)^2 \right]}_{\lambda^2} +\dots+c_n^2 \underbrace{\mathbb{E}\left[ e(t-n)^2 \right]}_{\lambda^2}  +\\
+                &+ 2a_1a_2\underbrace{\mathbb{E}\left[ y(t-1)y(t-2) \right]}_{\gamma_y(1)}  + \dots + 2a_1c_0\underbrace{\mathbb{E}\left[ y(t-1)e(t) \right]}_{0 \text{ if the times are different}}  + \dots + 2c_0c_1\underbrace{\mathbb{E}\left[ e(t)e(t-1) \right]}_0  \\   
+                &=a_1^2\gamma_y(0) +\dots+c_0^2\lambda^2 +\dots+c_n^2 \lambda^2  + 2a_1a_2\gamma_y(1)  + \dots + 2a_1c_1\mathbb{E}\left[ y(t-1)e(t-1) \right]+\dots    
+\end{align*}
+We require $\gamma_y(1),\gamma_y(2),\dots,\gamma_y(n)$ to compute $\gamma_y(0)$.
+
+To compute the covariance function at $\tau=1$, considering $m_y=0$, we have:
+\begin{align*}
+    \gamma_y(1) &=\mathbb{E}\left[ \left(y(t)-m_y\right)\left(y(t-1)-m_y\right) \right] \\
+                &=\mathbb{E}\left[ \left(a_1y(t-1)+\dots+a_my(t-m)+c_0e(t)+\dots+c_ne(t-n)\right)y(t-1) \right] \\
+                &=a_1\mathbb{E}\left[y(t-1)^2\right]+\dots+c_0\mathbb{E}\left[e(t)y(t-1)\right]+\dots \\
+                &=a_1\gamma_y(0)+\dots+c_0\mathbb{E}\left[e(t)y(t-1)\right]+\dots
+\end{align*}
+Proceeding with increasing values of $\tau$, we obtain a set of $m$ recursive equations known as Yule-Walker equations for an ARMA($m,n$) process:
+\[\begin{cases}
+    \gamma_y(0)=a_1^2\gamma_y(0) +a_2^2\gamma_y(0) +2a_1a_2\gamma_y(1) +\dots \\
+    \gamma_y(1)=a_1\gamma_y(0) +c_0\mathbb{E}\left[e(t)y(t-1)\right] +\dots \\
+    \vdots \\
+    \gamma_y(m-1)=a_1\gamma_y(m-2)+\dots
+\end{cases}\]
+At the end we get a set of $m$ recursive equations called Yule-Walker equations for an ARMA($m,n$) process.
+These equations require all covariances $\gamma_y(0),\gamma_y(1),\dots,\gamma_y(m-1)$ to compute $\gamma_y(m)$.

@@ -1,0 +1,32 @@
+\section{Variance estimation}
+
+Consider a process with zero mean, where the variance is defined as:
+\[\gamma(\tau)=\mathbb{E}\left[y(t)y(t-\tau)\right]\]
+Similar to mean estimation, we have a dataset $\mathcal{D}_N=\left\{ y(1),y(2),\dots,y(n) \right\}$, and the covariance is computed as the covariance of all data.
+
+One possible method to estimate the covariance is:
+\[\hat{\gamma}_N(\left\lvert \tau\right\rvert )=\dfrac{1}{N-\left\lvert \tau\right\rvert}\sum_{t=1}^{N-\left\lvert \tau\right\rvert}y(t)y(t+\left\lvert \tau\right\rvert)\]
+Here, $\left\lvert \tau\right\rvert \leq N-1$. 
+The values of the covariance for different $\tau$ are:
+\[\begin{cases}
+    \hat{\gamma}_N(0)=\frac{1}{N}\left(y(1)^2+y(2)^2+\dots+y(N)^2\right) \\
+    \hat{\gamma}_N(1)=\frac{1}{N-1}\left(y(1)y(2)+y(2)y(3)+\dots+y(N-1)y(N)\right) \\
+    \vdots \\
+    \hat{\gamma}_N(N-1)=y(1)y(N) \\
+\end{cases}\]
+As $\tau$ increases, we might encounter difficulties in computing accurate covariance due to fewer data points.
+Therefore, in practice, it's preferable to have $|\tau|\ll N-1$ ($|\tau|\approx 2\%$ of $N-1$) to ensure reliable estimation. 
+
+\subsection{Correctness}
+Let's examine the expected value of $\gamma(\tau)_N$: 
+\[\mathbb{E}\left[ \gamma(\tau)_N\right] =\mathbb{E}\left[ \dfrac{1}{N-\tau}\sum_{t=1}^{N- \tau}y(t)y(t+ \tau)\right]=\dfrac{1}{N-\tau}\left( N-\tau \right)\underbrace{\mathbb{E}\left[y(t)y(t+ \tau)\right]}_{\gamma_y(\tau)}=\gamma_y(\tau)\]
+Thus, this estimator is correct.
+
+\subsection{Consistency}
+Similar to the mean, since this is not a function of $n$, the estimator does not depend on the number of samples. 
+Therefore, it is not consistent.
+
+\subsection{Theorem}
+\begin{theorem}
+    The estimator $\gamma(\tau)_N$ is correct and consistent for ARMA processes. 
+\end{theorem}
