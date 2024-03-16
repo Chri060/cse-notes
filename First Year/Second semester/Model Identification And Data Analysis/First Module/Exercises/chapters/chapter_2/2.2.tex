@@ -1,43 +1,46 @@
 \section{Exercise two}
-Consider the ARMA(1, 1) process:
-\[v(t)=\dfrac{1}{2}v(t-1)+\eta(t)-\eta(t-1) \qquad \eta(\cdot)\sim WN(1,9)\]
-Compute the expected value and the variance.
+
+Consider the ARMA($1,1$) process described by the expression: 
+\[y(t)=\dfrac{1}{2}y(t-1)+e(t)-e(t-1) \qquad e(t)\sim WN(1,9)\]
+\begin{enumerate}
+    \item Find the transfer function and verify if it is a stationary stochastic process.
+    \item Compute the expected value. 
+    \item Compute the covariance function. 
+\end{enumerate}
+
 
 \subsection{Solution}
-The expected value is zero. 
-The variance is:
-\begin{align*}
-    \gamma(0)=\text{Var}\left[v(t)\right] &= \mathbb{E}\left[(v(t) - 0)^2\right] \\
-                                &= \mathbb{E}\left[(\dfrac{1}{2}v(t-1)+\eta(t)-\eta(t-1))^2\right]
-\end{align*}
-Expanding, we get:
-\begin{multline*}
-    \text{Var}\left[v(t)\right]= \dfrac{1}{4}\underbrace{\mathbb{E}\left[v(t-1)^2\right]}_{\text{Var}\left[v(t)\right]}  + \underbrace{\mathbb{E}\left[\eta(t)^2\right]}_{10}  -\underbrace{\mathbb{E}\left[\eta(t-1)^2\right]}_{10}  + \underbrace{\mathbb{E}\left[v(t-1)\eta(t)\right]}_{0} - \\ - \underbrace{\mathbb{E}\left[v(t-1)\eta(t-1)\right]}_{9}  - 2 \underbrace{\mathbb{E}\left[\eta(t)\eta(t-1)\right]}_{1}                           
-\end{multline*}
-Given that $\text{Var}[v(t)] = \text{Var}[v(t-1)] = \gamma(0)$ and $\text{Var}[\eta(t)] = \text{Var}[\eta(t-1)] = 9$, we have:
-\[\text{Var}\left[v(t)\right]=\text{Var}\left[v(t)\right]+10-10-9-2\rightarrow\text{Var}\left[v(t)\right]=12\]
-Additionally, we have:
-\begin{itemize}
-    \item $\gamma(1)=-3$. 
-    \item $\gamma(2)=-\frac{3}{2}$. 
-\end{itemize}
-For $|\tau| \geq 2$, we have:
-\[\gamma(\tau)=\left( \dfrac{1}{2} \right)^{\left\lvert \tau \right\rvert -1}\gamma(1)\]
-The correlation function and the spectrum remain unchanged when we depolarize the process. 
-Defining:
-\[\tilde{v}(t)=v(t)-\mathbb{E}\left[v(t)\right]=v(t)\]
-\[\tilde{\eta}(t)=\eta(t)-\mathbb{E}\left[\eta(t)\right]=\eta(t)-1\]
-We obtain:
-\[\tilde{v}(t)=\dfrac{1}{2}\tilde{v}(t-1)+\tilde{\eta}(t)-\tilde{\eta}(t-1) \qquad \tilde{\eta}(\cdot)\sim WN(0,9)\]
+\begin{enumerate}
+    \item We can rewrite the formula in operatorial representation: 
+        \[y(t)=\dfrac{1}{2}y(t)z^{-1}+e(t)-e(t)z^{-1}\rightarrow y(t)=\dfrac{z-1}{z-\frac{1}{2}}e(t)\]
+        We have a zero in $z=1$, and a pole in $z=\frac{1}{2}$, so the transfer function is asymptotically stable. 
+        Since the White Noise is the input, and it is a stationary stochastic process, also $y(t)$ is a stationary stochastic process. 
+    \item We can compute the expected value as: 
+        \[\mathbb{E}\left[ y(t) \right]=\mathbb{E}\left[ \dfrac{1}{2}y(t-1)+e(t)-e(t-1) \right]=\dfrac{1}{2}\mathbb{E}\left[ y(t-1)\right] + 1 - 1\]
+        We have that $y(t)$ is a stationary stochastic process, and so the mean is constant: 
+        \[m_y=\dfrac{1}{2}m_y \rightarrow m_y=0\]
 
-Using the transfer function: 
-\[W(z)=\dfrac{1-z^{-1}}{1-\frac{1}{2}z^{-1}}\]
-We can calculate the spectrum using the formula:
-\[\Gamma_{\tilde{v}\tilde{v}}=\left\lvert W(e^{j\omega})\right\rvert^2\Gamma_\eta(\omega)=\frac{1-1\cos(\omega)}{1.25-\cos(\omega)}18 \]
-This result in the following graph:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{images/22spec.png}
-\end{figure}
-The system blocks the component at zero frequency. 
-Indeed, although the input has a non-zero mean, the output has null expected value.
+        It can also be computed by the theorem: 
+        \[\mathbb{E}\left[ y(t) \right]=W(1)\cdot\mathbb{E}\left[ e(t) \right]=0\cdot 1=0\]
+    \item We define the unbiased process as: 
+        \[\begin{cases}
+            \tilde{y}(t)=y(t)-m_y \\
+            \tilde{e}(t)=e(t)-m_e
+        \end{cases}\]
+        In our case we have: 
+        \[\tilde{y}(t)+m_y=\dfrac{1}{2}\left(\tilde{y}(t-1)+m_y\right)+\tilde{e}(t)+m_e-\left(\tilde{e}(t-1)+m_e\right)\]
+        That becomes: 
+        \[\tilde{y}(t)=\dfrac{1}{2}\tilde{y}(t-1)+\tilde{e}(t)+1-\tilde{e}(t-1)-1\rightarrow\tilde{y}(t)=\dfrac{1}{2}\tilde{y}(t-1)+\tilde{e}(t)-\tilde{e}(t-1)\]
+
+        We start by the covariance in $\tau=0$: 
+        \[\gamma_{\tilde{y}}(0)=\mathbb{E}\left[\tilde{y}(t)^2\right]=\mathbb{E}\left[ \left(\dfrac{1}{2}\tilde{y}(t-1)+\tilde{e}(t)-\tilde{e}(t-1)\right)^2\right]=\dfrac{1}{4}\gamma_{\tilde{y}}(0) +9-9 - 9\rightarrow \gamma_{\tilde{y}}(0)=12\]
+        
+        We now compute the covariance in $\tau=1$: 
+        \[\gamma_{\tilde{y}}(1)=\mathbb{E}\left[ \tilde{y}(t)\tilde{y}(t-1)\right]=\mathbb{E}\left[ \left(\dfrac{1}{2}\tilde{y}(t-1)+\tilde{e}(t)-\tilde{e}(t-1)\right)y(t-1)\right]=\dfrac{1}{2}\gamma_{\tilde{y}}(0)-9\rightarrow \gamma_{\tilde{y}}(1)=-3\]
+
+        We now compute the covariance in $\tau=2$: 
+        \[\gamma_{\tilde{y}}(1)=\mathbb{E}\left[ \tilde{y}(t)\tilde{y}(t-1)\right]=\mathbb{E}\left[ \left(\dfrac{1}{2}\tilde{y}(t-1)+\tilde{e}(t)-\tilde{e}(t-1)\right)y(t-2)\right]\rightarrow \gamma_{\tilde{y}}(1)=-\dfrac{3}{2}\]
+
+        For a generic $\tau$ we have: 
+        \[\gamma_{\tilde{y}}(\tau)=\dfrac{1}{2}\gamma_{\tilde{y}}(\tau-1) \qquad \left\lvert \tau \right\rvert \geq 2\]
+\end{enumerate}

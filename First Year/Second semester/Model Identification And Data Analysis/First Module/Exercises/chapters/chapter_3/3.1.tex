@@ -1,0 +1,53 @@
+\section{Exercise one}
+
+Consider the stochastic process defined by the following diagram:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/block.png}
+\end{figure}
+Here, $\eta_1 \sim WN(1,1)$ and $\eta_2 \sim WN(0,1)$ are uncorrelated. 
+
+Find the characteristic values of the given process $y(t)$. 
+
+\subsection{Solution}
+Remember that if we have an ARMA($n_a,n_b$) we have that: 
+\begin{itemize}
+    \item If $n_a>n_b$, the covariance becomes recursive for $\tau=n_a$. 
+    \item If $n_a \leq n_b$, the covariance becomes recursive for $\tau=n_b+1$
+\end{itemize}
+
+The output process is composed by two process that are uncorrelated because the White Noise is uncorrelated: 
+\[y(t)=y_1(t)+y_2(t)\]
+The processes $y_1(t)$ and $y_2(t)$ are stationary, and so also $y(t)$ is stationary. 
+
+The mean is: 
+\[m_y=\mathbb{E}\left[y(t)\right]=\mathbb{E}\left[y_1(t)+y_2(t)\right]=W_1(1)\lambda_1^2+W_2(1)\lambda_2^2=\dfrac{15}{2}\]
+
+The covariance can be computed as the sum of the two covariances (uncorrelated): 
+\[\gamma_y(\tau)=\gamma_{y_1}(\tau)+\gamma_{y_2}(\tau)\]
+
+The stochastic process $y_1(t)$ in the time domain is: 
+\[y_1(t)=\dfrac{1}{5}y_1(t-1)+\eta_1(t)+5\eta_1(t-1)\]
+We can define the unbiased process by defining: 
+\[\begin{cases}
+    \tilde{y}_1(t)=y_1(t)-m_{y_1}\\
+    \tilde{\eta}_1(t)=\eta_1(t)-m_{\eta_1}
+\end{cases}\]
+The process becomes: 
+\[\tilde{y}_1(t)=\dfrac{1}{5}\tilde{y}_1(t-1)+\tilde{\eta}_1(t)+5\tilde{\eta}_1(t-1)\]
+From this we can compute the covariance ad different time lags as: 
+\[\gamma_{y_1}(\tau)=\begin{cases}
+    \frac{175}{6} \qquad\qquad\qquad\qquad \tau=0 \\
+    \frac{65}{6} \qquad\qquad\qquad\qquad \left\lvert \tau\right\rvert =1 \\
+    \frac{13}{6} \qquad\qquad\qquad\qquad \left\lvert \tau\right\rvert =2 \\
+    \frac{1}{5}\gamma_{y_1}(\tau-1) \qquad\qquad \left\lvert \tau\right\rvert \geq 3 
+\end{cases}\]
+
+The stochastic process $y_2(t)$ in the time domain is: 
+\[y_2(t)=-\dfrac{1}{10}y_2(t-1)+\eta_2(t)+10\eta_2(t-1)\]
+The process is already unbiased, and we can finally compute the covariance function: 
+
+\[\gamma_{y_2}(\tau)=\begin{cases}
+    100 \qquad\: \tau=0 \\
+    0 \qquad\quad  \left\lvert \tau\right\rvert \geq 1
+\end{cases}\]
