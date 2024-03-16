@@ -53,3 +53,41 @@ Ensuring the integrity of a file typically involves either comparing it bit by b
 However, it would be highly advantageous to verify the integrity of a file using only short, fixed-length strings, regardless of the file's size, thereby simplifying the process and reducing computational overhead.
 Unfortunately, a significant obstacle arises due to the inherent lower bound on the number of bits required to accurately encode a given content without any loss of information. 
 This limitation presents a challenge when attempting to devise a method for efficiently testing the integrity of files.
+
+A cryptographic hash function, denoted as $H : \{0, 1\}^\ast \rightarrow \{0, 1\}^I$, is designed such that the following computational problems are difficult to solve:
+\begin{enumerate}
+    \item Given a digest $d = H(s)$, determining the original input $s$ (first preimage).
+    \item Given both an input $s$ and its corresponding digest $d = H(s)$, finding another input $r$ (where $r \neq s$) that produces the same digest ($H(r) = d$) (second preimage).
+    \item Finding two distinct inputs $r$ and $s$ (where $r \neq s$) that yield the same digest ($H(r) = H(s)$) (collision).
+\end{enumerate}
+In an ideal scenario, the performance of a concrete cryptographic hash function can be summarized as follows:
+\begin{enumerate}
+    \item Finding the first preimage requires approximately $O(2^d)$ hash computations, involving guessing potential inputs $s$.
+    \item Finding the second preimage similarly demands around $O(2^d)$ hash computations, involving guessing potential inputs $r$.
+    \item Discovering a collision involves approximately $O(2^{2d})$ hash computations.
+\end{enumerate}
+The resulting output bitstring of a hash function is commonly referred to as a digest.
+
+\paragraph*{Hash functions}
+For preferred cryptographic hash functions, consider utilizing SHA-2 and SHA-3. 
+SHA-2, developed privately by the NSA, offers digest sizes of 256, 384, and 512 bits. 
+SHA-3, on the other hand, emerged from a public design contest akin to AES and boasts digest sizes ranging from 256 to 512 bits. 
+Both SHA-2 and SHA-3 are currently unbroken and enjoy wide standardization by bodies such as NIST and ISO.
+
+Conversely, it's advisable to steer clear of SHA-1 and MD-5. 
+SHA-1, with its fixed 160-bit digest size, has been compromised for collisions, achievable in around $2^{61}$ operations. 
+MD-5, which is known to be severely broken, allows for collisions with just $2^{11}$ operations, with public tools readily accessible for generating collisions. 
+MD-5 is particularly vulnerable to collisions with arbitrary input prefixes, achievable in approximately $2^{40}$ operations.
+
+\paragraph*{Usage}
+Hash functions serve various purposes, including:
+\begin{itemize}
+    \item \textit{Pseudonymized matching}: employed in scenarios like signal's contact discovery, where hashes of values are stored and compared instead of the actual values themselves.
+    \item \textit{MAC construction}: hash functions are integral in generating Message Authentication Codes (MACs), where a tag is produced by hashing both the message and a secret string. 
+        Verification involves recomputing the same hash and comparing it with the original tag. 
+        HMAC (Hash-based Message Authentication Code) is a widely adopted method, standardized in RFC 2104 and NIST FIPS 198. 
+        It utilizes a generic hash function as a plug-in, denoted as HMAC-hash name. 
+        Examples include HMAC-SHA1, HMAC-SHA2, and HMAC-SHA3.
+    \item \textit{Forensic applications}: hash functions are crucial in forensic investigations. 
+        For instance, only the hash of a disk image obtained can be documented in official reports, ensuring data integrity and facilitating verification processes.
+\end{itemize}
