@@ -5,6 +5,8 @@ Consider the process:
 \begin{enumerate}
     \item Find the transfer function. 
     \item Find $\hat{y}(t+1|t)$. 
+    \item Check the correctness of the obtained predictor. 
+    \item Find $\hat{y}(t+2|t)$. 
 \end{enumerate}
 
 \subsection{Solution}
@@ -22,16 +24,36 @@ Consider the process:
                         \[\left[\dfrac{z(z+4)}{z^2-\frac{1}{2}}\right]\left[\dfrac{1-\frac{1}{4}z^{-1}}{1-\frac{1}{4}z^{-1}}\right]=\dfrac{1+\frac{1}{4}z^{-1}}{1-\frac{1}{2}z^{-1}}\]
                         And we must redefine the White Noise as $e(t)\sim WN(0,4^2\cdot 1)$
                 \end{enumerate}
-            \item Computation of the predictor: 
-                \begin{itemize}
-                    \item Long division
-                \end{itemize}
+            \item Computation of the predictor via long division: 
+                \[\hat{y}(t|t-1)=E(z)e(t)+\dfrac{F(z)}{A(z)}e(t-1)=e(t)+\dfrac{\frac{1}{4}-\frac{1}{2}z^{-1}}{1-\frac{1}{2}z^{-2}}e(t-1)\]
+                But we don't know the value of $e(t)$ because we have given only past samples until $t-1$.
+                So the predictor is: 
+                \[\hat{y}(t|t-1)=\dfrac{\frac{1}{4}z^{-1}-\frac{1}{2}z^{-2}}{1-\frac{1}{2}z^{-2}}\dfrac{1-\frac{1}{2}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t)=\dfrac{\frac{1}{4}-\frac{1}{2}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t-1)\]
+                Equivalently: 
+                \[\hat{y}(t+1|t)=\dfrac{\frac{1}{4}-\frac{1}{2}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t)\]
+                That in time domain becomes: 
+                \[\hat{y}(t+1|t)=\dfrac{1}{4}\hat{y}(t|t-1)+\dfrac{1}{4}y(t)+\dfrac{1}{2}y(t-1)\]
         \end{itemize}
+        Note that the predictors from noise can be also computed as: 
+        \[\hat{y}(t|t-1)=\dfrac{C(z)-A(z)}{A(z)}e(t++1)\]
+        Note that the predictors from data can be also computed as: 
+        \[\hat{y}(t|t-1)=\dfrac{C(z)-A(z)}{C(z)}y(t+1)\]
+    \item The prediction error is computed as: 
+        \[\varepsilon(t|t-1)=y(t)-\hat{y}(t|t-1)=E(z)e(t)\]
+        The variance is: 
+        \[\text{Var}\left[\varepsilon(t|t-1)\right]=\mathbb{E}\left[\varepsilon(t|t-1)^2\right]=\mathbb{E}\left[1 \cdot e(t)^2\right]=16\]
+        The variance of the process is approximately 23, so the predictor is optimal but not very good because variance and covariance are similar.  
+    \item The two-step ahead predictor can only be found via long division. 
+        After performing two steps in the division we obtain: $E(z)=1-\frac{1}{4}z^{-1}$ and $F(z)=\frac{1}{2}z^{-2}+\frac{1}{8}z^{-3}$: 
+        \[\hat{y}(t|t-2)=\dfrac{F(z)}{A(z)}e(t)=\dfrac{\frac{1}{2}z^{-2}+\frac{1}{8}z^{-3}}{1-\frac{1}{2}z^{-2}}e(t)\]
+        The predictor from data can be found knowing that: 
+        \[e(t)=\dfrac{1-\frac{1}{2}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t)\]
+        By substitution we obtain: 
+        \[\hat{y}(t|t-2)=\dfrac{\frac{1}{2}+\frac{1}{8}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t-2)\]
+        
+        The prediction error is: 
+        \[\varepsilon(t|t-2)=y(t)-\hat{y}(t|t-2)=E(z)e(t)\]
+        The variance is: 
+        \[\text{Var}\left[\varepsilon(t|t-2)\right]=\mathbb{E}\left[\varepsilon(t|t-2)^2\right]=\mathbb{E}\left[\left( e(t) +\frac{1}{4}e(t-1) \right)^2\right]=17\]
+        The variance of the process is approximately 23, so the predictor is optimal but not very good because variance and covariance are similar.  
 \end{enumerate}
-
-
-
-
-
-
-
