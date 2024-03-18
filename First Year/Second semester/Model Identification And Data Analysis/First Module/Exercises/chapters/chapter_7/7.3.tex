@@ -2,31 +2,34 @@
 
 Consider the system: 
 \[\mathcal{S}:y(t)=e(t)+\dfrac{1}{2}e(t-1)\qquad e(t)\sim WN(0,1)\]
-And the model used is: 
+And the model: 
 \[\mathcal{M}:y(t)=\dfrac{1}{1+az^{-1}+bz^{-2}}\eta(t)\qquad \eta(t)\sim WN(0,\lambda^2)\]
-Find the value of $\theta=\begin{bmatrix} a & b \end{bmatrix}$ and $\lambda^2$. 
+Find the value of $\theta^\ast=\begin{bmatrix} a^\ast & b^\ast \end{bmatrix}$ and $\lambda^{\ast 2}$. 
 
-\subsection{Solution}
-Find the one-step predictor for the model: 
-\[\hat{y}(t|t-1)=\dfrac{C(z)-A(z)}{C(z)}y(t)\]
-The prediction error is
-\[\varepsilon(t|t-1)=\dfrac{A(z)}{C(z)}y(t)=\dfrac{1+az^{-1}+bz^{-2}}{1}\left(e(t)+\dfrac{1}{2}e(t-1)\right)\]
-
-The cost function is the square of all elements, that is: 
-\[\bar{J}(\theta)=\dfrac{5}{4}a^2+\dfrac{5}{4}b^2+a+ab+\dfrac{5}{4}\]
-
-The minimum is found with the partial derivatives: 
-\[\begin{cases}
-    \dfrac{5}{2}a+1+b=0 \\
-    \dfrac{5}{2}b+a=0
-\end{cases} \rightarrow \begin{cases}
-    a=-\dfrac{10}{21} \\
-    b=\dfrac{4}{21}
-\end{cases}\]
-
-After substitution, we have to check the stationarity of the model: 
-\[y(t)=\dfrac{1}{1-\frac{10}{21}z^{-1}+\frac{4}{21}z^{-2}}\]
-The poles are inside the unit circle thus the system is stationary. 
-
-We can also find the variance that is: 
-\[\lambda^2=1.011\]
+\subsection*{Solution}
+The steps are: 
+\begin{enumerate}
+    \item Compute the predictor:
+        \[\hat{y}(t|t-1)=\dfrac{C(z)-A(z)}{C(z)}y(t)\]
+    \item Compute the prediction error (by substituting the real system to $y(t)$): 
+        \[\varepsilon(t|t-1)=\dfrac{A(z)}{C(z)}y(t)=\dfrac{1+az^{-1}+bz^{-2}}{1}\left(e(t)+\dfrac{1}{2}e(t-1)\right)\]
+    \item Compute the variance of the prediction error:
+        \[\bar{J}(\theta^{\ast})=\text{Var}\left[\varepsilon(t|t-1)\right]=\mathbb{E}\left[\varepsilon(t|t-1)^2\right]=\dfrac{5}{4}a^2+\dfrac{5}{4}b^2+a+ab+\dfrac{5}{4}\]
+    \item Derive with respect to the variable $\theta^{\ast}$: 
+        \[\begin{cases}
+            \dfrac{\partial \theta^{\ast}}{\partial a^\ast} = \dfrac{5}{2}a^\ast+1+ b^\ast\\
+            \dfrac{\partial \theta^{\ast}}{\partial b^\ast} = \dfrac{5}{2} b^\ast+a^\ast
+        \end{cases}\]
+        We want a minimum, so we set those derivatives to zero:
+        \[\begin{cases}
+            \dfrac{5}{2}a^\ast+1+ b^\ast=0\\
+            \dfrac{5}{2} b^\ast+a^\ast=0
+        \end{cases}\rightarrow \begin{cases}
+            a=-\dfrac{10}{21} \\
+            b=\dfrac{4}{21}
+        \end{cases}\]
+    \item The value of $\lambda^{\ast 2}$ can be computed by substituting the value of $\theta^\ast$ into the variance function: 
+        \[\lambda^{\ast 2}=1.011\]
+        The prediction is good since it is similar to the variance of the White Noise. 
+\end{enumerate}
+The model is stable since the poles are inside the unit circle. 
