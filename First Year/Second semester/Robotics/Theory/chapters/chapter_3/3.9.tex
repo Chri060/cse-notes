@@ -1,0 +1,33 @@
+\section{Inverse kinematics}
+
+When faced with a desired position or velocity, several strategies can be employed to achieve it.
+While it's relatively straightforward to find some solution, determining the best solution can pose significant challenges. 
+This best solution could be defined by various criteria such as:
+\begin{itemize}
+    \item Shortest time to reach the goal.
+    \item Most energy-efficient path or trajectory.
+    \item Smoothest velocity profiles for comfortable operation.
+\end{itemize}
+Furthermore, if we encounter non-holonomic constraints and are limited to just two control variables, it becomes impossible to directly reach any of the three degrees of freedom final positions.
+
+\subsection{Differential drive}
+To tackle the problem effectively, we can decompose it and focus on controlling only a few degrees of freedom at a time:
+\begin{enumerate}
+    \item Begin by turning the robot so that the wheels align parallel to the line between its original and final positions:
+    \[-v_L(t)=v_R(t)=v_{max}\]
+    \item Proceed to drive straight until the robot's origin coincides with the destination:
+    \[v_L(t)=v_R(t)=v_{max}\]
+    \item Finally, rotate again to achieve the desired final orientation:
+    \[-v_L(t)=v_R(t)=v_{max}\]
+\end{enumerate}
+
+\subsection{Synchro drive}
+To address the challenge systematically, we can break it down and manage only a select few degrees of freedom at each stage:
+\begin{enumerate}
+    \item Initiate a turn to align the wheels parallel to the line connecting the robot's original and final positions:
+    \[\omega(t)=\omega_{max}\]
+    \item Proceed to drive straight until the robot's origin reaches the destination:
+    \[v(t)=v_{max}\]
+    \item Rotate once more to achieve the desired final orientation:
+    \[\omega(t)=\omega_{max}\]
+\end{enumerate}
