@@ -1,0 +1,63 @@
+\section{Dynamic branch prediction techniques}
+
+The main idea of dynamic branch prediction techniques is to leverage past branch behavior to forecast future outcomes.
+
+We utilize hardware to dynamically anticipate branch outcomes, where predictions adapt based on real-time branch behavior during execution.
+
+Initially, we implement a basic prediction scheme and then explore methods to enhance prediction accuracy.
+Dynamic branch prediction integrates two key mechanisms:
+\begin{itemize}
+    \item \textit{Branch outcome predictor}: determines the likelihood of branch direction (taken or not taken) based on historical behavior.
+    \item \textit{Branch target predictor}: forecasts the target address for a taken branch.
+\end{itemize}
+These prediction modules collaborate within the instruction fetch unit, aiding in the prediction of the subsequent instruction to fetch from the instruction cache:
+\begin{itemize}
+    \item If the branch isn't taken, the Program Counter (PC) increments.
+    \item In the case of a taken branch, the BTP provides the target address.
+\end{itemize}
+
+\subsection{Branch outcome predictor}
+\paragraph*{Branch history table}
+The branch history table is a table featuring one bit for each entry, indicating whether a branch was recently taken or not. 
+It is indexed by the lower portion of the branch instruction's address.
+
+Prediction involves assuming the correctness of a hint, initiating fetching in the predicted direction. 
+Should the hint prove incorrect, the prediction bit is flipped and stored anew. 
+Subsequently, the pipeline is cleared, and the accurate sequence is executed.
+
+This table lacks tags, resulting in every access being a hit. 
+Moreover, it's plausible for the prediction bit to have been set by another branch sharing the same lower-order address bits; however, this doesn't impact prediction accuracy as it merely serves as a hint.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/bht.png}
+    \caption{Branch history table structure}
+\end{figure}
+\paragraph*{Accuracy}
+A misprediction arises when either the prediction is erroneous for a particular branch or when the same index has been referenced by two distinct branches, and the previous history pertains to the other branch.
+To mitigate this issue, increasing the number of rows in the BHT or employing a hashing function (e.g., as in GShare) can be effective solutions.
+
+\paragraph*{One-bit branch history table}
+The 1-bit BHT exhibits a notable limitation in scenarios such as loop branches. 
+Even if a branch is predominantly taken throughout a loop but is not taken once, the 1-bit BHT may mispredict twice instead of once.
+This scheme results in two erroneous predictions:
+\begin{itemize}
+    \item At the conclusion of the loop iteration, where the prediction bit indicates a taken branch, contradicting the need to exit the loop.
+    \item Upon re-entering the loop, following the first loop iteration's end, the branch should be taken to maintain loop execution. 
+        However, the prediction bit suggests exiting the loop, stemming from the previous execution of the loop's final iteration where the prediction bit was flipped.
+\end{itemize}
+
+\subsection{Branch target predictor}
+\paragraph*{Branch target buffer}
+Branch target buffer (BTB), also known as branch target predictor, functions as a cache that stores the anticipated branch target address for the instruction following a branch.
+During the Instruction Fetch (IF) stage, the BTB is accessed using the instruction address of the fetched instruction, which could potentially be a branch, to index the cache.
+Typical entries in the BTB include:
+\begin{itemize}
+    \item The exact address of a branch.
+    \item The predicted target address.
+\end{itemize}
+The predicted target address is typically represented as PC-relative.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/btb.png}
+    \caption{Branch target buffer structure}
+\end{figure}

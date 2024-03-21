@@ -1,0 +1,46 @@
+\section{Interrupts}
+
+\paragraph*{Asynchronous interrupt}
+In case of asynchronous interrupt an I/O device signals the need for attention by activating a prioritized interrupt request line.
+Upon the processor's decision to handle the interrupt:
+\begin{enumerate}
+    \item Execution halts at instruction $I_i$ of the current program, ensuring completion of all instructions up to $I_{i-1}$ (precise interrupt).
+    \item The processor stores the program counter (PC) value of instruction $I_i$ in a dedicated register (EPC).
+    \item Interrupts are disabled, and control shifts to a specified interrupt handler operating in kernel mode.
+\end{enumerate}
+The interrupt handler: 
+\begin{itemize}
+    \item Before enabling interrupts to accommodate nested interrupts:
+        \begin{itemize}
+            \item It saves the program counter (PC) to facilitate nested interrupts.
+            \item Requires an instruction to transfer the PC into general-purpose registers (GPRs).
+            \item Requires a mechanism to temporarily block further interrupts until the PC is saved.
+        \end{itemize}
+    \item It retrieves information about the interrupt cause from a designated status register.
+    \item Utilizes a specialized indirect jump instruction called Return-From-Exception (RFE), which:
+        \begin{itemize}
+            \item Enables interrupts.
+            \item Restores the processor to user mode.
+            \item Reinstates hardware status and control state.
+        \end{itemize}
+\end{itemize}
+
+\paragraph*{Synchronous interrupt}
+A synchronous interrupt, also known as an exception, is triggered by a specific instruction.
+Typically, the instruction cannot finish execution and must be restarted after handling the exception.
+This necessitates undoing the impact of one or more partially executed instructions.
+However, in the scenario of a system call trap, the instruction is deemed as fully executed.
+This involves a special jump instruction that transitions to privileged kernel mode.
+
+\subsection{Precise interrupt}
+\begin{definition}[\textit{Precise interrupt}]
+    An interrupt or exception is deemed precise when a singular instruction (or interrupt point) exists at which all preceding instructions have finalized their state, and no subsequent instructions, including the interrupting instruction, have altered any state.
+\end{definition}
+This implies that you can effectively resume execution from the interrupt point and obtain the correct outcome.
+
+Precise interrupts are desirable for several reasons. 
+They facilitate the restart of various interrupt and exception types. 
+Additionally, they simplify the process of determining the exact cause of the interruption.
+
+While restartability doesn't mandate preciseness, it significantly enhances the ease of restarting. 
+Preciseness notably streamlines the task for the operating system: less state must be preserved when unloading processes, and restarts are quicker.

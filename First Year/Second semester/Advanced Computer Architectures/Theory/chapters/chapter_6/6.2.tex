@@ -1,0 +1,86 @@
+\section{Static branch prediction techniques}
+
+Static Branch Prediction is employed in processors where it's anticipated that the branch behavior remains highly predictable at compile time. 
+Additionally, Static Branch Prediction can complement dynamic predictors. 
+Several techniques fall under Static Branch Prediction:
+\begin{itemize}
+    \item \textit{Branch always not taken} (predicted-not-taken). 
+    \item \textit{Branch always taken} (predicted-taken). 
+    \item \textit{Backward taken forward not taken} (BTFNT). 
+    \item \textit{Profile-driven prediction}. 
+    \item \textit{Delayed branch}. 
+\end{itemize}
+
+\subsection{Branch always not taken}
+In Static Branch Prediction, when assuming that the branch will not be taken, the sequential instruction flow that has been fetched can proceed as if the branch condition was not met.
+\begin{itemize}
+    \item If the condition in the instruction decode (ID) stage indicates that the branch will not be taken (correct prediction), performance is preserved.
+    \item However, if the condition in the ID stage indicates that the branch will be taken (incorrect prediction), the next instruction that has already been fetched must be flushed (turned into a nop), and execution restarts by fetching the instruction at the branch target address, incurring a one-cycle penalty.
+\end{itemize}
+
+\subsection{Branch always taken}
+An alternative approach is to treat every branch as taken. 
+Once the branch is decoded and the branch target address is computed, we assume the branch is taken and immediately commence fetching and executing at the target.
+
+This predicted-taken scheme is advantageous for pipelines where the branch target is ascertainable before the branch outcome.
+However, in the MIPS pipeline, the branch target address isn't determined earlier than the branch outcome. 
+Hence, there is no benefit in adopting this approach for this particular pipeline.
+
+\subsection{Backward taken forward not taken }
+The prediction relies on the direction of the branch:
+\begin{itemize}
+    \item Backward-going branches are anticipated as taken.
+    \item Forward-going branches are expected as not taken.
+\end{itemize}
+
+\subsection{Profile-driven prediction}
+Branch prediction relies on profiling information gathered from previous executions.
+This approach can incorporate compiler hints to enhance prediction accuracy.
+
+\subsection{Delayed branch}
+The compiler statically arranges an independent instruction in the branch delay slot.
+The instruction in the branch delay slot executes regardless of whether the branch is taken or not.
+Assuming a branch delay of one cycle (as in MIPS), there is typically only one delay slot. 
+While some deeply pipelined processors may have longer branch delays, most processors with delayed branches feature a single delay slot, as it is often challenging for the compiler to fill more than one delay slot.
+
+For MIPS, the compiler consistently schedules an independent instruction after the branch. 
+For instance, a preceding add instruction without any impact on the branch may be placed in the branch delay slot.
+
+The behavior of the delayed branch remains consistent irrespective of whether the branch is taken or not:
+\begin{itemize}
+    \item If the branch is untaken, execution proceeds with the instruction following the branch.
+    \item If the branch is taken, execution continues at the branch target.
+\end{itemize}
+
+The compiler's task is to ensure the instruction placed in the branch delay slot is valid and beneficial. 
+There are three typical strategies for scheduling the branch delay slot:
+\begin{enumerate}
+    \item \textit{From before}: an independent instruction from before the branch is placed in the branch delay slot.
+        The instruction in the branch delay slot is always executed, regardless of whether the branch is taken or not.
+    \item \textit{From target}: the branch delay slot is filled with an instruction from the target of the branch. 
+        This is often accompanied by using a register (e.g., \$1) in the branch condition to prevent certain instructions (e.g., add) from being moved after the branch.
+        This strategy is preferred for branches that are likely to be taken, such as loop branches (backward branches).
+    \item From fall-through: The branch delay slot is occupied by an instruction from the fall-through path, where the branch is not taken. 
+        Similar to the from target strategy, this may involve using a register (e.g., \$1) in the branch condition to control instruction placement.
+        This strategy is favored for branches that are unlikely to be taken, such as forward branches.
+\end{enumerate}
+
+For optimizations to be valid in both target and fall-through cases, it must be acceptable to execute the moved instruction when the branch takes an unexpected direction. 
+This means that while the instruction in the branch delay slot is executed, the work done by it is wasted, yet the program still executes correctly. 
+For instance, if the destination register is an unused temporary register when the branch takes an unexpected direction.
+
+Generally, compilers are able to fill approximately 50\% of delayed branch slots with valid and useful instructions, with the remaining slots filled with nops. 
+However, in deeply pipelined processors where delayed branches span multiple cycles, it becomes more challenging to populate all slots with useful instructions.
+The primary constraints on delayed branch scheduling stem from:
+\begin{itemize}
+    \item Limitations on the instructions that can be scheduled in the delay slot.
+    \item The compiler's capability to accurately predict the branch outcome statically.
+\end{itemize}
+
+To enhance the compiler's ability to populate the branch delay slot, many processors have introduced a canceling or nullifying branch. 
+This instruction indicates the predicted branch direction:
+\begin{itemize}
+    \item When the branch behaves as predicted, the instruction in the delay slot executes normally.
+    \item However, if the branch prediction is incorrect, the instruction in the delay slot is replaced with a nop (flushed).
+\end{itemize}
+This approach enables the compiler to be less conservative when filling the delay slot.
