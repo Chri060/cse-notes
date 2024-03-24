@@ -1,0 +1,66 @@
+\section{CPI and dependencies}
+In a pipelined machine, actual CPI is derived as:
+\[\text{CPI}_{pipelined} = \text{CPI}_{ideal} + \text{Stalls}_{structural} + \text{Stalls}_{data\:hazard} + \text{Stalls}_{control}\]
+Decreasing any term on the right-hand side reduces the CPI (Cycles Per Instruction) of the pipeline, thereby increasing the Instructions Per Clock (IPC).
+However, techniques aimed at increasing the CPI of the pipeline might exacerbate issues related to hazards.
+
+To achieve higher performance within a given technology, it's imperative to extract more parallelism from the program.
+In essence, this entails detecting and resolving dependencies, as well as ordering (scheduling) instructions to attain the highest possible execution parallelism that aligns with the available resources.
+
+\paragraph*{Dependencies}
+Establishing dependencies among instructions is crucial for identifying the level of parallelism present in a program.
+If two instructions exhibit dependence, they cannot execute concurrently; rather, they must be executed sequentially or only partially overlapped.
+There are three distinct types of dependencies:
+\begin{itemize}
+    \item Name dependencies.
+    \item Data dependencies (also known as true data dependencies).
+    \item Control dependencies.
+\end{itemize}
+
+\subsection{Name dependencies}
+A name dependence arises when two instructions utilize the same register or memory location (referred to as a name), but there's no flow of data between these instructions associated with that name.
+
+There are two types of name dependencies between an instruction $i$ preceding instruction $j$ in program order:
+\begin{itemize}
+    \item Anti-dependence: occurs when $j$ writes to a register or memory location that instruction $i$ reads. 
+        Preserving the original instruction ordering ensures that $i$ reads the correct value.
+    \item Output dependence: arises when both $i$ and $j$ write to the same register or memory location. 
+        Preserving the original instruction ordering guarantees that the value eventually written corresponds to $j$.
+\end{itemize}
+Name dependencies are distinct from true data dependencies as there is no transmission of values (no data flow) between instructions.
+
+If the name (register number or memory location) used in the instructions could be altered, the instructions do not conflict.
+
+Detecting dependencies through memory locations poses more challenges (referred to as the memory disambiguation problem) since two addresses may refer to the same location but appear different. 
+Register renaming is comparatively easier to implement.
+
+Register renaming can be accomplished either statically by the compiler or dynamically by the hardware.
+
+\subsection{Data dependencies}
+A data/name dependence can potentially generate
+a data hazard (RAW, WAW, or WAR), but the actual
+hazard and the number of stalls to eliminate the
+hazards are a property of the pipeline.
+– RAW hazards correspond to true data dependences.
+– WAW hazards correspond to output dependences
+– WAR hazards correspond to antidependences.
+• Dependences are a property of the program, while
+hazards are a property of the pipeline.
+
+\subsection{Control dependencies}
+Control dependence determines the ordering of
+instructions and it is preserved by two properties:
+– Instructions execution in program order to ensure
+that an instruction that occurs before a branch is
+executed before the branch.
+– Detection of control hazards to ensure that an
+instruction (that is control dependent on a branch) is
+not executed until the branch direction is known.
+• Although preserving control dependence is a
+simple way to preserve program order, control
+dependence is not the critical property that must be
+preserved.
+
+
+
+
