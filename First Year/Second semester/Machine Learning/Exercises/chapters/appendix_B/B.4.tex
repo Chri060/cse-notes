@@ -1,0 +1,43 @@
+\section{Naïve Bayes}
+
+The naïve assumption posits that within the class $C_k$, each input is conditionally independent of one another.
+In this scenario the decision function, given a prior p(Ck), maximize the Maximum A Posteriori (MAP) probability:
+\[y(\textbf{x})=\argmax_{k}\text{P}(C_k)\prod_{i=1}^{M}\text{P}(x_j|C_k)\]
+
+\subsection{Functions definition}
+So with this approach we have: 
+\begin{itemize}
+    \item Hypothesis space: 
+    \[y(\textbf{x})=\argmax_{k}\text{P}(C_k)\prod_{i=1}^{M}\text{P}(x_j|C_k)\]
+    Here, $\sigma=\frac{1}{1+e^{z}}$. 
+    \item Loss function: log likelihood for fitting both the priors $\text{P}(C_k)$ and the likelihoods $\text{P}(x_j |C_k)$.
+    \item Optimization method: maximum likelihood estimation (MLE).
+\end{itemize}
+In our classification problem, we opt for the following:
+\begin{itemize}
+    \item Prior: $\text{P}(C_k)$ multinomial distribution with parameters $(p_1, \dots , p_k)$. 
+    \item Likelihood: $\text{P}(x_j|C_k)$ follows a normal distribution $\mathcal{N}(\mu_{jk},\sigma_{jk}^2)$, where each feature $x_j$ and each class $C_k$ are represented.
+\end{itemize}
+We may select different distributions for the features based on the input.
+
+\subsection{Generative method}
+Due to the generative capabilities of the naïve Bayes classifier, we can generate datasets that resemble the original one using the following steps:
+\begin{enumerate}
+    \item Select a class $C_{\hat{k}}$ according to the prior multinomial distribution with parameters: 
+        \[\hat{\text{P}}(C_1),\dots,\hat{\text{P}}(C_k)\]
+    \item For each feature $j$, draw a sample $x_j$ from $\mathcal{N}(\hat{\mu}_{j\hat{k}}, \hat{\sigma}_{j\hat{k}}^2)$. 
+    \item Repeat these steps whenever a new sample is desired.
+\end{enumerate}
+
+\subsection{Python implementation}
+We can implement naïve Bayes in Python using two approaches:
+\begin{itemize}
+    \item Utilizing pre-implemented \texttt{sklearn} \texttt{GaussianNB}, with a multinomial distribution as prior and Gaussian distributions as likelihood.
+    \item Implementing it by hand:
+        \begin{itemize}
+            \item Estimate the prior: $\hat{\text{P}}(C_k)=\frac{\sum_{i=1}^{N}I\left\{ \textbf{x}_n\in C_k \right\}}{N}$
+            \item Estimate the Maximum Likelihood Estimation (MLE) parameters: $\text{P}(x_j|C_k)=\mathcal{N}(x_j;\hat{\mu}_{jk},\hat{\sigma}_{jk}^2)$, where $\hat{\mu}_{jk}$ and $\hat{\sigma}_{jk}^2$ are computed by maximizing the likelihood.
+            \item Compute $\text{P}(C_k)\prod_{j=1}^{M}\text{P}(x_j|C_k)$ for each class $C_k$ and choose the maximum one. 
+        \end{itemize}
+\end{itemize}
+Notice that naïve Bayes isn't strictly a Bayesian method, as the priors are estimated from data and not updated using likelihoods.
