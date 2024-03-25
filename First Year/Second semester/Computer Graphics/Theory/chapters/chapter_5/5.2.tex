@@ -1,0 +1,32 @@
+\section{Back-face culling}
+
+Back-face culling effectively removes faces on the rear side of a mesh by evaluating the vertex order of triangles concerning the viewer, determining if they're arranged clockwise or counterclockwise.
+
+This evaluation can take place before projection or using normalized screen coordinates.
+Vulkan's implementation of back-face culling operates within normalized screen coordinates, hence our focus on this approach.
+
+Suppose all triangles of a mesh are consistently encoded with a specific orientation, such as clockwise.
+When projected onto the screen, front faces maintain their clockwise order, while back faces are ordered oppositely.
+
+To compute the orientation of triangle vertices in normalized screen coordinates, a straightforward cross-product can be employed.
+If the resultant vector points toward the viewer (with a positive z component), the vertices are ordered clockwise. 
+Because only the sign of the $z$ component matters, this test can be executed efficiently:
+\[\begin{bmatrix}
+    u_x & u_y & u_z
+\end{bmatrix} \times \begin{bmatrix}
+    v_x & v_y & v_z
+\end{bmatrix}=\begin{bmatrix}
+    u_yv_z - u_zv_y & u_zv_x - u_xv_z & u_xv_y -u_yv_x
+\end{bmatrix}\]
+
+\paragraph*{Remarks}
+There are transformations that can alter the vertex ordering, thus affecting the effectiveness of back-face culling. 
+Additionally, not all 3D asset creation software follows the same convention for defining front faces. 
+Therefore, users must have the ability to specify whether faces with vertices ordered clockwise or counterclockwise should be displayed.
+
+While back-face culling can enhance application performance, there are potential issues that need consideration. 
+Firstly, if a world matrix involves scaling with an odd number of negative coefficients (either one or all three), the acceptance test must be inverted, indicating that back-face culling may not always be applicable. 
+Moreover, in non-2-manifold objects, those with holes or thin faces, certain polygons belonging to the back faces that should be visible might inadvertently be deleted.
+
+If a camera is positioned inside an object where back-face culling is enabled, its boundaries become invisible since their vertices are oriented in the opposite direction. 
+To address this, an object delineating the borders of the 3D world area (e.g., a room or a skybox) should be created with vertices ordered in the opposite direction.
