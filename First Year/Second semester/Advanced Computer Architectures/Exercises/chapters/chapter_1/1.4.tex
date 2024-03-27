@@ -13,21 +13,21 @@ The processor operates with a clock cycle of $2\:ns$.
 \begin{itemize}
     \item Draw the pipeline schema and highlight potential hazards.
     \item Illustrate the actual execution with stall cycles inserted.
-    \item Calculate Instruction Count (IC), CPI, and MIPS.
+    \item Calculate Instruction Count (IC), CPI, and MIPS.\@
 \end{itemize}
 
-\subsection{Solution}
+\subsection*{Solution}
 \begin{enumerate}
     \item The pipeline schema is:
         \begin{table}[H]
             \centering
             \begin{tabular}{l|ccccccccc}
-            \textbf{Instruction}     & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} \\ \hline
-            \textit{LW \$1, OFF(\$2)}  & F          & D          & E          & M          & W          &            &            &            &            \\
-            \textit{FDDI \$3, \$1, 4}  &            & F          & D          & E          & M          & W          &            &            &            \\
-            \textit{SUB \$4, \$1, \$3} &            &            & F          & D          & E          & M          & W          &            &            \\
-            \textit{ADDI \$2, \$1, -8} &            &            &            & F          & D          & E          & M          & W          &            \\
-            \textit{SW \$5, OFF(\$2)}  &            &            &            &            & F          & D          & E          & M          & W         
+            \textbf{Instruction}        & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9}  \\ \hline
+            \textit{LW \$1, OFF (\$2)}  & F          & D          & E          & M          & W          &            &            &            &            \\
+            \textit{FDDI \$3, \$1, 4}   &            & F          & D          & E          & M          & W          &            &            &            \\
+            \textit{SUB \$4, \$1, \$3}  &            &            & F          & D          & E          & M          & W          &            &            \\
+            \textit{ADDI \$2, \$1, -8}  &            &            &            & F          & D          & E          & M          & W          &            \\
+            \textit{SW \$5, OFF (\$2)}  &            &            &            &            & F          & D          & E          & M          & W         
             \end{tabular}
         \end{table}
         The potential hazards are:
@@ -40,16 +40,16 @@ The processor operates with a clock cycle of $2\:ns$.
         \begin{table}[H]
             \centering
             \begin{tabular}{l|ccccccccccccccc}
-            \textbf{Instruction}     & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{10} & \textbf{11} & \textbf{12} & \textbf{13} & \textbf{14} & \textbf{15} \\ \hline
-            \textit{LW \$1, OFF(\$2)}  & F          & D          & E          & M          & W          &            &            &            &            &             &             &             &             &             &             \\
-            \textit{ADDI \$3, \$1, 4}  &            & F          & \underline{S}    & \underline{S}     & D          & E          & M          & W          &            &             &             &             &             &             &             \\
-            \textit{SUB \$4, \$1, \$3} &            &            &            &            & F          & \underline{S}     & \underline{S}     & D          & E          & M           & W           &             &             &             &             \\
-            \textit{ADDI \$2, \$1, -8} &            &            &            &            &            &            &            & F          & D          & E           & M           & W           &             &             &             \\
-            \textit{SW \$5, OFF(\$2)}  &            &            &            &            &            &            &            &            & F          & \underline{S}      & \underline{S}      & D           & E           & M           & W          
+            \textbf{Instruction}        & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{10} & \textbf{11} & \textbf{12} & \textbf{13} & \textbf{14} & \textbf{15} \\ \hline
+            \textit{LW \$1, OFF (\$2)}  & F          & D          & E          & M          & W          &            &            &            &            &             &             &             &             &             &             \\
+            \textit{ADDI \$3, \$1, 4}   &            & F          & \underline{S}    & \underline{S}     & D          & E          & M          & W          &            &             &             &             &             &             &             \\
+            \textit{SUB \$4, \$1, \$3}  &            &            &            &            & F          & \underline{S}     & \underline{S}     & D          & E          & M           & W           &             &             &             &             \\
+            \textit{ADDI \$2, \$1, -8}  &            &            &            &            &            &            &            & F          & D          & E           & M           & W           &             &             &             \\
+            \textit{SW \$5, OFF (\$2)}  &            &            &            &            &            &            &            &            & F          & \underline{S}      & \underline{S}      & D           & E           & M           & W          
             \end{tabular}
         \end{table}
     \item The performance metrics are: 
         \[\text{IC}=5\]
-        \[\text{CPI}=\dfrac{CCs}{IC}=\dfrac{15}{5}=3\]
-        \[\text{MIPS}=\dfrac{\text{clock frequency}}{CPI \cdot 10^6}=\dfrac{0.5\cdot 10^9}{3 \cdot 10^6}=166\]
+        \[\text{CPI}=\dfrac{\text{CCs}}{\text{IC}}=\dfrac{15}{5}=3\]
+        \[\text{MIPS}=\dfrac{\text{clock frequency}}{\text{CPI} \cdot 10^6}=\dfrac{0.5\cdot 10^9}{3 \cdot 10^6}=166\]
 \end{enumerate}
