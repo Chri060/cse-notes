@@ -1,0 +1,119 @@
+\section{Rendering equation}
+
+Light emitted by sources is characterized by its radiance. 
+The material comprising an object's surface determines the intensity of light reflected in a particular direction.
+
+In practice, the surface's microscopic structure determines the direction of light bounces, which can vary significantly between materials.
+The surface properties of an object can be described by a function known as the bidirectional reflectance distribution function (BRDF).
+
+\subsection{Bidirectional reflectance distribution function}
+The BRDF function takes as inputs the incoming ($\omega_i$) and outgoing ($\omega_r$) light directions, both represented as unit vectors.
+It quantifies the amount of irradiance from the incoming angle that is reflected towards the outgoing angle and is measured in steradians per unit solid angle ($sr^{-1}$):
+\[f_r(\theta_i,\phi_i,\theta_r,\phi_r)=f_r(\omega_i,\omega_r)\]
+This allows for the consideration of various reflection angles for incoming radiance, depending on the surface material.
+
+A good BRDF should satisfy two main properties: reciprocity and energy conservation. 
+
+\paragraph*{Reciprocity}
+Reciprocity implies that swapping the incoming and outgoing directions doesn't change the function's value (hence the term bidirectional):
+\[f_r(\omega_i,\omega_r)=f_r(\omega_r,\omega_i)\]
+
+\paragraph*{Energy conservation}
+Energy conservation dictates that the BRDF cannot increase the total irradiance leaving a point on a surface:
+\[\int f_r(\omega_i,\omega_r)\cos\theta_r\, d\omega_r \leq 1\]
+The integral may be less than one if the point absorbs energy.
+
+\paragraph*{BRDF functions}
+Various approximations to common BRDF functions have been proposed in the literature.
+ome of these approximations provide satisfactory results during rendering, even if they don't fully adhere to the aforementioned properties.
+
+\subsection{The equation}
+The BRDF facilitates the connection between the irradiance in all directions for every point on the objects within a scene. 
+This connection is formalized through the rendering equation:
+\[L(x,\omega_r)=L_e(x,\omega_r)+\int L(y,\overrightarrow{yx}) f_r(x,\overrightarrow{yx},\omega_r)G(x,y)V(x,y)\, dy\]
+In this equation, the following components are present:
+\begin{itemize}
+    \item $L(x,\omega_r)$ determines the radiance of each point $x$ of any object in the 3D world, for any output direction $\omega$.
+    \item $L_e(x,\omega_r)$ accounts for the light that the object at $x$ emits in direction $\omega$. 
+        This parameter mainly characterizes light sources (e.g., bulbs or neons) and serves as the initial injection of photons into the scene.
+    \item The integral accounts for the light that hits the considered point $x$ from all the points $y$ of the surfaces (including the light sources) of all the objects and lights in the scene. 
+        It also includes other points of the same object to allow for the computation of effects such as self-shadowing or self-reflection. 
+        It is composed of the following terms:
+        \begin{itemize}
+            \item $L(y,\overrightarrow{yx})$: for each object, the equation considers the radiance emitted toward point $x$. 
+                Here $\overrightarrow{yx}$ represents the direction of the line that connects point $y$ to point $x$.
+            \item $f_r(x,\overrightarrow{yx},\omega_r)$ is the BRDF of the material of the object at point $x$. 
+                Since the materials of objects might change over the surface, the BRDF depends also on the position of the considered point $x$. 
+                The input angle corresponds to the direction of the incoming light, oriented along the segment that connects $y$ to $x$. 
+                The output angle corresponds to the direction from which the output radiance is being computed, represented by $\omega_r$ on the left-hand side of the equation.
+            \item $G(x,y)$ encodes the geometric relation between points $x$ and $y$. 
+                This is necessary because the angle between the surfaces has an impact on both the light emitted and reflected. 
+                It considers both the relative orientation and the distance of the two points and is defined as follows:
+                \[G(x,y)=\dfrac{\cos\theta_x\cos\theta_y}{r_{xy}^2}\]
+                The two cosine terms account for the angle relative to the respective normal vectors, and $r_{xy}^2$ represents the squared distance of the two points.
+            \item $V(x,y)$: finally, term $V(x,y)$ considers the visibility between two points $x$ and $y$: $V(x,y) = 1$ if the two points can see each other, and $V(x,y) = 0$ if point $y$ is hidden by some other objects in between. 
+                Term $V(x,y)$ allows for the computation of shadows and ensures that in each input direction, at most a single object is considered.
+        \end{itemize}
+\end{itemize}
+The term $L(x, \omega)$ represents the unknown quantity in the equation. 
+As it appears on both sides of the expression, the rendering equation is mathematically classified as an integral equation of the second kind. 
+This classification is denoted using mathematical notation as follows:
+\[\varphi(x)=f(x)+\lambda\int_a^b K(x,t)\varphi(t)\, dt\]
+
+\paragraph*{Colors}
+The rendering equation is applied for every wavelength $\lambda$ of light, typically involving repetition for the three different RGB channels. 
+Geometric and visibility terms remain constant across wavelengths and are unique for each pair of points.
+
+Light sources are associated with RGB values representing the photons emitted for each of the three main frequencies. 
+Objects are characterized by a BRDF with distinct parameters for each of the three primary colors. 
+Three images are generated independently, each considering either the red, green, or blue components individually. 
+Subsequently, the three colors are combined to produce the final output image.
+
+Due to the separation of color components, the interaction between light and material colors results in outcomes that are not immediately intuitive.
+
+\paragraph*{Extension}
+The proposed rendering equation accurately computes various effects such as reflections, shadows, matte, and glossy objects. 
+However, it falls short in simulating other effects like participating media (e.g., rendering of gases and fumes) or transparent objects like glass or water. 
+To account for these materials, extensions to the BRDF and rendering equations have been made.
+
+One extension involves considering transmitted light, i.e., transparency, which is achieved by defining the bidirectional transmittance distribution function (BTDF). 
+The BTDF has a similar definition to the BRDF but is used in the opposite direction:
+\[f_t(\theta_i,\phi_i,\theta_r,\phi_r)=f_t(\omega_i,\omega_r)\]
+Since the angles for the BRDF and BTDF typically do not overlap, they are often combined into a single function called the bidirectional scattering distribution function (BSDF). 
+The rendering equations need to be updated to incorporate both the BRDF and the BTDF.\@ 
+Here, $x^\prime$ denotes the point on the other side of the surface (assuming it is unique) from which light is directed toward point $x$.
+\begin{multline*}
+    L(x,\omega_r)=L_e(x,\omega_r)+\int L(y,\overrightarrow{yx}) f_r(x,\overrightarrow{yx},\omega_r)G(x,y)V(x,y) + \\ + L(y,\overrightarrow{yx}) f_t(x^\prime,\overrightarrow{yx},\omega_r)G(x^\prime,y)V(x^\prime,y) \, dy
+\end{multline*}
+In certain materials, light can bounce inside the object and exit from another point. 
+This phenomenon is known as subsurface scattering, observed in materials like human skin and marble.
+For such cases, a more complex function called the bidirectional surface reflectance distribution function (BSSRDF) is utilized. 
+The BSSRDF incorporates an extra parameter $x^\prime$ to account for the point on the surface from which light enters at angle $\omega_i$. 
+The rendering equation now integrates over all points of an object to consider the quantity of light that can enter from a given position and direction and exit from a specific position and direction:
+\[L(x,\omega_r)=L_e(x,\omega_r)+\iint L(y,\overrightarrow{yx}) f_{ss}(x,\overrightarrow{yx},x^\prime,\omega_r)G(x^\prime,y)V(x^\prime,y) \, dx^\prime dy\]
+
+\paragraph*{Solution}
+Solving the rendering equations is inherently challenging and often necessitates complex discretization techniques. 
+In the subsequent sections, we will explore straightforward approximations to the rendering equation that yield satisfactory results with manageable complexity. 
+Some of these techniques are supported in Vulkan through its specific features.
+
+\subsection{Lights basics}
+The simplest approximations to the rendering equation categorize light sources into direct and indirect sources.
+
+Direct sources emanate from specific positions and directions, such as lamps, studio spotlights, or the sun in outdoor scenes.
+
+Indirect sources encompass all other forms of illumination, primarily caused by light bounces and reflections among surfaces. 
+Photographers often utilize these sources to introduce soft lighting in their images.
+
+Images illuminated solely by direct sources may appear overly dark and lack realism.
+Points not struck by any light source would appear pitch black. 
+While this setup is unrealistic, it is often the simplest assumption made to simplify real-time rendering equation solutions in computer graphics.
+
+Projected shadows are formed by the obstruction of direct light sources and can be approximated using specific techniques.
+
+Indirect lighting enhances realism by accounting for light that bounces off other surfaces. 
+However, achieving accurate computations for indirect lighting demands considerable effort and is challenging to implement in real-time scenarios.
+Nonetheless, various approximations exist to recreate indirect lighting effects.
+
+In many cases, the light contribution for a single point and direction is computed offline and stored in an image-based structure. 
+This precomputed data is later used to perform approximations for indirect lighting during real-time rendering.
