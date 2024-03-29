@@ -30,7 +30,7 @@ While they are computationally intensive, they remain feasible for practical imp
 
 \subsection{Kernel function}
 The kernel function is defined as the scalar product between the feature vectors of two data samples:
-\[k(\textbf{x},\textbf{x}^\prime)=\phi(\textbf{x})^T\phi(\textbf{x})\]
+\[k(\textbf{x},\textbf{x}^\prime)=\phi{(\textbf{x})}^T\phi(\textbf{x})\]
 The kernel function exhibits symmetry: $k(\textbf{x},\textbf{x}^\prime)=k(\textbf{x}^\prime,\textbf{x})$.
 It can be interpreted as a measure of similarity between $\textbf{x}$ and $\textbf{x}^\prime$.
 
@@ -105,7 +105,7 @@ It effectively measures the similarity between two samples by considering their 
 
 \subsection{Kernel ridge regression}
 The loss function utilized in ridge regression is given by:
-\[L(\textbf{w})=\dfrac{1}{2}\left(\textbf{t}-\boldsymbol{\Phi}\textbf{w}\right)^T\left(\textbf{t}-\boldsymbol{\Phi}\textbf{w}\right)+\dfrac{\lambda}{2}\textbf{w}^T\textbf{w}\]
+\[L(\textbf{w})=\dfrac{1}{2}{\left(\textbf{t}-\boldsymbol{\Phi}\textbf{w}\right)}^T\left(\textbf{t}-\boldsymbol{\Phi}\textbf{w}\right)+\dfrac{\lambda}{2}\textbf{w}^T\textbf{w}\]
 To solve it, we equate the gradient of $L$ with respect to $\textbf{w}$ to zero:
 \[\dfrac{\partial L(\textbf{w})}{\partial \textbf{w}}=\lambda\textbf{w}-\boldsymbol{\Phi}^T(\textbf{t}-\boldsymbol{\Phi}\textbf{w})=0\]
 Now, instead of solving it for $\textbf{w}$, let's perform a variable change ($\textbf{a}=\lambda^{-1}(\textbf{t}-\boldsymbol{\Phi}\textbf{w})$):
@@ -115,20 +115,20 @@ Substituting $\textbf{w}$ in the gradient, we have:
     &\lambda\textbf{w}-\boldsymbol{\Phi}^T(\textbf{t}-\boldsymbol{\Phi}\textbf{w})=0 \rightarrow \\
     &\boldsymbol{\Phi}^T\left(\lambda \textbf{a} -\left( \textbf{t}-\boldsymbol{\Phi}\boldsymbol{\Phi}^T\textbf{a}\right) \right)=0 \rightarrow \\
     &\boldsymbol{\Phi}\boldsymbol{\Phi}^T\textbf{a} + \lambda \textbf{a} =\textbf{t} \rightarrow \\
-    &\textbf{a} = \left(\textbf{K}+\lambda \textbf{I}\right)^{-1}\textbf{t}
+    &\textbf{a} = {\left(\textbf{K}+\lambda \textbf{I}\right)}^{-1}\textbf{t}
 \end{align*}
 Here, $\textbf{K}=\boldsymbol{\Phi}\boldsymbol{\Phi}^T$ is known as the Gram matrix.
 The Gram matrix is an $N\times N$ matrix where each element represents the inner product between the feature vectors:
 \[\textbf{K}=\begin{bmatrix}
-    k(\textbf{x}_1,\textbf{x}_1)    & \dots     & k(\textbf{x}_1,\textbf{x}_N)  \\
+    k(\textbf{x}_1,\textbf{x}_1)    & \cdots     & k(\textbf{x}_1,\textbf{x}_N)  \\
     \vdots                          & \ddots    & \vdots                        \\
-    k(\textbf{x}_N,\textbf{x}_1)    & \dots     & k(\textbf{x}_N,\textbf{x}_N)  \\
+    k(\textbf{x}_N,\textbf{x}_1)    & \cdots     & k(\textbf{x}_N,\textbf{x}_N)  \\
 \end{bmatrix}\]
 The Gram matrix signifies the similarities between each pair of samples in the training data.
 
 \paragraph*{Prediction function}
 To compute the prediction using the dual representation, we can utilize the following formula:
-\[y(\textbf{x})=\textbf{w}^T\boldsymbol{\phi}(\textbf{x})=\textbf{a}\boldsymbol{\Phi}\boldsymbol{\phi}(\textbf{x})=\textbf{k}(\textbf{x})^T(\textbf{K}+\lambda\textbf{I})^{-1}\textbf{t}\]
+\[y(\textbf{x})=\textbf{w}^T\boldsymbol{\phi}(\textbf{x})=\textbf{a}\boldsymbol{\Phi}\boldsymbol{\phi}(\textbf{x})=\textbf{k}{(\textbf{x})}^T{(\textbf{K}+\lambda\textbf{I})}^{-1}\textbf{t}\]
 Here,$\textbf{k}(\textbf{x})$ is defined such that $k_n(\textbf{x})=k(\textbf{x}_n,\textbf{x})$ for all $\textbf{x}_n\in\mathcal{D}$. 
 Accordingly, the prediction is computed as the linear combination of the target values of the samples in the training set.
 
@@ -144,4 +144,49 @@ The dual representation:
     \item Is computationally favorable when $N$ is very large or even infinite.
     \item Eliminates the need to explicitly compute $\boldsymbol{\Phi}$, enabling application to diverse data types such as graphs, sets, strings, and text.
     \item The computation of the similarity between data samples (i.e., the kernel function) is typically more efficient and simpler than calculating $\boldsymbol{\Phi}$.
+\end{itemize}
+
+\subsection{Kernel regression}
+The $k$-nearest neighbors algorithm can be utilized for regression tasks by computing the average of the target values of the $k$ nearest samples in the training data. 
+This can be expressed as:
+\[\hat{f}(\textbf{x})=\dfrac{1}{k}\sum_{\textbf{x}_i\in N_k(\textbf{x})}t_i\]
+
+\paragraph*{Nadaraya-Watson model}
+In k-NN regression, the model output often exhibits significant noise due to the discontinuity of neighborhood averages. 
+The Nadaraya-Watson model, also known as kernel regression, addresses this issue by employing a kernel function to calculate a weighted average of samples:
+\[\hat{f}(\textbf{x})=\dfrac{\sum_{i=1}^N k(\textbf{x},\textbf{x}_i)t_i}{\sum_{i=1}^N k(\textbf{x},\textbf{x}_i)}\]
+Typically, kernels are chosen based on their properties. Two common choices for kernels are:
+\begin{itemize}
+    \item Epanechnikov Kernel (bounded support):
+        \[k(u)=\dfrac{3}{4}{\left(1-u^2\right)} \qquad \left\lvert u \right\rvert \leq 1\]
+    \item Gaussian Kernel (infinite support):
+        \[K(u)=\dfrac{1}{\sqrt{2\pi}\sigma}e^{-\frac{u^2}{2\sigma^2}}\]
+\end{itemize}
+
+\subsection{Gaussian processes}
+Starting from the assumptions of Bayesian linear regression:
+\[y(\textbf{x},\textbf{w})=\textbf{w}^T\boldsymbol{\phi}(\textbf{x})\]
+with the following prior probability:
+\[\text{P}(\textbf{w})=\mathcal{N}\left(\textbf{w}|\textbf{0},\tau^2\textbf{I}\right)\]
+Now, let's compute the prior distribution of the outputs of the regression function:
+\[\textbf{y}=\boldsymbol{\Phi}\textbf{w}\implies\mathcal{N}(\textbf{y}|\boldsymbol{\mu},\textbf{S})\]
+Here: 
+\begin{itemize}
+    \item $\boldsymbol{\mu}=\mathbb{E}[\boldsymbol{y}]=\boldsymbol{\Phi}\mathbb{E}[\boldsymbol{w}]=\textbf{0}$
+    \item $\textbf{S}=\text{Cov}(\textbf{yy}^T)=\boldsymbol{\Phi}\mathbb{E}[\boldsymbol{ww}^T] \boldsymbol{\Phi}^T=\tau^2 \boldsymbol{\Phi\Phi}^T=\textbf{K}$
+\end{itemize}
+In general, a Gaussian Process is defined as a probability distribution over a function $y(\textbf{x})$ such that the set of values $y(\textbf{x}_i)$ — for an arbitrary ${\textbf{x}_i}$ — jointly have a Gaussian distribution.
+In our case:
+\[\text{P}(\textbf{y})=\mathcal{N}\left(\textbf{y}|\textbf{0},\textbf{K}\right)\]
+where $\textbf{K}$ is the Gram matrix defined as:
+\[K_{nm}=k(\textbf{x}_n,\textbf{x}_m)=\tau^2\boldsymbol{\phi}{(\textbf{x}_n)}^T\boldsymbol{\phi}(\textbf{x}_m)\]
+This provides a probabilistic interpretation of the Kernel function as:
+\[k(\textbf{x}_n,\textbf{x}_m)=\mathbb{E}\left[ y(\textbf{x}_n),y(\textbf{x}_m) \right]\]
+We can apply the usual approaches to design the kernels.
+Two families of kernels typically used with Gaussian processes are:
+\begin{itemize}
+    \item Gaussian kernel: 
+        \[k(\textbf{x},\textbf{x}^\prime)=e^{-\frac{\left\lVert \textbf{x} - \textbf{x}^\prime \right\rVert_2^2 }{2\sigma^2}}\]
+    \item Exponential kernel: 
+        \[k(\textbf{x},\textbf{x}^\prime)=e^{-\theta \left\lvert \textbf{x} - \textbf{x}^\prime\right\rvert}\]
 \end{itemize}
