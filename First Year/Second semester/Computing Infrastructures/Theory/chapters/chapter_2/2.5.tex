@@ -99,7 +99,7 @@ It's important to note that external fragmentation can significantly degrade the
 \subsection{Hard disk drives}
 A hard disk drive (HDD) utilizes rotating disks (platters) coated with magnetic material for data storage. 
 Information can be accessed in a random-access manner, allowing for the storage or retrieval of individual data blocks in any order, rather than sequentially. 
-The HDD comprises one or more rigid ("hard") rotating disks (platters) with magnetic heads positioned on a moving actuator arm, facilitating the reading and writing of data onto the surfaces.
+The HDD comprises one or more rigid (``hard'') rotating disks (platters) with magnetic heads positioned on a moving actuator arm, facilitating the reading and writing of data onto the surfaces.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{images/hdds.png}
@@ -123,7 +123,8 @@ Present-day technology specifications include:
 \end{itemize}
 
 \paragraph*{Cache}
-Numerous disks integrate caches, often referred to as track buffers, which typically consist of a small amount of RAM ranging from 16 to 64 MB. These caches serve several purposes:
+Numerous disks integrate caches, often referred to as track buffers, which typically consist of a small amount of RAM ranging from 16 to 64 MB.\@
+These caches serve several purposes:
 \begin{enumerate}
     \item \textit{Read caching}: This minimizes read delays caused by seeking and rotation.
     \item \textit{Write caching}: There are two primary types of write caching:
@@ -211,7 +212,7 @@ Various scheduling algorithms facilitate this optimization process:
     \item \textit{SCAN}, also known as the elevator algorithm: in SCAN, the head of the disk sweeps across the disk, servicing requests in a linear order. 
         This approach offers reasonable performance and avoids starvation, but average access times are higher for requests at the extremes of the disk.
     \item \textit{C-SCAN}: Similar to SCAN, but it only services requests in one direction, providing fairer treatment to requests. 
-        However, it typically exhibits worse performance compared to SCAN.
+        However, it typically exhibits worse performance compared to SCAN.\@
     \item \textit{C-LOOK}: this is akin to C-SCAN, but with a twist: the head of the disk only moves as far as the last request in the queue, effectively reducing the range of movement.
 \end{itemize}
 These scheduling algorithms can be implemented in various ways:
@@ -253,7 +254,7 @@ Each page contains several logical block addresses (LBAs), while a block general
 \end{itemize}
 Pages that are empty are the only ones that can be written to. 
 Erasing is limited to pages that are dirty, and this must occur at the block level, where all pages within the block must be dirty or empty. 
-Reading is only meaningful for pages in the "in use" or "valid" state. If there are no empty pages available, a dirty page must be erased. 
+Reading is only meaningful for pages in the ``in use'' or ``valid'' state. If there are no empty pages available, a dirty page must be erased. 
 If there are no blocks containing only dirty or empty pages available, special procedures should be followed to gather empty pages across the disk.
 Resetting the original voltage to neutral is necessary before applying a new voltage to erase the value in flash memory. 
 
@@ -263,28 +264,28 @@ Write amplification occurs when the actual volume of data physically written to 
 \begin{example}
     Let's examine an SSD with these specifications: page size of $4\:KB$, block size of $5$ pages, drive size of $1$ block, read speed of $2\:KB/s$, and write speed of $1\:KB/$s.
     
-    First, let's write a $4:KB$ text file to the brand-new SSD. 
+    First, let's write a $4:KB$ text file to the brand-new SSD.\@
     The overall writing time will be $4$ seconds.
 
-    Next, let's write a $8:KB$ picture file to the almost brand-new SSD.
+    Next, let's write a $8:KB$ picture file to the almost brand-new SSD.\@
     The overall writing time will be $8$ seconds.
 
     Now, suppose the text file in the first page is no longer needed.
 
-    Finally, let's write a $12:KB$ picture to the SSD. 
+    Finally, let's write a $12:KB$ picture to the SSD.\@
     It will take $24$ seconds. 
     In this case, we need to perform the following steps:
     \begin{itemize}
         \item Read the block into the cache.
         \item Delete the page from the cache.
         \item Write the new picture into the cache.
-        \item ERASE the old block on the SSD.
-        \item Write the cache to the SSD.
+        \item ERASE the old block on the SSD.\@
+        \item Write the cache to the SSD.\@
     \end{itemize}
     The operating system only thought it was writing $12:KB$ of data when, in fact, the SSD had to read $8:KB$ ($2:KB/s$) and then write $20:KB$ ($1:KB/s$), the entire block.
     The writing should have taken $12$ seconds but actually took $4 + 20 = 24$ seconds, resulting in a write speed of $0.5:KB/s$ instead of $1:KB/s$.
 \end{example}
-As time goes on, write amplification significantly diminishes the performance of an SSD. 
+As time goes on, write amplification significantly diminishes the performance of an SSD.\@ 
 This degradation occurs due to the wear-out of flash cells, resulting from the breakdown of the oxide layer within the floating-gate transistors of NAND flash memory. 
 During the erasing process, the flash cell is subjected to a relatively high charge of electrical energy.
 
@@ -293,9 +294,9 @@ After numerous write-erase cycles, the electrical characteristics of the flash c
 
 \paragraph*{Flash transition layer}
 Establishing a direct mapping between logical and physical pages is not practical. 
-To address this, an SSD component called the FTL (Flash Translation Layer) is utilized to emulate the functionality of a traditional HDD. 
+To address this, an SSD component called the FTL (Flash Translation Layer) is utilized to emulate the functionality of a traditional HDD.\@ 
 The FTL manages data allocation and performs address translation efficiently to mitigate the effects of Write Amplification.
-One method used by the FTL to reduce Write Amplification is through a technique called Log-Structured FTL. 
+One method used by the FTL to reduce Write Amplification is through a technique called Log-Structured FTL.\@ 
 This involves programming pages within an erased block sequentially, from low to high pages.
 
 \paragraph*{Garbage collection}
@@ -330,7 +331,7 @@ To mitigate the costs associated with mapping, several approaches have been deve
         \end{itemize}
         When searching for a specific logical block, the FTL consults both the page mapping table and the block mapping table sequentially.
     \item \textit{Page mapping combined with caching}: implementing strategies to exploit data locality and optimize mapping efficiency.
-        The fundamental concept is to cache the active portion of the page-mapped FTL. 
+        The fundamental concept is to cache the active portion of the page-mapped FTL.\@ 
         When a workload primarily accesses a limited set of pages, the translations for those pages are retained in the FTL memory. 
         This approach offers high performance without incurring high memory costs, provided that the cache can accommodate the required working set. 
         However, there is a potential overhead associated with cache misses.
