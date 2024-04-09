@@ -100,16 +100,16 @@ Depth testing (z-buffer) and stencil operations in early per-fragment tests.
 
 The pseudocode of a scan-line rendering algorithm is as follows:
 \begin{algorithm}[H]
-    \caption{Graph reachability problem}
+    \caption{Scan-line rendering algorithm}
         \begin{algorithmic}[1]
             \For{each mesh object $A$ in the scene}
-                \State{} Determine the screen coordinates of each vertex of $t$
+                \State{Determine the screen coordinates of each vertex of $t$}
                 \For{each visible (passes the back-face culling and clipping) triangle $t$ of $A$}
                     \For{each pixel $x$ of $t$ on screen}
                         \If{pixel $x$ is visible (passes Z-buffer test)}
-                            \State{} Set the pixel color $C=L_e(x,\omega_r)$
+                            \State{Set the pixel color $C=L_e(x,\omega_r)$}
                             \For{each light $l$ in the scene}
-                                \State{} Set $C = C + L(l,lx) * fr(x,lx, \omega_r)$
+                                \State{Set $C = C + L(l,lx) * fr(x,lx, \omega_r)$}
                             \EndFor{}
                         \EndIf{}
                     \EndFor{}
@@ -139,3 +139,35 @@ In general, depending on the shader type, the file containing its source code ha
 Compiled shaders into SPIR-V files have instead the \texttt{spv} extension.
 
 Shaders can be compiled using the glslc tool, which is included in the Vulkan SDK.\@
+
+\section{Ray casting}
+Ray casting expands upon scan-line rendering by calculating the visibility function for all point-triangle/light source pairs in the scene. 
+It facilitates the inclusion of projected shadows. 
+The visibility function is determined by tracing a ray from each considered point to every light source. 
+If the ray intersects an object, the light is obstructed, and its contribution to the rendering equation is disregarded. 
+Below is the pseudocode for a ray casting rendering algorithm:
+\begin{algorithm}[H]
+    \caption{Ray casting rendering algorithm}
+        \begin{algorithmic}[1]
+            \For{each object $A$ in the scene}
+                \For{each visible (pass back-face culling and clipping) triangle $t$ of $A$}
+                    \For{each pixel $x$ of $t$ on screen}
+                        \If{pixel $x$ is visible (pass Z-buffer test)}
+                            \State{Set the pixel color $C = 0$}
+                            \For{each light $l$ in the scene}
+                                \If{light $l$ is not occluded (ray-casting)}
+                                    \State{Set $C = C + L(l,lx)\cdot fr(x,l_x, \omega_r)$}
+                                \EndIf{}
+                            \EndFor{}
+                        \EndIf{}
+                    \EndFor{}
+                \EndFor{}
+            \EndFor{}
+        \end{algorithmic}
+\end{algorithm}
+One common real-time technique for ray casting is the utilization of a Shadow Map. 
+This map is essentially an image generated from the perspective of the light source, where each pixel's color represents the distance from the point to the light source.
+This information is then employed to ascertain whether a pixel is illuminated by the light or obscured.
+
+The shader responsible for rendering computes the distance from the light source to the pixel being rendered and contrasts it with the corresponding distance stored in the shadow map. 
+If the computed distance is greater, indicating that the pixel is farther from the light source than the corresponding point in the shadow map, the light contribution is not considered.
