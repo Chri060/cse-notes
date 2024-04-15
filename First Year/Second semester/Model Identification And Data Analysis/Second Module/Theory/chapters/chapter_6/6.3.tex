@@ -1,0 +1,26 @@
+\section{Control system analysis}
+
+We'll delve into assessing both the stability and performance of the Minimum Variance Control system.
+
+\subsection{Stability}
+To assess the stability of the Minimum Variance Control system, we can apply stability criteria for feedback systems. 
+Considering the closed-loop transfer function $L(z)$, defined as:
+\[L(z)=\dfrac{1}{B(z)E(z)}\dfrac{B(z)z^{-k}}{A(z)}\tilde{R}(z)\]
+We then have:
+\[\chi_x=L_N(z)+L_D(z)=B(z)\tilde{R}(z)z^{-k}+B(z)E(z)A(z)=B(z)\underbrace{\left(\tilde{R}(z)z^{-k}+E(z)A(z)\right)}_{C(z)}\]
+Given that the roots of  $B(z)$ are strictly inside the unit circle (due to the assumption of a minimum phase system) and the roots of $C(z)$ are strictly inside the unit circle (owing to the assumption that $\frac{C(z)}{A(z)}$ is in canonical representation), the Minimum Variance Control system is guaranteed to be asymptotically stable.
+
+\subsection{Performance}
+The control system can be expressed as a function of its two inputs:
+\[y(t)=F_{y^{0} y}(z)y^{0}(t)+F_{ey}(z)e(t)\]
+The transfer function from $y^{0}(t)$ to $y(t)$ is: 
+\[F_{y^{0} y}(z)=C(z)\dfrac{\frac{1}{B(z)E(z)}\frac{B(z)}{A(z)}z^{-k}}{1+\frac{1}{B(z)E(z)}\frac{B(z)}{A(z)}z^{-k}\tilde{R}(z)}=z^{-k}\]
+And the transfer function from $e(t)$ to $y(t)$ is: 
+\[F_{ey}(z)=\dfrac{\frac{C(z)}{A(z)}}{1+\frac{1}{B(z)E(z)}\frac{B(z)}{A(z)}z^{-k}\tilde{R}(z)}=E(z)\]
+Hence, the closed-loop behavior of the Minimum Variance Controller system is:
+\[y(t)=y^{0}(t)z^{-k}+E(z)e(t)=y^{0}(t-k)+E(z)e(t)\]
+That has a very simple closed loop behavior. 
+
+This indicates perfect tracking, albeit with a delay of $k$ steps due to the pure delay and the unpredictability of $y^{0}(t)$. 
+Moreover, $E(z)e(t)$ represents the minimum amount of noise (the prediction error) making the Minimum Variance Control system optimal.
+Therefore, achieving better tracking with lower noise is impossible.

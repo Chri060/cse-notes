@@ -1,0 +1,107 @@
+\section{Constructive 4SID algorithm}
+
+4SID for noise-free data was initially discovered in the 1960s; however, its applicability was limited due to its inability to handle noisy data effectively. 
+It was later rediscovered in the 1990s with the advent of Singular Value Decomposition, a pivotal tool in numerical algebra.
+
+Considering the practical scenario, let's address the real-world problem where impulse response experiments are affected by noise.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/noiserep.png}
+    \caption{Real and ideal impulse response to a step input}
+\end{figure}
+In this context, each recorded impulse response data point consists of the true value along with a noise component:
+\[\tilde{\omega}(t)=\omega(t)+\eta(t)\qquad t=0,1,2,\dots,N\]
+Thus, the dataset is structured as follows:
+\[\left\{ \tilde{\omega}(0),\tilde{\omega}(1),\tilde{\omega}(2),\dots,\tilde{\omega}(N)\right\}\]
+Here, $N$ represents a minimum of 100 samples. 
+
+\subsection{Algorithm}
+Here's how the algorithm functions:
+\begin{enumerate}
+    \item Construct the Hankel matrix $\tilde{H}_{qd}$ using the full dataset, we arrange the data in the following manner:
+        \[\tilde{H}_{qd}=\begin{bmatrix}
+            \tilde{\omega}(1) & \tilde{\omega}(2) & \tilde{\omega}(3) & \cdots & \tilde{\omega}(d) \\ 
+            \tilde{\omega}(2) & \tilde{\omega}(3) & \tilde{\omega}(4) & \cdots & \tilde{\omega}(d+1) \\ 
+            \tilde{\omega}(3) & \tilde{\omega}(4) & \tilde{\omega}(5) & \cdots & \tilde{\omega}(d+2) \\ 
+            \vdots & \vdots  & \vdots  & \vdots  & \vdots  \\ 
+            \tilde{\omega}(q) & \tilde{\omega}(q+1) & \tilde{\omega}(q+2) & \cdots & \tilde{\omega}(q+d-1) \\ 
+        \end{bmatrix}\]
+        This matrix is diagonal with dimensions $q \times d$, where it's assumed that $q<d$. 
+        Given the relation $q+d-1=N$, it follows that $q=N+1-d$.
+        That graphically becomes: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/qd.png}
+            \caption{Graphical representation of the matrix dimension}
+        \end{figure}
+        When $q \ll d$, estimation quality is compromised but computational efficiency is maximized.
+        When $q \approx d$, estimation quality is optimized but computational complexity increases.
+        The optimal choice lies where $q>\frac{1}{2}d$, balancing estimation quality and computational efficiency.
+        It's worth noting that there's only a minor sensitivity to the specific values of $q$ and $d$ as long as they adhere to this inequality.
+    \item Singular Value Decomposition of the matrix $\tilde{H}_{qd}$ is given by:
+        \[\tilde{H}_{qd}=\tilde{U}\tilde{S}\tilde{V}^T\]
+        Here, $\tilde{H}_{qd}$ is a $q \times d$ matrix, $\tilde{U}$ is a $q \times q$ unitary matrix, $\tilde{S}$ is a $q \times d$ matrix, and $\tilde{V}$ is a $d \times d$ unitary matrix. 
+        The matrix $\tilde{S}$ is defined as: 
+        \[\tilde{S}=\begin{bmatrix}
+            \sigma_1 & 0 & 0 & \cdots & 0 & \cdots & 0\\ 
+            0 & \sigma_2 & 0 & \cdots & 0 & \cdots & 0\\ 
+            0 & 0 & \sigma_3 & \cdots & 0 & \cdots & 0\\ 
+            \vdots & \vdots  & \vdots  & \ddots  & \vdots  & \vdots & \vdots\\ 
+            0 & 0 & 0 & \cdots & \sigma_q & \cdots & 0\\ 
+        \end{bmatrix}\]
+        Here, $\sigma_1,\sigma_2,\cdots,\sigma_q$ are the singular values of matrix $\tilde{H}_{qd}$, which are real positive numbers sorted in decreasing order: $\sigma_1\geq\sigma_2\geq\cdots\geq\sigma_q$. 
+        Singular Value Decomposition can be viewed as a type of diagonalization of a rectangular matrix. 
+        The singular values are akin to eigenvalues of a rectangular matrix and can be computed as the square root of the eigenvalues of the matrix product of $M$ and its transpose:
+        \[\text{SV}(M)=\sqrt{\text{eig}(MM^T)}\]
+        Here, $M$ represents a generic rectangular matrix.
+    \item Plot the singular values and identify the system part of the matrix. 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/qd1.png}
+            \caption{Graphical representation of the ideal singular values}
+        \end{figure}
+        In the ideal scenario depicted above, there's a clear jump between the constant and decreasing parts of the graph, indicating the estimated order of the system $n$.
+        However, in real-world scenarios, the graph might look more like this:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.4\linewidth]{images/qd2.png}
+            \caption{Graphical representation of the real singular values}
+        \end{figure}
+        In such cases, we don't see a distinct jump but rather a knee in the graph. 
+        The order of the system can lie at multiple points within this knee.
+        
+        Once we select an order, say $n$, we can cut the plot into two parts: the left containing the singular values of the system and the right containing the singular values of the noise.
+        Typically, $n \ll q$. 
+
+        We then proceed to cut the Hankel matrix at $n$ to obtain:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.75\linewidth]{images/hankel.png}
+            \caption{Hankel matrix cutting}
+        \end{figure}
+        Now we define the reduced matrix:
+        \[\hat{H}_{qd}=\hat{U}\hat{S}\hat{V}^T\]
+        At this stage, we have:
+        \[\tilde{H}_{qd}=\hat{H}_{qd}+{H}_{\text{residual}_{qd}}\]
+        Where the rank of $\tilde{H}_{qd}$ and ${H}_{\text{residual}_{qd}}$ is $q$, while the rank of $\hat{H}_{qd}$ is $n$, indicating a significant rank reduction from $q$ to $n$. 
+    \item Estimation of matrices $\hat{F}$, $\hat{G}$, and $\hat{H}$  from the clean matrix $\tilde{H}_{qd}$. 
+        We start by decomposing $\hat{H}_{qd}$ as follows: 
+        \[\hat{H}_{qd}=\hat{U}\hat{S}\hat{V}^T=\hat{U}\sqrt{\hat{S}}\sqrt{\hat{S}}\hat{V}^T\]
+        We define:
+        \[\hat{O}=\hat{U}\sqrt{\hat{S}}\]
+        \[\hat{R}=\sqrt{\hat{S}}\hat{V}^T\]
+        Therefore:
+        \[\hat{H}_{qd}=\hat{O}\cdot\hat{R}\]
+        Where $\hat{O}$ and $\hat{R}$ are the extended observability and controllability matrices of the system, respectively.
+        The first row of $\hat{O}$ and the first column of $\hat{R}$ represent $\hat{H}$ and $\hat{G}$, respectively.
+        
+        Next, we formulate two submatrices, $O_1$ and $O_2$, by excluding the last and first rows of $\hat{O}$, respectively. 
+        It's worth noting that $O_1$ and $O_2$ are square matrices due to the shift invariance property.
+        
+        Consequently, $O_2=O_1\cdot \hat{F}$.
+        Since $O_1$ is rectangular and not directly invertible, $\hat{F}$ can be determined as:
+        \[O_2=O_1\cdot \hat{F} \rightarrow O_1^TO_2=O_1O_1^T\cdot \hat{F} \rightarrow \hat{F}=\left(O_1^TO_1\right)^{-1}O_1^TO_2\]
+\end{enumerate}
+\begin{property}
+    The optimality of the 4SID algorithm stems from the Singular Value Decomposition, which achieves an optimal reduction in rank.
+\end{property}

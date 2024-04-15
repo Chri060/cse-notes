@@ -1,0 +1,52 @@
+\section{Introduction}
+
+The process of designing a control system typically unfolds in three sequential steps:
+\begin{enumerate}
+    \item \textit{System modeling}: this involves creating a mathematical representation of the system under consideration.
+    \item \textit{Estimation of unmeasurable variables} (software sensing): certain variables within the system may not be directly measurable and need to be estimated through software-based techniques.
+    \item \textit{Control algorithm design}: here, the actual control algorithm that governs the system's behavior is developed.
+\end{enumerate}
+In the realm of minimum variance control, the mathematical techniques employed bear strong resemblance to those utilized in system identification and software sensing. 
+Minimum variance control, essentially an optimization endeavor centered around an ARMAX system, shares mathematical commonalities with these areas.
+
+Indeed, Minimum Variance Control can be viewed as a versatile tool for optimizing stochastic feedback systems, offering a broad spectrum of applications in the realm of control engineering.
+
+\paragraph*{Problem}
+The problem of Minimum Variance Control is set around a standard ARMAX representation of the system:
+\[y(t)=\dfrac{B(z)}{A(z)}u(t-k)+\dfrac{C(z)}{A(z)}e(t)\]
+Here: 
+\[\begin{cases}
+    A(z)=1+a_1z^{-1}+\dots+a_nz^{-n} \\
+    B(z)=b_0+b_1z^{-1}+\dots+b_pz^{-p} \\
+    C(z)=1+c_1z^{-1}+\dots+c_mz^{-m} \\
+\end{cases}\]
+We assume that the transfer function $\frac{C(z)}{A(z)}$ is in canonical form, and $k$ is the pure delay from $u(t)$ to $y(t)$ ($k \geq 1$). 
+Also, we assume $b_0\neq 0$ to prevent changes in the actual delay. 
+Additionally, we assume that $\frac{B(z)}{A(z)}$ is minimum phase. 
+
+Controlling a non-minimum phase system is challenging because immediate reactions may lead to incorrect decisions. 
+Designing control systems for non-minimum phase systems requires specific design tools. 
+Minimum variance control cannot be used for non-minimum phase systems. 
+Instead, there exists a Generalized Minimum Variance Control that can be employed, even for minimum phase systems.
+
+The objective of the control system is to track a desired output reference signal:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{images/cs.png}
+    \caption{Control system}
+\end{figure}
+Ideally, $y(t)$ should exactly follow $y^{0}(t)$. 
+
+\paragraph*{Formal description}
+In a formal manner, we can define the problem as an optimal control problem: find the signal $u(t)$ such that the performance index $J$ is minimized: 
+\[\min{J}=\mathbb{E}\left[\left(y(t)-y^{0}(t)\right)^2\right]\]
+That is the variance of the tracking error between $y(t)$ and $y^{0}(t)$. 
+
+We attempt to solve this problem with the following technical assumptions:
+\begin{enumerate}
+    \item $y^{0}(t)$ and $e(t)$ are uncorrelated. 
+    \item $y^{0}(t)$ is unpredictable (worst-case assumption). 
+        This implies that we have no preview of the future desired output behavior. 
+        The best prediction we can make at time $t$ is:
+        \[\hat{y}^\circ(t+k|t)=y^{0}(t)\]
+\end{enumerate}
