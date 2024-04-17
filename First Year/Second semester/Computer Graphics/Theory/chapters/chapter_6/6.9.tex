@@ -85,3 +85,21 @@ void main() {
     float(i % 10) / 10.0, float(i) / 15.0, 1.0);
 }
 \end{verbatim}
+Please be aware that flow control statements behave differently on the GPU compared to the CPU. 
+Due to the SIMD architecture of the GPU, which operates on multiple elements simultaneously, there are some important considerations:
+\begin{itemize}
+    \item Both the if and else branches are always executed.
+    \item In variable-length loops, all iterations are conditioned by the longest one in the batch being run concurrently.
+\end{itemize}
+Therefore, it's generally advisable to minimize the use of loops with variable iterations and conditional statements to optimize performance on the GPU.
+
+\subsection{Shader-pipeline communication}
+Communication between shaders and the pipeline takes place via global variables.
+\texttt{in} and \texttt{out}variables serve as interfaces with the programmable or configurable part of the pipeline. 
+Additionally, communication with the fixed part of the pipeline utilizes predefined global variables, with \texttt{gl\_Position} being a crucial one required in all graphic pipeline applications.
+However, numerous other global variables exist primarily to interface with different shader types.
+
+For communication between shaders and the application, special types of external variables known as uniforms are employed. 
+The most common among these are Uniform Variable Blocks.
+Each block resembles a C \texttt{typedef struct}  element, possessing a tag, a name, and a collection of components. 
+Elements within these blocks are accessed within a shader program akin to fields of a structure in C code.
