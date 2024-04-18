@@ -1,0 +1,93 @@
+\section{Exercise one}
+
+Consider the following system:
+\[\begin{cases}
+    x(t+1)=\frac{1}{2}x(t)+\frac{1}{4}u(t)-\frac{3}{2}v_1(t) \\
+    y(t)=x(t)+v_2(t)
+\end{cases} \qquad v_1(t)\sim WN(0,1) \quad v_2(t)\sim WN(0,1)\]
+\begin{enumerate}
+    \item Assuming $v_1(t)$ and $v_2(t)$ are uncorrelated, find an equivalent model in the form:
+        \[y(t)=\frac{B(z)}{A(z)}u(t-k)+\frac{C(z)}{A(z)}e(t) \qquad e(t)\sim WN(\mu,\lambda^2)\]
+    \item Assuming $v_1(t)=v_2(t)=v(t)$, where $v(t)\sim WN(0,1)$, find an equivalent model in the form:
+        \[y(t)=\frac{B(z)}{A(z)}u(t-k)+\frac{C(z)}{A(z)}e(t) \qquad e(t)\sim WN(\mu,\lambda^2)\]
+    \item Given the reference signal $y^0(t)$, find a controller using the principles of Minimum Variance Control for both models found in the previous points.
+    \item Consider $y^0(t)=\frac{1}{2}$ for all $t$.
+\end{enumerate}
+
+\subsection*{Solution}
+\begin{enumerate}
+    \item We rearrange the state equation as follows:
+        \[zx(t)=\frac{1}{2}x(t)+\frac{1}{4}u(t)-\frac{3}{2}v_1(t)\]
+        Isolating the term $x(t)$, we find:
+        \[x(t)=\dfrac{\frac{1}{4}}{z-\frac{1}{2}}u(t)-\dfrac{\frac{3}{2}}{z-\frac{1}{2}}v_1(t)\]
+        Upon substitution, we derive:
+        \[y(t)=\dfrac{\frac{1}{4}}{1-\frac{1}{2}z^{-1}}u(t-1)-\dfrac{\frac{3}{2}z^{-1}}{1-\frac{1}{2}z^{-1}}v_1(t)+v_2(t)\]
+        To achieve the requested representation, we aim for a single noise. 
+        For equivalence, matching spectra is necessary:
+        \[-\dfrac{\frac{3}{2}z^{-1}}{1-\frac{1}{2}z^{-1}}v_1(t)+v_2(t)\]
+        We define:
+        \[\tilde{v}_1(t)=-\frac{3}{2}z^{-1}v_1(t)\rightarrow \tilde{v}_1(t)\sim WN\left(0,\dfrac{9}{4}\right)\]
+        This new White Noise remains uncorrelated with $v_2(t)$. 
+        At this point: 
+        \[\dfrac{1}{1-\frac{1}{2}z^{-1}}\tilde{v}_1(t)+v_2(t)\]
+        The spectrum of the two White Noises is the sum of their spectra:
+        \[\Gamma_d(\omega)=\left\lvert \dfrac{1}{1-\frac{1}{2}e^{-j\omega}}\right\rvert^2 \cdot \dfrac{9}{4}+1=\left(\dfrac{\frac{7}{2}-\frac{1}{2}(z^{-1}+z)}{\left(1-\frac{1}{2}z^{-1}\right)\left(1-\frac{1}{2}z\right)}\right)_{z=e^{j\omega}}\]
+
+        Given $A(z)=1-\frac{1}{2}z^{-1}$ from the system, and considering the numerator's degree cannot exceed the denominator's, $C(z)=1+cz^{-1}$ with $e(t)\sim WN(0,\lambda^2)$. 
+        The spectrum of $\frac{C(z)}{A(z)}$ is: 
+        \[\Gamma(\omega)=\left\lvert \dfrac{1+cz^{-1}}{1-\frac{1}{2}e^{-j\omega}}\right\rvert^2 \cdot \lambda^2=\left(\dfrac{(1+c^2)\lambda^2+c\lambda^2(z^{-1}-z)}{\left(1-\frac{1}{2}z^{-1}\right)\left(1-\frac{1}{2}z\right)}\right)_{z=e^{j\omega}}\]
+
+        We then impose:
+        \[\begin{cases} 
+            \dfrac{7}{2}-\frac{1}{2}(z^{-1}+z)=(1+c^2)\lambda^2+c\lambda^2(z^{-1}-z) \\
+            c\lambda^2=-\dfrac{1}{2}
+        \end{cases}\rightarrow\begin{cases} 
+            c_{1,2}=-0.146,-6.854 \\
+            c\lambda^2=-\dfrac{1}{2}
+        \end{cases}\]
+        As it's a zero, we require the modulus to be less than one, thus selecting $c=-0.146$, with $\lambda^2=3.427$. 
+
+        In conclusion:
+        \[y(t)=\dfrac{\frac{1}{4}}{1-\frac{1}{2}z^{-1}}u(t-k)+\dfrac{1-\frac{73}{500}z^{-1}}{1-\frac{1}{2}z^{-1}}e(t) \qquad e(t)\sim WN\left(0,\frac{3427}{1000}\right)\]
+    \item The given system is:
+        \[\begin{cases}
+            x(t+1)=\frac{1}{2}x(t)+\frac{1}{4}u(t)-\frac{3}{2}v(t) \\
+            y(t)=x(t)+v(t)
+        \end{cases}\]
+        Shifting the state equation, we have:
+        \[zx(t)=\frac{1}{2}x(t)+\frac{1}{4}u(t)-\frac{3}{2}v(t)\]
+        Isolating the $x(t)$ term, we find:
+        \[x(t)=\dfrac{\frac{1}{4}}{z-\frac{1}{2}}u(t)-\dfrac{\frac{3}{2}}{z-\frac{1}{2}}v(t)\]
+        Substituting, we obtain the desired form:
+        \[y(t)=\dfrac{\frac{1}{4}}{1-\frac{1}{2}z^{-1}}u(t-1)-\dfrac{1-2z^{-1}}{1-\frac{1}{2}z^{-1}}v(t)\]
+        This representation fulfills the request.
+
+        We can transform it into canonical form while retaining the denominator:
+        \[y(t)=\dfrac{\frac{1}{4}}{1-\frac{1}{2}z^{-1}}u(t-1)-\dfrac{1-\frac{1}{2}z^{-1}}{1-\frac{1}{2}z^{-1}}\eta(t) \qquad \eta(t)\sim WN(0,4)\]
+    \item The initial model equations are:
+        \[y_1(t)=\dfrac{\frac{1}{4}}{1-\frac{1}{2}z^{-1}}u(t-k)+\dfrac{1-0.146z^{-1}}{1-\frac{1}{2}z^{-1}}e(t) \qquad e(t)\sim WN(0,3.427)\]
+        \[y_2(t)=\dfrac{\frac{1}{4}}{1-\frac{1}{2}z^{-1}}u(t-1)-\dfrac{1-\frac{1}{2}z^{-1}}{1-\frac{1}{2}z^{-1}}\eta(t) \qquad \eta(t)\sim WN(0,4)\]
+        The following steps are required:
+        \begin{enumerate}
+            \item Verification of assumptions:
+                \begin{itemize}
+                    \item $b_0\neq 0$: in both cases $b_0=\frac{1}{4}$, satisfying the condition.
+                    \item $B(z)$  is minimum phase: Both models have no roots, hence minimum phase.
+                    \item $\frac{C(z)}{A(z)}$  is in canonical form: both models are constructed in canonical form.
+                    \item Assumption that $y^0(t)$ is independent of $e(t)$, and $y^0(t)$ is unpredictable. 
+                \end{itemize}
+            \item Determination of the one-step ahead predictors:
+                \[\hat{y}(t|t-1)=\dfrac{B(z)}{C(z)}u(t-k)+\dfrac{C(z)-A(z)}{C(z)}y(t)\]
+                In our case, we have:
+                \[\hat{y}_1(t|t-1)=\dfrac{\frac{1}{4}}{1-0.146z^{-1}}u(t-1)+\dfrac{0.354}{1-0.146z^{-1}}y(t-1)\]
+                \[\hat{y}_2(t|t-1)=\dfrac{\frac{1}{4}}{1-\frac{1}{2}z^{-1}}u(t-1)\]
+            \item Calculation of the Minimum Variance Control for both systems:
+                \[u(t)=\dfrac{1}{B(z)E(z)}\left(C(z)y^0(t)-\tilde{R}(z)y(t)\right)\]
+                In our case, we have: 
+                \[u_1(t)=4\left(\left(1-0.146z^{-1}\right)y^0(t)-0.354y(t)\right)\]
+                \[u_2(t)=4\left(\left(1-\frac{1}{2}z^{-1}\right)y^0(t)\right)\]
+        \end{enumerate}
+    \item Substituting the values into the found controllers, we get:
+        \[u_1(t)=4\left(\left(1-0.146z^{-1}\right)\dfrac{1}{2}-0.354y(t)\right)=1.708-1.416y(t)\]
+        \[u_2(t)=4\left(\left(1-\frac{1}{2}z^{-1}\right)\dfrac{1}{2}-0.354y(t)\right)=1\]
+\end{enumerate}

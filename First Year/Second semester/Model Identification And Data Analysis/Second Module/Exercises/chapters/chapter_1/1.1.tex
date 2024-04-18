@@ -1,0 +1,86 @@
+\section{Exercise one}
+
+Consider a second-order system in state-space representation:
+\[F=\begin{bmatrix} 0 & 2 \\ \frac{1}{2} & 3 \end{bmatrix}\quad G=\begin{bmatrix} \frac{1}{2} \\ \frac{1}{2} \end{bmatrix}\quad H=\begin{bmatrix} 1 & 0 \end{bmatrix}\quad D=\begin{bmatrix} 0 \end{bmatrix}\]
+\begin{enumerate}
+    \item Write the system of difference equations.
+    \item Compute the system transfer function.
+    \item Compute the poles.
+    \item Compute five samples of the impulse response. 
+    \item Check the observability and reachability of the system. 
+    \item Compute the Hankel matrix. 
+\end{enumerate}
+
+\subsection*{Solution}
+\begin{enumerate}
+    \item The system of difference equations for the given matrices are:
+        \[\begin{cases}
+            x_1(t+1)=x_2(t)+\frac{1}{2}u(t) \\
+            x_2(t+1)=\frac{1}{2}x_1+3x_2(t)+\frac{1}{2}u(t) \\
+            y(t)=x_1(t)
+        \end{cases}\]
+    \item The transfer function can be derived using the formula:
+        \[W(z)=H\left(zI-F\right)^{-1}G+D\]
+        In this scenario, it simplifies to:
+        \[W(z)=\begin{bmatrix} 1 & 0 \end{bmatrix}\begin{bmatrix} z & -2 \\ -\frac{1}{2} & z-3 \end{bmatrix}^{-1}\begin{bmatrix} \frac{1}{2} \\ \frac{1}{2} \end{bmatrix}=\dfrac{1}{2}\dfrac{z-1}{z^{2}-3z-1}\]
+
+        Alternatively, we can compute the transfer function using the shift operators as follows:
+        \[\begin{cases}
+            zx_1(t)=x_2(t)+\frac{1}{2}u(t) \\
+            zx_2(t)=\frac{1}{2}x_1+3x_2(t)+\frac{1}{2}u(t) \\
+        \end{cases}\]
+        Reformulating the system yields:
+        \[\begin{cases}
+            x_1(t)=\frac{x_2(t)}{x}+\frac{1}{2z}u(t) \\
+            x_2(t)=\frac{\frac{1}{2}x_1+\frac{1}{2}u(t)}{z-3} \\
+        \end{cases}\]
+        Upon substitution, we obtain:
+        \begin{align*}
+            x_2(t)  &=\dfrac{\frac{1}{2}\left(\frac{x_2(t)}{x}+\frac{1}{2z}u(t)\right)+\frac{1}{2}u(t)}{z-3} \\
+                    &=\dfrac{\frac{1}{4}+\frac{1}{2}z}{z^2-3z-1}u(t)
+        \end{align*}
+        Now, the expression for $x_1$ can be derived as:
+        \[x_1(t)=\dfrac{\frac{1}{4}+\frac{1}{2}zu(t)}{z^2-3z-1}+\dfrac{1}{2z}u(t)=\dfrac{1}{2}\dfrac{z-1}{z^2-3z-1}u(t)\]
+        Thus, the transfer function is given by:
+        \[y(t)=\dfrac{1}{2}\dfrac{z-1}{z^2-3z-1}u(t)\]
+    \item To find the poles of the function, we equate the denominator to zero:
+        \[z^{2}-3z-1=0\rightarrow\lambda_{1,2}=\dfrac{3\pm\sqrt{13}}{2}\]
+        As a result, one pole lies outside the unit circle, indicating that the system is unstable.
+    \item We can approach solving this problem through two methods:
+        \begin{itemize}
+            \item Direct calculation of Impulse Response coefficients: compute the impulse response coefficients iteratively.
+                \[\begin{cases}
+                    \omega(0)=0 \\
+                    \omega(1)=HG=\begin{bmatrix} 1 & 0 \end{bmatrix}\begin{bmatrix} \frac{1}{2} \\ \frac{1}{2} \end{bmatrix}=\dfrac{1}{2} \\
+                    \omega(2)=HFG=\begin{bmatrix} 1 & 0 \end{bmatrix}\begin{bmatrix} 0 & 2 \\ \frac{1}{2} & 3 \end{bmatrix}\begin{bmatrix} \frac{1}{2} \\ \frac{1}{2} \end{bmatrix}=1 \\
+                    \omega(3)=HF^2G=\begin{bmatrix} 1 & 0 \end{bmatrix}\begin{bmatrix} 0 & 2 \\ \frac{1}{2} & 3 \end{bmatrix}^2\begin{bmatrix} \frac{1}{2} \\ \frac{1}{2} \end{bmatrix}=\dfrac{7}{2} \\
+                    \omega(4)=HF^3G=\begin{bmatrix} 1 & 0 \end{bmatrix}\begin{bmatrix} 0 & 2 \\ \frac{1}{2} & 3 \end{bmatrix}^3\begin{bmatrix} \frac{1}{2} \\ \frac{1}{2} \end{bmatrix}=\dfrac{23}{2}
+                \end{cases}\]
+                Note the increasing trend of the coefficients, indicating instability in the system.
+            \item The alternative approach involves employing long division. 
+                Beginning with the transfer function expressed in negative power notation as $\frac{\frac{1}{2}z^{-1}-\frac{1}{2}z^{-2}}{1-3z^{-1}-z^{-2}}$, we divide the numerator by the denominator through five steps to yield the quotient:
+                \[E(z)=\dfrac{1}{2}z^{-1}+z^{-2}+\dfrac{7}{2}z^{-3}+\dfrac{23}{2}z^{-4}\]
+                In this representation, the coefficients correspond to the impulse response of the system:
+                \[\begin{cases}
+                    \omega(0)=0 \\
+                    \omega(1)=\frac{1}{2} \\
+                    \omega(2)=1 \\
+                    \omega(3)=\frac{7}{2} \\
+                    \omega(4)=\frac{23}{2}
+                \end{cases}\]
+        \end{itemize}
+    \item The observability matrix, denoted as $O$, is structured as:
+        \[O=\begin{bmatrix} H \\ HF \end{bmatrix}=\begin{bmatrix} 1 & 0 \\ 0 & 2 \end{bmatrix}\]
+        This matrix possesses full rank, implying that the system is entirely observable.
+        
+        On the other hand, the reachability matrix, denoted as $R$, takes the form:
+        \[R=\begin{bmatrix} G \\ FG \end{bmatrix}=\begin{bmatrix} \frac{1}{2} & 1 \\ \frac{1}{2} & \frac{7}{4} \end{bmatrix}\]
+        Similar to the observability matrix, this matrix also exhibits full rank, indicating that the system is fully reachable.
+    \item The Hankel matrix, $H_n$, can be computed in two ways: 
+        \begin{itemize}
+            \item Utilizing the previously computed impulse response coefficients:
+                \[H_n=\begin{bmatrix} \frac{1}{2} & 1 \\ 1 & \frac{7}{2} \end{bmatrix}\]
+            \item Deriving it from the observability and reachability matrices:
+                \[H_2=O_2R_2=\begin{bmatrix} 1 & 0 \\ 0 & 2 \end{bmatrix}\begin{bmatrix} \frac{1}{2} & 1 \\ \frac{1}{2} & \frac{7}{4} \end{bmatrix}=\begin{bmatrix} \frac{1}{2} & 1 \\ 1 & \frac{7}{2} \end{bmatrix}\]
+        \end{itemize}
+\end{enumerate}

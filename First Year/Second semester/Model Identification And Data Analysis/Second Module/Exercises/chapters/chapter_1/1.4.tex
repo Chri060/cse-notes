@@ -1,0 +1,51 @@
+\section{Exercise four}
+
+We are provided with the impulse response:
+\[\omega(0)=0 \quad \omega(1)=0 \quad \omega(2)=2 \quad \omega(3)=0 \quad \omega(4)=1 \quad \omega(5)=0\]
+We're tasked with:
+\begin{enumerate}
+    \item Identifying the system order.
+    \item Identifying the system matrices using the 4SID method.
+    \item Computing the transfer function.
+    \item Finding an analytical expression for $\omega(t)$.
+\end{enumerate}
+
+\subsubsection*{Solution}
+\begin{enumerate}
+    \item We compute the Hankel matrix in increasing order until we obtain a matrix with no full rank:
+        \[H_1=\begin{bmatrix} \omega(1) \end{bmatrix}=\begin{bmatrix} 0 \end{bmatrix}\]
+        Since this matrix is not full rank, but the rank cannot be $n=-1$, we increase the order:
+        \[H_2=\begin{bmatrix} \omega(1) & \omega(2) \\ \omega(2) & \omega(3) \end{bmatrix}=\begin{bmatrix} 0 & 2 \\ 2 & 0 \end{bmatrix}\]
+        The rank is two, so we continue:
+        \[H_3=\begin{bmatrix} \omega(1) & \omega(2) & \omega(3) \\ \omega(2) & \omega(3) & \omega(4) \\ \omega(3) & \omega(4) & \omega(5) \end{bmatrix}=\begin{bmatrix} 0 & 2 & 0 \\ 2 & 0 & 1 \\ 0 & 1 & 0 \end{bmatrix}\]
+        The rank is two again, so we stop.
+        The order of the system is determined to be $n=2$.
+    \item Let's proceed with the second and third steps:
+        \begin{itemize}
+            \item Factorize $H_3$. 
+                The reachability matrix is:
+                \[R_3=H_3(1:2,:)=\begin{bmatrix} 0 & 2 & 0 \\ 2 & 0 & 1 \end{bmatrix}\]
+                From the relation $O_3R_3=H_3$, we obtain:
+                \[0_3=\begin{bmatrix} 1 & 0 \\ 0 & 1 \\ \frac{1}{2} & 0 \end{bmatrix}\]
+            \item Now, we can determine the matrices:
+                \[\hat{G}=R_3(:,1)=\begin{bmatrix} 0 \\ 2 \end{bmatrix}\]
+                \[\hat{H}=O_3(1,:)=\begin{bmatrix} 1 & 0 \end{bmatrix}\]
+                \[\hat{F}=O_3(1:2,:)^{-1}O_3(2:3,:)=\begin{bmatrix} 1 & 0 \\ \frac{1}{2} & 0 \end{bmatrix}\]
+                \[\hat{D}=\begin{bmatrix} 0 \end{bmatrix}\]
+        \end{itemize}
+    \item The transfer function is computed as: 
+        \[W(z)=\hat{H}\left(zI-\hat{F}\right)^{-1}\hat{G}+\hat{D}=\dfrac{2}{z^2+\frac{1}{2}}\]
+    \item We have the transfer function:
+        \[W(z)=\dfrac{2z^{-2}}{1-\frac{1}{2}z^{-2}}\]
+        Using the geometric series, we can express it as:
+        \begin{align*}
+            W(z)    &=2z^{-2}\sum_{t=0}^{+\infty}\left(\frac{1}{2}z^{-2}\right)^k \\
+                    &=2z^{-2}\sum_{t=0}^{+\infty}\left(\frac{1}{2}\right)^kz^{-2k}
+        \end{align*}
+        From this, we can derive the analytical expression for $\omega(t)$:
+        \[\begin{cases}
+            0 \qquad\qquad\quad \text{if }t=0 \\
+            0 \qquad\qquad\quad \text{if }t=2k-1 \\
+            \left(\frac{1}{2}\right)^{\frac{t}{2}-2}\:\qquad\text{if }t=2k
+        \end{cases}\]
+\end{enumerate}
