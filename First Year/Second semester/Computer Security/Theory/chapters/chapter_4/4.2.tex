@@ -177,7 +177,7 @@ This triggers the kernel to execute the specified system call, such as \texttt{e
             \item \texttt{mov arg3, \%edx}
         \end{enumerate}
     \item \texttt{int 0x80} 
-    \item Syscall is executed
+    \item Syscall is executed.
 \end{enumerate}
 
 \paragraph*{Shell code}
@@ -205,9 +205,40 @@ We can apply a layered defense strategy against buffer overflows:
     \item \textit{Operating system level defenses}: implement measures on the operating system level to obstruct attacks, or at the very least increase their difficulty.
 \end{enumerate}
 
+\paragraph*{Source code level defenses}
+C/C++ programming can be fortified to prevent buffer overflows, with an understanding that such overflows stem from programmer errors. 
+This necessitates educating developers, integrating security measures into the System Development Life Cycle, conducting targeted testing, and employing source code analyzers.
+Moreover, the adoption of safer libraries can contribute significantly. 
+For instance, utilizing functions from the Standard Library like \texttt{strncpy} and \texttt{strncat}, which allow specifying the length parameter explicitly, or opting for BSD versions such as \texttt{strlcpy} and \texttt{strlcat}.
+Furthermore, languages featuring dynamic memory management, such as Java, inherently offer greater resilience against these vulnerabilities.
+Integrating such languages into the development process can serve as an additional layer of defense.
 
+\paragraph*{Compiler level defenses}
+Warnings issued during compile time serve as an initial line of defense, alerting developers to potential vulnerabilities before execution.
+Additionally, randomized reordering of stack variables, while considered a temporary measure, can introduce variability, making it harder for attackers to exploit memory vulnerabilities.
+Moreover, embedding stack protection mechanisms during compilation enhances security.
+The canary mechanism, for instance, involves inserting a sentinel value between local variables and control values. 
+During the function's epilogue, the integrity of this canary is verified. If tampering is detected upon function return, the program is terminated.
+There are various types of canaries implemented for enhancing security:
+\begin{itemize}
+    \item Terminator canaries are constructed using terminator characters, often /0, which cannot be copied by string-copy functions. 
+        This characteristic prevents them from being overwritten during potential attacks.
+    \item Random canaries are generated as random sequences of bytes when the program is executed. 
+        This randomness adds an additional layer of defense against buffer overflow attacks. 
+        They are commonly implemented using options like \texttt{-fstack-protector} in GCC.
+    \item Random XOR canaries, similar to random canaries, are also randomly generated but are additionally XORed with a portion of the structure that requires protection. 
+        This XOR operation adds complexity to the canary, making it more difficult for attackers to manipulate even in scenarios where buffer overflow doesn't occur.
+\end{itemize}
 
-
-
-
-
+\paragraph*{Operating system level defenses}
+OS Level Defenses encompass several protective measures:
+\begin{itemize}
+    \item Non-executable stack configuration ensures that data is distinguished from executable code, mitigating the risk of stack smashing attacks on local variables. 
+        However, it's worth noting that certain programs, such as older versions of the JVM, may require executing code on the stack, posing a challenge to this defense mechanism.
+    \item To enforce non-executable stack policies, hardware mechanisms like the NX bit are leveraged. 
+    \item Despite non-executable stack defenses, attackers may bypass them by redirecting the return address to existing machine instructions, a technique known as code-reuse attacks. 
+        Common variants include return to libc (ret2libc) attacks using C library functions or more sophisticated methods like return-oriented programming (ROP).
+    \item Address Space Layout Randomization (ASLR) further fortifies defenses by repositioning memory elements, including the stack, at random locations during each execution.
+        This randomness makes it challenging for attackers to predict return addresses accurately. 
+        ASLR is active by default in Linux kernels newer than 2.6.12, with a typical randomization range of 8MB, configurable through /proc/sys/kernel/randomize\_va\_space.
+\end{itemize}
