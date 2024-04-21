@@ -4,7 +4,7 @@ If laser measurements are utilized to determine distances between the robot and 
 This model treats each beam independently and integrates various sources of error:
 \begin{enumerate}
     \item \textit{Measurement Noise}: each measurement is subject to noise, which is represented using a Gaussian distribution:
-        \[\text{P}_{hit}(z|x,m)=\eta \dfrac{1}{\sqrt{2\pi b}}e^{-\frac{1}{2}\frac{{\left(z-z_{\text{exp}}\right)}^2}{b}}\]
+        \[\Pr_{hit}(z|x,m)=\eta \dfrac{1}{\sqrt{2\pi b}}e^{-\frac{1}{2}\frac{{\left(z-z_{\text{exp}}\right)}^2}{b}}\]
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.4\linewidth]{images/mn.png}
@@ -12,7 +12,7 @@ This model treats each beam independently and integrates various sources of erro
         \end{figure}
     \item \textit{Unexpected obstacles}: measurements may deviate from the actual values due to temporary obstacles obstructing the beam's path. 
         This probability is expressed as:
-        \[\text{P}_{\text{unexp}}(z|x,m)=\begin{cases}
+        \[\Pr_{\text{unexp}}(z|x,m)=\begin{cases}
             \eta\lambda e^{-\lambda z} \qquad z>z_{\text{exp}} \\
             0 \qquad\qquad\:\: \text{otherwise}
         \end{cases}\]
@@ -22,14 +22,14 @@ This model treats each beam independently and integrates various sources of erro
             \caption{Unexpected obstacles}
         \end{figure}
     \item \textit{Random measurement}: occasionally, a completely erroneous measurement may occur with a certain probability:
-        \[\text{P}_{\text{rand}}(z|x,m)=\eta\dfrac{1}{z_{\max}}\]
+        \[\Pr_{\text{rand}}(z|x,m)=\eta\dfrac{1}{z_{\max}}\]
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.4\linewidth]{images/rm.png}
             \caption{Random measurement}
         \end{figure}
     \item \textit{Maximum range}: uncertainty arises from distances beyond the sensor's reach, which is modeled as:
-        \[\text{P}_{\max}(z|x,m)=\eta \dfrac{1}{z_{\text{small}}}\]
+        \[\Pr_{\max}(z|x,m)=\eta \dfrac{1}{z_{\text{small}}}\]
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.4\linewidth]{images/mr.png}
@@ -37,16 +37,16 @@ This model treats each beam independently and integrates various sources of erro
         \end{figure}
 \end{enumerate}
 The total probability can be computed by combining these individual probabilities:
-\[\text{P}(z|x,m)=\begin{bmatrix}
+\[\Pr(z|x,m)=\begin{bmatrix}
     \alpha_{\text{hit}} \\
     \alpha_{\text{unexp}} \\
     \alpha_{\text{max}} \\
     \alpha_{\text{rand}}
 \end{bmatrix}^T \cdot \begin{bmatrix}
-    \text{P}_{\text{hit}}(z|x,m) \\
-    \text{P}_{\text{unexp}}(z|x,m) \\
-    \text{P}_{\text{max}}(z|x,m) \\
-    \text{P}_{\text{rand}}(z|x,m)
+    \Pr_{\text{hit}}(z|x,m) \\
+    \Pr_{\text{unexp}}(z|x,m) \\
+    \Pr_{\text{max}}(z|x,m) \\
+    \Pr_{\text{rand}}(z|x,m)
 \end{bmatrix}\]
 The overall structure of this probability distribution is depicted as follows:
 \begin{figure}[H]
@@ -56,7 +56,7 @@ The overall structure of this probability distribution is depicted as follows:
 \end{figure}
 
 \subsection{Calibration}
-To calibrate the sensor, we can collect data at specific distances, such as 300 cm and 400 cm, and then estimate the model parameters using maximum likelihood $\text{P}(z|z_{\text{exp}})$.
+To calibrate the sensor, we can collect data at specific distances, such as 300 cm and 400 cm, and then estimate the model parameters using maximum likelihood $\Pr(z|z_{\text{exp}})$.
 Since it's impractical to calibrate the sensor for every possible distance, we typically select a few representative distances and interpolate or use a mean for the missing data.
 \begin{figure}[H]
     \centering

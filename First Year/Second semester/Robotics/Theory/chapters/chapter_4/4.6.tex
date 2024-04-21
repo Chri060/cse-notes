@@ -1,0 +1,152 @@
+\section{Kalman filter}
+
+The belief can be computed as: 
+\[\text{Bel}(x_t|m)=\eta\Pr(z_t|x_t,m)\int\Pr(x_t|u_t,x_{t-1},m)\text{Bel}(x_{t-1}|m)\,dx_{t-1}\]
+It can be computed partially with the following two formulas: 
+\[\begin{cases}
+    \bar{\text{Bel}}(x_t|m)=\int\Pr(x_t|u_t,x_{t-1},m)\text{Bel}(x_{t-1}|m)\,dx_{t-1} \\
+    \text{Bel}(x_t|m)=\eta\Pr(z_t|x_t,m)\bar{\text{Bel}}(x_t|m)
+\end{cases}\]
+Note that also the variable $\eta$ is an integral. 
+It is impossible to compute these integrals in closed form for continuos distributions, but it is possible to do so at least for Gaussian distributions. 
+
+\paragraph*{Univariate Gaussian distribution}
+The univariate gaussian distribution, denoted as $\Pr(x)\sim \mathcal{N}(\mu,\sigma^2)$ is described as follows: 
+\[\Pr(x)=\dfrac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(x-\mu)^2}{2\sigma^2}}\]
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/ugd.png}
+    \caption{Univariate Gaussian distribution}
+\end{figure}
+Given an univariate gaussian distribution $\Pr(x)\sim \mathcal{N}(\mu,\sigma^2)$, the distribution $Y=aX+b$ si still Gaussian and is defined as: 
+\[Y\sim \mathcal{N}(a\mu+b,a^2\sigma^2)\]
+Given two univariate Gaussian distributions $X_1\sim\mathcal{N}(\mu_1,\sigma_1^2)$ and $X_2\sim\mathcal{N}(\mu_2,\sigma_2^2)$, the product between these distributions is: 
+\[\Pr(X_1)\cdot\Pr(X_2)\sim\mathcal{N}\left(\dfrac{\sigma_2^2}{\sigma_1^2+\sigma_2^2}\mu_1+\dfrac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}\mu_2,\dfrac{1}{\frac{1}{\sigma_1^2}+\frac{1}{\sigma_2^2}}\right)\]
+
+\paragraph*{Multivariate Gaussian distribution}
+The multivariate gaussian distribution, denoted as $\Pr(\mathbf{x})\sim \mathcal{N}(\boldsymbol{\mu},\mathbf{\Sigma})$ is described as follows: 
+\[\Pr(\mathbf{x})=\dfrac{1}{\sqrt{(2\pi)^d\left\lvert \mathbf{\Sigma} \right\rvert }}e^{-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})\mathbf{\Sigma}^{-1}(\mathbf{x}-\boldsymbol{\mu})^T}\]
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/mgd.png}
+    \caption{Multivariate Gaussian distribution}
+\end{figure}
+Given a multivariate gaussian distribution $\Pr(\mathbf{x})\sim \mathcal{N}(\boldsymbol{\mu},\mathbf{\Sigma})$, the distribution $Y=\mathbf{A}X+\mathbf{B}$ si still Gaussian and is defined as: 
+\[Y\sim \mathcal{N}(\mathbf{A\mu}+\mathbf{B},\mathbf{A\Sigma A}^T)\]
+Given two univariate Gaussian distributions $X_1\sim\mathcal{N}(\boldsymbol{\mu}_1,\mathbf{\Sigma}_1)$ and $X_2\sim\mathcal{N}(\boldsymbol{\mu}_2,\mathbf{\Sigma}_2)$, the product between these distributions is: 
+\[\Pr(X_1)\cdot\Pr(X_2)\sim\mathcal{N}\left(\dfrac{\mathbf{\Sigma}_2}{\mathbf{\Sigma}_1+\mathbf{\Sigma}_2}\boldsymbol{\mu}_1+\dfrac{\mathbf{\Sigma}_1}{\mathbf{\Sigma}_1+\mathbf{\Sigma}_2}\boldsymbol{\mu}_2,\dfrac{1}{\frac{1}{\mathbf{\Sigma}_1}+\frac{1}{\mathbf{\Sigma}_2}}\right)\]
+
+\subsection{Discrete time Kalman filter}
+Consider the following scenario, where $z$ is the observation, $x$ is the position, and $u$ is the action performed: 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/kal.png}
+\end{figure}
+Let's consider the observation as a linear function of the position: 
+\[z_t=\mathbf{C}_tx_t+\delta_t\]
+Here, $C_t$ is a $k\times n$ matrix that describes how to map the state $x_t$ to an observation $z_t$, and $\delta_t$ is a random variables representing process and measurement noise assumed independent and normally distributed with covariance $Q_t$
+In the same way it is possible to see the position of the robot (motion model) as: 
+\[x_t=\mathbf{A}_tx_{t-1}+\mathbf{B}_tu_t+\varepsilon_t\]
+Here, $A_t$ is a $n\times n$ matrix that describes how state evolves from $t-1$ to $t$ without controls or noise, $B_t$ is a $n\times l$ matrix that describes how control $u_t$ changes the state from $t-1$ to $t$, and $\varepsilon_t$ is a random variables representing process and measurement noise assumed independent and normally distributed with covariance $R_t$. 
+
+The initial belief is normally distributed: 
+\[\text{Bel}(x_0)=\mathcal{N}(\boldsymbol{\mu}_0,\mathbf{\Sigma}_0)\]
+
+We imposed that the observations are linear function of state, with additive noise:
+As a result, the probability to to have a certain observation becomes: 
+\[\Pr(z_t|x_t)=\mathcal{N}(z_t;\mathbf{C}_tx_t,\mathbf{Q}_t)\]
+In the same way, we imposed that the states are linear functions of the state and control, with an additive noise. 
+As a result, the probability to be in a certain state becomes: 
+\[\Pr(x_t|u_t,x_{t-1})=\mathcal{N}(x_t;\mathbf{A}_tx_{t-1}+\mathbf{B}_tu_t,\mathbf{R}_t)\]
+
+\paragraph*{Closed form prediction}
+With these assumption we can predict the position as: 
+\begin{align*}
+    \bar{\text{Bel}}(x_t)   &=\int\Pr(x_t|u_t,x_{t-1})\cdot\text{Bel}(x_{t-1})\,dx_{t-1} \\
+                            &=\int\mathcal{N}(x_t;\mathbf{A}_tx_{t-1}+\mathbf{B}_tu_t,\mathbf{R}_t)\cdot\mathcal{N}(z_t;\mathbf{C}_tx_t,\mathbf{Q}_t)\,dx_{t-1} \\
+                            &=\eta\int e^{-\frac{1}{2}(x_t-\mathbf{A}_tx_{t-1}-\mathbf{B}_tu_t)\mathbf{R}_t^{-1}(x_t-\mathbf{A}_tx_{t-1}-\mathbf{B}_tu_t)^T}\cdot e^{-\frac{1}{2}(x_{t-1}-\boldsymbol{\mu}_{t-1})\mathbf{\Sigma}_{t-1}^{-1}(x_{t-1}-\boldsymbol{\mu}_{t-1})^T}\,dx_{t-1}
+\end{align*}
+In the end, we have that the closed form prediction step is equal to:
+\[\bar{\text{Bel}}(x_t)=\begin{cases}
+    \bar{\boldsymbol{\mu}}_t=\mathbf{A}_t\boldsymbol{\mu}_{t-1}+\mathbf{B}_tu_t \\
+    \bar{\mathbf{\Sigma}}_t=\mathbf{A}_t\mathbf{\Sigma}_{t-1}\mathbf{A}_t^T+\mathbf{R}_t
+\end{cases}\]
+
+\paragraph*{Closed form correction}
+With these assumption we can predict the position as: 
+\begin{align*}
+    \text{Bel}(x_t) &=\eta\Pr(z_t|x_t)\cdot\bar{\text{Bel}}(x_t) \\
+                    &=\eta\mathcal{N}(z_t;\mathbf{C}_tx_t,\mathbf{Q}_t)\mathcal{N}(x_t;\bar{\boldsymbol{\mu}}_t,\bar{\boldsymbol{\Sigma}}_t) \\
+                    &=\eta\int e^{-\frac{1}{2}(z_t-\mathbf{C}_tx_t)\mathbf{Q}_t^{-1}(z_t-\mathbf{C}_tx_t)^T}\cdot e^{-\frac{1}{2}(x_t-\bar{\boldsymbol{\mu}}_t)  \bar{\mathbf{\Sigma}}_t^{-1}   (x_t-\bar{\boldsymbol{\mu}}_t)^T}\,dx_{t-1}
+\end{align*}
+In the end, we have that the closed form update step is equal to:
+\[\text{Bel}(x_t)=\begin{cases}
+    \boldsymbol{\mu}_t=\bar{\boldsymbol{\mu}}_t+\mathbf{K}_t(z_t-\mathbf{C}_t\bar{\boldsymbol{\mu}}_t) \\
+    \mathbf{\Sigma}_t=(I-\mathbf{K}_t\mathbf{C}_t)\bar{\mathbf{\Sigma}}_t
+\end{cases}\]
+Here, $\mathbf{K}_t=\bar{\mathbf{\Sigma}}_t\mathbf{C}_t^T\left(\mathbf{C}_t\bar{\mathbf{\Sigma}}_t\mathbf{C}_t^T+\mathbf{Q}_t\right)^{-1}$. 
+
+\paragraph*{Algorithm} 
+With these steps we can finally write the Kalman algorithm: 
+\begin{algorithm}[H]
+    \caption{Kalman filter algorithm}
+        \begin{algorithmic}[1]
+            \State{$\bar{\boldsymbol{\mu}}_t=\mathbf{A}_t\boldsymbol{\mu}_{t-1}+\mathbf{B}_tu_t$} \Comment{Prediction step}
+            \State{$\bar{\mathbf{\Sigma}}_t=\mathbf{A}_t\mathbf{\Sigma}_{t-1}\mathbf{A}_t^T+\mathbf{R}_t$} 
+            \State{$\mathbf{K}_t=\bar{\mathbf{\Sigma}}_t\mathbf{C}_t^T\left(\mathbf{C}_t\bar{\mathbf{\Sigma}}_t\mathbf{C}_t^T+\mathbf{Q}_t\right)^{-1}$}  \Comment{Correction step}
+            \State{$\boldsymbol{\mu}_t=\bar{\boldsymbol{\mu}}_t+\mathbf{K}_t(z_t-\mathbf{C}_t\bar{\boldsymbol{\mu}}_t)$}
+            \State{$\mathbf{\Sigma}_t=(I-\mathbf{K}_t\mathbf{C}_t)\bar{\mathbf{\Sigma}}_t$} 
+            \State\Return{$\boldsymbol{\mu}_t$,$\mathbf{\Sigma}_t$}
+        \end{algorithmic}
+\end{algorithm}
+The complexity is polynomial in measurement dimensionality $k$ and state dimensionality $n$: $O(k^{2.376} + n^2)$
+Optimal for linear Gaussian systems
+
+The problem is that Most robotics systems are nonlinear, and that it It represents unimodal distributions. 
+
+\subsection{Extended Kalman filter}
+The Gaussian noise in linear system is assumed to be: 
+\[\begin{cases}
+    x_t=\mathbf{A}_tx_{t-1}+\mathbf{B}_tu(t)+\varepsilon_t \\
+    z_t=\mathbf{C}_tx_t+\delta_t
+\end{cases}\]
+On the other hand, in non-linear systems the Gaussian noise is distributed as: 
+\[\begin{cases}
+    x_t=g(u_t,x_{t-1}) \\
+    z_t=h(x_t)
+\end{cases}\]
+Here, $g(\cdot)$ and $h(\cdot)$ are nonlinear functions. 
+
+\paragraph*{Prediction step}
+In case of nonlinear functions we have that the prediction is computed as: 
+\begin{align*}
+    g(u_t,x_{t-1})  &\approx g(u_t,\boldsymbol{\mu}_{t-1})+\dfrac{\partial g(u_t,\boldsymbol{\mu}_{t-1})}{\partial x_{t-1}} (x_{t-1}-\boldsymbol{\mu}_{t-1}) \\
+                    &\approx g(u_t,\boldsymbol{\mu}_{t-1})+\mathbf{G}_t(x_{t-1}-\boldsymbol{\mu}_{t-1})
+\end{align*} 
+
+\paragraph*{Correction step}
+In case of nonlinear functions we have that the prediction is computed as: 
+\begin{align*}
+    h(x_t)  &\approx h(\bar{\boldsymbol{\mu}}_t)+\dfrac{\partial h(\bar{\boldsymbol{\mu}}_t)}{\partial x_t}(x_t-\bar{\boldsymbol{\mu}}_t) \\
+            &\approx h(\bar{\boldsymbol{\mu}}_t)+\mathbf{H}_t(x_t-\bar{\boldsymbol{\mu}}_t)
+\end{align*} 
+
+\paragraph*{Algorithm}
+With these steps we can finally write the Kalman algorithm: 
+\begin{algorithm}[H]
+    \caption{Extended Kalman filter algorithm}
+        \begin{algorithmic}[1]
+            \State{$\bar{\boldsymbol{\mu}}_t=g(u_t,\boldsymbol{\mu}_{t-1})$} \Comment{Prediction step}
+            \State{$\bar{\mathbf{\Sigma}}_t=\mathbf{G}_t\mathbf{\Sigma}_{t-1}\mathbf{G}_t^T+\mathbf{R}_t$} 
+            \State{$\mathbf{K}_t=\bar{\mathbf{\Sigma}}_t\mathbf{H}_t^T\left(\mathbf{H}_t\bar{\mathbf{\Sigma}}_t\mathbf{H}_t^T+\mathbf{Q}_t\right)^{-1}$}  \Comment{Correction step}
+            \State{$\boldsymbol{\mu}_t=\bar{\boldsymbol{\mu}}_t+\mathbf{K}_t(z_t-h(\bar{\boldsymbol{\mu}}_t))$}
+            \State{$\mathbf{\Sigma}_t=(I-\mathbf{K}_t\mathbf{H}_t)\bar{\mathbf{\Sigma}}_t$} 
+            \State\Return{$\boldsymbol{\mu}_t$,$\mathbf{\Sigma}_t$}
+        \end{algorithmic}
+\end{algorithm}
+Here, $\mathbf{G}_t=\frac{\partial g(u_t,\boldsymbol{\mu}_{t-1})}{\partial x_{t-1}}$, and $\mathbf{H}_t=\frac{\partial h(\bar{\boldsymbol{\mu}}_t)}{\partial x_t}$. 
+Extended Kalman Filter:
+Polynomial in measurement k and state n dimensionality: $O(k^{2.376} + n^2)$
+Not optimal and can diverge if nonlinearity are large.
+Works surprisingly well even when all assumptions are violated.
+There are possible alternative like the Unscented Kalman Transform.
