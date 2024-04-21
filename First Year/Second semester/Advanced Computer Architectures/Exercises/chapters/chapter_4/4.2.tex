@@ -1,0 +1,41 @@
+\section{Exercise two}
+
+Consider the following code:
+\begin{verbatim}
+I1: LD F6 32+ R2
+I2: ADDD F2 F6 F4
+I3: MULTD F0 F4 F2
+I4: SUBD F12 F2 F6
+I5: ADDD F0 F12 F2
+\end{verbatim}
+\begin{enumerate}
+    \item Identify all conflicts.
+    \item Develop a scoreboard for the given code, indicating clock cycles.
+    \item If the previous table was incorrect, provide the accurate one, specifying the number, type, and latency for each unit.
+\end{enumerate}
+
+\subsection*{Solution}
+\begin{enumerate}
+    \item Conflicts:
+        \begin{itemize}
+        \item RAW F6 between I1 and I2
+        \item RAW F2 between I2 and I3
+        \item RAW F2 between I2 and I4
+        \item RAW F6 between I1 and I4
+        \item RAW F2 between I2 and I5
+        \item WAW F0 between I3 and I5
+        \item RAW F12 between I4 and I5
+        \end{itemize}
+    \item Scoreboard:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=1\linewidth]{images/score.png}
+        \end{figure}
+        Although two write results occur simultaneously, this is permissible in a scoreboard-based architecture. 
+        However, the issue order is incorrect, rendering the scoreboard configuration inaccurate.
+    \item Correct Scoreboard:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=1\linewidth]{images/score1.png}
+        \end{figure}
+\end{enumerate}
