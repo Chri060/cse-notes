@@ -1,0 +1,37 @@
+\section{RAID four}
+
+In RAID four, the $N$-th disk only stores parity information for the other $N-1$ disks. 
+The parity bit is computed using the XOR operation.
+
+\paragraph*{Writes}
+There are two methods for updating parity when blocks are written:
+\begin{itemize}
+    \item Additive parity involves reading other blocks and then updating the parity block. 
+        This method calculates the new parity value by XORing the old parity value with the new parity value.
+    \item Subtractive parity involves updating the disk and then computing the new parity value. 
+        This method calculates the new parity value by XORing the old parity value with the new parity value.
+\end{itemize}
+
+\paragraph*{Reads}
+In RAID 4, reads are not a problem because the data is distributed evenly across all non-parity blocks in the stripe. 
+This ensures that read operations can be performed efficiently without any significant performance reduction due to the parity disk.
+
+RAID 4 has the same read and write performance, with parallelization across all non-parity blocks in the stripe. 
+This means that all writes on the same stripe update the parity drive once.
+
+\paragraph*{Random writes}
+In RAID 4, random writes can cause a bottleneck due to the need to update the parity drive, which can cause serialization. 
+The process of writing to a RAID 4 array involves reading the target block and the parity block, calculating the new parity block using subtraction, and then writing the target block and the new parity block. 
+This process can cause performance issues, especially if the parity drive is slow or has limited bandwidth.
+
+\subsection{Summary}
+The following is a summary of the features of RAID 1:
+\begin{itemize}
+    \item The system has a capacity of $N-1$, meaning that the space on the parity drive is lost. 
+    \item The system has a reliability of $1$, meaning that one drive can fail. 
+        This can result in massive performance degradation during a partial outage.
+    \item The system supports sequential read and write operations of $(N-1)\times S$, which means that it can perform parallelization across all non-parity blocks in the stripe.
+    \item The system supports parallelization of read operations over all drives except the parity drive, with a maximum of $(N-1)\times R$ simultaneous reads.
+    \item The system supports random write operations of $\frac{R}{2}$, which means that writes serialize due to the parity drive. 
+        Each write requires one read and one write of the parity drive.
+\end{itemize}

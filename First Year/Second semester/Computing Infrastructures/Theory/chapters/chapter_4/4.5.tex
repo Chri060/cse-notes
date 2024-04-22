@@ -1,0 +1,23 @@
+\section{RAID five}
+
+In RAID 5, the parity blocks are distributed evenly across all N disks. 
+Unlike RAID 4, writes are spread evenly across all drives.
+Random writes in RAID 5 involve the following steps:
+\begin{enumerate}
+    \item Read the target block and the parity block.
+    \item Calculate the new parity block by subtracting the old parity block from the target block.
+    \item Write the target block and the new parity block.
+\end{enumerate}
+This results in a total of 4 operations (2 reads and 2 writes) being distributed evenly across all drives.
+
+\subsection{Summary}
+The following is a summary of the features of RAID 1:
+\begin{itemize}
+    \item The system has a capacity of $N-1$, meaning that the space on the parity drive is lost. 
+    \item The system has a reliability of $1$, meaning that one drive can fail. 
+        This can result in massive performance degradation during a partial outage.
+    \item The system supports sequential read and write operations of $(N-1)\times S$, which means that it can perform parallelization across all non-parity blocks in the stripe.
+    \item The system supports parallelization of read operations over all drives, with a maximum of $N\times R$ simultaneous reads.
+    \item The system supports random write operations of $\frac{N}{4}R$, which means that writes parallelize over all drives. 
+        Each write requires two reads and two writes. 
+\end{itemize}

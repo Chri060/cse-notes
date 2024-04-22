@@ -1,4 +1,4 @@
-\section{Redundant Arrays of Independent Disks}
+\section{Introduction}
 
 Redundant Arrays of Independent Disks (RAID) is a storage technology introduced in the 1980s by Patterson. 
 Its purpose is to enhance the performance, capacity, and reliability of storage systems. 
@@ -84,6 +84,46 @@ Here's an overview of the commonly known RAID levels:
         It can tolerate the failure of up to two disks simultaneously, as it utilizes double parity to protect against data loss.
 \end{enumerate}
 
+\subsection{Performance}
+\paragraph*{Sequential transfer rate}
+We typically examine sequential and random workloads. 
+Assuming disks in the array have a sequential transfer rate $S$:
+\[S=\dfrac{\text{transfer size}}{\text{time to access}}\]
+\begin{example}
+    Consider a 10 megabyte transfer and a hard disk with the following characteristics:
+    \begin{itemize}
+        \item Average seek time of seven milliseconds.
+        \item Average rotational delay of three milliseconds.
+        \item Transfer rate of 50 megabytes per second.
+    \end{itemize}
+    The transfer rate in this case will be:
+    \[S=\dfrac{10\:MB}{7\:ms+3\:ms+\frac{10\:MB}{50\:MB/s}}= 47.62\:MB/s\]
+\end{example}
 
+\paragraph*{Random transfer rate}
+Again, we focus on sequential and random workloads. 
+Assuming disks in the array have a random transfer rate $R$:
+\[R=\dfrac{\text{transfer size}}{\text{time to access}}\]
+\begin{example}
+    Consider a 10 kilobyte transfer and a hard disk with the following characteristics:
+    \begin{itemize}
+        \item Average seek time of seven milliseconds.
+        \item Average rotational delay of three milliseconds.
+        \item Transfer rate of 50 megabytes per second.
+    \end{itemize}
+    The transfer rate in this case will be:
+    \[S=\dfrac{10\:KB}{7\:ms+3\:ms+\frac{10\:MB}{50\:MB/s}}= 0.98\: MB/s\]
+\end{example}
 
+\subsection{Consistent update}
+Mirrored writes should be atomic, meaning that all copies are written, or none are written.
+However, this is difficult to guarantee. Many RAID controllers include a write-ahead log, which is a battery-backed, non-volatile storage of pending writes. 
+A recovery procedure ensures that the out-of-sync mirrored copies are recovered.
 
+\subsection{Main levels comparison}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/levcomp.png}
+    \caption{RAID levels comparison}
+\end{figure}
+Here, $N$ refers to the number of drives, $S$ represents sequential access speed, $R$ denotes random access speed, and $D$ signifies the latency required to access a single disk.
