@@ -121,9 +121,19 @@ However, this is difficult to guarantee. Many RAID controllers include a write-a
 A recovery procedure ensures that the out-of-sync mirrored copies are recovered.
 
 \subsection{Main levels comparison}
-\begin{figure}[H]
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.6\linewidth]{images/levcomp.png}
-    \caption{RAID levels comparison}
-\end{figure}
+    \begin{tabular}{cc|c|c|c|c|}
+    \cline{3-6}
+    \textit{\textbf{}}                                        &                           & \textbf{RAID 0} & \textbf{RAID 1}             & \textbf{RAID 4} & \textbf{RAID 5}      \\ \cline{2-6} 
+    \multicolumn{1}{c|}{\textit{}}                            & \textbf{Capacity}         & $N$             & $\frac{N}{2}$               & $N-1$           & $N-1$                \\
+    \multicolumn{1}{c|}{\textit{}}                            & \textbf{Reliability}      & $0$             & $1 \text{ or } \frac{N}{2}$ & $1$             & $1$                  \\ \cline{2-6} 
+    \multicolumn{1}{c|}{\multirow{4}{*}{\textit{Throughput}}} & \textbf{Sequential read}  & $N\cdot S$      & $\frac{N}{2}\cdot S$        & $(N-1)\cdot S$  & $(N-1)\cdot S$       \\
+    \multicolumn{1}{c|}{}                                     & \textbf{Sequential write} & $N\cdot S$      & $\frac{N}{2}\cdot S$        & $(N-1)\cdot S$  & $(N-1)\cdot S$       \\
+    \multicolumn{1}{c|}{}                                     & \textbf{Random read}      & $N\cdot R$      & $N \cdot R$                 & $(N-1)\cdot R$  & $N\cdot R$           \\
+    \multicolumn{1}{c|}{}                                     & \textbf{Random write}     & $N\cdot R$      & $\frac{N}{2}\cdot R$        & $\frac{R}{2}$   & $\frac{N}{4}\cdot R$ \\ \cline{2-6} 
+    \multicolumn{1}{c|}{\multirow{2}{*}{\textit{Latency}}}    & \textbf{Read}             & $D$             & $D$                         & $D$             & $D$                  \\
+    \multicolumn{1}{c|}{}                                     & \textbf{Write}            & $D$             & $D$                         & $2D$            & $2D$                 \\ \cline{2-6} 
+    \end{tabular}
+    \end{table}
 Here, $N$ refers to the number of drives, $S$ represents sequential access speed, $R$ denotes random access speed, and $D$ signifies the latency required to access a single disk.
