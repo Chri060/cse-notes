@@ -1,0 +1,55 @@
+\section{Exercise twenty-two}
+
+Let's analyze an infrastructure consisting of a web server, an application server, and a storage server. 
+After a 1-hour measurement period, during which $N = 50$ users continuously worked, the following data were collected:
+\begin{itemize}
+    \item Total number of jobs executed by the system: $C = 5400$ jobs.
+    \item Number of WS completed operations: $C_{WS} = 54000$ operations.
+    \item Number of AS completed operations: $C_{AS} = 32400$ operations.
+    \item Number of SS completed operations: $C_{SS} = 10800$ operations.
+    \item WS total activity time: $B_{WS} = 1800$ seconds.
+    \item AS total activity time: $B_{AS} = 720$ seconds.
+    \item SS total activity time: $B_{SS} = 900$ seconds.
+    \item Mean think time: $Z = 5$ seconds.
+\end{itemize}
+Using operational analysis equations:
+\begin{enumerate}
+\item Calculate the visits $V_i$ to the three servers during a complete job execution, their global service demands $D_i$, and determine the bottleneck resource of the infrastructure.
+\item Compute the response time when $N = 50$ users are connected, as well as the maximum throughput when the number of users tends to infinity (asymptotic value).
+\item Substitute the bottleneck resource determined in step 1 with another resource that is two times (2x) more powerful. 
+    Compute the new value of the asymptotic throughput.
+\end{enumerate}
+
+\subsection*{Solution}
+\begin{enumerate}
+    \item We compute the number of visits as:
+        \[\begin{cases}
+            V_{WS}=\frac{C_{WS}}{C}=\frac{54000}{5400}=10\text{ visits} \\
+            V_{AS}=\frac{C_{AS}}{C}=\frac{32400}{5400}=6\text{ visits} \\
+            V_{SS}=\frac{C_{SS}}{C}=\frac{10800}{5400}=2\text{ visits} 
+        \end{cases}\]
+        The utilization of each resource is:
+        \[\begin{cases}
+            U_{WS}=\frac{B_{WS}}{T}=\frac{1800}{3600}=0.5 \\
+            U_{AS}=\frac{B_{AS}}{T}=\frac{720}{3600}=0.2\\
+            U_{SS}=\frac{B_{SS}}{T}=\frac{900}{3600}=0.25
+        \end{cases}\]
+        The throughput of the system is:
+        \[X=\dfrac{C}{T}=\dfrac{5400}{3600}=1.5\:\dfrac{\text{job}}{\text{second}}\]
+        We can now compute the global service demands as:
+        \[\begin{cases}
+            D_{WS}=\frac{U_{WS}}{X}=\frac{0.5}{1.5}=0.33\text{ visits} \\
+            D_{AS}=\frac{U_{AS}}{X}=\frac{0.2}{1.5}=0.13\text{ visits} \\
+            D_{SS}=\frac{U_{SS}}{X}=\frac{0.25}{1.5}=0.16\text{ visits} 
+        \end{cases}\]
+        The maximum service demand is:
+        \[D_{\max}=\max\{0.33,0.13,0.16\}=0.33\]
+        Therefore, the bottleneck is the web server.
+    \item The response time with $N=50$ is:
+        \[R(50)=\dfrac{N}{X}-Z=28.3\text{ s}\]
+        The upper bound for the throughput is then:
+        \[X_{\max}=\dfrac{1}{D_{\max}}=\dfrac{1}{0.33}=3\:\dfrac{\text{job}}{\text{second}}\]
+    \item After replacing the bottlenecked web server with one that is two times more powerful, the new $D_{\max}^\prime$ is the web server, and the bottlenecks become the web server and the storage server. 
+        The new upper bound for the throughput is then:
+        \[X_{\max}^\prime=\dfrac{1}{D_{\max}^\prime}=\dfrac{1}{0.16}=6\:\dfrac{\text{job}}{\text{second}}\]
+\end{enumerate}

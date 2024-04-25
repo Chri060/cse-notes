@@ -1,23 +1,16 @@
 \section{Exercise six}
 
-In the C-5 aircraft, there are 12 identical AC generators, and at least 9 of them must be operational for the aircraft to complete its mission. 
-Failures follow an exponential distribution with a failure rate of $0.01$ failure per hour.
-Compute the reliability of the generator system over a ten-hour mission in case the switch is perfect.
+A system administrator needs to utilize a stock of disks with the following characteristics:
+\begin{itemize}
+    \item Mean Time To Failure (MTTF) of 800 days.
+    \item Mean Time To Repair (MTTR) of twenty days.
+\end{itemize}
+The desired operational lifetime of the system is 3 years.
+Calculate the maximum number of disks that can be used in RAID 01 to ensure a mean time to data loss greater than the system's lifetime.
 
 \subsection*{Solution}
-For a system composed of $n$ identical replicas where at least $r$ replicas must function for the entire system to operate correctly, the system reliability is given by:
-\[R_s(t)=R_V\sum_{i=r}^{n}R_c^i(1-R_c)^{n-1}\binom{n}{i} \]
-Here: 
-\begin{itemize}
-    \item $R_s$ is the system reliability. 
-    \item $R_c$ is the component reliability. 
-    \item $R_v$ is the voter reliability. 
-    \item $n$ is the number of components. 
-    \item $r$ is the minimum number of components that must function.
-\end{itemize}
-
-For each generator over a ten-hour mission, the reliability is:
-\[R_m(10)=e^{-\lambda t}=e^{-0.01\cdot 10}=0.9048374\]
-
-Substituting into the formula, we get:
-\[R_s=\sum_{i=9}^12R_m^i\left(1-R_m\right)^{12-i}\binom{12}{i}=165R_m^{12}+540 R_m^{11}+549R_m^10 +220 R_m^9 =0.9782773\]
+We know that:
+\[\text{MTTF}_{\text{RAID 01}}=\dfrac{2\cdot \text{MTTF}^2}{N^2\cdot\text{MTTR}}\]
+Thus, we have:
+\[N=\sqrt{\dfrac{2\cdot\text{MTTF}^2}{\text{MTTF}_{\text{RAID 01}}\cdot\text{MTTR}}}=\sqrt{\dfrac{2\cdot800^2}{20\cdot 3\cdot 365}}\approx 7.65\]
+The correct answer is six, as in RAID 01, an even number of disks is needed, which must be less than $N=7.65$.

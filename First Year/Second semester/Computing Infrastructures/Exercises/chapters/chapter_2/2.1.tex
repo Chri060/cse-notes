@@ -1,28 +1,56 @@
 \section{Exercise one}
 
-A computer system is engineered with a failure rate of one fault every five years under typical usage conditions. 
-This system lacks fault tolerance capabilities, meaning it ceases functioning upon encountering its initial fault.
+Let's explore the total storage capacity of a system consisting of six disks, each with a capacity of $1\text{ TB}$, under various RAID configurations:
 \begin{enumerate}
-    \item Compute the mean time to failure of the system.
-    \item Compute the probability that the system will fail during its first year of operation. 
-    \item The standard warranty for the system covers 2 years of operation. 
-        However, the vendor aims to provide extended insurance against failures for the initial 5 years of operation, for which they plan to charge an additional fee.  
-        The vendor intends to charge $20\$$ for every $1\%$ decrease in reliability to offer this insurance. 
-        Compute how much should the vendor charge for such an insurance.
+    \item RAID 0
+    \item RAID 1
+    \item RAID 01
+    \item RAID 10
+    \item RAID 5
+    \item RAID 6
 \end{enumerate}
 
 \subsection*{Solution}
 \begin{enumerate}
-    \item The mean time to failure for the system is calculated as the inverse of the failure rate:
-        \[\text{MTTF}=\dfrac{1}{\lambda}=\dfrac{1}{\frac{1}{5}}=5\text{ years}\]
-    \item The failure probability within a given time frame is given by:
-        \[F(t)=1-R(t)\]
-        For the first year:
-        \[F(1)=1-R(1)=1-e^{-\lambda}=1-0.818=0.18\]
-    \item We compute the reliability at 2 and 5 years:
-        \[R(2\text{ year})=e^{-2\lambda}=0.67\]
-        \[R(5\text{ year})=e^{-2\lambda}=0.37\]
-        This yields a reliability drop of $0.3$. 
-        Since the vendor wants to charge $20\$$ for each $1\%$ drop in reliability, the cost is:
-        \[\text{cost}=\dfrac{0.3}{0.01}=30\cdot 20\$=600\$\]
+    \item In RAID 0, all disks are utilized as a single unit:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.7\linewidth]{images/raid0.png}
+        \end{figure}
+        Hence, the total capacity is the sum of individual disk capacities:
+        \[S_C=6\cdot1\text{ TB}=6\text{ TB}\]
+    \item RAID 1 duplicates data across disks for high reliability but lower storage:
+        \[S_C=1\text{ TB}\]
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.7\linewidth]{images/raid1.png}
+        \end{figure}
+    \item RAID 01 involves striping followed by mirroring, resulting in two sets of mirrored blocks:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.7\linewidth]{images/raid01.png}
+        \end{figure}
+        Thus, the total capacity becomes:
+        \[S_C=\dfrac{6}{2}\cdot 1\text{ TB}=3\text{ TB}\]
+    \item RAID 10 employs mirroring followed by striping, creating three pairs of mirrored disks:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.7\linewidth]{images/raid10.png}
+        \end{figure}
+        Therefore, the total capacity is:
+        \[S_C=\dfrac{6}{2}\cdot 1\text{ TB}=3\text{ TB}\]
+    \item RAID 5 utilizes parity blocks across disks, requiring removal of one disk:
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.7\linewidth]{images/raid5.png}
+        \end{figure}
+        This yields:
+        \[S_C=(N-1)\cdot 1\text{ TB}=5\text{ TB}\]
+    \item RAID 6 employs two parity blocks per disk, necessitating removal of two disks:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\linewidth]{images/raid6.png}
+    \end{figure}
+    Resulting in:
+    \[S_C=(N-2)\cdot 1\text{ TB}=4\text{ TB}\]
 \end{enumerate}
