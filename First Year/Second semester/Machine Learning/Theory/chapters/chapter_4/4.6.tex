@@ -1,1 +1,114 @@
 \section{Temporal difference learning}
+
+Dynamic Programming (DP) necessitates knowledge of the Markov Decision Process (MDP) dynamics. 
+On the other hand, Monte Carlo (MC) learning relies on experience but mandates complete episodes for updating. 
+Consequently, it's solely applicable to episodic tasks. 
+However, even within episodic tasks, MC might encounter challenges.
+
+\subsection{Temporal-Difference Policy Evaluation with TD(0)}
+Temporal-Difference combines MC (model-free) with DP (bootstrapping):
+\[V(S_t)=V(S_t)+\alpha[G_t-V(S_t)]=V(S_t)=V(S_t)+\alpha[R_{t+1}+\gamma V(S_{t+1})-V(S_t)]\]
+Here, $R_{t+1}+\gamma V(S_{t+1})-V(S_t)$ is the Temporal-Difference Error $\delta t$. 
+\begin{algorithm}[H]
+    \caption{TD(0) Policy Evaluation}
+        \begin{algorithmic}[1]
+            \State Initialize $V(s)$ arbitrarily, for all $s\in\mathcal{S}^{+}$
+            \State $V(\text{terminal})=0$
+            \For{each episode}
+                \State{Initialize $S$}
+                \Repeat{ for each step of episode}
+                    \State{$A = \text{action given by }\pi\text{ for }S$}
+                    \State{Take action $A$, observe $R$, $S^\prime$}
+                    \State{$V(S)=V(S)+\alpha[R+\gamma V(S^\prime)-V(S)]$}
+                    \State{$S=S^\prime$}
+                \Until{$S$ is terminal}
+            \EndFor
+        \end{algorithmic}
+\end{algorithm}
+The algorithm takes as input the policy $\pi$ to be evaluated, and a parameter $\alpha\in(0,1]$ that represent the step size. 
+One main advantage is that the value function is updated during the episode and not after. 
+
+\subsection{Comparison}
+Temporal Difference (TD) learning has several advantages over Monte Carlo (MC) learning:
+\begin{itemize}
+    \item TD can learn before knowing the final outcome and can update its estimates after every step, whereas MC must wait until the end of an episode before the return is known.
+    \item TD can learn from incomplete sequences, making it more flexible than MC, which can only learn from complete sequences.
+    \item TD is suitable for both continuing (non-terminating) and episodic (terminating) environments, while MC is limited to episodic tasks.
+    \item MC returns are unbiased estimates of the value function, whereas TD targets are biased estimates due to the use of bootstrapping.
+    \item TD targets have lower variance compared to MC returns because they depend on fewer random actions, transitions, and rewards.
+    \item MC works well with function approximation and is less sensitive to initial values, while TD may face challenges with function approximation and is more sensitive to initial values.
+\end{itemize}
+Bootstrapping, where updates involve an estimate, is a characteristic of TD and Dynamic Programming (DP), while MC does not bootstrap.
+Monte Carlo does not rely on Markov assumption. 
+Sampling, where updates do not involve an expected value, is a feature of MC and TD, while DP does not sample.
+
+\subsection{SARSA}
+SARSA is an algorithm employed for policy evaluation in reinforcement learning. 
+It operates as an on-policy optimization method, meaning it evaluates and improves the same policy that is used to make decisions. 
+The update rule for SARSA is defined as follows:
+\[Q(S_t,A_t)=Q(S_t,A_t)+\alpha(R_{t+1}+\gamma Q(S_{t+1},A_{t+1})-Q(S_t,A_t))\]
+SARSA is typically paired with an $\varepsilon$-greedy policy for improvement. 
+This means that most of the time, the policy selects the action with the highest estimated value, but occasionally explores other actions with probability $\varepsilon$.
+
+The algorithm requires two parameters: a step size $\alpha\in(0,1]$ and a small $\varepsilon>0$.
+\begin{algorithm}[H]
+    \caption{SARSA on-policy control algorithm}
+        \begin{algorithmic}[1]
+            \State Initialize $Q(s,a)$ arbitrarily, for all $s\in\mathcal{S}^{+}$, $a \in \mathcal{A}(s)$
+            \State $Q(\text{terminal},\cdot)=0$
+            \Loop
+                \State {Initialize $S$}
+                \State{Choose $A$ from $S$ using policy derived from $Q$}
+                \Repeat{ for each step of episode}
+                    \State{Take action $A$, observe $R$, $S^\prime$}
+                    \State{Choose $A^\prime$ from $S^\prime$ using policy derived from $Q$}
+                    \State{$Q(S,A)=Q(S,A)+\alpha(R+\gamma Q(S^\prime,A^\prime)-Q(S,A))$}
+                    \State{$S=S^\prime$}
+                    \State{$A=A^\prime$}
+                \Until{$S$ is terminal}
+            \EndLoop
+        \end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Q-learning}
+Q-learning is an algorithm utilized for policy evaluation in reinforcement learning. 
+It operates as an off-policy optimization method, meaning it evaluates a policy while following a different policy for action selection.
+
+As opposed to SARSA, which is a sampled version of the Bellman expectation equation, Q-learning is based on a sampled version of the Bellman optimality equation:
+\[Q(S_t,A_t)=Q(S_t,A_t)+\alpha\left(R_{t+1}+\gamma\max_aQ(S_{t+1},a)-Q(S_t,A_t)\right)\]
+The algorithm requires two parameters: a step size $\alpha\in(0,1]$ and a small $\varepsilon>0$.
+\begin{algorithm}[H]
+    \caption{Q-learning algorithm}
+        \begin{algorithmic}[1]
+            \State Initialize $Q(s,a)$ arbitrarily, for all $s\in\mathcal{S}^{+}$, $a \in \mathcal{A}(s)$
+            \State $Q(\text{terminal},\cdot)=0$
+            \Loop
+                \State {Initialize $S$}
+                \Repeat{ for each step of episode}
+                    \State{Choose $A$ from $S$ using policy derived from $Q$}
+                    \State{Take action $A$, observe $R$, $S^\prime$}
+                    \State{$Q(S,A)=Q(S,A)+\alpha\left(R+\gamma\max_aQ(S^\prime,a)-Q(S,A)\right)$}
+                    \State{$S=S^\prime$}
+                \Until{$S$ is terminal}
+            \EndLoop
+        \end{algorithmic}
+\end{algorithm}
+Q-learning updates the Q-values based on the observed rewards and transitions, aiming to find the optimal policy by maximizing the estimated action values over time.
+Since it's off-policy, it doesn't follow the policy it's evaluating, making it particularly useful in scenarios where exploration and exploitation need to be decoupled.
+
+\subsection{Eligibility traces}
+Eligibility traces are a concept in reinforcement learning that play a crucial role in updating the value estimates of states or actions. 
+They are used in combination with temporal difference (TD) learning methods like SARSA (State-Action-Reward-State-Action) or Q-learning.
+The main features are:
+\begin{enumerate}
+    \item \textit{Temporal credit assignment}: eligibility traces help in assigning credit or blame to actions taken in the past for the rewards received in the future.
+    \item \textit{Memory mechanism}: eligibility traces serve as a memory mechanism that tracks the eligibility of states or actions to be updated based on future rewards. 
+        They maintain a record of recent state-action pairs that are likely to contribute to future rewards.
+    \item \textit{Decay factor}: determines how much past experiences influence the current update.
+        It helps balance between short-term and long-term credit assignment.
+    \item \textit{Updating value estimates}: when a reward is received, the eligibility traces are used to update the value estimates of relevant states or actions. 
+        This updating process is done more efficiently because the traces highlight which experiences are relevant.
+    \item \textit{Efficiency and learning speed}: By allowing updates to propagate more efficiently through the learning process, eligibility traces can speed up learning and improve the convergence of RL algorithms.
+\end{enumerate}
+Overall, eligibility traces enhance the efficiency and effectiveness of temporal difference learning methods by providing a mechanism for assigning credit over time, which is crucial for learning in complex environments with delayed rewards.
