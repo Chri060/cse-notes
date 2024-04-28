@@ -1,0 +1,61 @@
+\section{Multi-armed bandits}
+
+In the $k$-armed bandit problem, an agent faces a decision-making scenario where it selects from $k$ actions and receives a reward based on the chosen action. 
+The objective is to identify the optimal action among the available options. 
+Unlike many decision problems, this setting lacks contextual information; decisions are made in isolation, without considering a broader state.
+
+Feedback in this problem manifests as evaluations (rewards) of decisions made under uncertainty, with learning occurring through trial and error and interaction with the environment.
+
+The value associated with each action is represented by its expected reward:
+\[q^\ast\doteq\mathbb{E}[R_t|A_t=a]=\sum p(r|a)r\qquad\forall a\in\{1,\cdots,k\}\]
+Here, the agent's aim is to maximize the expected reward by selecting:
+\[\argmax_a q^\ast(a)\]
+Since the exact distribution $p(r|a)$ is typically unknown, the agent estimates $q^\ast (a)$ based on its experiences:
+\[Q_t(a)\doteq\dfrac{\sum_{i=1}^{t-1}R_i\mathbb{1}_{A_t=a}}{\sum_{i=1}^{t-1}\mathbb{1}_{A_t=a}}\]
+This expression represents the ratio of the cumulative rewards received when action $a$ was chosen before time step $t$, divided by the number of times action $a$ was selected up to time step $t$.
+
+\subsection{Incremental update of action-values}
+Let's examine the update for a single action:
+\begin{align*}
+    Q_{n+1} &=\dfrac{1}{n}\sum_{i=1}^{n}R_i \\
+            &=\dfrac{1}{n}\left(R_n+(n-1)\dfrac{1}{n-1}\sum_{i=1}^{n-1}R_i\right) \\
+            &=\dfrac{1}{n}\left(R_n+(n-1)Q_n\right) \\
+            &=Q_n+\dfrac{1}{n}\left(R_n-Q_n\right)
+\end{align*}
+In this equation, $Q_{n+1}$ represents the new estimate, $Q_{n}$ denotes the old estimate, $\frac{1}{n}$ stands for the step size, and $\left(R_n-Q_n\right)$ serves as the target for the old estimate.
+
+\paragraph*{Non-stationary bandit problem}
+For non-stationary bandit problems, the update equation takes the form:
+\[Q_{n+1}=Q_n+\alpha\left(R_n-Q_n\right)\]
+Here, the parameter $\alpha$ varies over time.
+
+\subsection{Epsilon-greedy action selection}
+Selecting the action with the highest value isn't always optimal, as it may not lead to the best outcome. 
+Thus, striking a balance between exploration and exploitation becomes crucial:
+\begin{itemize}
+    \item Exploitation: The agent leverages its current knowledge to gain immediate rewards.
+    \item Exploration: The agent seeks to enhance its knowledge for long-term gains.
+\end{itemize}
+To navigate this trade-off, we can employ epsilon-greedy action selection:
+\[A_t=\begin{cases}
+    \argmax_a Q_t(a) \qquad\qquad\quad\text{with probability }1-\varepsilon\\
+    \text{Uniform}(\{a_1,\cdots,a_k\})\qquad\text{with probability }\varepsilon
+\end{cases}\]
+
+\subsection{Optimistic initial values}
+Traditionally, we've initialized action-values to 0.0. 
+However, initializing them with values different from zero can yield varied outcomes.
+
+Optimistic initial values encourage early exploration but may not be suitable for non-stationary problems, where the environment's dynamics change over time.
+
+Determining the appropriate optimistic initial value can also pose a challenge, as it's often unclear what value would be most effective in driving exploration.
+
+\subsection{UCB action selection}
+In epsilon-greedy action selection, we had:
+\[A_t=\begin{cases}
+    \argmax_a Q_t(a) \qquad\qquad\quad\text{with probability }1-\varepsilon\\
+    \text{Uniform}(\{a_1,\cdots,a_k\})\qquad\text{with probability }\varepsilon
+\end{cases}\]
+However, we can improve upon the uniform function with the following approach:
+\[A_t=\argmax_a\left[Q_t(a)+c\sqrt{\dfrac{\ln(t)}{N_t(a)}}\right]\]
+Here, $Q_t(a)$ represents exploitation, $c$ is a user-defined coefficient, and $\frac{\ln(t)}{N_t(a)}$ accounts for exploration.

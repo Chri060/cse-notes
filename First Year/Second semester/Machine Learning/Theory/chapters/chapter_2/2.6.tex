@@ -1,0 +1,48 @@
+\section{Computational learning theory}
+
+Computational learning theory is a field of study that aims to understand the general principles of inductive learning. 
+It models the complexity of the hypothesis space, the bound on the training samples, the bound on accuracy, and the probability of successful learning.
+
+A learner ($L$) aims to grasp a concept ($C$) that effectively relates data in the input space ($X$) to a target ($t$). 
+Let's suppose $L$ has identified a hypothesis $h^\ast$ that perfectly fits the training data.
+We need to find how many training samples from $X$ are required to ensure that $L$ has genuinely acquired the true concept, meaning $h^\ast$ accurately represents $C$. 
+
+Let $Acc(L)$ represent the generalization accuracy of learner $L$, indicating $L$'s performance on samples not included in the training set.
+Let $\mathcal{F}$ be the collection of all potential concepts where $y = f(\mathbf{x})$.
+For any learner $L$ and any possible training set:
+\[\dfrac{1}{\left\lvert \mathcal{F} \right\rvert}\sum_{\mathcal{F}}Acc_G(L)=\dfrac{1}{2}\]
+\begin{corollary}
+    For any two learners, $L_1$ and $L_2$, if exists $f(\cdot)$ where $Acc_G(L_1)>Acc_G(L_2)$ then exists $f^\prime(\cdot)$ where $Acc_G(L_2)>Acc_G(L_1)$. 
+\end{corollary}
+This means that in Machine Learning we always operate under some assumptions. 
+
+\subsection{Approximately correct hypothesis}
+Let $X$ be the instance space.
+Let $H =\{ h:X \rightarrow \{0,1\}\}$ represent the hypothesis space of learner $L$. 
+Let $C =\{ c:X \rightarrow \{0,1\}\}$ denote the set of all possible target functions (concepts) we aim to learn.
+Let be $\mathcal{D}$ be the training data drawn from a stationary distribution $P(X)$ and labeled (without noise) according to a concept $c$ we intend to learn.
+A learner $L$ produces a hypothesis $h \in H$ such that: 
+\[h^\ast=\argmin_{h\in H}error_{train}(h)\]
+
+\paragraph*{Error}
+We determine the error of a hypothesis as the probability of misclassifying a sample:
+\[error_{\mathcal{D}}(h)=\Pr_{x\in\mathcal{D}}\left[h(x)\neq c(x)\right]=\dfrac{1}{\left\lvert \mathcal{D}\right\rvert}\sum_{x\in\mathcal{D}}I(h(x)\neq c(x))\]
+This represents the training error. 
+However, our interest lies in the true error of $h$:
+\[error_{true}(h)=\Pr_{x \sim P(X)}\left[h(x)\neq c(x)\right]\]
+
+Assuming $error_{true}$ as the probability of making a mistake on a sample, we can compute $error_{\mathcal{D}}$, which is the average error probability on $\mathcal{D}$.
+Assuming a Bernoulli distribution for the error probability, the 95\% Confidence Interval is given by:
+\[error_{true}(h)=error_{\mathcal{D}}(h)\pm 1.96\sqrt{\dfrac{error_{\mathcal{D}}(h)(1-error_{\mathcal{D}}(h))}{n}}\]
+This calculation is inaccurate because $\mathcal{D}$ represents the training data and is not independent of $h$. 
+Therefore, we require a stricter bounding of the error under additional assumptions.
+
+
+
+
+
+
+
+
+
+
