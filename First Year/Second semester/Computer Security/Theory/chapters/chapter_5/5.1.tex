@@ -1,0 +1,98 @@
+\section{Web application security}
+
+Web applications have become the predominant method for delivering software in various contexts. 
+They are commonly utilized within corporate intranets and are prevalent in SAAS and cloud environments. 
+These applications are often designed to be accessible to the public, resembling public web services in their functionality.
+They are typically built on top of the stateless HTTP protocol, which necessitates the emulation of state management to maintain user sessions and data between requests.
+Additionally, HTTP's built-in authentication mechanisms are relatively weak, prompting the implementation of additional authentication measures to bolster security.
+
+\paragraph*{Client}
+The golden rule in web application security asserts that the client should never be considered trustworthy. 
+Therefore, it is imperative to thoroughly filter and scrutinize any data received from the client. 
+This approach helps mitigate the risks associated with potential malicious inputs or attacks originating from users interacting with the application.
+
+\paragraph*{Filtering}
+Filtering data poses a challenge, yet employing a sequence of validation methods can enhance security:
+\begin{itemize}
+    \item Allowlisting: Permitting only the expected data to pass through.
+    \item Blocklisting: Further filtering out known malicious content on top of allowlisting.
+    \item Escaping: Converting special characters into less harmful equivalents.
+\end{itemize}
+A fundamental principle: allowlisting is generally more secure than blocklisting.
+
+\subsection{Cross site scripting}
+Imagine we have a basic blog application that allows anyone to post comments. 
+Users simply fill in a text field with their comment, which is then displayed to subsequent visitors.
+
+Without implementing any filtering mechanism, an attacker could input malicious code like:
+\begin{verbatim}
+<script>
+    alert('JavaScript Executed');
+</script>
+\end{verbatim}
+If this input is not filtered, the malicious script would execute on the screens of subsequent visitors. 
+This type of attack is known as Cross-Site Scripting (XSS).
+
+Cross site scripting is a vulnerability by
+means of which client-side code can be
+injected in a page.
+Three Types:
+\begin{enumerate}
+    \item Stored XSS: The attacker input is stored on the target server in a database. 
+    Then a victim retrieves the stored malicious code from the web application without that data being made safe to render in the browser.
+    \item Reflected XSS: Client input (i.e., “request payload”) is returned to the client by the web application in a response (e.g., error message, search result). 
+    The response includes some or all of the input provided in the request without being stored and made safe to render in the browser.
+    \item Dom-based XSS: User input never leaves the victim's browser:
+        The malicious payload is directly executed by client-side script (e.g., script that modifies/updates the DOM in-memory representation of a page including forms).
+\end{enumerate}
+With XSS it is possible to: 
+\begin{itemize}
+    \item Cookie theft or session hijack
+    \item Manipulation of a session and execution of
+    fraudulent transaction
+    \item Snooping on private information
+    \item Drive by Download
+    \item Effectively bypasses the same-origin policy
+\end{itemize}
+you may wish to browse with noscript
+
+\paragraph*{Same Origin Policy}
+Same Origin Policy is Implemented by all web clients. 
+Same Origin Policy (SOP) = all client-side
+code (e.g., JavaScript) loaded from origin A
+should only be able to access data from
+origin A
+Modern web has "blurry" boundaries
+- Cross-origin resource sharing (CORS)
+- Client-side extensions
+
+\subsection{Content security policy}
+It is a W3C specification to inform the browser on
+what should be trusted, and what shouldn’t
+think of it as the same-origin policy, with flexible and
+more expressive policies
+technically, it's a set of directives sent by the
+server to the client in the form of HTTP
+response headers
+
+\paragraph*{Directives}
+many directives are available, for instance:
+- script-src load client code only from listed origins
+- form-action lists valid endpoints for submission
+- frame-ancestors lists sources that can embed the
+current page as frames and applets
+- img-src defines the origins from which images can
+be loaded
+- style-src as script-src but for stylesheets
+
+of course, this is a spec; the
+implementation is up to the browser!
+
+CSP is slowly gaining traction because strict policies break functionality and relaxed policies can be bypassed. 
+practical barriers and challenges
+- who writes the policies?
+- it's mainly a manual process
+- something can be automated, but not all
+- how to keep policies up to date?
+- modern pages load content from many resources
+- pages and resources can change over time
