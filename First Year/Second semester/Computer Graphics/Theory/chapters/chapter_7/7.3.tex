@@ -3,3 +3,23 @@
 Point lights are light sources that emit light from fixed positions in space and do not have a specific direction. 
 Unlike directional lights, which emit light uniformly in a particular direction from a distant source, point lights radiate light equally in all directions from a single point in space. 
 They are commonly used to simulate light sources such as lamps or bulbs, where light emanates spherically in all directions from a specific location.
+
+The attributes of a point light, namely its position $\mathbf{p} = (p_x, p_y, p_z)$ and color $\mathbf{l} = (l_R, l_G, l_B)$ define its characteristics.
+The direction of light extends from point $\mathbf{x}$ to the light center, varying depending on the object's surface being illuminated.
+It's essential to normalize the light direction to ensure it's a unit vector:
+\[\overrightarrow{lx}=\dfrac{\mathbf{p}-\mathbf{x}}{\left\lvert \mathbf{p}-\mathbf{x}\right\rvert}\]
+The subtraction $\mathbf{p}-\mathbf{x}$ signifies the ray's orientation from the object toward the light source.
+
+\paragraph*{Realistic light}
+To simulate realistic light behavior, point lights incorporate a decay factor. 
+In physical terms, light intensity diminishes at a rate proportional to the inverse square of the distance.
+However, this may result in excessively dark images. 
+Hence, light models typically allow users to specify a decay factor $\beta$, which can be constant, inverse-linear, or inverse-squared:
+\[L(l,\overrightarrow{lx})=\left(\dfrac{g}{\left\lvert \mathbf{p}-\mathbf{x}\right\rvert}\right)^{\beta}\mathbf{l}\]
+The parameter $g$ that represents the distance at which the light reduction is exactly one; intensity surpasses $\mathbf{l}$ for distances shorter than $g$, and dims for longer distances.
+
+\paragraph*{Rendering Equation for a single point light:}
+For a single point light, the rendering equation for a pixel can be stated as follows:
+\[L(x,\omega_r)=\left(\dfrac{g}{\left\lvert \mathbf{p}-\mathbf{x}\right\rvert}\right)^{\beta}\mathbf{l}\cdot f_r\left(x,\dfrac{\mathbf{p}-\mathbf{x}}{\left\lvert \mathbf{p}-\mathbf{x}\right\rvert}.\omega_r\right)\]
+This equation describes the light intensity $L$ at pixel $x$ in a scene, considering the illumination from a single point light source.
+The term $\left(\frac{g}{\left\lvert \mathbf{p}-\mathbf{x}\right\rvert}\right)^{\beta}$ represent the attenuation of light with distance, $\mathbf{l}$ represents the color of the light source, and $l_r$ is the Bidirectional Reflectance Distribution Function (BRDF), describing how light is reflected from the surface at point $x$ in the scene.

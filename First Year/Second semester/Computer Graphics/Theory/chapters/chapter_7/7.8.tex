@@ -1,0 +1,86 @@
+\section{Specular reflection}
+
+We'll explore the following specular reflection models:
+\begin{itemize}
+    \item Phong specular reflection.
+    \item Blinn specular reflection.
+    \item Ward.
+    \item Cook-Torrance.
+    \item Toon.
+\end{itemize}
+A perfect mirror surface reflects light in only one direction, lying on the same plane as both the incident light and the surface's normal, but with an opposite angle. 
+Consequently, light reflected from such a surface would be visible solely along this specific angle and invisible in any other direction. 
+However, if a surface is rough, incoming light will also be reflected at angles close to the mirror reflection angle. 
+Hence, even though at reduced intensities, the reflected ray could be visible in an area near the mirror direction.
+
+Specular reflection can be accounted for by adding a specular term to the diffuse component. 
+This term calculates the probability of mirror reflection occurring in the given viewing direction $\omega_r$.
+Similar to the diffuse case, the specular component is characterized by a color $m_S$ that dictates how the RGB components of the incoming light are reflected.
+In most cases, objects exhibit white specular color, i.e., $m_S = (1,1,1)$.
+However, metallic objects like gold or copper have specular colors identical to their diffuse counterparts.
+
+\subsection{Phong reflection model}
+In the Phong model, the mirror reflection direction $\mathbf{r}$  is first calculated.
+For parallel projection, $\omega_r$ remains constant at$\mathbf{p}$
+In the case of perspective projection, $\omega_r$ can be computed as the normalized difference between the surface point $\mathbf{x}$ and the center of projection $\mathbf{c}$. 
+
+The Phong specular reflection model takes into account the angular distance $\alpha$ between the specular direction and the observer. 
+It computes the intensity of specular reflection based on $\cos\alpha$: the term reaches its maximum when the specular direction aligns with the observer and diminishes to zero as the angle exceeds $90^\circ$. 
+To confine highlight regions more effectively, $\cos\alpha$ is raised to the power of $\gamma$.
+A higher $\gamma$ results in smaller highlight areas, making the object appear shinier as its surface behaves more like a mirror.
+
+To calculate the direction of the reflected ray, $n^\prime$, the projection of the light vector onto the normal vector is first computed.
+This is achieved by finding its length with the dot product between the normal and light direction ($d\cdot n_x$), and then multiplying the result with the normal vector $\mathbf{n}_x$ to obtain a vector perpendicular to it.
+Subsequently, subtracting $n^\prime$  from the light vector yields $d^\prime$, the perpendicular from $\mathbf{d}$ to $\mathbf{n}$. 
+By adding $d^\prime$ twice to $d$, the reflected vector $\mathbf{r}$ is obtained: 
+\[r=d+2d^\prime\]
+In summary:
+\[\mathbf{r}_{l,x}=2\left(\overrightarrow{xl}\mathbf{n}_x\right)\mathbf{n}_x-\overrightarrow{xl}\]
+Note that many shading languages provide built-in functions to directly compute the reflected vector. 
+
+The intensity of the specular reflection term can then be computed as:
+\[\cos^\gamma\alpha=\text{clamp}(\omega_r\cdot\mathbf{r})^\gamma\]
+Similar to the Lambert diffuse term, it is necessary to exclude cases where the cosine is negative using the \texttt{clamp()} function.
+
+\paragraph*{Simplified parametrization}
+The Blinn reflection model is an alternative to the Phong shading model that employs the half vector $\mathbf{h}$: a vector positioned midway between the viewer direction $\omega_r$ and the light $\mathbf{d}$.
+
+\subsection{Blinn reflection model}
+The angle $\alpha$ between the observer and the reflected ray is approximated by the angle $\alpha^\prime$ between the normal vector $\mathbf{n}_x$ and the half vector $\mathbf{h}$.
+The half vector $\mathbf{h}$ can be computed as the normalized average of vectors $\mathbf{d}$ and $\omega_r$. 
+Using the notation from the rendering equations:
+\[\mathbf{h}_{l,x}=\dfrac{d+\omega_r}{\left\lvert d+\omega_r \right\rvert }=\text{normalize}(d+\omega_r)\]
+
+The specular highlight is then computed by raising to the power of $\gamma$ the cosine of $\alpha^\prime$, expressed as the dot product of $\mathbf{n}_x$ and $\mathbf{h}_{l,x}$. 
+The formula for Blinn specular reflection is:
+\[f_{specular}(x,\overrightarrow{lx},\omega_r)=\mathbf{m}_S\cdot\text{clamp}(\mathbf{n}_x\cdot\mathbf{h}_{l,x})^\gamma\]
+
+The Blinn specular model is typically slightly more computationally expensive than the Phong model (as it requires normalization, which is more complex than simple reflection). However, it is still easily achievable in real-time with current hardware.
+
+Since the two techniques yield slightly different results, they are often both implemented and chosen by artists to achieve various effects. 
+For instance, in the examples provided, the left image employs the Phong model, while the right image uses the Blinn specular computation. 
+Blinn reflections generally exhibit a larger decay area compared to Phong reflections with similar parameters.
+
+\subsection{Ward anisotropic specular model}
+Some objects, such as hairs, CDs, or brushed metals, are characterized by grooves on their surfaces, leading to specular highlights oriented along these grooves. 
+Such surfaces are termed anisotropic materials. The Ward specular model is significant for two key reasons:
+\begin{enumerate}
+    \item It is derived from physically inspired principles.
+    \item It supports anisotropic reflections.
+\end{enumerate}
+To accommodate anisotropy, it's necessary to specify an orientation for the grooves on the surface by assigning two additional vectors alongside the normal. 
+These vectors, termed tangent and bi-tangent, are denoted by $\mathbf{b}$ and $\mathbf{t}$ respectively. 
+We will delve into methods for encoding or deriving these vectors in a future lesson.
+
+Similar to the Blinn specular model, the Ward technique relies on the half-vector $\mathbf{h}$ between the light and viewer directions.
+Specifically, it depends on the angle of this vector $\mathbf{h}$  with the normal (denoted with $\delta$), and the angle between its projection onto the $\mathbf{bt}$-plane and the groove direction (denoted with $\phi$).
+
+The formula for the specular component of the Ward model incorporates two roughness parameters for the $\mathbf{h}$ and $\mathbf{bh}$ directions, denoted $\alpha_t$ and $\alpha_b$ respectively:
+\[f_{\text{specular}}(\mathbf{x}, \mathbf{L}_x, \omega_r) =\dfrac{e^{-\frac{\left(\frac{\mathbf{ht}_x}{\alpha_t}\right)^2+\left(\frac{\mathbf{hb}_x}{\alpha_b}\right)^2}{\mathbf{hn}_x^2}}}{4\pi\alpha_t\alpha_b\sqrt{\frac{\omega_r\mathbf{n}_x}{\overrightarrow{lx}\mathbf{n}_x}}}\]
+
+\subsection{The Cook-Torrance reflection model}
+Realistic specular highlights on objects often display a soft falloff area. However, conventional models like Blinn and Phong yield a sharp falloff. 
+Additionally, according to the Fresnel principle, objects tend to exhibit stronger specular reflection when the incident light is nearly parallel to the surface. 
+These observations, among others, prompted the development of more sophisticated specular illumination models capable of accurately capturing these physical characteristics.
+
+SLIDE 68 next
