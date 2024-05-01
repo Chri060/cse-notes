@@ -1,0 +1,43 @@
+\section{Support Vector Machines}
+
+Support Vector Machines are a flexible and theoretically supported method initially applied to classification. 
+Over the years, they have been extended to handle regression, clustering, and anomaly detection problems.
+
+The fundamental idea behind SVM is to find the hyperplane that maximizes the margins (distance between the boundary and the points).
+
+The hypothesis space of SVM is defined as $y(\mathbf{x})=f(\mathbf{x},\mathbf{w})=\text{sign}(\mathbf{w}^T\mathbf{x}+b)$. 
+The loss function is computed over the dataset $\mathcal{D}=\left\{(\mathbf{x}_n,t_n)\right\}_{n=1}^{N}$ with $t_n\in\{-1,1\}$.
+It aims to minimize:
+\[\dfrac{1}{2}\left\lVert \mathbf{w} \right\rVert _2^2+C\sum_{n=1}^{N}\zeta_i \]
+with respect to $\mathbf{w},\zeta_1,\ldots,\zeta_N$ subject to:
+\[\begin{cases}
+    t_n(\mathbf{w}^T\mathbf{x}_n+b)\geq 1-\zeta_i \qquad\forall n \in \{1,\ldots,N\} \\
+    \zeta_i\geq 0\qquad\forall\in\{1,\ldots,N\}
+\end{cases}\]
+where $C > 0$ is a hyperparameter. 
+The optimization method typically used for SVM is sequential quadratic optimization.
+
+\paragraph*{Python}
+To train a linear classification Support Vector Machine: 
+\begin{enumerate}
+    \item Define the SVM: \texttt{SVM\_model.svm.SVC(kernel='linear')}.
+    \item Train the SVM: \texttt{SVM\_model.fit(input, target)}.
+\end{enumerate}
+We are interested in determining:
+\begin{itemize}
+    \item Boundary $\textbf{w}^T\textbf{x}_n+b=0$.
+    \item Margins $\textbf{w}^T\textbf{x}_n+b=\pm 1$.
+    \item Support vectors (\texttt{SVM\_model.support\_vectors\_}).
+\end{itemize}
+The use of kernels in SVMs is almost native, turning it into a non-parametric method:
+\begin{itemize}
+    \item Hypothesis space: $y(\mathbf{x})=f(\mathbf{x},\mathbf{w})=\text{sign}\left(\sum_{n=1}^{N}\alpha_nt_nK(\mathbf{x}_n,\mathbf{x})+b\right)$. 
+    \item Loss measure: loss function in the dual formulation.
+    \item Optimization method: quadratic optimization.
+\end{itemize}
+In Python:
+\begin{itemize}
+    \item Define the SVM: \texttt{SVM\_model = svm.SVC()}.
+    \item Train the SVM: \texttt{SVM\_model.fit(input, target)}.
+\end{itemize}
+With kernels, we no longer have an explicit formula for the boundary and the margins.

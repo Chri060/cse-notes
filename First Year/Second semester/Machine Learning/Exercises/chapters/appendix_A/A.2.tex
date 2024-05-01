@@ -1,0 +1,73 @@
+\section{Linear regression}
+
+\paragraph*{Preliminary operations}
+The preliminary operations on data are: 
+\begin{itemize}
+    \item Loading data: load the dataset into memory.
+    \item Inspecting data: examine the dataset to understand its structure and contents.
+    \item Selecting interesting data: identify and choose the relevant features or variables from the dataset.
+    \item Preprocessing: prepare the data for further analysis by performing various preprocessing steps such as:
+        \begin{itemize}
+            \item Shuffling the data to randomize the order of samples (\texttt{shuffle ()}).
+            \item Removing inconsistent data points that may contain errors or inconsistencies.
+            \item Removing outliers to ensure data quality.
+            \item Normalizing or standardizing the data to bring all features to a similar scale.
+            \item Filling missing data, for example, by replacing \texttt{NaN} values with appropriate values.
+        \end{itemize}
+\end{itemize}
+These preprocessing steps help ensure that the data is clean, consistent, and ready for analysis.
+
+\paragraph*{Data normalization}
+We can normalize a series of samples $\{ s_1,\dots,s_N \}$ to a sample $s$ using: 
+\begin{itemize}
+    \item Z-score: 
+        \[\dfrac{s-\bar{s}}{S}\]
+        Here, $\bar{s}=\dfrac{1}{N}\sum_{n=1}^N s_n$ and $S^2=\dfrac{1}{N-1}\sum_{n=1}^N{\left(s_n-\bar{s}\right)}^2$. 
+    \item Min-max feature scaling: 
+        \[\dfrac{s-s_{\min}}{s_{\max}-s_{\min}}\]
+        Here, $s_{\max}=\max_{n\in\{1,\dots,N\}}s_n$ and $s_{\min}=\min_{n\in\{1,\dots,N\}}s_n$. 
+\end{itemize}
+
+\subsection{Functions definition}
+To proceed with our analysis, we must define the following elements:
+\begin{itemize}
+    \item Hypothesis space: we consider linear models represented by:
+        \[\hat{t}=y(\textbf{x},\textbf{w})=w_0+\sum_{j=1}^{M-1}w_j x_j=\textbf{w}^T\textbf{x}\]
+        Here, $\textbf{w} = \begin{bmatrix} w_0, w_1, \dots , w_{M-1} \end{bmatrix}^T$ and $\textbf{x} = \begin{bmatrix} x_0, x_1, \dots , x_{M-1} \end{bmatrix}^T$.
+    \item Loss function: the loss function is defined as the residual sum of squares over the $N$ samples ${\left\{(\textbf{x}_n, t_n)\right\}}^{N}_{n=1}$: 
+        \[\text{RSS}(\textbf{w})=\sum_{n=1}^N{\left( y(\textbf{x}_n,\textbf{w})-t_n \right)}^2\]
+    \item Optimization method: various optimization methods can be employed, including closed form solutions, gradient descent, and others, to minimize the loss function and find the optimal values for the model parameters.
+\end{itemize}
+
+\subsection{Result evaluation}
+Evaluation of the linear regression results involves several metrics:
+\begin{itemize}
+    \item Residual sum of squares (RSS) or sum of squared errors (SSE):
+        \[\text{RSS}(\textbf{w})=\sum_{n=1}^N{\left(\hat{t}_n-t_n\right)}^2\]
+        Here, $\hat{t}_n=y(\textbf{x}_n,\textbf{w})$. 
+    \item Mean square error (MSE):
+        \[\text{MSE}=\dfrac{\text{RSS}(\textbf{w})}{N}\]
+    \item Root mean square error (RMSE):
+        \[\text{RMSE}=\sqrt{\dfrac{\text{RSS}(\textbf{w})}{N}}\]
+    \item Coefficient of determination ($R^2$):
+        \[R^2=1-\dfrac{\text{RSS}(\textbf{w})}{\text{TSS}}\]
+        Here $\text{TSS}=\sum_{n=1}^{N}{\left(\bar{t}-t_n\right)}^2$ is the total sum of squares and $\bar{t}=\frac{1}{N}\sum_{n=1}^{N}t_n$. 
+    \item Degrees of freedom (dfe):
+        \[\text{dfe}=N-M\]
+    \item Adjusted coefficient of determination ($R^2_{adj}$):
+        \[R^2_{adj}=1-\left(1-R^2\right)\dfrac{N-1}{\text{dfe}}\]
+\end{itemize}
+
+\subsection{Python implementation}
+We have several solutions available from different libraries:
+\begin{itemize}
+    \item Utilizing \texttt{sklearn} with \texttt{LinearRegression ()}.
+    \item Utilizing \texttt{statsmodels} with \texttt{OLS}.
+    \item Implementing it manually as $\textbf{w}^\ast={\left(\textbf{X}^T\textbf{X}\right)}^{-1}\textbf{X}^T\textbf{t}$.
+\end{itemize}
+With the \texttt{sklearn} option:
+\begin{itemize}
+    \item Initialize a linear model (\texttt{LinearRegression ()}).
+    \item Fit the model to the data (\texttt{fit ()}).
+    \item Analyze the results.
+\end{itemize}
