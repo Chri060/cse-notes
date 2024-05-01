@@ -1,0 +1,113 @@
+\section{Instruction level parallelism limits}
+
+We previously defined Instruction-Level Parallelism (ILP) as the potential overlap of execution among unrelated instructions. 
+This overlapping becomes feasible under certain conditions:
+\begin{itemize}
+    \item Absence of Structural Hazards.
+    \item Absence of Read-After-Write (RAW), Write-After-Read (WAR), or Write-After-Write (WAW) stalls.
+    \item No Control stalls.
+\end{itemize}
+
+\subsection{Superscalar execution}
+Enabling more than one instruction to begin execution in each clock cycle requires:
+\begin{itemize}
+    \item \textit{Fetching more instructions per clock cycle}: this typically involves fetching multiple instructions simultaneously. 
+        As long as the instruction cache can handle the increased bandwidth and manage multiple requests concurrently, there are usually no major issues with this approach.
+    \item \textit{Managing data and control dependencies}: to handle data and control dependencies efficiently, dynamic scheduling and dynamic branch prediction mechanisms are crucial. 
+        These techniques allow the processor to dynamically schedule instructions and predict branch outcomes, facilitating the execution of multiple instructions concurrently.
+\end{itemize}
+Superscalar processors issue multiple instructions per clock cycle, with the number of instructions varying from one to eight.
+Instruction scheduling can be performed either by the compiler or by hardware mechanisms like Tomasulo's algorithm. 
+
+The success of superscalar architectures led to the adoption of Instructions Per Clock cycle (IPC) as a performance metric, contrasting with the traditional notion of Cycles Per Instruction (CPI). 
+In an ideal scenario, where all available instruction slots are filled every cycle, CPIideal equals 1 divided by the issue width.
+
+\subsection{Limits}
+Assumptions for an ideal or perfect machine to begin with:
+\begin{enumerate}
+    \item \textit{Register renaming}: assume infinite virtual registers are available, and all Write-After-Write (WAW) and Write-After-Read (WAR) hazards are effectively avoided through renaming.
+    \item \textit{Branch prediction}: assume perfect branch prediction, where there are no mispredictions.
+    \item \textit{Jump Prediction}: assume all jumps are perfectly predicted, indicating a machine with flawless speculation and an unlimited buffer of instructions readily available.
+    \item \textit{Memory-address alias analysis}: assume perfect knowledge of memory addresses, allowing movements of stores before loads as long as the addresses are not identical.
+    \item \textit{Uniform latency}: assume a consistent one-cycle latency for all instructions, enabling unlimited instructions to be issued per clock cycle.
+\end{enumerate}
+
+\paragraph*{Initial assumptions}
+Initial assumptions:
+\begin{itemize}
+    \item The CPU can issue an unlimited number of instructions simultaneously, with the ability to look arbitrarily far ahead in computation.
+    \item There are no restrictions on the types of instructions that can be executed in one cycle, including loads and stores.
+    \item All functional unit latencies are assumed to be one cycle, and any sequence of dependent instructions can issue on successive cycles.
+    \item Perfect caches are assumed, meaning all loads and stores execute in one cycle. This scenario only considers fundamental limits to Instruction-Level Parallelism (ILP).
+    \item It's important to note that the results obtained from these assumptions are highly optimistic, as such a CPU cannot be realized in practice.
+    \item Benchmark programs used include six from SPEC92, comprising three floating-point-intensive programs and three integer programs.
+\end{itemize}
+
+\paragraph*{Limits on window size}
+Dynamic analysis becomes imperative to approach perfect branch prediction, as achieving perfection at compile time is unattainable.
+For a perfectly dynamic-scheduled CPU, the following conditions should ideally be met:
+\begin{enumerate}
+    \item The CPU should have the capability to look arbitrarily far ahead to identify a set of instructions to issue and predict all branches perfectly.
+    \item All register uses should be renamed to avoid Write-After-Write (WAW) and Write-After-Read (WAR) hazards.
+    \item The CPU should ascertain whether there are any data dependencies among instructions in the issue packet and rename them if necessary.
+    \item It should determine the presence of memory dependencies among issuing instructions and handle them accordingly.
+    \item Sufficient replicated functional units should be provided to enable all ready instructions to issue simultaneously.
+\end{enumerate}
+The size of the window impacts the number of comparisons required to identify Read-After-Write (RAW) dependencies. 
+In modern CPUs, constraints arise from the limited number of registers, coupled with the need to search for dependent instructions and adhere to in-order issue policies. 
+Consequently, all instructions within the window must be retained in the processor.
+
+Present-day CPUs typically feature window sizes ranging from 32 to 200, necessitating up to over 2400 comparisons to determine dependencies.
+
+\subsection{Current CPU Limitations}
+Several factors limit CPU performance:
+\begin{itemize}
+    \item Number of functional units.
+    \item Number of buses.
+    \item Number of ports for the register file.
+\end{itemize}
+These constraints dictate the maximum number of instructions that can be issued, executed, or committed in a single clock cycle, which is typically much smaller than the window size.
+Currently, the maximum achievable number of instructions per cycle is rare and limited to 6 in some cases. Processor widths vary from single-issue (e.g., ARM11, UltraSPARC-T1) through 2-issue (e.g., UltraSPARC-T2/T3, Cortex-A8 \& A9, Atom, Bobcat) to 3-issue (e.g., Pentium-Pro/II/III/M, Athlon, Pentium-4, Athlon 64/Phenom, Cortex-A15), 4-issue (e.g., UltraSPARC-III/IV, PowerPC G4e, Core 2, Core i, Core i*2, Bulldozer), 5-issue (e.g., PowerPC G5), or even 6-issue (e.g., Itanium, although it's a VLIW architecture).
+However, deciding which 8 or 16 instructions can execute every cycle is incredibly challenging due to the sheer complexity involved:
+\begin{itemize}
+    \item It requires significant computational effort.
+    \item This would necessitate a decrease in processor frequency due to longer computation times.
+\end{itemize}
+
+\subsection{Current Superscalar and VLIW processors}
+Dynamically-scheduled superscalar processors represent the commercial state-of-the-art for general-purpose computing. 
+Present implementations of architectures like Intel Core i, PowerPC, Alpha, MIPS, SPARC, and others are all examples of superscalar processors.
+VLIW (Very Long Instruction Word) processors, on the other hand, find primary success in embedded media processors for consumer electronic devices.
+Itanium 2 stands out as the only general-purpose VLIW processor, adopting a hybrid VLIW approach known as EPIC (Explicitly Parallel Instruction Computing).
+
+\paragraph*{Limits}
+Doubling issue rates from today's typical 3-6 instructions per clock, say to 6 to 12 instructions, would likely necessitate a processor capable of:
+\begin{itemize}
+    \item Issuing 3 or 4 data memory accesses per cycle.
+    \item Resolving 2 or 3 branches per cycle.
+    \item Renaming and accessing more than 20 registers per cycle.
+    \item Fetching 12 to 24 instructions per cycle.
+\end{itemize}
+Implementing these capabilities is complex and would likely require sacrifices in the maximum clock rate. 
+Most techniques for increasing performance tend to increase power consumption.
+The crucial question lies in whether a technique is energy-efficient, i.e., whether it increases power consumption faster than it enhances performance.
+Multiple issue processor techniques are generally energy-inefficient:
+\begin{itemize}
+    \item Issuing multiple instructions incurs overhead in logic that grows faster than the issue rate.
+    \item This leads to a growing gap between peak issue rates and sustained performance.
+    \item The number of transistors switching is a function of the peak issue rate, while performance is a function of the sustained rate, resulting in an increasing energy per unit of performance ratio.
+\end{itemize}
+
+\subsection{Conclusions}
+To advance performance in the future, we need to consider the limitations of Instruction-Level Parallelism (ILP) and explore explicit parallelism that programmers can directly leverage, as opposed to relying solely on implicit parallelism exploited by compilers and hardware.
+However, several challenges remain:
+\begin{itemize}
+    \item \textit{Processor-memory performance gap}: this gap poses a significant hurdle to achieving further performance gains.
+    \item \textit{VLSI scaling problems}: challenges related to wiring and other VLSI scaling issues need to be addressed.
+    \item \textit{Energy and leakage problems}: increasing energy consumption and leakage present additional concerns.
+\end{itemize}
+Despite these challenges, alternative forms of parallelism offer potential solutions:
+\begin{itemize}
+    \item \textit{Multi-core architectures}: embracing multi-core architectures allows for parallel processing across multiple cores.
+    \item \textit{SIMD revival}: sub-word parallelism, as seen in SIMD (Single Instruction, Multiple Data) architectures, is experiencing a resurgence and offers another avenue for improving performance.
+\end{itemize}
