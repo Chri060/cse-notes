@@ -1,0 +1,81 @@
+\section{Smooth shading}
+
+Meshes, typically polygonal objects with sharp edges, can be made to appear smooth through specialized rendering techniques.
+This smoothing effect not only enhances visual quality but also addresses performance considerations, particularly regarding how frequently the rendering equation is solved.
+
+The solution to achieve smooth shading can be computed either per-vertex or per-pixel.
+
+In modern applications, 3D models often consist of approximately 100,000 vertices and occupy a substantial number of pixels on the screen, typically over 2,000,000. 
+To achieve smoother images, the rendering equation may need to be solved multiple times per pixel to mitigate the aliasing effect. 
+While solving the rendering equation per pixel yields visually appealing results, it comes at the cost of a significant performance reduction, typically around one order of magnitude.
+The two primary techniques for smooth shading are:
+\begin{itemize}
+    \item \textit{Gouraud shading} (per-vertex): smoothing is achieved by blending the colors generated at each vertex.
+    \item \textit{Phong shading} (per-pixel): smoothing is accomplished by interpolating the parameters passed to the shaders involved in solving the rendering equations.
+\end{itemize}
+
+\subsection{Vertex normal vectors}
+Let's envision a curved surface. To represent this surface, a mesh approximates it by sampling a finite set of points. 
+The finer the sampling, the closer the approximation to the actual surface.
+
+To enhance the rendering of curved surfaces, each vertex is extended to include six values. 
+These values define both the vertex's position and the direction of the normal vector to the surface at that 3D point:
+\[\mathbf{v}=(x,y,z,n_x,n_y,n_z)\]
+As we've discussed in previous lessons, the rendering equation leverages the normal vector's direction to compute the color of a surface.
+In the context of a mesh, the rendering equation determines the colors of the pixels at the three vertices of each triangle based on the associated normal vectors. 
+Subsequently, the colors of the interior pixels of the triangles are computed using interpolation techniques.
+
+\paragraph*{Vertex normal vectors directions}
+The normal vector associated with a vertex may differ from the geometric normal determined by the triangle to which it belongs.
+In general, it can be an arbitrary vector that might not necessarily align with the associated surfaces. 
+However, normal vectors that are completely uncorrelated with the geometry are rarely useful.
+Under this definition, the direction of the normal vector is a property of a (vertex, triangle) pair, rather than solely of a vertex. 
+Therefore, two triangles may share a vertex in the same spatial position but characterized by different normal vector directions.
+Consequently, each triangle is defined by 18 values: three vertices, each comprising three vertex coordinates and three normal vector direction components.
+Modelers can leverage these properties to encode both smooth and sharp surfaces. 
+For instance, vertices in the same position across adjacent triangles may possess the same normal vector direction to produce a smooth surface. 
+Conversely, vertices in different triangles but with the same position yet different normal vector directions can be used to encode sharp surfaces.
+
+\paragraph*{Transforming vertex normal}
+When normal vectors are stored with an object that undergoes a transformation encoded in a World Matrix, they need to be transformed accordingly. 
+However, transforming normal vectors is not as straightforward as transforming vertex positions.
+The primary distinction lies in the fact that normal vectors represent 3D directions (three-component vectors), whereas vertex positions are represented as homogeneous coordinates (four-component vectors).
+To transform normal vectors correctly, we derive the transformation matrix from the 4x4 matrix responsible for transforming homogeneous coordinates. 
+This involves computing the inverse-transpose of the 3x3 upper-left sub-matrix.
+\[M=\begin{bmatrix} &  &  & d_x \\ & M_l &  & d_y \\ &  &  & d_z \\ 0 & 0 & 0 & 1 \end{bmatrix}>M_n=\begin{bmatrix} &  &  \\ & M_l^{T-1} & \\ &  & \end{bmatrix}\]
+In a special scenario where the transpose of the 3x3 rotation matrix is identical to its inverse, the proposed procedure has no effect. 
+This scenario occurs when there are no scaling or shear transformations applied.
+In such cases, we can directly transform the normal vector with the world matrix $M$ using a simple trick:
+\[n^\prime=\left(M\cdot\begin{bmatrix} n_x & n_y & n_z & 0 \end{bmatrix}\right)^T.xyz\]
+
+\subsection{Gouraud shading}
+Gouraud shading, a per-vertex shading technique, determines the colors of pixels inside a triangle by interpolating the colors of its vertices. 
+This interpolation is based on geometric principles: the position of a point within a triangle can be calculated using a convex linear combination of its vertices. 
+Similarly, the coefficients used for interpolating the positions can be employed for interpolating colors:
+\begin{itemize}
+    \item For any internal point $p$ within a triangle, its coefficients are established via a linear system of equations.
+    \item These coefficients are then utilized for color interpolation.
+\end{itemize}
+For objects that remain static in the scene, illuminated by fixed lights, and whose material BRDF does not vary with the observer's direction (for instance, solely the diffuse component following the Lambert model), pre-computed vertex colors can be stored along with the geometry. 
+This enables the real-time rendering process to disable computation of the light model, replacing vertex normal vectors with vertex colors.
+
+The pre-computation of colors is typically carried out within 3D authoring software like Blender. 
+Additionally, vertex colors tend to occupy less memory compared to normal vector directions (i.e., 4 bytes versus 12 bytes).
+
+
+\subsection{Phong shading}
+The Phong shading algorithm computes the color of each internal pixel individually, making it a per-pixel shading technique. 
+Here, vertex normal vectors are interpolated to approximate the normal vector direction of the actual surface at the internal points of the triangle.
+
+Interpolation is conducted by treating the $x, y, z$ components of the normal vectors separately. 
+However, this approach may result in interpolated vectors that are no longer unitary, even if the normal vectors associated with the triangle's vertices are unitary. 
+Consequently, the interpolated normal vectors must be normalized at each step to maintain the required size.
+
+For every pixel, the illumination model is then computed using the interpolated normal vectors along with other constants necessary for the light model and the BRDF in the rendering equation.
+
+Compared to the Gouraud method, Phong shading is significantly more computationally expensive because it necessitates solving the rendering equation for each pixel. 
+This can greatly reduce performance, especially when multiple light sources are considered, as the illumination model exhibits linear complexity concerning the number of lights.
+However, Phong shading can produce high-quality rendering even for models with few vertices.
+
+While the Gouraud technique may generate artifacts in the image and fail to capture specific lighting conditions due to interpolation potentially overlooking details between vertices, both methods tend to yield similar results when applied to geometries composed of many vertices. 
+This is because, in such cases, the area of each triangle is only a few pixels wide.
