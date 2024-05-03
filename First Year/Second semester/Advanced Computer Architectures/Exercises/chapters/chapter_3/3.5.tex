@@ -1,42 +1,38 @@
-\section{Exercise five}
+\section{Exercise eleven}
 
-Assuming the following:
-\begin{itemize}
-    \item All functional units are pipelined.
-    \item ALU operations take 1 cycle.
-    \item Memory operations take 2 cycles (includes time in ALU).
-    \item Floating-point add instructions take 2 cycles.
-    \item Floating-point multiply instructions take 3 cycles.
-    \item There is no register renaming. No forwarding.
-    \item Instructions are fetched, decoded and issued in order.
-    \item The ISSUE stage is a buffer of unlimited length that holds instructions waiting to start execution.
-    \item An instruction will only enter the issue stage if it does not cause a WAR or WAW hazard.
-    \item Only one instruction can be issued at a time, and in the case multiple instructions are ready, the oldest one will go first.
-    \item Program Counter calculation for branches and jumps has been anticipated in the ISSUE stage.
-\end{itemize}
-Consider the code:
-\begin{verbatim}
-LOOP:   I1: LD F1, 0 (R2)
-        I2: MULTD F2, F1, F1
-        I3: ADDD F3, F1, F5
-        I4: MULTD F2, F3, F1
-        I5: SUBD F5, F1, F5
-        I6: SUBI R2, R2, 4
-        I7: BNEZ R2, LOOP
-\end{verbatim}
-Find the conflicts.
+Consider now the code:
+\begin{verbnobox}[\verbarg]
+ADDI S3, S2, 2
+ADD S5, S4, S3
+SW S5, 4(S3)
+SUB S7, S5, S6
+LS S6, 4(S7)
+\end{verbnobox}
+\begin{enumerate}
+    \item Find the conflicts. 
+    \item Simple Pipelining. 
+    \item Reschedule the instructions to reduce the stalls; Draw the pipeline schema showing all the data conflicts/dependencies.
+\end{enumerate}
 
 \subsection*{Solution}
-The conflicts in the given problem are: 
-\begin{itemize}
-    \item RAW F1 I1-I2
-    \item RAW F1 I1-I3
-    \item RAW F1 I1-I4
-    \item RAW F1 I1-I5
-    \item RAW F3 I3-I4
-    \item RAW R2 I6-I7
-    \item WAW F2 I2-I4
-    \item WAR F5 I3-I5
-    \item WAR R2 I1-I6
-    \item CNTRL
-\end{itemize}
+\begin{enumerate}
+    \item The conflicts are: 
+        \begin{itemize}
+            \item RAW S3 I1-I2
+            \item RAW S7 I4-I5
+            \item RAW S5 I2-I3
+            \item RAW S3 I1-I3
+            \item RAW S5 I2-I4
+        \end{itemize}
+    \item With simple pipelining we have: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=1\linewidth]{images/simp.png}
+        \end{figure}
+    \item By using forwarding paths we have: 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=1\linewidth]{images/simp1.png}
+        \end{figure}
+\end{enumerate}
+
