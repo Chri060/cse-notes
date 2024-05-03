@@ -1,0 +1,30 @@
+\section{Training set}
+
+We can exclusively utilize the same training set $\mathcal{D}_{test} = {(\mathbf{x}_n , t_n )}_{n=1}^N$ , comprising independent and identically distributed random variable samples from $\Pr$, which was used to learn the empirical risk minimizer $\hat{h}$.
+For any arbitrary hypothesis $h\in\mathcal{H}$, we can compute the training loss:
+\[\tilde{\mathcal{L}}(h)=\dfrac{1}{N}\sum_{n=1}^{N}\ell(h(\mathbf{x}_n),t_n)\]
+The empirical risk minimizer $\hat{h}$ is reliant on $\mathcal{D}_{train}$ ($\hat{h}$ is derived from the same $\mathcal{D}_{train}$): the training loss $\hat{\mathcal{L}}(\hat{h})$  serves as a negatively biased estimator for the true loss $\mathcal{L}(\hat{h})$, thus:
+\[\mathbb{E}[\hat{\mathcal{L}}(\hat{h})|\hat{h}]\leq\mathbb{E}[\hat{\mathcal{L}}(h^\ast)|\hat{h}]\leq\mathcal{L}(h^\ast)\leq\mathcal{L}(\hat{h})\]
+A crucial observation: all losses $\{\ell(\hat{h}(\mathbf{x}_n), t_n)\}^N_{n=1}$ are not independent and identically distributed random variables conditioned to $\hat{h}$. 
+Thus, Hoeffding's inequality cannot be applied.
+
+A Statistical Learning Theory approach (Vapnik) provides:
+\[\mathcal{L}(\hat{h})=\hat{\mathcal{L}}(\hat{h})+\mathcal{L}(\hat{h})-\hat{\mathcal{L}}(\hat{h})\leq\hat{\mathcal{L}}(\hat{h})+\sup_{h\in\mathcal{H}}\left\lvert \mathcal{L}(h)-\hat{\mathcal{L}}(h)\right\rvert \]
+Now, the problem is to provide bounds on $\sup_{h\in\mathcal{H}}\left\lvert \mathcal{L}(h)-\hat{\mathcal{L}}(h)\right\rvert$, termed uniform bounds. 
+They depend on:
+\begin{itemize}
+    \item The size of the training set $N$. 
+    \item The complexity of the hypothesis space $\mathcal{H}$.
+\end{itemize}
+For binary classification and $\mathcal{L}$ equals accuracy, considering:
+\begin{itemize}
+    \item Finite hypothesis space ($\left\lvert \mathcal{H}\right\rvert<+\infty$) and consistent learning ($\hat{\mathcal{L}}(\hat{h}) = 0$ always):
+        \[\mathcal{L}(\hat{h})\leq\dfrac{\log\left\lvert \mathcal{H}\right\rvert+\log\left(\dfrac{1}{\delta}\right)}{N}\] 
+        With probability $1-\delta$.
+    \item Finite hypothesis space ($\left\lvert \mathcal{H}\right\rvert<+\infty$) and agnostic learning ($\hat{\mathcal{L}}(\hat{h}) > 0$ possibly): 
+        \[\mathcal{L}(\hat{h})\leq\hat{\mathcal{L}}(\hat{h})+\sqrt{\dfrac{\log\left\lvert \mathcal{H}\right\rvert+\log\left(\dfrac{1}{\delta}\right)}{2N}}\] 
+        With probability $1-\delta$.
+    \item Infinite hypothesis space ($\left\lvert \mathcal{H}\right\rvert=+\infty$) and agnostic learning ($\hat{\mathcal{L}}(\hat{h}) > 0$ possibly):
+        \[\mathcal{L}(\hat{h})\leq\hat{\mathcal{L}}(\hat{h})+\sqrt{\dfrac{VC(\mathcal{H})\log\left(\dfrac{2eN}{VC(\mathcal{H})}\right)+\log\left(\dfrac{4}{\delta}\right)}{N}}\] 
+        With probability $1-\delta$. 
+\end{itemize}
