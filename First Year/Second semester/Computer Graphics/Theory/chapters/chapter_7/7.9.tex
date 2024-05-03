@@ -1,0 +1,73 @@
+\section{Emission and indirect lighting approximation}
+
+\subsection{Material emission}
+The emission term of a material represents the small amount of light directly emitted by an object. 
+It corresponds to the emissive part of the rendering equation:
+\[L_e(x,\omega_r)\]
+This material emission term is combined with other parts of the rendering equation. 
+It is independent of the environment but solely depends on the considered object.
+
+For instance, considering a direct light source, Phong specular, Lambert diffuse reflection, and emission, we have:
+\[\mathbf{r}_x=2\mathbf{n}_x\cdot(\mathbf{d}\cdot\mathbf{n}_x)-\mathbf{d}\]
+\[L(x,\omega_r)= \text{clamp}(\mathbf{I}_D\cdot(\mathbf{m}_D \cdot \text{clamp}(\mathbf{d}\cdot\mathbf{n}_x)+ \mathbf{m}_S\cdot \text{clamp} (\omega_r\cdot\mathbf{r}_x)^\gamma)+ \mathbf{m}_E)\]
+
+\subsection{Ambient lighting}
+When considering only direct light sources (such as directional, point, or spotlight), images can appear very dark. 
+Realistic rendering techniques aim to incorporate indirect lighting as well—illumination caused by light bouncing off other objects.
+
+Ambient lighting serves as the simplest approximation for indirect illumination. 
+It represents a constant factor for the entire scene, encompassing light reflected by all objects in all directions. 
+The ambient light emission is defined by a constant RGB color value $\mathbf{l}_A$.
+
+To extend the Bidirectional Reflectance Distribution Function (BRDF) of the object, another component $f_A(x, \omega_r)$ specifically accounts for ambient lighting. 
+This component is independent of the light direction:
+\[L(x,\omega_r)=\sum_lL(l,\overrightarrow{lx})f_r(x,\overrightarrow{lx},\omega_r)+\mathbf{l}_Af_A(x,\omega_r)\]
+In most cases, the BRDF for the ambient term $f_A(x, \omega_r)$ is a constant known as the ambient light reflection color $\mathbf{m}_A$. 
+Typically, $\mathbf{m}_A$ corresponds to the main color of the object (i.e., $\mathbf{m}_A=\mathbf{m}_D$), but it can be adjusted to achieve specific lighting effects for particular objects.
+
+In the case of a single direct light source, plus the ambient term (assumed to be constant), the rendering equation simplifies to:
+\[L(x,\omega_r)=\mathbf{l}\cdot f_r(x,\mathbf{d},\omega_r)+\mathbf{l}_A\cdot\mathbf{m}_A\]
+
+\paragraph*{Hemispheric lighting}
+A slight extension of ambient lighting is hemispheric lighting. 
+In this case, there are two ambient light colors—the upper or sky color and the lower or ground color—along with a direction vector. 
+This model simulates the impact of both the sky and ground colors on the indirect light component for the object under consideration.
+
+This technique creates an ambient light color factor by blending the two colors based on the orientation of the object. 
+The two colors, $\mathbf{l}_U$ and $\mathbf{l}_D$, represent the ambient light values at the two extremes, while the direction vector $\mathbf{d}$ governs the blending of the two colors. 
+The orientation of the object is characterized by $\mathbf{n}_x$, the normal vector to the surface at point $x$.
+
+If the normal vector is aligned and in the same direction as $\mathbf{d}$, the ambient color $\mathbf{l}_U$ is used. 
+Conversely, if the normal vector is aligned but in the opposite direction of $\mathbf{d}$, the ambient color $\mathbf{l}_D$ is used. 
+For normal vectors oriented in other directions, the two colors are blended proportionally to the cosine of their angle with the vector $\mathbf{d}$.
+In particular, $\mathbf{l}_A(x)$ is defined as follows:
+\[\mathbf{l}_A(x)=\dfrac{n_x\cdot d+1}{2}\mathbf{l}_U+\dfrac{1-n_x\cdot d}{2}\mathbf{l}_D\]
+In the case of a single direct light source plus the hemispheric ambient term, the rendering equation simplifies to:
+\[L(x,\omega_r)=\mathbf{l}\cdot f_r(x,\mathbf{d},\omega_r)+\left(\dfrac{n_x\cdot d+1}{2}\mathbf{l}_U+\dfrac{1-n_x\cdot d}{2}\mathbf{l}_D\right)\cdot\mathbf{m}_A\]
+
+\subsection{Image based lighting}
+MAchieving more accurate reproduction of light sources and advanced approximations to rendering equations are crucial for the photorealistic effects seen in high-end 3D applications. 
+While a comprehensive discussion of these techniques is beyond this course's scope, we can briefly outline some fundamental concepts.
+
+Hemispheric lighting, as introduced earlier, computes the light received by an object based on the orientation of its surface points, determined by their corresponding normal vectors. 
+This computation is relatively straightforward, interpolating between two colors based on relative orientation to a given direction.
+
+Image-based lighting extends this idea by defining generic functions $\mathbf{l}_A(\mathbf{x}_i)$ that return the color received from the environment by a point $\mathbf{x}_i$ on a surface oriented in the direction described by its normal vector $\mathbf{n}_i$. 
+Each point is illuminated according to $\mathbf{l}_A(\mathbf{x})$.
+
+These functions $\mathbf{l}_A(\mathbf{x})$ can be computed from specially taken photographs or high-quality offline rendering of the environment, encoded in a format suitable for real-time use.
+
+Starting with an image (hence the name image-based lighting) and applying filtering, the actual light received from each point in any direction can be determined. 
+The approximation of the rendering equation remains similar to hemispheric lighting, with the light function adjusted to return values computed in the filtering step.
+This approximation includes both ambient and diffuse components of light:
+\[L(x,\omega_r)=\sum_lL(l,\overrightarrow{lx})f_r(x,\overrightarrow{lx},\omega_r)+\mathbf{l}_A(x)f_A(x,\omega_r)\]
+Efficiently encoding the function $\mathbf{l}_A(\mathbf{x})$ is challenging. 
+Common approaches include interpolating values stored in a table (Cubic Mapping), spectral expansion (Spherical Harmonics), and other approximations.
+
+\paragraph*{Spherical Harmonics}
+Spherical Harmonics expansion expresses the color received from a given direction $\mathbf{n}_x$ as a sum of contributions multiplied by a set of basic functions indexed by two numbers $l$ and $m$, with $-l\leq m \leq l$ and $l\geq 0$. 
+For low values of $l$ (e.g., $l\leq 1$), the expansion simplifies significantly:
+\[\mathbf{l}_A(x)=\sum_{l=0}^{\infty}\sum_{m=-l}^l\mathbf{c}_{l,m}\cdot y_l^m(\mathbf{n}_x)\]
+If we denote the components of the (unitary) normal vector direction $\mathbf{n}_x$ as $(\mathbf{n}_x).x$, $(\mathbf{n}_x).y$, and $(\mathbf{n}_x).z$, and we restrict ourselves to $l \leq 1$, the expansion yields a particularly simple expression:
+\[\mathbf{l}_A(x) = \mathcal{c}_{0,0} + (\mathbf{n}_x). x \cdot \mathcal{c}_{1,1} + (\mathbf{n}_x). y \cdot \mathcal{c}_{1,-1} + (\mathbf{n}_x). z \cdot \mathcal{c}_{1,0}\]
+For $l \leq 2$, the expression becomes slightly more complex, but it enables the capture of a broader range of illumination conditions using only nine coefficients.

@@ -6,7 +6,6 @@ We'll explore the following specular reflection models:
     \item Blinn specular reflection.
     \item Ward.
     \item Cook-Torrance.
-    \item Toon.
 \end{itemize}
 A perfect mirror surface reflects light in only one direction, lying on the same plane as both the incident light and the surface's normal, but with an opposite angle. 
 Consequently, light reflected from such a surface would be visible solely along this specific angle and invisible in any other direction. 
@@ -83,4 +82,50 @@ Realistic specular highlights on objects often display a soft falloff area. Howe
 Additionally, according to the Fresnel principle, objects tend to exhibit stronger specular reflection when the incident light is nearly parallel to the surface. 
 These observations, among others, prompted the development of more sophisticated specular illumination models capable of accurately capturing these physical characteristics.
 
-SLIDE 68 next
+The Cook-Torrance Bidirectional Reflectance Distribution Function (BRDF) model aims to compute both the specular and diffuse components in a physically accurate manner.
+The diffuse component adheres to the Lambert diffusion model. 
+However, for achieving a physically accurate behavior, it is blended with the specular part through linear interpolation, governed by a coefficient $k$:
+\[f_r(x,\overrightarrow{lx},\omega_r)=k\cdot f_{diffuse}(x,\overrightarrow{lx},\omega_r)+(1-k)f_{specular}(x,\overrightarrow{lx},\omega_r)\]
+Here, $f_{diffuse}(x,\overrightarrow{lx},\omega_r)=\mathbf{m}_D\cdot\text{clamp}(\overrightarrow{lx}\mathbf{n}_x)$. 
+The specular term is computed as the product of three factors:
+\[f_{specular}(x,\overrightarrow{lx},\omega_r)=\mathbf{m}_S\dfrac{D\cdot F\cdot G}{4\cdot\text{clamp}(\omega_r\mathbf{n}_x)}\]
+Similar to other specular models, it is characterized by a specular color $\mathbf{m}_S$. 
+The $\text{clamp}(\omega_r\cdot\mathbf{n}_x)$ term is a geometric factor that normalizes the values computed by components $D$, $F$, and $G$.
+
+The model also defines a constant $\rho$, commonly referred to as roughness, which determines the smoothness of the surface:
+\begin{itemize}
+    \item $\rho=0$ denotes a perfectly smooth object.
+    \item $\rho=1$ represents a very rough surface.
+\end{itemize}
+For each of the three terms $D$, $F$, and $G$, various definitions exist, each characterized by its features and complexities. 
+Many formulations will rely on the half-vector, defined for the Blinn specular model as:
+\[\mathbf{h}_{l,x}=\dfrac{\overrightarrow{lx}+\omega_r}{\left\lvert \overrightarrow{lx}+\omega_r\right\rvert }=\text{normalize}(\overrightarrow{lx}+\omega_r)\]
+
+\paragraph*{Distribution term}
+The distribution term $D$ encapsulates the surface roughness. 
+The Blinn version adapts the corresponding specular model to the Cook-Torrance framework. 
+Specifically, it replaces the specular power $\gamma$ with the roughness parameter $\rho$ and includes a normalization factor.
+\[D=\dfrac{(\mathbf{h}_{l,x}\cdot\mathbf{n}_x)^{\frac{2}{\rho^2}-2}}{\pi\rho^2}\]
+The Beckmann version relies on parameter $rho$ to define the average slope of the surface at a microscopic level.
+\[D=\dfrac{e^{-\left(\frac{\tan\alpha}{\rho}\right)^2}}{\pi\rho^2\cos^2\alpha}\]
+Here, $\alpha=\arccos(\mathbf{h}_{l,x}\cdot\mathbf{n}_x)$
+The GGX version of the distribution term $D$ employs the following definition. 
+In certain studies, it has been shown to yield the most realistic outcomes while maintaining a complexity akin to the Blinn version.
+\[D=\dfrac{\rho^2}{\pi(\text{clamp}(\mathbf{h}_{l,x}\cdot\mathbf{n}_x)^2(\rho^2-1)+1)^2}\]
+
+\paragraph*{Fresnel term}
+The Fresnel term $F$ is dependent on a parameter $F_0 \in [0,1]$. 
+It dictates how the light response alters concerning the angle of incidence relative to the viewer and can be approximated with the following expression:
+\[F=F_0+(1-F_0)\left(1-\text{clamp}(\omega_r\cdot\mathbf{h}_{l,x})\right)^5\]
+
+\paragraph*{Geometric term}
+The microfacet version of the geometric term $G$ isn't characterized by any parameters and solely relies on the angles.
+\[G=\min\left(1,\dfrac{2(\mathbf{h}_{l,x}\cdot\mathbf{n}_x)(\omega_r\cdot\mathbf{n}_x)}{(\omega_r\cdot\mathbf{h}_{l,x})},,\dfrac{2(\mathbf{h}_{l,x}\cdot\mathbf{n}_x)(\overrightarrow{lx}\cdot\mathbf{n}_x)}{(\omega_r\cdot\mathbf{h}_{l,x})}\right)\]
+The GGX version for the geometric term $G$ depends on the surface roughness $\rho$ and utilizes a helper function that is first invoked with the light direction and then with the viewer direction.
+\[g_{GGX}(\mathbf{n},\mathbf{a})=\dfrac{2}{1+\sqrt{1+\rho^2\frac{1-(\mathbf{na}^2)}{\mathbf{na}^2}}}\]
+\[G=g_{GGX}(\mathbf{n}_x,\omega_r)g_{GGX}(\mathbf{n}_x,\overrightarrow{lx})\]
+
+\paragraph*{Summary}
+Despite its complexity, the Cook-Torrance reflection model offers realistic reflections that consider numerous physical behaviors. 
+Typically, it serves as a fundamental building block for various advanced rendering techniques. 
+These techniques generate specialized textures, utilized as look-up tables, enabling the rendering of this reflection model in real-time.
