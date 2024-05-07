@@ -1,0 +1,52 @@
+\section{SQL injection}
+
+To end a statement in SQL we simply put a semicolon followed by a double dash line that it is used to comment a part of the line. 
+In that way we can modify the query as we desire. 
+
+Another way to modify a query is to use the following line where a parameter is requested: 
+\begin{verbatim}
+' OR '1'='1';--
+\end{verbatim}
+In that way the query will be modified resulting in always true. 
+
+\paragraph*{Unions}
+By using unions we can retrieve data from different tables: 
+\begin{verbatim}
+SELECT name, phone, address FROM Users
+WHERE Id='' UNION ALL SELECT name,creditCardNumber,CCV2 
+FROM CreditCardTable;--';
+\end{verbatim}
+Will show contents of a different table.
+Will work only if the number and the data types of the columns are the same.
+
+\subsection{Insert injection}
+On insert we can use the double dash line to comment a section of the statement and change the inserted values. 
+We can also modify the insertion query by adding a sub-query that retrieve some wanted data like passwords and then retrieve the value of the data with another query: 
+\begin{verbatim}
+INSERT INTO results VALUES (NULL, 's.zanero',
+    (SELECT password from USERS where user='admin')
+    )--', '18')
+\end{verbatim}
+
+\subsection{Blind injections}
+Some SQL queries do not display returned values. 
+Rather, they do, or do not do, stuff based on the return value. 
+As a result, we cannot use them to directly display data, but we can play with their behavior to infer data. 
+
+\subsection{Solutions}
+We can avoid SQL injections in the following ways: 
+\begin{itemize}
+    \item Input sanitization (validation and filtering). 
+    \item Using prepared statements (parametric query) instead of building query strings (if languages allows). 
+        In this case we have variable placeholders, that is not a string concatenation. 
+        For instance, in PHP we have: 
+        \begin{verbatim}
+            $stmt = $db->prepare(SELECT * 
+                                 FROM users
+                                 WHERE username = ? AND password = ?” )
+            $stmt -> execute(array($username,$psw));
+        \end{verbatim}
+    \item Not using table names as field names (to avoid information leakage). 
+    \item Limitations on query privileges. 
+        Different users can execute different types of queries on different tables/DBs, so separate privileges from DB admin point of view. 
+\end{itemize}
