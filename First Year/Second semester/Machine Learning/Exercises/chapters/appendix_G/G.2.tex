@@ -1,0 +1,32 @@
+\section{Prediction}
+
+Given a policy, we aim to determine the value of each state. 
+The agent's behavior is defined by a policy:
+\[\pi:\mathcal{S}\rightarrow\Delta(\mathcal{A})\]
+Once a specific policy $\pi(a|s)$ is chosen, $P^\pi$ and $R^\pi$ are defined as follows:
+\[P^\pi(s^\prime|s)=\sum_{a\in\mathcal{A}}\pi(a|s)P(s^\prime|s,a)\qquad\text{dim}(P^\pi)=\left\lvert \mathcal{S}\right\rvert\times\left\lvert \mathcal{S}\right\rvert\]
+\[R^\pi(s)=\sum_{a\in\mathcal{A}}\pi(a|s)P(s,a)\qquad\text{dim}(R^\pi)=\left\lvert \mathcal{S}\right\rvert\]
+
+\paragraph*{State values}
+We employ the Bellman expectation equation:
+\begin{align*}
+    V^\pi(s)    &=\mathbb{E}^\pi\left[\sum_{t=0}^{+\infty}\gamma^tR(s_t,a_t)|s_0=0\right] \\
+                &=\sum_{a \in \mathcal{A}}\pi(a|s)\left[R(s,a)+\gamma\sum_{s^\prime}P(s^\prime|s,a)V^\pi(s^\prime)\right] \\
+                &=R^\pi(s)+\gamma\sum_{s^\prime\in\mathcal{S}}P^\pi(s^\prime|s)V^\pi(s^\prime)
+\end{align*}
+This equation can be represented in matrix form:
+\[V^\pi=R^\pi+\gamma P^\pi V^\pi\qquad\text{dim}(V^\pi)=\left\lvert \mathcal{S} \right\rvert\]
+We can solve this equation in two ways:
+\begin{itemize}
+    \item \textit{Closed-form solution}: utilizing the Bellman expectation equation:
+        \[V^\pi=(I-\gamma P^\pi)^{-1}R^\pi\]
+        Since $P^\pi$ is a stochastic matrix, the eigenvalues of $(I - \gamma P^\pi)$ are in the range $[1-\gamma,1]$ for $\gamma \in [0, 1)$, ensuring invertibility.
+        Inverting $(I-\gamma P^\pi)^{-1}$ has a computational complexity of $\mathcal{O}(\left\lvert\mathcal{S}\right\rvert ^3)$ with a straightforward algorithm.
+    \item \textit{Recursive solution}: if matrix inversion is infeasible due to a large state space, we can use the recursive form of the Bellman expectation equation:
+        \[V^\pi = R^\pi + \gamma P^\pi V^\pi\] 
+\end{itemize}
+
+\paragraph*{Policy evaluation}
+By altering the policy, represented in matrix form as:
+\[\pi(s|a)=\Pi(s,a|s)\qquad\text{dim}(\Pi)=\left\lvert \mathcal{S}\right\rvert\times\left\lvert \mathcal{S}\right\rvert\left\lvert \mathcal{A}\right\rvert\]
+We can compute the state values using different strategies based on the given problem.
