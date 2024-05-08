@@ -1,157 +1,59 @@
-\section{Java Persistence API}
-An application permits the management of the bill of materials (BoM) of products. The BoM is the hierarchical description of a product in terms of the 
-sub-products that comprise it. At each level but the last one, a product is associated with the components that make it, each with a quantity. The application 
-allows the user to create BoMs. A BoM is progressively assembled by attaching to a product its sub-products and specifying the number of units of sub-products 
-that make one unit of the parent product. The editor accesses the HOME PAGE with the list of current BoMs and where s/he can create a new top level product and 
-view the existing BOMs. The editor can add product-sub-products links to a product, modify the quantity of a product-sub-products link, delete a product or
-product-sub-products link. Products have an identifier, a name a description and a unit cost. An example of BoM is the following: 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{images/BoM.png}
-\end{figure}
-The entity relationship model is the following:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.3\linewidth]{images/e-r1.png}
-\end{figure}
-The relational schema DDL of the given database is: 
-\begin{lstlisting}[style=SQL]
-CREATE TABLE 'product' (
-'id'            INT             NOT NULL AUTO_INCREMENT,
-'unitcost'      INT             NOT NULL,
-'name'          VARCHAR(45)     NOT NULL,
-'description'   VARCHAR(45)     DEFAULT NULL,
-PRIMARY KEY ('id')
-) 
-CREATE TABLE 'subparts' (
-'father'        INT             NOT NULL,
-'child'         INT             NOT NULL,
-'quantity'      INT             NOT NULL,
-PRIMARY KEY ('father','child'),
-KEY 'childtoproduct_idx' ('child'),
-CONSTRAINT 'childtoproduct' FOREIGN KEY ('child') REFERENCES 'product' ('id'),
-CONSTRAINT 'fathertoproduct' FOREIGN KEY ('father') REFERENCES 'product' ('id')
-)           
-\end{lstlisting}
-The relational model is: 
+\section{Exercise 2}
+
+A table T(Name, Surname, City, Pathology, BloodType) has ten millions tuples and three multi-attribute indexes:
 \begin{itemize}
-    \item Product(\underline{id}, unitcost, name, description)
-    \item Subparts(\underline{father}, \underline{child}, quantity)
+    \item $IDX_1$(City, Name, Surname).
+    \item $IDX_2$(Pathology, Name, BloodType).
+    \item $IDX_3$(Pathology, Surname, City).
 \end{itemize}
-Given the specifications, write the entity classes of the ORM mapping, including annotations for the attributes and for the relationships, fetch type of 
-attributes and of relationships, and operation cascading policies for relationships (when not by default).
+The access keys are made by the listed attributes from left to right. 
+All attributes have a (reasonably) uniform and independent distribution, with:
+\begin{itemize}
+    \item $\text{val}(\text{Name}) = 1000$.
+    \item $\text{val}(\text{Surname}) = 2000$.
+    \item $\text{val}(\text{City}) = 1000$.
+    \item $\text{val}(\text{Pathology}) = 100$.
+    \item $\text{val}(\text{BloodType}) = 10$.
+\end{itemize}
+\begin{enumerate}
+    \item Choose the most convenient index to evaluate the query:
+        \begin{lstlisting}[style=SQL]
+SELECT *
+FROM T
+WHERE Name = "N" AND Surname = "S" AND Pathology = "P" AND BloodType = "BT"
+        \end{lstlisting}
+    \item Choose the most convenient index to evaluate the same query, but with the following distribution: 
+    \begin{itemize}
+        \item $\text{val}(\text{Name}) = 1000$.
+        \item $\text{val}(\text{Surname}) = 6000$.
+        \item $\text{val}(\text{City}) = 1000$.
+        \item $\text{val}(\text{Pathology}) = 100$.
+        \item $\text{val}(\text{BloodType}) = 4$.
+    \end{itemize}
+\end{enumerate}
 
 \paragraph*{Solution}
-Given the specifications write the entity classes of the ORM mapping, including annotations for the attributes and for the relationships, fetch type of attributes
-and of relationships, and operation cascading policies for relationships (when not by default). 
-
-\begin{itemize}
-    \item BoM: from father product to children product we have to use the annotations: 
-        \begin{lstlisting}[style=Java]
-@ManyToMany
-        \end{lstlisting}
-        From children product to father product we have to use these annotations: 
-        \begin{lstlisting}[style=Java]
-@ManyToMany
-        \end{lstlisting}
-        The owner of the relation is entity project. 
-    \item 
-\end{itemize}
-The entity product is defined as:  
-    \begin{lstlisting}[style=Java]
-@Entity
-@NamedQueries({
-@NamedQuery(name = "BomProduct.findAll", query = "SELECT p FROM BomProduct p"),
-@NamedQuery(name = "BomProduct.findAllTop", query = "SELECT p FROM BomProduct p WHERE p.fathers IS EMPTY") })
-
-public class BomProduct implements Serializable {
-    ...
-    private static final long serialVersionUID = 1L;
-    @Id @Column(name="id") @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String description;
-    private String name;
-    private int unitcost;
-    ...
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "subparts",joinColumns = @JoinColumn(name = "father"))
-    @MapKeyJoinColumn(name = "child")
-    @Column(name = "QUANTITY")
-    private Map<BomProduct, Integer> subparts;
-
-    @ManyToMany
-    @JoinTable(name = "subparts",
-            joinColumns = @JoinColumn(name = "child"),
-            inverseJoinColumns = @JoinColumn(name ="father"))
-    private List<BomProduct> fathers;
-    ...            
-}
-    \end{lstlisting}
-The better way is to make the many-to-many relationships with attributes a weak entity like in the following image. 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{images/BoMweak.png}
-\end{figure}
-The entity P2PLinkID is defined as:  
-\begin{lstlisting}[style=Java]
-@Embeddable
-public class P2PLinkID implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private int father;
-    private int child;
-
-    public P2PLinkID() { }
-
-    public P2PLinkID(int father, int child) {
-        super();
-        this.father = father;
-        this.child = child;
-    }
-    ...
-}
-\end{lstlisting}
-The entity P2PLink is defined as:  
-\begin{lstlisting}[style=Java]
-@Entity
-public class P2PLink implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    @EmbeddedId
-    private P2PLinkID id;
-
-    @ManyToOne
-    @MapsId("father") // reference to the foreign key attribute
-    @JoinColumn(name = "father")
-    private BomProduct father;
-
-    @ManyToOne
-    @MapsId("child") // reference to the foreign key attribute
-    @JoinColumn(name = "child")
-    private BomProduct child;
-
-    private int quantity;
-    ...
-}
-\end{lstlisting}
-The entity product is defined as:  
-\begin{lstlisting}[style=Java]
-@Entity
-public class BomProduct implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String description;
-    private String name;
-    private int unitcost;
-
-    // getters setters and constructors
-
-    @OneToMany(mappedby="father")
-    private List<P2PLink> children;
-
-    @OneToMany(mappedby="child")
-    private List<P2PLink> fathers;
-    ...
-}
-\end{lstlisting}
+\begin{enumerate}
+    \item The where clause is a conjunction of supported predicates.
+        We estimate the selectivity allowed by each of the available indexes, only considering the predicates mentioned in the where clause:
+        \begin{itemize}
+            \item $IDX_1$: there is no condition on the name of the City, so in this case we will have to follow all the pointer starting with the cities name. 
+                As a result it would force a full sequential scan of the table.
+            \item $IDX_2$: the average number of candidate tuples is: 
+                \[\dfrac{\left\lvert R \right\rvert }{\text{val}(\text{Pathology}) \cdot \text{val}(\text{Name}) \cdot \text{val}(\text{BloodType})}=\dfrac{10000000}{100 \cdot 1000 \cdot 10}=10\]
+            \item $IDX_3$: the average number of candidate tuples is: 
+                \[\dfrac{\left\lvert R \right\rvert }{\text{val}(\text{Pathology}) \cdot \text{val}(\text{Surname}) }=\dfrac{10000000}{2000 \cdot 100}=10\]
+                We excluded the City attribute since there is no restriction on it. 
+        \end{itemize}
+        The best index is the more selective one, in this case we have that it is $IDX_2$. 
+    \item We estimate the selectivity allowed by each of the available indexes, only considering the predicates mentioned in the where clause as before:
+        \begin{itemize}
+            \item $IDX_1$: useless for the same reasons as before. 
+            \item $IDX_2$: the average number of candidate tuples is: 
+                \[\dfrac{\left\lvert R \right\rvert }{\text{val}(\text{Pathology}) \cdot \text{val}(\text{Name}) \cdot \text{val}(\text{BloodType})}=\dfrac{10000000}{100 \cdot 1000 \cdot 4}=25\]
+            \item $IDX_3$: the average number of candidate tuples is: 
+                \[\dfrac{\left\lvert R \right\rvert }{\text{val}(\text{Pathology}) \cdot \text{val}(\text{Surname}) }=\dfrac{10000000}{100 \cdot 6000}=16.6\]
+                We excluded the City attribute since there is no restriction on it. 
+        \end{itemize}
+        In this case, even if the third attribute of $IDX_3$ is of no use, its overall selectivity is higher, and therefore we choose $IDX_3$.
+\end{enumerate}

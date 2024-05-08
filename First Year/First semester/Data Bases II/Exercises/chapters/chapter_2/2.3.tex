@@ -1,32 +1,75 @@
-\section{Schedule classification}
+\section{Exercise 3}
 
-Determine the classification of the provided schedule with respect to the 2PL (Two-Phase Locking) and strict 2PL (Strict Two-Phase Locking) classes:
-\[r_1(A) r_2(A) w_2(A) r_1(B) w_1(C) w_2(C) r_3(C) w_3(A) w_2(B) w_3(B)\]
+Consider the following two ranked lists of hotels: 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cc|cc}
+    \hline
+    \textbf{Rating} & \textbf{Hotel} & \textbf{Stars} & \textbf{Hotels} \\ \hline
+    0.8             & C              & 0.8            & F               \\
+    0.4             & G              & 0.6            & E               \\
+    0.4             & F              & 0.5            & G               \\
+    0.3             & D              & 0.4            & A               \\
+    0.3             & A              & 0.2            & D               \\
+    0.2             & E              & 0.2            & C               \\
+    0.1             & B              & 0.2            & B               \\ \hline
+    \end{tabular}
+\end{table}
+\begin{enumerate}
+    \item Apply FA and TA to determine the top hotel according to the scoring function: 
+        \[\textnormal{MAX}(o) = \max\{\textnormal{Rating}(o), \textnormal{Stars}(o)\}\] 
+    \item Indicate the number of sorted accesses and random accesses executed on each source. 
+    \item Could FA make fewer sorted accesses than TA?
+    \item Could FA make fewer random accesses than TA?
+    \item TA is instance optimal: can any algorithm cost overall less than TA?
+\end{enumerate}
 
 \paragraph*{Solution}
-In the context of strict 2PL, the assumption is made that all transactions commit and release all locks immediately after their final operation. 
-The verification involves assessing whether these releases can be executed at the time of commit.
-\begin{table}[H]
-    \centering
-    \begin{tabular}{c|cccccccccc}
-            & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} \\ \hline
-    \textit{A} & $r_1$      & $r_2\searrow _1$          & $w_2$      &            &            &            &            & $w_3$      &            &             \\
-    \textit{B} &            &                           &            &            & $w_1\downharpoonleft_1$      & $w_2$      & $r_3$      &            &            &             \\
-    \textit{C} &            &                           &            & $r_1$      &            &            &            &            & $w_2$      & $w_3$      
-    \end{tabular}%
-\end{table}
-The schedule is not strict 2PL.
+\begin{enumerate}
+    \item For the FA we have to make sorted access until we found $k$ objects in all tables. 
+        In this case we need to find only one element that is in both columns. To do so we need 
+        three sorted accesses, and we obtain the following buffer. 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cc|c}
+            \hline
+            \textbf{Hotel} & \textbf{Rating} & \textbf{Stars} & \textbf{Score} \\ \hline
+            F     & 0.4    & 0.8   & 1.2   \\
+            C     & 0.8    & ?     & 0.8   \\
+            G     & 0.4    & 0.5   & 0.9   \\
+            E     & ?      & 0.6   & 0.6   \\ \hline
+            \end{tabular}
+        \end{table}
+        We need to find the missing values with two random accesses, and we have
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cc|c}
+            \hline
+            \textbf{Hotel} & \textbf{Rating} & \textbf{Stars} & \textbf{Score} \\ \hline
+            F     & 0.4    & 0.8   & 1.2   \\
+            C     & 0.8    & 0.2   & 1.0   \\
+            G     & 0.4    & 0.5   & 0.9   \\
+            E     & 0.2    & 0.6   & 0.8   \\ \hline
+            \end{tabular}
+        \end{table}
+        The best hotel according to the given scoring function is F. 
 
-In the context of 2PL:
-\begin{table}[H]
-    \centering
-    \resizebox{\columnwidth}{!}{%
-    \begin{tabular}{c|cccccccccc}
-            & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} \\ \hline
-    \textit{A} & $\nearrow_1r_1$        & $\nearrow_2r_2\searrow_1$         & $\nearrow_2w_2$       &                   &                   & $\searrow_2$                      &                           & $\nearrow_3w_3$       &                       & $\searrow_3$            \\
-    \textit{B} &                        & $\nearrow_1$                      &                       &                   & $w_1\searrow_1$   & $\nearrow_2w_2\searrow_2$         & $\nearrow_3r_3$           &                       &                       & $\searrow_3$            \\
-    \textit{C} &                        & $\nearrow_1$                      &                       & $r_1\searrow_1$   &                   &                                   &                           &                       & $w_2\searrow_2$       & $\nearrow_3w_3\searrow_3$      
-    \end{tabular}%
-    }
-\end{table}
-The schedule is 2PL. 
+        The TA checks rows until the value of the threshold is greater than the worst score in the top-$k$. After accessing the first row 
+        we have:
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|cc|c}
+            \hline
+            \textbf{Hotel} & \textbf{Rating} & \textbf{Stars} & \textbf{Score} \\ \hline
+            F     & 0.4    & 0.8   & 1.2   \\ \hline
+            \end{tabular}
+        \end{table}
+        With a threshold of $1.6$. After accessing the second row we have the same buffer, and a threshold value of $1.0$, that is less than F's score, so 
+        the algorithm halts. The best hotel found is again F. 
+    \item With FA we have made six sorted accesses (three for Rating, and three for Stars) and two random accesses (one for Rating, and one for Stars), so the total is eight. 
+        With TA we have made four sorted accesses (two for Rating, and two for Stars) and four random accesses (two for Rating, and two for Stars), so the total is eight. 
+    \item No, because FA stops its sorted access phase when all potential top-$k$ objects (according to any possible scoring function) have been seen, so at least $k$ objects 
+        are no worse than the threshold according to any scoring function. 
+    \item Yes, in this exercise we have an example. 
+    \item Yes, it is possible. 
+\end{enumerate}

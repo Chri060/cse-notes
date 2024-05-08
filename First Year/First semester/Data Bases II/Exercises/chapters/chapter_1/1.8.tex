@@ -1,0 +1,42 @@
+\section{Exercise 8}
+
+Determine the classification of the provided schedule with respect to the 2PL (Two-Phase Locking) and strict 2PL (Strict Two-Phase Locking) classes:
+\[r_4(x) r_2(x) w_4(x) w_2(y) w_4(y) r_3(y) w_3(x) w_4(z) r_3(z) r_6(z) r_8(z) w_6(z) w_9(z) r_5(z) r_10(z)\]
+
+\paragraph*{Solution}
+In the context of strict 2PL, the assumption is made that all transactions commit and release all locks immediately after their final operation. 
+The verification involves assessing whether these releases can be executed at the time of commit.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|ccccccccccccccc}
+                & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
+    \textit{X} & $r_4$      & $r_2\searrow _2$          & $w_4$      &                              &            &            & $w_3$      &            &            &             &             &             &             &             &             \\
+    \textit{Y} &            &                           &            & $w_2\downharpoonleft_2$      & $w_4$      & $r_3$      &            &            &            &             &             &             &             &             &             \\
+    \textit{Z} &            &                           &            &                              &            &            &            & $w_4$      & $r_3$      & $r_6$       & $r_8$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
+    \end{tabular}%
+\end{table}
+Hence, it is evident that the schedule cannot conform to strict 2PL. 
+The conflict arises between transactions $T_2$ and $T_4$: while $T_2$ concludes after step 4, $T_4$ intends to write to $X$ at step 3.
+As a result, $T_2$ would be compelled to release lock $X$ earlier, contradicting the requirement that it must maintain all locks until after step 4.
+
+In the context of 2PL:
+\begin{table}[H]
+    \centering
+    \resizebox{\columnwidth}{!}{%
+    \begin{tabular}{c|ccccccccccccccc}
+                & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
+    \textit{X} & $\nearrow_4r_4$        & $\nearrow_2r_2\searrow_2$         & $\nearrow_4w_4$       &                       & $\searrow_4$                          &                           & $\nearrow_3w_3$       &                       &                          & $\searrow_3$  &                       &             &             &             &             \\
+    \textit{Y} &                        & $\nearrow_2$                      &                       & $w_2\searrow_2$       & $\nearrow_4w_4\searrow_4$             & $\nearrow_3r_3$           &                       &                       &                          & $\searrow_3$  &                       &             &             &             &             \\
+    \textit{Z} &                        &                                   & $\nearrow_4$          &                       &                                       &                           &                       & $w_4\searrow_4$       & $\nearrow_3r_3$          & $r_6$         & $r_8\searrow_3$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
+    \end{tabular}%
+    }
+\end{table}
+We need to examine the acquisitions that must be anticipated and the releases that must be delayed to avoid violating the 2PL rules.
+\begin{itemize}
+    \item $T_4$ can only acquire the exclusive lock on $X$ after step 2 and on $Y$ after step 4. 
+        It has to release $Y$ before step 6 and $X$ before step 7. 
+        Consequently, the lock on $Z$ must be acquired before step 6.
+    \item $T_2$ can acquire all locks at the beginning and release them immediately after each use.
+    \item $T_3$ can acquire locks on $X$, $Y$, and $Z$ just before using them and release them all before step 12.
+\end{itemize}
+All other transactions ($T_6, T_9, T_5, T_{10}$) do not present any issues.

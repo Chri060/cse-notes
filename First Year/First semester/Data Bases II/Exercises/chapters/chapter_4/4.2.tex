@@ -1,86 +1,60 @@
-\section{Ranking and skyline queries}
+\section{Exercise 2}
 
-Consider the following three ranked lists reporting statistics about European soccer teams: 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|cc|cc|cc|}
-    \hline
-    \textbf{Goals} & \textbf{Team} & \textbf{Possession} & \textbf{Team} & \textbf{Passes} & \textbf{Team} \\ \hline
-    75         & PSG      & 63.2         & BMU      & 89.9         & PSG      \\
-    73         & BMU      & 62.1         & BAR      & 88.9         & MCY      \\
-    70         & ATA      & 61.8         & PSG      & 88.4         & BAR      \\
-    68         & MCY      & 61.6         & MCY      & 87.5         & BMU      \\
-    68         & BDO      & 59.0         & LIV      & 86.6         & BDO      \\
-    66         & LIV      & 58.5         & BDO      & 84.4         & LAZ      \\
-    63         & BAR      & 55.7         & ATA      & 83.9         & LIV      \\
-    60         & LAZ      & 50.1         & LAZ      & 83.4         & ATA      \\ \hline
-    \end{tabular}
-\end{table}
+Consider the following schema describing a system for hiring rehearsal rooms to musical groups. 
+Start and end time of reservations contain only hours (minutes are always “00”). 
+Use of rooms can only happen if there is a corresponding reservation, but can start later or end earlier. 
+All rooms open at 7:00 and close at 24:00.
+\begin{itemize}
+    \item USER (\underline{SSN}, Name, Email, Type)
+    \item RESERVATION (\underline{UserSSN}, \underline{RoomCode}, \underline{Date}, \underline{StartTime}, EndTime)
+    \item ROOM (\underline{RoomId}, Type, CostPerHour)
+\end{itemize}
 \begin{enumerate}
-    \item Apply an algorithm that does not use random access to determine the best team according to the scoring function:
-        \[S(\textnormal{team})=\max\{\textnormal{team.Goals},\textnormal{team.Possession},\textnormal{team.Passes}\}\]
-    \item On this dataset, could you do better than the previous algorithm, in terms of access cost, with an algorithm that also uses random access? 
-    \item Apply now the TA to determine the best team according to the same scoring function as in one. 
-    \item Apply now the TA to determine the best team according to the following scoring function:
-        \[S(\textnormal{team}) = \textnormal{team.Goals} + \textnormal{team.Possession} + \textnormal{team.Passes}\]
-    \item Determine the skyline of the dataset. 
+    \item Write a trigger that prevents the reservation of already booked rooms. 
+    \item Suppose that usage data are inserted into a table Usage only after the room has been actually used. 
+        Enrich the schema to track the number of hours that have been reserved but not used by each user, and write a (set of) trigger(s) that track such a number and set the “type” of a user to “unreliable” when he totalizes 50 hours of unused reservations.
 \end{enumerate}
 
 \paragraph*{Solution}
 \begin{enumerate}
-    \item Since the scoring function is MAX we can use the $B_0$ algorithm. Find the best team means that we have $k=1$, so we 
-        need to make only one sorted access. By accessing the first row we obtain the following buffer. 
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{c|ccc|c}
-            \hline
-            \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
-            PSG             & 75             & ?                   & 89.9            & 89.9           \\
-            BMU             & ?              & 63.2                & ?               & 0.8            \\ \hline
-            \end{tabular}
-        \end{table}
-        The maximum score is given to PSG, that is the best team according to the MAX scoring function. 
-    \item No algorithm could do better than reading at least the top scores on each list. 
-    \item We have again $k=1$. We make sorted access to the first row to compute the threshold value and 
-        the objects to insert in the buffer. 
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{c|ccc|c}
-            \hline
-            \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
-            PSG             & 75             & ?                   & 89.9            & 89.9           \\
-            BMU             & ?              & 63.2                & ?               & 0.8            \\ \hline
-            \end{tabular}
-        \end{table}
-        The threshold point has a value that is the MAX of the scores in the first row, that is $89.9$. We now make random 
-        accesses to complete the data in the buffer (remember that the algorithm searches the missing data when it inserts a 
-        new object in the buffer). 
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{c|ccc|c}
-            \hline
-            \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
-            PSG             & 75             & 61.8                & 89.9            & 89.9           \\ \hline
-            \end{tabular}
-        \end{table}
-        Note that the passes for PSG are accessed before via random access, and later via sorted access. So at each iteration (except for 
-        the third column) the algorithm makes a sorted access and two random accesses. Since the threshold has the same value as the score 
-        of PSG, the algorithm halts and returns PSG as the best team. 
-    \item We have to apply again TA with $k=1$, but with a different scoring function, so the result may change. The check for the 
-        first row is the same as the previous point, except for the score.
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{c|ccc|c}
-            \hline
-            \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
-            PSG             & 75             & 61.8                & 89.9            & 226.7           \\ \hline
-            \end{tabular}
-        \end{table}
-        The threshold is the sum of the values in the first row $228.1$. The threshold is greater than PSG score, so we need to make another 
-        iteration. In the next row we find: BMU (223.7), BAR (213.5), and MCY (218.5). All these scores are lower than PSG one, so the buffer 
-        remains the same. The threshold point has a value of $224$, that is less than PSG score, so the algorithm halts. The best team with 
-        SUM is again PSG. 
-    \item It is possible to represent the dataset in a graph with coordinates (Goals, Possession, Passes). By inspecting the ordered table we 
-        add PSG to the window and all the other teams that are not dominated by it. The only teams not dominated by PSG are BMU and BAR. We have 
-        found that the skyline of the dataset is composed by three teams: PSG, BMU, and BAR. 
+    \item The requested trigger is: 
+        \begin{lstlisting}[style=SQL]
+CREATE TRIGGER ThouShallNotBook
+BEFORE INSERT INTO Reservation
+FOR EACH ROW
+WHEN EXISTS ( 
+    SELECT *
+    FROM RESERVATION
+    WHERE RoomCode = NEW.RoomCode
+    AND Date = NEW.Date AND
+    StartTime < NEW.EndTime AND EndTime > NEW.StartTime 
+    )
+ROLLBACK;
+        \end{lstlisting}
+    \item We add and modify the tables as follows: 
+        \begin{itemize}
+            \item USAGE (UserSSN, RoomCode, Date, StartTime, EndTime)
+            \item USER (SSN, Name, Email, Type, WastedHours)
+        \end{itemize}
+        The requested triggers are: 
+        \begin{lstlisting}[style=SQL]
+CREATE TRIGGER UpdateWastedHours
+AFTER INSERT ON USAGE
+FOR EACH ROW
+UPDATE USER
+SET WastedHours = WastedHours +
+    ( SELECT EndTime - StartTime - ( NEW.EndTime - NEW.StartTime )
+      FROM Reservation
+      WHERE RoomCode = NEW.RoomCode AND Date = NEW.Date
+      AND StartTime <= NEW.StartTime AND EndTime >= NEW.EndTime )
+WHERE SSN = NEW.UserSSN
+
+CREATE TRIGGER UpdateType
+AFTER UPDATE OF WastedHours ON USER
+FOR EACH ROW
+WHEN old.WastedHours < 50 AND NEW.WastedHours >= 50
+UPDATE USER
+SET Type = "Unreliable"
+WHERE SSN = OLD.SSN;
+        \end{lstlisting}
 \end{enumerate}

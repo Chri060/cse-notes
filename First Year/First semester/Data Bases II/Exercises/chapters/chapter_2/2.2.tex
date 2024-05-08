@@ -1,42 +1,86 @@
-\section{Schedule classification}
+\section{Exercise 2}
 
-Determine the classification of the provided schedule with respect to the 2PL (Two-Phase Locking) and strict 2PL (Strict Two-Phase Locking) classes:
-\[r_4(x) r_2(x) w_4(x) w_2(y) w_4(y) r_3(y) w_3(x) w_4(z) r_3(z) r_6(z) r_8(z) w_6(z) w_9(z) r_5(z) r_10(z)\]
+Consider the following three ranked lists reporting statistics about European soccer teams: 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|cc|cc|cc|}
+    \hline
+    \textbf{Goals} & \textbf{Team} & \textbf{Possession} & \textbf{Team} & \textbf{Passes} & \textbf{Team} \\ \hline
+    75         & PSG      & 63.2         & BMU      & 89.9         & PSG      \\
+    73         & BMU      & 62.1         & BAR      & 88.9         & MCY      \\
+    70         & ATA      & 61.8         & PSG      & 88.4         & BAR      \\
+    68         & MCY      & 61.6         & MCY      & 87.5         & BMU      \\
+    68         & BDO      & 59.0         & LIV      & 86.6         & BDO      \\
+    66         & LIV      & 58.5         & BDO      & 84.4         & LAZ      \\
+    63         & BAR      & 55.7         & ATA      & 83.9         & LIV      \\
+    60         & LAZ      & 50.1         & LAZ      & 83.4         & ATA      \\ \hline
+    \end{tabular}
+\end{table}
+\begin{enumerate}
+    \item Apply an algorithm that does not use random access to determine the best team according to the scoring function:
+        \[S(\textnormal{team})=\max\{\textnormal{team.Goals},\textnormal{team.Possession},\textnormal{team.Passes}\}\]
+    \item On this dataset, could you do better than the previous algorithm, in terms of access cost, with an algorithm that also uses random access? 
+    \item Apply now the TA to determine the best team according to the same scoring function as in one. 
+    \item Apply now the TA to determine the best team according to the following scoring function:
+        \[S(\textnormal{team}) = \textnormal{team.Goals} + \textnormal{team.Possession} + \textnormal{team.Passes}\]
+    \item Determine the skyline of the dataset. 
+\end{enumerate}
 
 \paragraph*{Solution}
-In the context of strict 2PL, the assumption is made that all transactions commit and release all locks immediately after their final operation. 
-The verification involves assessing whether these releases can be executed at the time of commit.
-\begin{table}[H]
-    \centering
-    \begin{tabular}{c|ccccccccccccccc}
-                & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
-    \textit{X} & $r_4$      & $r_2\searrow _2$          & $w_4$      &                              &            &            & $w_3$      &            &            &             &             &             &             &             &             \\
-    \textit{Y} &            &                           &            & $w_2\downharpoonleft_2$      & $w_4$      & $r_3$      &            &            &            &             &             &             &             &             &             \\
-    \textit{Z} &            &                           &            &                              &            &            &            & $w_4$      & $r_3$      & $r_6$       & $r_8$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
-    \end{tabular}%
-\end{table}
-Hence, it is evident that the schedule cannot conform to strict 2PL. 
-The conflict arises between transactions $T_2$ and $T_4$: while $T_2$ concludes after step 4, $T_4$ intends to write to $X$ at step 3.
-As a result, $T_2$ would be compelled to release lock $X$ earlier, contradicting the requirement that it must maintain all locks until after step 4.
-
-In the context of 2PL:
-\begin{table}[H]
-    \centering
-    \resizebox{\columnwidth}{!}{%
-    \begin{tabular}{c|ccccccccccccccc}
-                & \textit{1} & \textit{2} & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{9} & \textit{10} & \textit{11} & \textit{12} & \textit{13} & \textit{14} & \textit{15} \\ \hline
-    \textit{X} & $\nearrow_4r_4$        & $\nearrow_2r_2\searrow_2$         & $\nearrow_4w_4$       &                       & $\searrow_4$                          &                           & $\nearrow_3w_3$       &                       &                          & $\searrow_3$  &                       &             &             &             &             \\
-    \textit{Y} &                        & $\nearrow_2$                      &                       & $w_2\searrow_2$       & $\nearrow_4w_4\searrow_4$             & $\nearrow_3r_3$           &                       &                       &                          & $\searrow_3$  &                       &             &             &             &             \\
-    \textit{Z} &                        &                                   & $\nearrow_4$          &                       &                                       &                           &                       & $w_4\searrow_4$       & $\nearrow_3r_3$          & $r_6$         & $r_8\searrow_3$       & $w_6$       & $w_9$       & $r_5$       & $r_{10}$     
-    \end{tabular}%
-    }
-\end{table}
-We need to examine the acquisitions that must be anticipated and the releases that must be delayed to avoid violating the 2PL rules.
-\begin{itemize}
-    \item $T_4$ can only acquire the exclusive lock on $X$ after step 2 and on $Y$ after step 4. 
-        It has to release $Y$ before step 6 and $X$ before step 7. 
-        Consequently, the lock on $Z$ must be acquired before step 6.
-    \item $T_2$ can acquire all locks at the beginning and release them immediately after each use.
-    \item $T_3$ can acquire locks on $X$, $Y$, and $Z$ just before using them and release them all before step 12.
-\end{itemize}
-All other transactions ($T_6, T_9, T_5, T_{10}$) do not present any issues.
+\begin{enumerate}
+    \item Since the scoring function is MAX we can use the $B_0$ algorithm. Find the best team means that we have $k=1$, so we 
+        need to make only one sorted access. By accessing the first row we obtain the following buffer. 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|ccc|c}
+            \hline
+            \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
+            PSG             & 75             & ?                   & 89.9            & 89.9           \\
+            BMU             & ?              & 63.2                & ?               & 0.8            \\ \hline
+            \end{tabular}
+        \end{table}
+        The maximum score is given to PSG, that is the best team according to the MAX scoring function. 
+    \item No algorithm could do better than reading at least the top scores on each list. 
+    \item We have again $k=1$. We make sorted access to the first row to compute the threshold value and 
+        the objects to insert in the buffer. 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|ccc|c}
+            \hline
+            \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
+            PSG             & 75             & ?                   & 89.9            & 89.9           \\
+            BMU             & ?              & 63.2                & ?               & 0.8            \\ \hline
+            \end{tabular}
+        \end{table}
+        The threshold point has a value that is the MAX of the scores in the first row, that is $89.9$. We now make random 
+        accesses to complete the data in the buffer (remember that the algorithm searches the missing data when it inserts a 
+        new object in the buffer). 
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|ccc|c}
+            \hline
+            \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
+            PSG             & 75             & 61.8                & 89.9            & 89.9           \\ \hline
+            \end{tabular}
+        \end{table}
+        Note that the passes for PSG are accessed before via random access, and later via sorted access. So at each iteration (except for 
+        the third column) the algorithm makes a sorted access and two random accesses. Since the threshold has the same value as the score 
+        of PSG, the algorithm halts and returns PSG as the best team. 
+    \item We have to apply again TA with $k=1$, but with a different scoring function, so the result may change. The check for the 
+        first row is the same as the previous point, except for the score.
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{c|ccc|c}
+            \hline
+            \textbf{Player} & \textbf{Goals} & \textbf{Possession} & \textbf{Passes} & \textbf{Score} \\ \hline
+            PSG             & 75             & 61.8                & 89.9            & 226.7           \\ \hline
+            \end{tabular}
+        \end{table}
+        The threshold is the sum of the values in the first row $228.1$. The threshold is greater than PSG score, so we need to make another 
+        iteration. In the next row we find: BMU (223.7), BAR (213.5), and MCY (218.5). All these scores are lower than PSG one, so the buffer 
+        remains the same. The threshold point has a value of $224$, that is less than PSG score, so the algorithm halts. The best team with 
+        SUM is again PSG. 
+    \item It is possible to represent the dataset in a graph with coordinates (Goals, Possession, Passes). By inspecting the ordered table we 
+        add PSG to the window and all the other teams that are not dominated by it. The only teams not dominated by PSG are BMU and BAR. We have 
+        found that the skyline of the dataset is composed by three teams: PSG, BMU, and BAR. 
+\end{enumerate}

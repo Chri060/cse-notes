@@ -1,18 +1,96 @@
-\section{Schedule classification}
+\section{Exercise 3}
 
-Classify the following schedule with respect to timestamps: 
-\[r_4(x) r_2(x) w_4(x) w_2(y) w_4(y) r_3(y) w_3(x) w_4(z) r_3(z) r_6(z) r_8(z) w_6(z) w_9(z) r_5(z) r_{10}(z)\]
+An application manages the shipment of orders to customers from an inventory. 
+The data are organized according to the following conceptual model. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/jpa.png}
+\end{figure}
+The application permits the operator to select a customer, open his/her list of orders, select an order and the list of its products with the ordered quantity associated with each product in the order. 
+Customers are in the order of millions, orders per customer are in the order of thousands and products per order are in the order of tens.
+Show the JPA entities (with all their attributes) that map the domain objects of the conceptual model, taking into account the above-mentioned access paths of the application and data cardinalities.
+When designing the annotations for the relationships, specify the owner side of the relationship, the mapped-by attribute, the fetch policy and the cascading policies you consider more appropriate to support the access required by the web application. 
 
 \paragraph*{Solution}
-We can identify pairs of operations that cause killings:
+We start by checking all the relationships in the E-R diagram: 
 \begin{itemize}
-    \item $X: r_4 r_2 w_4 w_3$
-    \item $Y: w_2 w_4 r_3$
-    \item $Z: w_4 r_3 r_6 r_8 w_6 w_9 r_5 r_{10}$
+    \item Orders/orderedBy: from customer to order we have to use the annotations: 
+        \begin{lstlisting}[style=Java]
+@OneToMany
+FetchType.LAZY
+        \end{lstlisting}
+        From order to customer we have to use these annotations: 
+        \begin{lstlisting}[style=Java]
+// This annotation can be omitted since it is implicit
+@ManyToOne
+        \end{lstlisting}
+        The owner of the relation is order. 
+    \item Contains/containedIn: from order to product we have to use the annotations: 
+        \begin{lstlisting}[style=Java]
+FetchType.EAGER
+        \end{lstlisting}
+        From product to order we have to use these annotations: 
+        \begin{lstlisting}[style=Java]
+// This annotation can be omitted since it is implicit
+@ManyToMany
+        \end{lstlisting}
+        The owner of the relation is product. 
 \end{itemize}
-On $X$ we have that $w_3$ is too late with respect to $r_4$ and $w_4$. On $Y$ we have that $r_3$ is late with respect to $w_4$. 
-On $Z$ we have that $r_3$ is late with respect to $w_4$, $w_6$ with respect to $r_8$, $r_5$ with respect to both $w_6$ and $w_9$. 
-So, the schedule is not in TS-mono. 
+We can now define the three entity mappings. 
+The entity customer is defined as:  
+\begin{lstlisting}[style=Java]
+@Entity
+public class Customer implements Serializable {
 
-The schedule is also outside TS-multi, because $w_3(X)$ comes too late ($r_4(X)$ was already given the initial version instead) and also because $w_6(Z)$ is late with respect to $r_8(Z)$. 
-The other five reasons were due to reads (that are always accepted in TS-multi).
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private int customerId;
+    private String firstName;
+    private String lastName;
+    private String address;
+
+    @OneToMany(mappedBy="customer", fetch = FetchType.LAZY)
+    private List<Order> orders;
+    . . .
+}
+\end{lstlisting}
+The entity product is defined as:  
+\begin{lstlisting}[style=Java]
+@Entity
+public class Product implements Serializable {
+
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private int productId;
+    private int unitPrice;
+
+    @ManyToMany
+    @JoinTable(name = "product_order",
+               joinColumns = @JoinColumn(name = "productId"),
+               inverseJoinColumns = @JoinColumn(name ="orderId"))
+    private List<Order> orders; 
+    . . .
+}
+\end{lstlisting}
+The entity order is defined as:  
+\begin{lstlisting}[style=Java]
+@Entity
+public class Order implements Serializable {
+
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private int orderId;
+    private int shippingFee;
+    private int totalCost;
+
+    @ManyToOne
+    @JoinColumn(name="customer") 
+    private Customer customer;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "product_order",
+    joinColumns = @JoinColumn(name = "orderId"))
+
+    @MapKeyJoinColumn(name = "productId") 
+    @Column(name = "quantity")
+    private Map<Product, Integer> products;
+    . . .
+}
+\end{lstlisting}

@@ -1,4 +1,4 @@
-\section{Physical database}
+\section{Exercise 6}
 
 Consider the following tables: 
 \begin{itemize}
@@ -9,7 +9,7 @@ Estimate the cost of joining the tables with the best technique.
 
 \paragraph*{Solution}
 The lookup cost for the USER table is one since it has a hash indexing. 
-In the case of REVIEW we have that each user has an averegae of 32 reviews (4M/128K). 
+In the case of REVIEW we have that each user has an average of 32 reviews (4M/128K). 
 Every user also have 9 nodes (1M leaf/128K tuples)
 \begin{itemize}
     \item Indexed nested loop with USER as external:
@@ -19,7 +19,7 @@ Every user also have 9 nodes (1M leaf/128K tuples)
         \[25000 + 128000 \cdot (4 + 9) = 1700000\]
     \item Indexed nested loop with REVIEW as external:
         REVIEW is external, so we have to check all its blocks (1000000) after scanning the 4 intermediate nodes, with a total of 1000004.
-        In theory, we have to acess 4 milion tuples, but since the users are only 128000 we can do fewer accesses (all with unitary cost).
+        In theory, we have to access 4 million tuples, but since the users are only 128000 we can do fewer accesses (all with unitary cost).
         The final cost will be: 
         \[4 + 1000000 + 128000 = 1130000\]
 \end{itemize}
