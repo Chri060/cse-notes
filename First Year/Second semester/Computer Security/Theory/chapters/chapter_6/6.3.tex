@@ -1,0 +1,40 @@
+\section{Sniffing}
+
+Normally, a network interface card (NIC) intercepts and forwards to the operating system only the packets addressed to the host's IP.
+
+In promiscuous mode, the NIC passes any packet it reads off the wire to the operating system, regardless of the packet's destination address.
+
+Originally, Ethernet networks operated on a shared medium, using BNC cables. 
+Although RJ-45 cables changed the physical connector, the medium remained shared due to the use of hubs, which broadcast traffic to every host within the broadcast domain.
+
+In contrast, switches selectively relay traffic only to the specific wire corresponding to the correct NIC, based on the Ethernet address. 
+This selective relaying is primarily for performance enhancement, not for security reasons.
+
+\subsection{ARP spoofing}
+Address Resolution Protocol (ARP) is responsible for mapping 32-bit IPv4 addresses to 48-bit hardware, or MAC, addresses.
+RP works with a simple request-reply mechanism with a request and a reply. 
+However, ARP lacks authentication, making it susceptible to spoofing. 
+An attacker can easily forge ARP replies, leading to a lack of trust in the received information. 
+Each host caches these replies, which can be viewed using the command \texttt{arp -a}.
+\paragraph*{Mitigation}
+To counter ARP spoofing, it's essential to verify responses before trusting them, especially if they conflict with existing address mappings. 
+One approach is to add a sequence or ID number in the request to help validate the responses.
+
+\subsection{CAM tables}
+CAM tables are integral to switches as they cache the mapping of MAC addresses to specific ports.
+Switches are susceptible to ARP spoofing attacks, compromising the integrity of CAM tables.
+A CAM table can be saturated in the following way: 
+\begin{itemize}
+    \item Switches rely on CAM tables to efficiently direct traffic based on MAC addresses.
+    \item Tools like Dsniff (macof) can inundate switches with a massive volume of spoofed packets, saturating the CAM table within seconds (known as MAC flooding).
+    \item When the CAM table reaches full capacity, the switch can no longer effectively cache ARP replies. 
+        Consequently, it resorts to broadcasting all incoming traffic to every port, resembling the behavior of a hub.
+\end{itemize}
+\paragraph*{Mitigation}
+Implementing PORT Security, a term coined by CISCO, helps mitigate these vulnerabilities.
+
+\subsection{Spanning Tree Protocol}
+The Spanning Tree Protocol (STP) 802.1d is crucial for preventing loops in switched networks by constructing a spanning tree (ST). 
+Switches determine the structure of the ST through the exchange of Bridge Protocol Data Unit (BPDU) packets to elect the root node.
+
+However, since BPDU packets are not authenticated, attackers can manipulate the topology of the spanning tree for malicious purposes such as sniffing or ARP spoofing.

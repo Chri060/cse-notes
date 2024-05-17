@@ -1,36 +1,12 @@
-\section{Other issues}
+\section{Cookies}
 
-\subsection{Information leakage}
-While detailed error messages enhance Human-Computer Interaction (HCI), they can inadvertently lead to security vulnerabilities. 
-Information leakage can occur through various avenues, including active debug traces in production environments. 
-Additionally, risks stem from the insertion of user-supplied data in errors, which may expose vulnerabilities like Reflected Cross-Site Scripting. 
-Side channels are another potential source of data leaks.
-
-\subsection{Password security}
-The essentials of password security stay the same: passwords should never be stored in plain text in web applications to reduce the risk of exposure in case of a breach. 
-Employing techniques like salting and hashing is crucial to prevent attacks like rainbow tables. 
-It's crucial to handle password reset processes carefully: Typically, resetting a password involves providing an alternative login method. 
-Common methods include sending a reset link to a registered email. 
-Less secure practices include sending temporary passwords or relying solely on security questions for verification.
-
-\paragraph*{Brute-forcing protection}
-Protecting against brute-force attacks requires thoughtful measures:
-\begin{itemize}
-    \item A naive solution involves locking an account after a certain number of failed login attempts. 
-        However, this can lead to reverse brute-forcing, where attackers focus on other accounts.
-    \item Making accounts non-enumerable can prevent attackers from cycling through usernames systematically.
-    \item  Blocking IP addresses may seem intuitive, but it's not foolproof due to proxies and NATs. 
-        Moreover, this approach can inadvertently lead to Denial of Service (DoS) attacks.
-\end{itemize}
-
-\subsection{Cookies}
 HTTP operates in a stateless manner, meaning it lacks inherent memory of previous interactions. 
 While HTTP predominantly facilitates data flow from client to server, it lacks a native ability for the server to persist information on the client side. 
 However, cookies emerged as a solution, enabling client-side storage of information and providing a dependable mechanism for maintaining stateful data.
 Originally conceived for website customization purposes, cookies have been susceptible to misuse, leading to privacy infringements. 
 Additionally, notions such as user authentication and session management, when implemented through cookies, can pose security risks if not handled properly.
 
-\paragraph*{Session creation with cookies}
+\subsection{Session creation with cookies}
 The process of establishing a session using cookies involves the following steps:
 \begin{enumerate}
 \item The user submits their Web Server username and password.
@@ -44,3 +20,23 @@ Issues concerning session cookies include:
     \item Ensuring that every token has a reasonable expiration period, although this should not be set in the cookies themselves.
     \item Employing cookie encryption for sensitive information and utilizing storage mechanisms such as Message Authentication Codes (MACs) to prevent tampering.
 \end{itemize}
+\paragraph*{Session hijacking}
+Due to the stateless nature of HTTP, session hijacking can occur through methods such as stealing a cookie via an XSS attack or brute-forcing a weak session ID parameter.
+
+\subsection{Cross-site request forgery}
+Cross-site request forgery (CSRF) forces a user to execute unwanted actions on a web application in which they are currently authenticated using ambient credentials, such as cookies. 
+In this context, cookies play a crucial role in session management as they are automatically included with every request originating from the browser. 
+This automatic inclusion allows attackers to craft malicious requests that are routed to the vulnerable web application through the victim's browser. 
+As a result, websites cannot distinguish whether the requests from authenticated users are the result of explicit user interaction or not.
+
+\paragraph*{Mitigation}
+To mitigate CSRF attacks, implementing a random challenge token is effective. 
+This token is unique and associated with the user's session. 
+It is regenerated at each request and included in forms that involve sensitive operations. 
+The token is sent to the server and compared against the stored token; server-side operations are permitted only if the tokens match. 
+Importantly, these tokens should not be stored in cookies.
+
+Additionally, using the SameSite attribute for cookies helps prevent session cookies from being sent with cross-site requests.
+By setting the SameSite attribute, websites can specify cookie behavior. 
+When SameSite is set to "strict," cookies are not sent for any cross-site usage. 
+When set to "lax," cookies are sent for cross-domain navigation but not for cross-site POST forms, images, frames, and similar requests.
