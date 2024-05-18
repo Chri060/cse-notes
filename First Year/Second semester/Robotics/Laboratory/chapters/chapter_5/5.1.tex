@@ -1,0 +1,54 @@
+\section{Introduction}
+
+The Robot Operating System (ROS) offers a robust platform for implementing navigation capabilities in robotic systems, leveraging a wide array of pre-existing, high-quality components. 
+The ROS navigation stack, in particular, stands out for its comprehensive suite of tools designed to facilitate path planning, obstacle avoidance, and localization.
+
+The primary elements of the ROS navigation stack include:
+\begin{itemize}
+    \item \texttt{move\_base}: this is the central node within the ROS navigation stack, responsible for integrating all planning and control functionalities. 
+        It relies on dynamically configurable plugins via ROS's  \texttt{pluginlib}, allowing for easy extension and customization.
+        The core logic is built upon the \texttt{nav\_core} class. 
+    \item \texttt{nav\_core}: this class serves as a central interface for navigation goals and velocity commands. 
+        It supports plugins that can be swapped out at runtime, enabling flexible and dynamic updates to the navigation logic. 
+        It relies on sensor data and map information provided by the map server to function effectively.
+    \item \texttt{costmap}: a crucial component that processes sensor data to generate a 2D or 3D occupancy grid, where each cell represents a different cost value. 
+        The costmap is divided into two types:
+        \begin{itemize}
+            \item \textit{Global costmap}: used for long-term path planning across the entire environment.
+            \item \textit{Local costmap}: focuses on short-term planning and obstacle avoidance in the robot's immediate vicinity.
+        \end{itemize}
+        Both costmap have distinct configurations but share some common settings.
+    \item \texttt{map\_server}: this tool is essential for publishing and saving maps. 
+        It provides map data through both topics and services and can handle dynamically generated maps. 
+        When combined with \texttt{costmap\_2d}, it manages multi-layered 2D maps, inflating obstacles based on sensor inputs. 
+        The map consists of a YAML file for map metadata, and an image file encoding occupancy data.
+    \item \texttt{amcl}: the Adaptive Monte Carlo Localization (AMCL) system is a probabilistic localization method that uses a 2D map.
+        It requires laser scan data and benefits from odometry information to estimate the robot's position within the global frame. 
+        AMCL transforms laser scan data to the odometry frame and publishes the transformation between the global and odometry frames.
+\end{itemize}
+
+\paragraph*{Other elements}
+Certain platform-specific elements need to be implemented manually, including:
+\begin{itemize}
+    \item Low-level robot interaction.
+    \item Sensor drivers.
+    \item Sensor measurement processing.
+    \item Odometry estimation.
+    \item High-level task planning.
+\end{itemize}
+Many of these components are available as existing ROS packages, such as drivers and \texttt{robot\_pose\_ekf}.
+
+\subsection{Requirements}
+For effective operation, the ROS Navigation stack requires:
+\begin{itemize}
+    \item Sensors for localization and obstacle avoidance, such as \texttt{sensor\_msgs/LaserScan} or \texttt{sensor\_msgs/PointCloud}.
+    \item A source of odometry, such as \texttt{nav\_msgs/Odometry}.
+    \item Mechanisms to convert \texttt{geometry\_msgs/Twist} messages into motor commands.
+    \item A well-formed tf tree to accurately represent the positions of sensors, the robot, and the map.
+\end{itemize}
+While the ROS Navigation stack is versatile and adaptable, optimal performance is achieved under certain hardware conditions:
+\begin{itemize}
+    \item It works best with differential drive or holonomic robots.
+    \item It requires a planar laser scanner for effective scanning and localization.
+    \item It performs best with robots that have square or circular shapes.
+\end{itemize}
