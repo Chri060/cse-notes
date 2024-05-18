@@ -1,0 +1,86 @@
+\section{Layout}
+
+The Vulkan graphics pipeline processes rendering as follows:
+\begin{itemize}
+    \item \textit{Mesh initialization}: it begins with a mesh defined by a set of vertices and indices.
+    \item \textit{Vertex processing}: each vertex is processed by a vertex shader, which computes its normalized screen coordinates and other parameters to pass to the fragment shader.
+    \item \textit{Fragment processing}: for every fragment (pixel) on the screen, the fragment shader computes the final color of the pixel, implementing algorithms like the Bidirectional Reflectance Distribution Function (BRDF).
+\end{itemize}
+
+
+\paragraph*{Pipelines}
+The graphics pipeline in Vulkan, while based on a set of fixed functions configurable by the user, must support a wide array of use cases, each with unique characteristics. 
+Because there is no one-size-fits-all solution, Vulkan provides users with extensive programming capabilities to tailor the pipeline to their specific needs.
+Besides allowing custom shader writing, Vulkan enables users to:
+\begin{itemize}
+    \item \textit{Vertex data definition}: specify which information is associated with vertices.
+    \item \textit{Shader communication}: define the information passed between vertex and fragment shaders and determine if and how it is interpolated.
+    \item \textit{Shader parameters}: define additional parameters that can be passed to shaders for proper vertex processing and fragment computation.
+\end{itemize}
+
+\section{Data structure}
+In Vulkan, the term Layout encompasses any data structure employed to specify the format and type of information within user-defined encodings. 
+This includes defining pixel color encodings such as the number of bits per pixel, selected color space, and the presence of an alpha-channel.
+
+However, the term "Layout" is sometimes ambiguously used in Vulkan documentation, leading to confusion regarding its context. 
+This ambiguity can be problematic when referencing related documentation and tutorials.
+
+Despite this ambiguity, Vulkan manages layouts in a manner that encourages reusability whenever possible. 
+Moreover, Vulkan emphasizes interoperability among shaders, vertices, and various data blocks, facilitating the mixing and matching of data types that yield identical results.
+
+
+
+
+\paragraph*{Vertex attributes}
+In GLSL, in and out global variables serve as the interface between shaders and other components of the pipeline, whether fixed or programmable.
+Within the graphics pipeline, vertex-related values are directly transmitted to the Vertex Shader by the Input Assembler component. 
+Specifically, vertex coordinates are conveyed through in variables of the Vertex Shader.
+
+Each vertex possesses an implicit integer index represented by the global variable \texttt{gl\_VertexIndex}. 
+Additionally, vertices can feature an arbitrary array of user-defined attributes, each characterized by one of the supported GLSL types. 
+Some vertices may lack user-defined attributes altogether.
+
+For instance, in a 2D game application, a set of vec2 normalized screen coordinates might directly denote element positions. 
+Conversely, a typical 3D scene employs at least a vec3 element to store positions in 3D local space. 
+Other pipelines might necessitate vec3 position attributes (measured in 3D local coordinates) and vec3 color attributes to vary diffuse reflection across object surfaces.
+
+Consistency is crucial: all vertices within a mesh must adhere to the same vertex format, i.e., share the same attributes. 
+The pipeline's fixed functions facilitate the transmission of such values to the Vertex Shaders.
+
+Different meshes may feature distinct vertex formats, albeit requiring the creation of separate pipelines. 
+Vulkan offers exceptional flexibility in configuring pipelines to specify the vertex attributes transmitted to the Vertex Shader.
+Specifically, Vulkan enables the partitioning of vertex data into separate arrays, each containing specific attributes. 
+These arrays, known as bindings, are distinguished by progressive binding IDs. 
+Although various approaches exist, employing a single binding is most common.
+
+Typically, a C++ structure encapsulating all vertex attributes is created, utilizing GLM types aligned with those defined in the corresponding Vertex Shader. 
+This binding is defined within a VkVertexInputBindingDescription structure, featuring fields specifying the binding ID and object size in bytes.
+The inputRate field accommodates instanced rendering, a concept elaborated on in subsequent lessons.
+
+Individual attributes are defined within elements of an array of \texttt{VkVertexInputAttributeDescription} structures. 
+Each attribute definition includes specifications for both its binding and location IDs, along with a constant denoting its data type (format). 
+Lastly, the byte offset within the data structure for the respective field must be provided, computable using the C++ \texttt{offsetof()} macro.
+
+To synchronize global variables with corresponding vertex attributes, the Vertex Shader employs the \texttt{layout(location)} directive.
+
+\subsection{Vertex and fragments shaders}
+In Vulkan, only the vertex shader has access to attributes. These values must be passed to other pipeline components using out variables. 
+Vertex attributes, communicated through in and out variables, are organized into slots, each identified by a location number starting from zero. 
+These location numbers are constrained by a hardware-dependent constant, typically sufficient for standard applications. 
+When defining in or out variables, the user specifies the slot's location ID in a layout directive. 
+Notably, only slot numbers are utilized, allowing the corresponding global variable names to vary between shaders.
+
+The Input Assembler configures the slots utilized by the Vertex Shader's in variables, which are available for communication. 
+Additionally, pipeline configuration dictates the out variables written by the Fragment Shader. 
+Typically, this includes the final pixel color, but advanced applications may compute additional values. 
+Communication between the Vertex and Fragment shaders adheres to their GLSL specifications. 
+The pipeline's fixed functions interpolate out variable values from the Vertex Shader based on pixel positions on the screen before passing them to the Fragment Shader.
+
+By default, interpolation between Vertex and Fragment shaders employs Perspective Correct techniques.
+However, this behavior can be modified using directives like flat and noperspective preceding in and out variables.
+
+
+
+
+
+
