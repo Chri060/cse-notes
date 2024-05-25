@@ -1,0 +1,52 @@
+\section{VLIW compiler}
+
+The VLIW compiler is responsible for scheduling instructions to maximize parallel execution, exploiting both Instruction Level Parallelism (ILP) and Loop Level Parallelism (LLP).
+This involves mapping instructions to the machine's functional units while accounting for time constraints and task dependencies. 
+The compiler ensures intra-instruction parallelism and schedules operations to avoid data hazards, typically separating them with explicit NOPs (No Operation instructions). 
+The primary goal is to minimize the program's total execution time.
+
+To support ILP, there are two main strategies:
+\begin{enumerate}
+    \item \textit{Dynamic scheduling}: relies on hardware to locate parallelism.
+    \item \textit{Static scheduling}: depends on software to identify potential parallelism.
+\end{enumerate}
+
+\subsection{Static scheduling}
+Static scheduling aims to keep the pipeline full in single-issue pipelines or utilize all functional units in each cycle in VLIW architectures. 
+This maximizes ILP and achieves higher parallel speedups.
+
+\paragraph*{General formulation}
+Compilers use sophisticated algorithms for code scheduling to exploit ILP. 
+Within a basic block, which is a sequence of straight non-branch instructions, the amount of parallelism is limited. 
+Data dependencies further restrict the available ILP within a basic block. 
+Therefore, substantial performance enhancements require exploiting ILP across multiple basic blocks, including across branches.
+
+Static scheduling involves the compiler detecting and resolving dependencies through code reordering.
+The compiler's output is a dependency-free code, which is typical for VLIW processors. 
+This method has several advantages and disadvantages:
+
+\subsection{Summary}
+The VLIW approach benefits from simple hardware requirements, making it easier to design and maintain. 
+It also allows for straightforward extension of the number of functional units, facilitating scalability. 
+Additionally, good compilers can effectively detect and exploit parallelism, maximizing performance gains.
+
+However, VLIW requires a large number of registers to keep all functional units active, and it necessitates substantial storage for operands and results. 
+The architecture demands a high data transport capacity between functional units, register files, and memory, and a high bandwidth between the instruction cache and fetch unit. 
+This results in a larger code size. 
+Binary compatibility poses challenges, as does the need for profiling to understand branch probabilities, adding a significant extra step in the build process. 
+Scheduling for statically unpredictable branches is also difficult, since the optimal schedule can vary with different branch paths.
+
+\paragraph*{Static Scheduling Methods}
+Several methods are used for static scheduling, including:
+\begin{itemize}
+    \item \textit{Simple code motion}: reordering instructions to avoid stalls.
+    \item \textit{Loop unrolling and loop peeling}: increasing loop body size to reduce overhead and improve parallelism.
+    \item \textit{Software pipelining}: overlapping the execution of operations from different iterations of a loop.
+    \item \textit{Global code scheduling}: optimizing code across multiple basic blocks.
+    \begin{itemize}
+        \item \textit{Trace scheduling}: identifying and optimizing frequently executed paths.
+        \item \textit{Super-block scheduling}: grouping basic blocks to optimize their execution as a single unit.
+        \item \textit{Hyper-block scheduling}: extending super-blocks to include predicated instructions for increased parallelism.
+        \item \textit{Speculative trace scheduling}: scheduling instructions based on probable execution paths, even if they involve branches.
+    \end{itemize}
+\end{itemize}

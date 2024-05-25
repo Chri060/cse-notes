@@ -1,0 +1,48 @@
+\section{Multithreading}
+
+Modern processors often fail to utilize their execution resources efficiently due to various issues such as memory conflicts, control hazards, branch misprediction, and cache misses. 
+Addressing these problems individually tends to have limited effectiveness. 
+Consequently, a general latency-tolerance solution that can hide all sources of latency is needed to significantly enhance performance.
+
+\subsection{Parallel programming}
+Explicit parallelism involves structuring applications into concurrent and communicating tasks. 
+Operating systems support different types of tasks, with processes and threads being the most important and frequent. 
+The implementation of multitasking varies based on the processor's characteristics, whether it is single-core, single-core with multithreading support, or multicore.
+
+\subsection{Multithreaded execution}
+Multithreading enables multiple threads to share the functional units of a single processor by overlapping their execution. 
+The processor must duplicate the independent state of each thread, such as having separate copies of the register file and program counter (PC), and for running independent programs, separate page tables. 
+Memory is shared through virtual memory mechanisms, which already support multiple processes. 
+Hardware is designed for fast thread switching, which is much quicker than a full process switch.
+
+Thread switching can occur in two ways:
+\begin{itemize}
+    \item \textit{Fine-grained multithreading}: the processor switches from one thread to another at each instruction, interleaving the execution of multiple threads.
+        The CPU must be capable of changing threads every clock cycle, necessitating duplicated hardware resources.
+    \item \textit{Coarse-grained multithreading}: the processor switches from one thread to another only during long stalls, such as a miss in the second-level cache. 
+        Two threads share many system resources, and switching between threads requires several clock cycles to save the context. 
+        This approach does not slow down a single thread under normal conditions and does not require very fast thread-switching.
+        However, it does not reduce throughput loss for short stalls, as the CPU must empty the pipeline before starting a new thread.
+\end{itemize}
+
+\subsection{Thread-level parallelism}
+
+\paragraph*{ILP and TLP}
+ILP and TLP exploit different types of parallelism in a program. 
+A processor designed for ILP often has idle functional units due to stalls or dependencies in the code. 
+TLP can provide independent instructions to keep the processor busy during these stalls and utilize the otherwise idle functional units. 
+By leveraging the resources of a superscalar processor, both ILP and TLP can be exploited simultaneously.
+
+The key motivation is that modern CPUs have more functional resources than a single thread can utilize. 
+With register renaming and dynamic scheduling, independent instructions from different threads can be issued without concerns about dependencies, which are managed by the hardware.
+
+\subsection{Simultaneous multithreading}
+Simultaneous multithreading (SMT) builds on the idea that dynamically scheduled processors already have many hardware mechanisms to support multithreading. 
+These include a large set of virtual registers to hold the register sets of independent threads and register renaming to provide unique register identifiers. 
+This allows instructions from multiple threads to be mixed in the datapath without confusing sources and destinations across threads. 
+Out-of-order completion further enhances hardware utilization.
+
+SMT can be implemented by adding a per-thread renaming table and maintaining separate PCs for each thread. 
+Independent commitment can be supported by logically keeping a separate reorder buffer for each thread. 
+The system can dynamically adapt to the environment, allowing the execution of instructions from each thread and utilizing all functional units if one thread encounters a long latency event. 
+More threads increase the CPU's issue possibilities per cycle, ideally limited only by the imbalance between resource requests and availability.
