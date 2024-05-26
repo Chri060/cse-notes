@@ -1,0 +1,44 @@
+\section{ICMP redirect attack}
+
+ICMP (Internet Control Message Protocol) is utilized for sending debugging information and error reports between hosts, routers, and other network devices at the IP level. 
+ICMP messages fall into three categories: requests, responses, and error messages.
+Key ICMP functions include:
+\begin{itemize}
+    \item \textit{Echo request/reply}: used to test connectivity (ping).
+    \item \textit{Redirect}: used to inform hosts about more efficient routes (gateways).
+\end{itemize}
+
+\paragraph*{Route change requests}
+Routers, not hosts, are responsible for maintaining and updating routing information. 
+They are expected to discover and manage the best routes for every destination. 
+Initially, hosts start with minimal routing information and gradually learn new routes from routers.
+A host may boot up knowing the address of only one router, which might not always be the most optimal route.
+
+\subsection{ICMP redirect}
+An ICMP Redirect message informs a host that a better route exists for a given destination and provides the gateway for that route.
+When a router detects a host using a suboptimal route, it:
+\begin{itemize}
+    \item Sends an ICMP Redirect message to the host and forwards the original packet.
+    \item The host is expected to update its routing table accordingly.
+\end{itemize}
+An attacker can exploit this by forging a spoofed ICMP Redirect packet to re-route traffic to a specific route or a particular host, which may not be a legitimate router. This attack can:
+\begin{itemize}
+    \item Hijack traffic, directing it through the attacker's computer.
+    \item Facilitate a denial-of-service (DoS) attack.
+\end{itemize}
+
+\paragraph*{Weak authentication}
+An ICMP message includes the IP header and a portion of the payload (usually the first 8 bytes) of the original IP datagram. 
+To forge a convincing ICMP Redirect message, an attacker must intercept a packet in the original connection, necessitating their presence on the same network. 
+This creates a half-duplex man-in-the-middle (MITM) situation.
+Handling of ICMP Redirects varies by operating system.
+
+\paragraph*{Route mangling}
+If an attacker can announce routes to a router, they can manipulate routing in various ways. 
+Common routing protocols with no or weak authentication include:
+\begin{itemize}
+    \item IGRP (Interior Gateway Routing Protocol).
+    \item RIP (Routing Information Protocol).
+    \item OSPF (Open Shortest Path First).
+\end{itemize}
+More secure protocols like EIGRP (Enhanced Interior Gateway Routing Protocol) and BGP (Border Gateway Protocol) offer authentication options, but these are often underutilized.

@@ -1,0 +1,60 @@
+\section{Firewall}
+
+\begin{definition}[\textit{Firewall}]
+    A firewall is a network access control system that inspects and verifies all packets flowing through it.
+\end{definition}
+The main functions of a firewall typically include:
+\begin{itemize}
+    \item IP packet filtering.
+    \item Network Address Translation (NAT).
+\end{itemize}
+A firewall must serve as the single enforcement point between a screened network and outside networks.
+
+\paragraph*{Insider attacks}
+Firewalls inspect all traffic passing through them but are powerless against insider attacks unless the network is partitioned.
+They are generally ineffective against unchecked paths within the network.
+
+\paragraph*{Firewall rules}
+Firewalls are essentially computers and can have vulnerabilities. 
+Most firewalls are single-purpose machines, often embedded appliances with minimal firmware that offer few or no additional services, resulting in a smaller attack surface. 
+Firewalls act as bouncers at the network boundary, enforcing security rules. 
+Ineffective rules result in inadequate protection. 
+Firewall rules implement higher-level security policies, which should be based on a default-deny approach.
+
+\paragraph*{Taxonomy}
+Firewalls are categorized based on their packet inspection capabilities, from lower to higher layers:
+\begin{itemize}
+    \item \textit{Network layer firewalls}: packet filters and stateful packet filters. 
+    \item \textit{Application layer firewalls}: circuit-level gateways and application proxies. 
+\end{itemize}
+
+\subsection{Packet filters}
+Packet filters process packets individually, decoding the IP and part of the TCP headers. 
+They are stateless and cannot track TCP connections or fully inspect payloads. 
+Often found on routers as Access Control Lists (ACLs), packet filters predicate actions (block, allow, log, etc.) based on packet conditions.
+
+\subsection{Stateful packet filters}
+Dynamic packet filters enhance standard packet filters by tracking the state of TCP connections, ensuring the correct sequence of packets (e.g., SYN followed by SYN-ACK). 
+This tracking improves the safety of deny rules but can impact performance as it is connection-based rather than packet-based. 
+Dynamic filters can also perform deeper content inspection, reconstruct application-layer protocols, and offer features like NAT, packet defragmenting, and reassembly to handle fragmented packets.
+
+\paragraph*{Session handling}
+A session is an atomic, transport-layer exchange of application data between two hosts. Main transport protocols include:
+\begin{itemize}
+    \item TCP (Transmission Control Protocol): the session is the TCP connection itself.
+    \item UDP (User Datagram Protocol): connectionless, but sessions can be inferred for NAT and control purposes.
+        UDP is widely used (e.g., DNS, VoIP, video streaming) despite its lack of connection orientation, making it difficult to secure.
+\end{itemize}
+
+\paragraph*{Application layer}
+Application-layer inspection is crucial for protocols that transmit network information. 
+Stateful firewalls must manage these protocols to ensure security.
+
+\subsection{Circuit firewalls}
+Circuit firewalls relay TCP connections, acting as a TCP-level proxy. 
+The client connects to a specific port on the firewall, which then connects to the desired server.
+
+\subsection{Application proxies}
+Application proxies operate at the application layer, inspecting, validating, and manipulating protocol data (e.g., rewriting HTTP frames). 
+They can authenticate users, apply specific filtering policies, perform advanced logging, and offer content filtering or scanning (e.g., anti-virus, spam filtering). 
+Proxies may require client modifications and specific protocol servers.
