@@ -1,0 +1,26 @@
+\section{Rootkit}
+
+Historically, rootkits emerged as a way for attackers to maintain root access on a compromised machine. 
+These tools allow attackers to make files, processes, users, and directories disappear, effectively rendering themselves invisible.
+Rootkits can operate in either userland or kernel-space.
+
+In userland, rootkits can backdoor login mechanisms, sshd, and passwd files. 
+They often trojanize utilities to hide their presence, such as ps, netstat, ls, find, du, who, w, finger, and ifconfig in Linux environments. 
+In Windows, userland rootkits typically target Task Manager, Process Explorer, Netstat, and ipconfig.
+
+\paragraph*{Rootkit types}
+Userland rootkits are easier to build but are often incomplete and more easily detected through cross-layer examination and the use of non-trojaned tools. 
+Kernel space rootkits, on the other hand, are more challenging to construct but can completely hide artifacts. 
+These rootkits can only be detected via post-mortem analysis. 
+The first complete Linux Kernel Module (LKM) rootkit was presented by plaguez in 1998.
+
+\paragraph*{Syscall hijacking}
+Syscall hijacking involves manipulating the syscall table, the Interrupt Descriptor Table (IDT), or the Global Descriptor Table (GDT). 
+For instance, after the syscall table was hidden in kernel 2.6, attackers began scanning the IDT for a FAR JMP instruction pointing to the syscall table address. 
+Other methods include detour patching and direct patching through /dev/mem or /dev/kmem, as demonstrated by Silvio Cesare, showing it was feasible even with monolithic kernels.
+
+\paragraph*{Advanced rootkits}
+Advanced rootkits extend beyond software to embed themselves in hardware components and firmware. 
+Brossard introduced a bootkit that operates independently of the BIOS. 
+Rootkits can also target the firmware of Network Interface Cards (NICs) or video cards. 
+In virtualization systems, rootkits can act as hypervisors, making detection extremely difficult.
