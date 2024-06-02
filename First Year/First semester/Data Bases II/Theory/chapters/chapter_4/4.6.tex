@@ -1,120 +1,106 @@
-\section{JPA: entity manager}
+\section{JPA Entity Manager}
 
-The entity instances in Java Persistence API (JPA) are plain Java objects, and they don't become managed until the application invokes an API method to initiate the process. 
-The entity manager serves as the central authority for all persistence actions, managing the mapping and APIs for interacting with the database and the objects.
+In JPA, entity instances are POJOs that only become managed when an API method is invoked to start the process. 
+The Entity Manager is the central authority for all persistence actions, handling the mapping and APIs for database interactions.
 \begin{definition}[\textit{Persistence context}]
-    The persistence context is a fundamental concept in JPA, acting as a main memory database that holds objects in a managed state.
+    The persistence context is a core concept in JPA, acting like a main memory database that holds objects in a managed state.
 \end{definition}
-A managed object is tracked, enabling automatic synchronization of modifications to its state with the database.
-Database writes typically occur asynchronously, requiring the persistence context to connect to a transaction when they happen. 
-A managed entity has two lives: one as a Java object and one as a relational tuple bound to it, existing only within the persistence context.
-When the POJO exits the persistence context the binding breaks: it gets untracked and no longer synchronized to the database.
-The application interacts only with the entity manager, not directly with the persistence context.
+A managed object is tracked, enabling automatic synchronization of its state modifications with the database. 
+Database writes generally occur asynchronously, requiring the persistence context to connect to a transaction when they happen. 
+A managed entity has dual lives: one as a Java object and one as a relational tuple, existing only within the persistence context. 
+When the POJO exits the persistence context, the binding breaks, and it is no longer tracked or synchronized with the database.
+Applications interact with the Entity Manager, not directly with the persistence context.
 
-\paragraph*{Interfaces}
-The interface of the entity manager exposes several methods:
-\begin{itemize}
-    \item Makes an entity instance become part of the persistence context. 
-        The method's signature is: \texttt{public void persist(Object entity)}. 
-    \item Finds an entity instance by its primary key. 
-        The method's signature is: \texttt{public <T> T find(Class<T> entityClass, Object primaryKey)}.
-    \item Removes an entity instance from the persistence context and thus from the database: \texttt{public void remove(Object entity)}.
-    \item Resets the state of entity instance from the content of the database: \texttt{public void refresh(Object entity)}.
-    \item Writes the state of entities to the database as immediately as possible: \texttt{public void flush()}.
-\end{itemize}
-
-\paragraph*{Operations on entities}
-When an entity is initially instantiated, it is in the transient state because the entity manager is not yet aware of its existence. 
-Transient entities are not part of the persistence context associated with the entity manager.
+\subsection{Operations}
+When an entity is first instantiated, it is in a transient state because the Entity Manager is not aware of its existence. 
+Transient entities are not part of the persistence context associated with the Entity Manager.
 \begin{example}
-    A new POJO can be created in the following way: 
-    \begin{lstlisting}[style=Java]
+    A new POJO can be created as follows:
+\begin{lstlisting}[style=Java]
 Employee emp = new Employee(ID, "John Doe"); 
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-To transition transient entities to the managed state, the \texttt{persist()} method of the entity manager is used.
-Once an entity becomes managed, any changes made to it are automatically applied to the database, and vice versa.
+To transition transient entities to the managed state, the \texttt{persist()} method of the Entity Manager is used. 
+Once an entity becomes managed, any changes made to it are automatically applied to the database. 
 The managed entity and its corresponding tuple are associated until the entity exits the managed state.
-It is even possible to call \texttt{persist()} on an already managed entity, triggering the cascade process.
+You can call \texttt{persist()} on an already managed entity to trigger the cascade process.
 \begin{example}
-    A new POJO can be created and later made managed in the following way: 
-    \begin{lstlisting}[style=Java]
+    A new POJO can be created and later made managed as follows:
+\begin{lstlisting}[style=Java]
 Employee emp = new Employee(ID, "John Doe"); 
 em.persist(emp);
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-Entities can be retrieved using the \texttt{find()} method, which takes the class of the sought entity and the primary key value identifying the desired entity instance.
+Entities can be retrieved using the \texttt{find()} method, which takes the class of the sought entity and the primary key value identifying the desired entity instance. 
 If the entity instance is found, the returned object becomes managed; otherwise, the \texttt{find()} method returns null.
 \begin{example}
     Finding an entity: 
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 Employee emp = em.find(Employee.class, ID);
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-To remove an entity, the \texttt{remove()} method is used. 
-This action breaks the association between the entity and the persistence context.
-Upon the transaction associated with the entity manager's persistence context committing or when the \texttt{flush()} method of the entity manager is called, the tuple linked with the entity is scheduled for deletion from the database.
+To remove an entity, the \texttt{remove()} method is used.
+This action breaks the association between the entity and the persistence context. 
+Upon the transaction associated with the Entity Manager's persistence context committing, or when the \texttt{flush()} method of the Entity Manager is called, the tuple linked with the entity is scheduled for deletion from the database. 
 Although the entity still exists, its changes are no longer tracked for synchronization with the database.
 \begin{example}
     Removing an entity:
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 em.remove(emp);
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{images/jpaem.png}
     \caption{Possible states for the entities}
 \end{figure}
-Referring to the preceding diagram, entities can exist in five primary states (deleted is excluded in the illustration):
+Referring to the preceding diagram, entities can exist in five primary states:
 \begin{itemize}
-    \item \textit{New}: the entity is unknown to the entity manager, lacking a persistent identity, and without any associated tuple.
-    \item \textit{Managed}: the entity is associated with persistence context, c with changes to objects automatically synchronized with the database.
+    \item \textit{New}: the entity is unknown to the Entity Manager, lacks a persistent identity, and has no associated tuple.
+    \item \textit{Managed}: the entity is associated with the persistence context, and changes to objects are automatically synchronized with the database.
     \item \textit{Detached}: the entity has an identity potentially associated with a database tuple, but changes are not automatically propagated to the database.
     \item \textit{Removed}: the entity is scheduled for removal from the database.
-    \item \textit{Deleted}: the entity is erased from the database. 
+    \item \textit{Deleted}: the entity is erased from the database.
 \end{itemize}
 
 \subsection{Application architecture}
-In the Java Enterprise Edition (JEE), clients leverage the services of the Enterprise JavaBeans (EJB) container to establish a connection with the entity manager.
-Specifically, the business layer interacts with the entity manager.
-The advantage of using EJB is that this container provides support to make Java Persistence API (JPA) entity method calls transactional through the automatic creation of transactions.
+In JEE, clients leverage the services of the EJB container to establish a connection with the Entity Manager.
+Specifically, the business layer interacts with the Entity Manager.
+The advantage of using EJB is that the container provides support to make JPA entity method calls transactional through the automatic creation of transactions.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{images/jee1.png}
 \end{figure}
 Transactions in this context exist at three levels:
 \begin{itemize}
-    \item \textit{DBMS transactions}: managed by the Database Management System (DBMS) and utilize SQL.
-        This level is used by the entity manager.
-    \item \textit{Resource-local transactions}: managed by the application and use the Java Database Connectivity (JDBC) connection interface, mapped to JDBC.
-    \item \textit{Container transaction}: managed by the application or the container and use the Java Transaction API (JTA) interface, also mapped to JDBC. 
-        The level utilized by the entity manager is the container transaction level.
+    \item \textit{DBMS transactions}: managed by the DBMS and utilize SQL. 
+        This level is used by the Entity Manager.
+    \item \textit{Resource-local transactions}: managed by the application and use the JDBC connection interface, mapped to JDBC.
+    \item \textit{Container transaction}: managed by the application or the container and use the JTA interface, also mapped to JDBC. 
+        The Entity Manager operates at this level.
 \end{itemize}
-After defining a business object, the container injects the entity manager into it.
-The container transparently manages instances of the entity manager for the application.
-It provides the transaction required to save modifications made to the entities in the persistence context associated with the entity manager into the database.
+After defining a business object, the container injects the Entity Manager into it. 
+The container transparently manages instances of the Entity Manager for the application. 
+It provides the transaction required to save modifications made to the entities in the persistence context associated with the Entity Manager into the database.
 \begin{example}
     Definition of a business object EJB: 
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Stateless 
 public class myEJBService {
-@PersistenceContext(unitName = "MyPersistenceUnit")
-private EntityManager em; 
+    @PersistenceContext(unitName = "MyPersistenceUnit")
+    private EntityManager em; 
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-When a client calls a method of a business object that utilizes a container-managed entity manager for persistence, the container offers a transaction for saving modifications to the database.
-If the same transaction is called multiple times, it is reused.
-This behavior is the most common and default, but the business object methods can be annotated to specify a different way to use the transactions provided by the container. 
-A method can be annotated to achieve the desired transactional behavior using: 
-\texttt{@TransactionAttribute(TransactionAttributeType.type)}, where \texttt{type} can be: 
+When a client calls a method of a business object that utilizes a container-managed entity manager for persistence, the container offers a transaction for saving modifications to the database. 
+If the same transaction is called multiple times, it is reused. 
+This behavior is the most common and default, but the business object methods can be annotated to specify a different transactional behavior using \texttt{@TransactionAttribute(TransactionAttributeType.type)}, where \texttt{type} can be: 
 \begin{itemize}
     \item \texttt{Mandatory}: expects a transaction to have already been started and be active when the method is called. 
         If no transaction is active, an exception is thrown.
-    \item \texttt{Required}: the default behavior; starts a new transaction if none is active. 
+    \item \texttt{Required}: the default behavior; starts a new transaction if none is active.
         If one is active, it is used.
-    \item \texttt{Requires\_new}: the method always needs to be in its own transaction.
+    \item \texttt{Requires\_new}: the method always needs to be in its own transaction. 
         Any active transaction is suspended.
     \item \texttt{Supports}: the method does not access transactional resources but tolerates running inside one if it exists.
     \item \texttt{Not\_supported}: the method will cause the container to suspend the current transaction if one is active when the method is called.

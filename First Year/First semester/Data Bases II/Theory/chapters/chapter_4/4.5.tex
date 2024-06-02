@@ -1,11 +1,11 @@
-\section{JPA: Object Relational Mapping}
+\section{Java Persistence API}
 
-The technique of bridging the gap between the object model and the relational model is known as object-relational mapping. 
+The technique of bridging the gap between the object model and the relational model is known as Object Relational Mapping (ORM).
 \begin{definition}[\textit{Impedance mismatch}]
     The challenge of mapping one model to the other lies in the concepts in one model for which there is no logical equivalent in the other, referred to as impedance mismatch.
 \end{definition}
-The automatic transformation of a model into another in managed by an element called mediator. 
-The principal distinctions between the object-oriented model and the relational one are as follows:
+The automatic transformation of a model into another is managed by an element called a mediator. 
+The principal distinctions between the object-oriented model and the relational one are outlined below:
 \begin{table}[H]
     \centering
     \begin{tabular}{cc}
@@ -20,72 +20,68 @@ The principal distinctions between the object-oriented model and the relational 
     Code is portable                   & Not necessarily portable    \\ \hline
     \end{tabular}
 \end{table}
-The Java Persistence API addresses the gap between object-oriented domain models and relational database systems by utilizing Plain Old Java Objects, providing a persistence model for object-relational mapping.
+The JPA addresses the gap between object-oriented domain models and relational database systems by utilizing Plain Old Java Objects (POJO), providing a persistence model for ORM.
 
 \paragraph*{Features}
-Key features of the Java Persistence API include:
+Key features of the JPA include:
 \begin{itemize}
-    \item \textit{POJO Persistence}: objects being persisted need not possess any special characteristics; any existing non-final object with a default constructor can be persisted.
+    \item \textit{POJO persistence}: objects being persisted need not possess any special characteristics; any existing non-final object with a default constructor can be persisted.
     \item \textit{Non-intrusiveness}: the persistence API exists as a separate layer from the persistent objects.
     \item \textit{Object queries}: a powerful query framework offers the ability to query across entities and their relationships without having to use concrete foreign keys or database columns.
 \end{itemize}
 
 \begin{definition}[\textit{Entity}]
-    The entity is a class (Java bean) representing a collection of persistent objects mapped onto a relational table. 
+    An entity is a class representing a collection of persistent objects mapped onto a relational table.
 \end{definition}
 \begin{definition}[\textit{Persistence unit}]
-    The persistence unit is the set of all classes that are persistently mapped to one database (analogous to the notion of db schema). 
+    The persistence unit is the set of all classes that are persistently mapped to one database.
 \end{definition}
 \begin{definition}[\textit{Persistence context}]
-    The persistence context is the set of all managed objects of the entities defined in the persistence unit (analogous to the notion of db instance). 
+    The persistence context is the set of all managed objects of the entities defined in the persistence unit.
 \end{definition}
 \begin{definition}[\textit{Managed entity}]
-    The managed entity is an entity part of a persistence context for which the changes of the state are tracked. 
+    A managed entity is an entity part of a persistence context for which the changes of the state are tracked.
 \end{definition}
-\begin{definition}[\textit{Entity manager}]
-    The entity manager is the interface for interacting with a persistence context. 
+\begin{definition}[\textit{Entity Manager}]
+    The Entity Manager is the interface for interacting with a persistence context.
 \end{definition}
 \begin{definition}[\textit{Client}]    
-    The client is a component that can interact with a persistence context, indirectly through an entity manager.
+    The client is a component that can interact with a persistence context, indirectly through an Entity Manager.
 \end{definition}
-Entities are accessed through the entity manager interface of the Java Persistence API.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{images/jpa.png}
-    \caption{Structure of the Java Persistence API}
+    \caption{JPA structure}
 \end{figure}
-
-\paragraph*{Interfaces}
-The entity manager exposes all the operations needed to synchronize the managed entities in the persistence context to the database to:
+Entities are accessed through the Entity Manager interface of the JPA. 
+The Entity Manager exposes all the operations needed to synchronize the managed entities in the persistence context to the database:
 \begin{itemize}
-    \item Persist an entity instance in the database: \texttt{public void persist(Object entity)}.
-    \item Find an entity instance by its primary key. 
-        The method's signature to accomplish this is: \texttt{public <T> T find(Class<T> entityClass, Object primaryKey)}.
-    \item Remove an entity instance from the database: \texttt{public void remove(Object entity)}.
-    \item Reset the entity instance from the database: \texttt{public void refresh(Object entity)}.
-    \item Write the state of entities to the database immediately: \texttt{public void flush()}.
+    \item Persist an entity instance in the database.
+    \item Find an entity instance by its primary key.
+    \item Remove an entity instance from the database.
+    \item Reset the entity instance from the database.
+    \item Write the state of entities to the database immediately.
 \end{itemize}
 
 \paragraph*{Entities}
-An entity is a Java Bean associated with a tuple in a database. 
-The persistent counterpart of an entity has a lifespan longer than that of the application.
+An entity is a EJB associated with a tuple in a database. 
+The persistent counterpart of an entity has a lifespan longer than that of the application. 
 The entity class must be associated with the database table it represents. 
-An entity can enter a managed state, where all modifications to the object's state are tracked and automatically synchronized to the database.
-Entities have properties such as identification (primary key), nesting, relationship, referential integrity (foreign key), and inheritance. 
+An entity can enter a managed state, where all modifications to the object's state are tracked and automatically synchronized to the database. 
 Entities must meet certain requirements:
 \begin{itemize}
     \item Must have a public or protected constructor with no arguments.
-    \item Must not be final.
-    \item No method or persistent instance variables may be final.
-    \item The Serializable interface must be implemented if you pass the entity by value.
+    \item Must not be \texttt{final}.
+    \item No method or persistent instance variables may be \texttt{final}.
+    \item The \texttt{Serializable} interface must be implemented if you pass the entity by value.
 \end{itemize}
 In the database, objects and tuples have an identity (primary key), so an entity assumes the identity of the persistent data it is associated with.
-The primary key can be either simple or composite. 
+The primary key can be either simple or composite.
 To identify a primary key, we use the \texttt{@Id} annotation, and for composite keys, we use \texttt{@EmbeddedId} and \texttt{@IdClass} annotations.
 
-\paragraph*{Uniqueness of data}
+\paragraph*{Data uniqueness}
 At times, applications may prefer not to handle the explicit management of data value uniqueness. 
-In such scenarios, the persistence provider has the capability to automatically create an identifier for each entity instance of a specified type. 
+In such scenarios, the persistence provider can automatically create an identifier for each entity instance of a specified type. 
 This functionality, known as identifier generation, is defined by the \texttt{@GeneratedValue} annotation. 
 There are four available ID generation strategies that applications can opt for:
 \begin{enumerate}
@@ -96,198 +92,183 @@ There are four available ID generation strategies that applications can opt for:
 \end{enumerate}
 \begin{example}
     An identifier can be generated as follows: 
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Entity
 public class Mission implements Serializable {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private int id;
-private String city;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private String city;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-Attributes can be qualified  with properties that guide the mapping between Plain Old Java Objects (POJO) and relational tables. 
-These properties include: large objects, enumerated types, and temporal types. 
+Attributes can be qualified with properties that guide the mapping between POJO and relational tables. 
+These properties include large objects, enumerated types, and temporal types.
 
 \paragraph*{Fetch policies}
-The fetch policy can be either lazy (retrieve the item when needed) or eager (retrieve the item as soon as possible).
+The fetch policy can be either lazy (retrieve the item when needed) or eager (retrieve the item as soon as possible). 
 Lazy policy is primarily employed for large objects.
 \begin{example}
-    The qualifiers can be used as follows: 
-    \begin{lstlisting}[style=Java]
+    The qualifiers can be used as follows:
+\begin{lstlisting}[style=Java]
 @Entity
 public class Mission implements Serializable {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private int id;
-@Temporal(TemporalType.DATE)
-private Date date;
-private MissionStatus status;
-@Basic(fetch=FetchType.LAZY)
-@LOB
-private byte[] photo;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    // date
+    @Temporal(TemporalType.DATE)
+    private Date date;
+
+    // image
+    @Basic(fetch=FetchType.LAZY)
+    @LOB
+    private byte[] photo;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-Entities are ordinarily mapped to tables with corresponding names, and their fields are mapped to columns with identical names by default.
-However, it is possible to alter this behavior using certain annotations.
+Entities are ordinarily mapped to tables with corresponding names, and their fields are mapped to columns with identical names by default. 
+However, it is possible to alter this behavior using certain annotations. 
 In cases where an entity should not be persisted, it can be designated with the \texttt{@Transient} annotation.
 \begin{example}
     The mapping can be redefined as follows: 
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Entity @Table(name="T_BOOKS")
 public class Book {
-@Column(name="BOOK_TITLE", nullable=false)
-private String title;
-private CoverType coverType;
-private Date publicationDate;
-@Transient
-private BigDecimal discount;
+    @Column(name="BOOK_TITLE", nullable=false)
+    private String title;
+    private CoverType coverType;
+    private Date publicationDate;
+
+    // non persistent entity
+    @Transient
+    private BigDecimal discount;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
 
 \subsection{Mapping}
 In any object model, relationships exhibit four key characteristics:
 \begin{itemize}
-    \item \textit{Directionality}: each of the two entities involved may possess an attribute that facilitates access to the other entity.
+    \item \textit{Directionality}: each of the two entities involved may possess an attribute that facilitates access to the other entity. 
         If two entities are mutually connected, it forms a bidirectional relationship; otherwise, it constitutes a unidirectional relationship.
-        Multiple references are possible.
     \item \textit{Role}: each entity within the relationship plays a role in one direction of access. 
         Entities are categorized as source and target based on the relationship's direction.
     \item \textit{Cardinality}: this refers to the number of instances of entities on each side of the relationship.
-        Four cardinality possibilities exist: 
+        Four cardinality possibilities exist:
         \begin{itemize}
             \item \textit{Many-to-one}: many source entities to one target entity.
             \item \textit{One-to-many}: one source entity to many target entities.
             \item \textit{One-to-one}: one source entity to one target entity.
             \item \textit{Many-to-many}: many source entities to many target entities.
         \end{itemize}
-    \item \textit{Ownership}: in a relationship, one of the two entities is deemed the owner.
+    \item \textit{Ownership}: in a relationship, one of the two entities is deemed the owner. 
         In the database, relationships are implemented through a foreign key column (referred to as the join column in JPA) that points to the key of the referenced table. 
         The entity with a foreign key column is considered the owner of the relationship, and its side is termed the owning side.
 \end{itemize}
 
 \paragraph*{One-to-many relationship}
-The bidirectional one-to-many relationship is established using the \texttt{mappedBy}, \texttt{@ManyToOne}, and \texttt{@OneToMany} annotations, where:
+The bidirectional one-to-many relationship is established using the \texttt{@ManyToOne} and \texttt{@OneToMany} annotations. 
+In the entity in relationships one to many, we use:
 \begin{itemize}
-    \item \texttt{@ManyToOne} annotation is applied to the entity participating with multiple instances, designating the entity containing this annotation as the owner of the relationship.
-    \item \texttt{@JoinColumn} annotation is utilized to specify the foreign key column of the underlying table.
+    \item The \texttt{@ManyToOne} annotation is applied to the entity participating with multiple instances, designating the entity containing this annotation as the owner of the relationship.
+    \item The \texttt{@JoinColumn} annotation is utilized to specify the foreign key column of the underlying table.
 \end{itemize}
 \begin{example}
     Here's the first part of the definition for a one-to-many bidirectional mapping:
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Entity
 public class Employee {
-@Id private int id;
-@ManyToOne
-@JoinColumn(name="dept_fk")
-private Department dept;
+    @Id private int id;
+    @ManyToOne
+    @JoinColumn(name="dept_fk")
+    private Department dept;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-To achieve bidirectionality, the mapping direction for the one-to-many relationship must also be specified.
-This is accomplished by including a \texttt{@OneToMany} annotation in the entity participating with one instance.
+To achieve bi-directionality, the mapping direction for the one-to-many relationship must also be specified. 
+This is accomplished by including a \texttt{@OneToMany} annotation in the entity participating with one instance. 
 The \texttt{@OneToMany} annotation is placed on a collection data member and includes a \texttt{mappedBy} element to indicate the property implementing the inverse of the relationship.
 \begin{example}
     Here's the second part of the definition for a one-to-many bidirectional mapping:
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Entity
 public class Department {
-@Id private int id;
-@OneToMany(mappedBy="dept")
-private Collection<Employee> employees;
+    @Id private int id;
+    @OneToMany(mappedBy="dept")
+    private Collection<Employee> employees;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-In cases where applications only require access to relationships along one direction, bidirectional mapping may not be necessary.
 
 \paragraph*{Many-to-one relationship}
-The many-to-one relationship is defined in the same way as the one-to-many, but the source and the target are switched in the definition. 
+The many-to-one relationship is defined similarly to the one-to-many relationship, but with the source and target switched.
 
 \paragraph*{One-to-one relationship}
-To establish a one-to-one relationship in JPA, two alternative approaches can be chosen:
+To establish a one-to-one relationship in JPA, you can choose between two approaches:
 \begin{itemize}
-    \item Map the relationship similarly to the bidirectional case and utilize only the one-to-many direction.
-    \item Omit the mapping of the collection attribute in the entity participating with one instance, and instead, use a query to retrieve correlated instances, relying on the inverse (many-to-one) relationship direction mapping.
+    \item Map the relationship similarly to the bidirectional case, but only use the one-to-many direction.
+    \item Omit the mapping of the collection attribute in the entity participating with one instance, and instead, use a query to retrieve related instances, relying on the inverse (many-to-one) relationship mapping.
 \end{itemize}
-The distinction between \texttt{@joincolumn} and \texttt{mappedby} is as following: 
-\begin{itemize}
-    \item The \texttt{@joincolumn} annotation specifies the foreign key column implementing the relationship in the database. 
-        This annotation is typically applied to the entity that owns the relationship and aids in generating SQL code for extracting correlated instances.
-    \item The \texttt{mappedby} attribute indicates that this side is the inverse of the relationship, with the owner residing in the other related entity. 
-        It is used to define bidirectional relationships. 
-        In the absence of the mappedBy parameter, the default JPA mapping involves a bridge table.
-\end{itemize}
-In a one-to-one mapping, the owner can be either entity, depending on the database design. 
+In a one-to-one mapping, either entity can be the owner, depending on the database design. 
 A one-to-one mapping is declared by annotating the owner entity with the \texttt{@OneToOne} annotation.
 \begin{example}
     Here's the first part of the definition for a one-to-one mapping:
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Entity
 public class Employee {
-@Id private int id;
-@OneToOne
-private ParkingSpace parkingSpace;
+    @Id private int id;
+    @OneToOne
+    private ParkingSpace parkingSpace;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-For bidirectional one-to-one mapping, the inverse side of the relationship must also be specified. 
+For a bidirectional one-to-one mapping, the inverse side of the relationship must also be specified. 
 In the non-owner entity, both the \texttt{@OneToOne} annotation and the \texttt{mappedBy} element are needed to guide JPA in placing the foreign key.
 \begin{example}
     Here's the second part of the definition for a one-to-one mapping:
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Entity
 public class ParkingSpace {
-@Id private int id;
-@OneToOne(mappedBy="parkingSpace")
-private Employee employee;
+    @Id private int id;
+    @OneToOne(mappedBy="parkingSpace")
+    private Employee employee;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
 
 \paragraph*{Many-to-many relationship}
-In a many-to-many mapping, there is no foreign key column, but instead, a join table is utilized. 
-Consequently, either entity can be arbitrarily designated as the owner.
+In a many-to-many mapping, there is no direct foreign key column; instead, a join table is used. 
+Either entity can be designated as the owner. 
+The logical model of a many-to-many relationship requires a bridge table (join table in JPA).
 \begin{example}
-    Here's the first part of the definition for a many-to-many mapping:
-    \begin{lstlisting}[style=Java]
+    Here's an example specifying the mapping of the entity to the bridge table via annotations:
+\begin{lstlisting}[style=Java]
 @Entity
 public class Employee {
-@Id private int id;
-@ManyToMany
-private Collection<Project> projects;
+    @Id private long id;
+    private String name;
+    @ManyToMany
+    @JoinTable(name="EMP_PROJ",
+                joinColumns=@JoinColumn(name="EMP_ID"),
+                inverseJoinColumns=@JoinColumn(name="PROJ_ID"))
+    private Collection<Project> projects;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-For bidirectional many-to-many mapping, the inverse side of the relationship must also be specified. 
+For a bidirectional many-to-many mapping, the inverse side of the relationship must also be specified. 
 In the non-owner entity, both the \texttt{@ManyToMany} annotation and the \texttt{mappedBy} element are required.
 \begin{example}
     Here's the second part of the definition for a many-to-many mapping:
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Entity
 public class Project {
-@Id private int id;
-@ManyToMany(mappedBy="projects")
-private Collection<Employee> employees;
+    @Id private int id;
+    @ManyToMany(mappedBy="projects")
+    private Collection<Employee> employees;
 }
-    \end{lstlisting}
-\end{example}
-The logical model of a many-to-many relationship necessitates a bridge table (join table in JPA).
-\begin{example}
-    Here's an example specifying the non-default mapping of the entity to the bridge table via annotations:
-    \begin{lstlisting}[style=Java]
-@Entity
-public class Employee {
-@Id private long id;
-private String name;
-@ManyToMany
-@JoinTable(name="EMP_PROJ",
-        joinColumns=@JoinColumn(name="EMP_ID"),
-        inverseJoinColumns=@JoinColumn(name="PROJ_ID"))
-private Collection<Project> projects;
-}
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
 
 \subsection{Relationship fetch mode}
@@ -296,56 +277,39 @@ When the fetch mode is unspecified, the default behavior is as follows:
     \item Single-valued relationships are fetched eagerly.
     \item Collection-valued relationships are loaded lazily.
 \end{itemize}
-In the case of bidirectional relationships, the fetch mode may be lazy on one side but eager on the other. 
-It's important to note that the recommended practice is to consider lazy loading as the most suitable mode for all relationships.
-This is because if an entity has many single-valued relationships that are not all utilized by applications, eager loading may result in performance drawbacks.
+In bidirectional relationships, the fetch mode may be lazy on one side but eager on the other. 
+It's recommended to consider lazy loading as the most suitable mode for all relationships to avoid performance drawbacks from eager loading of unused relationships.
 \begin{example}
     Here's an example using the annotation to define lazy loading:
-    \begin{lstlisting}[style=Java]
+\begin{lstlisting}[style=Java]
 @Entity
 public class Employee {
-@Id private int id;
-@OneToOne(fetch=FetchType.LAZY)
-private ParkingSpace parkingSpace;
+    @Id private int id;
+    @OneToOne(fetch=FetchType.LAZY)
+    private ParkingSpace parkingSpace;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-It's essential to understand that the directive to lazily fetch an attribute serves as a hint to the persistence provider, which retains the flexibility to employ an eager loading policy if deemed necessary. 
-However, the reverse is not true: the eager policy cannot be replaced with a lazy one by the provider.
+The directive to lazily fetch an attribute serves as a hint to the persistence provider, which can still employ an eager loading policy if necessary. 
+However, an eager policy cannot be replaced with a lazy one by the provider.
 
 \subsection{Cascading operations}
-By default, every operation performed by the entity manager does not cascade to other entities that have a relationship with the entity being operated on.
-However, in certain cases, it might be desirable to propagate changes to entities in a relationship with the modified one. 
-This can be achieved by enabling manual cascading.
+By default, operations performed by the Entity Manager do not cascade to other entities in a relationship with the operated entity. 
+However, in certain cases, it may be desirable to propagate changes to related entities, which can be achieved by enabling manual cascading.
 \begin{example}
-    Here's an example illustrating the activation of manual cascading:
-    \begin{lstlisting}[style=Java]
-Employee emp = new Employee();
-Address addr = new Address();
-emp.setAddress(addr);
-em.persist(addr);
-em.persist(emp);
-    \end{lstlisting}
-    With manual cascading activated, when the entity manager adds the Employee instance to the persistence context, it navigates the address relationship, searching for a new Address entity to manage as well.
-    The Address instance must be set on the Employee instance before invoking \texttt{persist()} on the employee object.  
-    If an Address instance has been set on the Employee instance and not persisted explicitly or implicitly via cascading, an error occurs.
-\end{example}
-The \texttt{cascade} attribute is used to specify when operations should automatically cascade across relationships, accepting values such as: \texttt{persist}, \texttt{refresh}, \texttt{remove}, \texttt{merge}, and \texttt{detach}.
-If all the previous operations are desired, the \texttt{all} operator can be used.
-\begin{example}
-    Activation of manual cascading of type persist: 
-    \begin{lstlisting}[style=Java]
+    Activation of manual cascading of type persist:
+\begin{lstlisting}[style=Java]
 @Entity
 public class Employee {
-@ManyToOne(cascade=CascadeType.PERSIST)
-Address address;
+    @ManyToOne(cascade=CascadeType.PERSIST)
+    Address address;
 }
-    \end{lstlisting}
+\end{lstlisting}
 \end{example}
-It's important to note that cascade settings are unidirectional and must be set on both sides for bidirectional behavior.
+Cascade settings are unidirectional and must be set on both sides for bidirectional behavior.
 
 \paragraph*{Cascade remove}
-JPA also supports an additional remove cascading called \texttt{orphanRemoval}. 
-This is utilized in \texttt{@OneToOne} and \texttt{@OneToMany} annotations for privately owned parent-child relationships where each child entity is associated only with one parent entity through just one relationship
-This operation causes the child entity to be removed when the parent-child relationship is broken by removing the parent, setting to null the attribute holding the related entity, or in the one-to-many case, by removing the child entity from the parent's collection.
-The distinction between the attribute \texttt{CascadeType.REMOVE} and the mode \texttt{orphanRemoval}  is that if the value of an entity is manually set to null, only \texttt{orphanRemoval} will automatically remove the linked entities from the database.
+JPA supports an additional remove cascading option called \texttt{ORPHANREMOVAL}. 
+This is used in \texttt{@OneToOne} and \texttt{@OneToMany} annotations for privately owned parent-child relationships where each child entity is associated only with one parent entity through just one relationship. 
+This operation causes the child entity to be removed when the parent-child relationship is broken by removing the parent, setting the attribute holding the related entity to null, or, in the one-to-many case, by removing the child entity from the parent's collection.
+The distinction between the \texttt{CascadeType.REMOVE} attribute and the \texttt{ORPHANREMOVAL} mode is that if the value of an entity is manually set to null, only \texttt{ORPHANREMOVAL} will automatically remove the linked entities from the database.
