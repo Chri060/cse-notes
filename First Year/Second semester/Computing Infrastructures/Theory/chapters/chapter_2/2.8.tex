@@ -1,182 +1,113 @@
-\section{Networking}
+\section{Buildings structure}
 
-Here are various network architectures:
-\begin{enumerate}
-    \item \textit{Monolithic app}: this setup requires minimal network resources and relies on proprietary protocols.
-    \item \textit{Client-server}: high network demands within the enterprise, applications confined within the enterprise, and a combination of TCP/IP and proprietary protocols.
-    \item \textit{Web applications}: utilizes ubiquitous TCP/IP, accessible from anywhere, and servers are segmented into multiple units.
-    \item \textit{Microservices}: infrastructure shifts to cloud providers, servers segmented into microservices, resulting in increased server-to-server traffic.
-\end{enumerate}
-A data center comprises all physical infrastructure necessary to support cloud computing services. 
-This infrastructure is typically co-located within a room, building, or set of adjacent buildings.
-Applications within the data center may include: cloud computing, cloud storage, and web services. 
-These applications facilitate the consolidation of computation and network resources, often in very large data centers ranging from 1,000 to 1,000,000 servers.
-
-\paragraph*{Demand increasing}
-As server performance improves over time, there is a natural increase in demand for inter-server bandwidth. 
-By doubling the number of compute or storage elements, we can easily double the aggregate compute capacity or storage.
-
-However, networking poses a challenge for straightforward horizontal scaling. 
-While doubling leaf bandwidth is straightforward—by doubling the number of servers, we also double the network ports and thus the bandwidth—dealing with bisection bandwidth becomes more complex when assuming that every server needs to communicate with every other server.
-\begin{definition}[\textit{Bisection bandwidth}]
-    Bisection bandwidth refers to the bandwidth across the narrowest line that evenly divides the cluster into two parts. 
-\end{definition}
-This metric serves as a characterization of network capacity, as it represents the capacity for randomly communicating processors to transmit data across the central portion of the network. 
-When assuming that every server must communicate with every other server, it becomes necessary to double not only leaf bandwidth but also bisection bandwidth.
-
-\paragraph*{Datacenter networking}
-Data center networking can be categorized into three primary types:
-\begin{itemize}
-    \item \textit{Switch-centric architectures}: utilize switches for packet forwarding tasks.
-    \item \textit{Server-centric architectures}: employ servers equipped with multiple Network Interface Cards (NICs) to serve as switches alongside their computational functions.
-    \item \textit{Hybrid architectures}: blend both switches and servers to handle packet forwarding duties.
-\end{itemize}
-
-\subsection{Switch-centric architecture}
+Usually only half of the available building is used for the actual servers, while the other parts are used for cooling and energy management. 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\linewidth]{images/sc.png}
-    \caption{Switch-centric architecture}
+    \includegraphics[width=0.5\linewidth]{images/build.png}
+    \caption{Usual building usage}
 \end{figure}
-The traffic is divided into two main flows: 
+In addition to servers, the WSC comprises critical components associated with power delivery, cooling, and building infrastructure, all of which warrant consideration.
+
+\subsection{Backup power generation}
+To safeguard against power failure, battery systems and diesel generators are employed to back up the external power supply.
+A typical Uninterruptible Power Supply (UPS) integrates three functions within a single system:
 \begin{itemize}
-    \item Northbound-southbound: direct connection between internet and servers. 
-    \item East-West: inter-server communication within a data center, often referred to as East-West traffic, involves several key aspects:
-        \begin{itemize}
-            \item Storage replication, typically characterized by numerous data flows with relatively few instances of data.
-            \item In distributed file systems like Hadoop, maintaining at least three copies of the same data, commonly with two copies residing within the same rack and one in a different rack.
-            \item Virtual Machine (VM) migration, a process integral to tasks such as Network Function Virtualization (NFV), where data undergoes processing across a series of VMs, such as firewalls, web servers, parental control systems, and accounting servers.
-        \end{itemize}
-        It's notable that East-West traffic typically surpasses North-South traffic in terms of volume and significance within the data center environment.
-        This type of traffic can be: unicast, multicast, and incast. 
+    \item It incorporates some form of energy storage (electrical, chemical, or mechanical) to bridge the time gap between utility failure and the availability of generator power.
+    \item It includes a transfer switch that selects the active power input, whether it be utility power or generator power.
+    \item It conditions the incoming power feed by eliminating voltage spikes or sags, as well as harmonic distortions in the AC feed.
 \end{itemize}
 
-\subsection{Classical 3-tier architecture}
-The classical 3-tier switch-centric architecture is structured into three distinct layers, as illustrated in the diagram below:
-\begin{figure}[H]
+\subsection{Cooling systems}
+IT equipment generates substantial heat, necessitating an expensive cooling system within the data center. 
+This system typically includes coolers, heat exchangers, and cold water tanks.
+
+\paragraph*{Open loop}
+The most basic cooling setup is fresh air cooling, also known as air economization, which essentially involves opening windows. 
+This operates as a single open-loop system.
+Free cooling, or open-loop cooling, utilizes cold outside air to assist in either producing chilled water or directly cooling servers. 
+While it's not entirely free in terms of cost, it incurs very low energy expenses compared to traditional chillers.
+
+\paragraph*{Closed loop}
+Closed-loop systems come in various configurations, with the air circuit on the data center floor being the most common.
+The objective is to extract and expel heat from the servers, directing it to a heat exchanger. 
+Cold air is directed towards the servers, where it absorbs heat and then proceeds to the heat exchanger to be cooled again for the subsequent cycle through the servers.
+
+\paragraph*{Two-loop system}
+The airflow path from the underfloor plenum, through the racks, and back to the CRAC (Computer Room Air Conditioning, a term dating back to the 1960s) delineates the primary air circuit, also known as the first loop.
+The second loop, comprising the liquid supply within the CRAC units, directs from the CRAC to external heat exchangers, often positioned on the building roof. 
+These heat exchangers then release the heat into the environment.
+
+\paragraph*{Three-loop system}
+A three-loop system for cooling typically involves three distinct circuits to manage the thermal environment within a data center or similar facility. Here's a brief description of each loop:
+\begin{itemize}
+    \item Primary air circuit: this loop involves airflow from the underfloor plenum, through the equipment racks, and back to the CRAC (Computer Room Air Conditioning) units. 
+        It's responsible for regulating the temperature of the air within the data center space.
+    \item Secondary liquid cooling loop: the second loop consists of a liquid coolant circulating within the CRAC units. This coolant absorbs heat from the air as it passes through the CRAC, helping to cool down the equipment and maintain optimal operating temperatures.
+    \item Tertiary heat rejection loop: in this loop, the heated liquid coolant from the CRAC units is transported to external heat exchangers, typically located on the building's roof. 
+        These heat exchangers release the absorbed heat into the environment, completing the cooling cycle and ensuring efficient heat dissipation from the data center.
+\end{itemize}
+
+\paragraph*{Chillers and cooling towers}
+A water-cooled chiller operates similarly to a water-cooled air conditioner. 
+Cooling towers are utilized to cool a water stream by evaporating a portion of it into the atmosphere. 
+However, their effectiveness diminishes in very cold climates as they require supplementary mechanisms to prevent ice formation.
+
+\paragraph*{Summary}
+Each cooling topology involves trade-offs concerning complexity, efficiency, and cost:
+\begin{itemize}
+    \item Fresh air cooling exhibits high efficiency but is not universally applicable, necessitates the filtration of airborne particles, and may introduce intricate control challenges.
+    \item Two-loop systems are straightforward to set up, relatively cost-effective to build, and provide isolation from external contaminants. 
+        However, they generally exhibit lower operational efficiency.
+    \item Three-loop systems are the most costly to establish and involve moderately complex controls. 
+        However, they offer protection against contaminants and boast good efficiency.
+\end{itemize}
+
+\paragraph*{Liquid cooling}
+An in-rack cooler integrates an air-to-water heat exchanger at the rear of a rack, allowing hot air emitted by the servers to pass over coils cooled by water. 
+This setup significantly shortens the distance between server exhaust and the input of the CRAC (Computer Room Air Conditioning) unit.
+
+In-row cooling functions similarly to in-rack cooling, but instead of having the cooling coils within the rack, they are positioned adjacent to the rack.
+
+Direct cooling of server components is achievable through cold plates, which are essentially local liquid-cooled heat sinks. 
+However, it's impractical to cool all compute components using cold plates. 
+Typically, components with the highest power dissipation are targeted for liquid cooling, while other components rely on air cooling. 
+The liquid circulating through the heat sinks carries the heat to a liquid-to-air or liquid-to-liquid heat exchanger, which can be situated near the tray or rack, or be integrated into the data center infrastructure, such as a cooling tower.
+
+\paragraph*{Container-based datacenters}
+Container-based data centers represent a further advancement from in-row cooling by housing server racks within a container, typically ranging from six to twelve meters in length. 
+These containers integrate heat exchange and power distribution systems directly into the container structure.
+
+\subsection{Datacenter power consumption}
+Data center power consumption has become a critical issue due to its potential to reach several megawatts (MWs). 
+Cooling requirements typically consume around half of the energy needed by the IT equipment, including servers, network infrastructure, and disks.
+Moreover, the energy transformation processes within data centers often result in significant energy wastage.
+
+In terms of global impact, data centers account for approximately 3\% of the world's electricity supply, exceeding the annual electricity consumption of countries like the UK, which stands at 300 terawatt-hours (TWh). 
+This substantial power consumption contributes to about 2\% of total greenhouse gas emissions, comparable to the emissions produced by worldwide air traffic before the pandemic.
+
+The carbon dioxide (CO2) emissions from data centers are substantial, equivalent to the emissions of entire countries such as the Netherlands or Argentina. 
+This highlights the urgent need for energy-efficient solutions and sustainable practices within the data center industry to mitigate its environmental impact.
+
+The power consumption of data centers poses a significant challenge, as it can scale up to multiple megawatts (MWs). 
+Typically, cooling operations account for approximately half of the total energy consumption, encompassing the energy demand of IT equipment such as servers, network infrastructure, and disks. 
+Additionally, the energy transformation processes within data centers result in substantial wastage, further contributing to the overall energy consumption.
+
+\paragraph*{Power usage effectiveness}
+Power Usage Effectiveness (PUE) represents the ratio of the total energy consumed by a data center facility to the energy supplied to the computing equipment, expressed as:
+\[\text{PUE}=\dfrac{\text{Total Facility Power}}{\text{IT Equipment Power}}\]
+Here, total facility power encompasses the energy consumption of IT systems, including servers, network devices, and storage units, along with other equipment such as cooling systems, Uninterruptible Power Supplies (UPS), switch gear, generators, lighting, and fans.
+Data Center Infrastructure Efficiency (DCiE) is the reciprocal of Power Usage Effectiveness (PUE).
+
+\subsection{Taxonomy}
+Data center availability is categorized into four distinct tier levels, each with its own set of requirements.
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{images/sca.png}
-    \caption{Classical 3-tier architecture} 
-\end{figure}
-This configuration represents a straightforward Data Center Network (DCN) topology, where servers interface with the DCN via access switches.
-Each access-level switch links to a minimum of two aggregation-level switches, which, in turn, connect to core-level switches (gateways).
-
-\paragraph*{Server structure}
-Servers can be categorized into two main architectures:
-\begin{itemize}
-    \item \textit{Top-of-Rack} (ToR): in a rack, all servers are linked to a Top-of-Rack (ToR) access switch, with both the servers and the ToR switch situated within the same rack.
-        Aggregation switches are housed either in dedicated racks or in shared racks alongside other ToR switches and servers. 
-        This setup restricts the number of cables, resulting in simpler cabling. 
-        Moreover, the number of ports per switch is constrained, leading to lower costs. 
-        However, this configuration suffers from limited scalability and heightened complexity in switch management due to the proliferation of switches.
-    \item \textit{End-of-Row} (EoR): aggregation switches are strategically placed at the end of each corridor, serving as the termination point for a row of racks. 
-        Servers within racks establish direct connections to the aggregation switch situated in another rack. 
-        Due to this arrangement, aggregation switches require a greater number of ports, resulting in more intricate cabling and necessitating longer cables, which in turn incur higher costs. 
-        Typically, a patch panel is employed to facilitate connections between servers and the aggregation switch. 
-        Despite the more complex cabling, this setup offers simpler switch management owing to the reduced number of switches involved.
-\end{itemize}
-
-\paragraph*{Bandwidth increasing}
-Boosting bandwidth can be achieved through various methods. 
-Firstly, augmenting the number of switches at both the core and aggregation layers facilitates enhanced bandwidth. 
-Additionally, employing routing protocols like Equal Cost Multiple Path (ECMP) enables equitable distribution of traffic across various routes, further amplifying bandwidth capabilities.
-While this solution is straightforward, it can prove to be exceedingly costly in expansive data centers for several reasons:
-\begin{itemize}
-    \item The upper layers necessitate swifter network equipment, which tends to be more expensive.
-    \item Each layer is serviced by switches of varying types, compounding acquisition costs and introducing complexities in management, spare-part stocking, and energy consumption.
-\end{itemize}
-Cumulatively, these factors contribute to significantly elevated expenses, both in terms of upfront investments and ongoing operational costs.
-
-\subsection{Leaf-spine architecture}
-The Leaf-spine switch-centric architecture is structured into two distinct layers: 
-\begin{itemize}
-    \item Leaf: ToR switch
-    \item Spine: dedicated switches (aggregation switches)
-\end{itemize}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{images/ls.png}
-    \caption{Leaf-spine architecture}
-\end{figure}
-Spine-leaf topologies draw inspiration from the realm of telephony, introducing a non-folded Clos structure.
-This architecture features fully interconnected stages, ensuring that each matrix within one stage is linked, at least once, to every matrix in the subsequent stage, and vice versa.
-
-\paragraph*{Clos networks}
-Let's denote $k$ as the number of middle stage switches and $n$ as the number of inputs and outputs of switches in the side stages.
-If $k\geq n$, there always exists a method to reorganize communications, allowing for the creation of a path between any pair of inactive input/output channels.
-Moreover, if $k\geq 2n-1$, a path between any pair of idle input/output channels is guaranteed to be available.
-It's important to note that $t$ serves as a flexible design parameter. 
-Consequently, the total number of input/output channels,$ N=t\cdot n$, can be adjusted freely by increasing the size of middle-stage switches.
-However, it's crucial to remember that a Data Center Network (DCN) operates as a packet-switched network.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{images/stage.png}
-    \caption{Clos network}
-\end{figure}
-In the Clos topology, where $n=m=k$, each switching module functions uni-directionally with $k$ input and $k$ output ports per module. 
-The central stage comprises $k$ matrices, while the side stages consist of $t$ matrices. 
-Path traversal encompasses three modules.
-
-In the Leaf and Spine topology, every switching module operates bidirectionally: 
-\begin{itemize}
-    \item Leaf Configuration: comprises $t$ switching modules, each featuring $2k$ bidirectional ports per module.
-    \item Spine Configuration: consists of $k$ switching modules, with each module having $t$ bidirectional ports.
-\end{itemize}
-In both configurations, paths traverse either one or three modules.
-
-\paragraph*{Advantages}
-The Clos design in Data Center Networks (DCNs) offers several advantages:
-\begin{itemize}
-    \item Utilization of homogeneous equipment throughout the network, simplifying management and maintenance.
-    \item Routing serves as the Fundamental Interconnect Model, eliminating the need for Learning and Forwarding or Spanning Tree Protocol (STP).
-    \item Implementation of Equal Cost Multipath (ECMP) strategy with routing protocols like IS-IS, SPB, or TRILL, enhancing network efficiency and resilience.
-    \item Consistent number of hops for any pair of nodes, ensuring predictable and reliable communication.
-    \item Small blast radius, minimizing the impact of network issues and failures.
-\end{itemize}
-
-\paragraph*{Upscaling}
-We begin with a two-tier network structure and introduce an additional row of switches. 
-Alternatively, we can consider transforming each spine-leaf group into a pod and incorporate a super spine tier. 
-This architecture represents a highly scalable and cost-effective Data Center Network (DCN) design, focusing on optimizing bisection bandwidth. 
-It can be constructed using standard Gigabit Ethernet switches with identical port counts. 
-This approach is adopted by major tech giants like Microsoft and Amazon.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{images/pod.png}
-    \caption{Pod-based three-tier Clos}
-\end{figure}
-A Point Of Delivery (POD) refers to a module or cluster comprising network, compute, storage, and application elements collaboratively functioning to provide a network service. 
-The POD represents a standardized and replicable pattern, with its constituent components enhancing the modularity, scalability, and manageability of data infrastructure.
-
-\paragraph*{Generalization of the architecture}
-A leaf with $2k^2$ bidirectional ports is configured with $k$ ports connecting to servers and $k$ ports linking to the data center network. 
-It's important to note that this setup cannot directly interconnect $2k^2$ servers as it would lead to network blocking. 
-This configuration is constructed using $2k$ switches with $2k$ ports each.
-
-The Point Of Delivery (PoD) is replicated $P$ times, each consisting of $k$ servers and $2P$ switches with $2k$ ports, and $k$ switches with $P$ ports. 
-In a Fat-tree design, choosing $P=2k$, we have $2k^3$ servers, $5k^2$ switches with $2k$ ports each, and $2k$ PoDs at the edge layer, each containing $2k^2$ servers.
-
-At the edge layer, each edge switch is directly connected to $k$ servers in a pod and $k$ aggregation switches. 
-A fat-tree network with $2k$-port commodity switches can accommodate a total of $2k^3$ servers. 
-Additionally, there are $2k^2$ core switches with $2k$-port each, with each one connected to $2k$ pods. 
-Each aggregation switch is connected to $k$ core switches, highlighting partial connectivity at the switch level.
-
-\paragraph*{VL2 network}
-
-The VL2 Network is an economical hierarchical fat-tree-based Data Center Network (DCN) architecture designed to provide high bisection bandwidth. 
-It employs three types of switches: intermediate, aggregation, and top-of-rack (ToR) switches.
-
-The network comprises $\frac{D_A}{2}$ intermediate switches, $D_I$ aggregation switches, and $\frac{1}{2}D_A D_I$ ToR switches. 
-The total number of servers in a VL2 network is calculated as $20\frac{D_A D_I}{4}$. 
-A key feature of the VL2 Network is its use of a load-balancing technique called valiant load balancing (VLB).
-
-\subsection{Switches}
-Commodity switches are known for their affordability and simplicity, as well as their rapid evolution. 
-While they offer intermittent capacity, they are suitable for scenarios where only a single operator is involved. 
-On the other hand, WAN switches are more complex and expensive, with slower evolution. 
-They provide the highest level of availability and allow intermittent capacity, with numerous protocols available to support interoperability among multivendor WANs.
-
-\subsection{Server-centric and hybrid architectures}
-A server-centric architecture, proposed for constructing containerized data centers, aims to lower implementation and maintenance expenses by solely utilizing servers to establish the DCN.\@ 
-It employs a 3D-Torus topology to directly interconnect the servers, leveraging network locality to enhance communication efficiency. 
-However, drawbacks include the necessity for servers with multiple Network Interface Cards (NICs) to assemble a 3D Torus network, as well as the presence of lengthy paths and heightened routing complexity.
+    \begin{tabular}{|c|l|}
+    \hline
+    Tier level & \multicolumn{1}{c|}{Requirements} \\ \hline
+    1          & \makecell[l]{No redundancy \\ 99.671\% uptime per year \\ Maximum of 28.8 hours of downtime per year }                                 \\\hline
+    2          & \makecell[l]{Some cooling and power redundancies \\ 99.741\% uptime per year \\ No more than 22 hours of downtime per year}    \\\hline
+    3          & \makecell[l]{$N+1$ fault tolerance \\ 99.982\% uptime \\ Less than 1.6 hours of downtime per year} \\\hline
+    4          & \makecell[l]{$2N$ or $2N+1$ fault tolerance \\ No single points of failure \\ 99.995\% uptime per year \\ Less than 26.3 minutes of downtime per year}                                 \\ \hline
+    \end{tabular}
+\end{table}
