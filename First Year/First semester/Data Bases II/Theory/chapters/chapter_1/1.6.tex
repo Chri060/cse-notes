@@ -1,4 +1,4 @@
-\section{Locking}
+\section{Locks}
 
 The prevalent method in commercial systems is the use of locking. 
 A transaction is considered well-formed concerning locking if:
@@ -23,22 +23,6 @@ The lock manager receives requests from transactions and allocates resources bas
     \end{tabular}
 \end{table}
 
-\begin{example}
-    Consider a schedule with three transactions and the following operations:
-    \[r_1(x)w_1(x)r_2(x)r_3(y)w_1(y)\]
-    The resulting locks are as follows:
-    \begin{itemize}
-        \item $r_1(x)$: $r_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $r\_locked$ with $n_x=1$. 
-        \item $w_1(x)$: $w_1\_lock(x)$ request $\rightarrow$ Ok $\rightarrow$ $x$ is $w\_locked$. 
-        \item $r_2(x)$: $r_1\_lock(x)$ request $\rightarrow$ No, because $x$ is $w\_locked$ $\rightarrow$ $T_2$ waits. 
-        \item $r_3(y)$: $r_3\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $r\_locked$ with $n_y=1$ and then $T_3$ unlocks $y$. 
-        \item $w_1(y)$: $w_1\_lock(y)$ request $\rightarrow$ Ok $\rightarrow$ $y$ is $w\_locked$ and then $x$ and $y$ are freed. 
-    \end{itemize}
-    The resulting a posteriori schedule becomes:
-    \[r_1(x)w_1(x)r_3(y)w_1(y)r_2(x)\]
-    Here, transaction two is delayed. 
-\end{example}
-
 \paragraph*{Lock tables}
 The locking system is implemented via lock tables, which are hash tables indexing lockable items via hashing. 
 Each locked item has an associated linked list, with each node representing the transaction that requested the lock, the lock mode, and the current status. 
@@ -57,12 +41,12 @@ This approach involves three phases: acquiring all locks, executing operations, 
 \begin{proof}
     We assume that a schedule $S$ is 2PL. Consider, for each transaction, the moment in which it holds all locks and is going to release the first one. 
     We sort the transactions by this temporal value and consider the corresponding serial schedule $S^{'}$. 
-    We want to prove by contradiction that $S$ is conflict-equivalent to $S^{'}$: 
+    We want to prove by contradiction that $S$ is C to $S^{'}$: 
     \[S^{'}\approx_CS,\dots\]
     Consider a generic conflict $o_i \rightarrow o_j$ in $S^{'}$ with $o_i \in T_i$, $0_j \in T_j$, and $i<j$. 
     By definition of conflict, $o_i$ and $o_j$ address the same resource $r$, and at least one of them is write. 
     The two operations cannot occur in reverse order of $S$. 
-    This proves that all 2PL schedules are view-serializable. 
+    This proves that all 2PL schedules are VSR. 
 \end{proof}
 \begin{property}
     2PL implies CSR.
@@ -73,7 +57,7 @@ In this state, the remaining anomalies are limited to phantom inserts (requiring
 \begin{definition}[\textit{Strict two-phase locking}]
     In strict two-phase locking (or long duration locks) we also have that locks held by a transaction can be released only after commit or rollback.
 \end{definition}
-This locking variant is employed in many commercial Data Base Management Systems when a high level of isolation is necessary.
+This locking variant is employed in many commercial DBMS when a high level of isolation is necessary.
 
 \paragraph*{Predicate locking}
 To counteract phantom inserts, a lock should also be applied to future data using predicate locks. 

@@ -1,44 +1,64 @@
-\section{Concurrency theory}
+\section{Opaque rankings}
 
-\begin{definition}[\textit{Model}]
-    A model is an abstraction of a system, object or process, which purposely disregards details to simplify the investigation of relevant properties. 
-\end{definition}
-Concurrency theory is founded on a model of transaction and concurrency control principles that aids in comprehending real systems.
-Actual systems leverage implementation-level mechanisms to attain desirable properties postulated by the theory.
-\begin{definition}[\textit{Operation}]
-    An operation consist in a reading or in a writing of a specific datum by a specific transaction. 
-\end{definition}
-\begin{definition}[\textit{Schedule}]
-    A schedule is a sequence of operations performed by concurrent transactions that respects the order of operations of each transaction. 
-\end{definition}
+The concept of opaque rankings focuses only on positions without considering associated scores.
 
-\paragraph*{Schedule}
-Transactions can be categorized as serial, interleaved, or nested. 
-Let $N_S$ and $N_D$ be respectively the number of serial schedules and distinct schedules for $n$ transactions $\left\langle T_1,\dots,T_n\right\rangle $ each with $k_i$ operations. 
-Then:
-\[N_S=n!\]
-\[N_D=\dfrac{\left( \sum_{i=1}^nk_i \right)!}{\prod_{i=1}^n \left( k_i! \right)}\]
+\paragraph*{MedRank algorithm}
+The MedRank algorithm, inspired by the median, offers an approximation of the foot-rule optimal aggregation.
+The algorithm takes an integer $k$ and a ranked list $R_1,\dots,R_m$ of $N$ elements as inputs, producing the top $k$ elements based on the median ranking.
+The algorithm proceeds as follows:
+\begin{enumerate}
+    \item Use sorted accesses in each list, extracting one element at a time until there are $k$ elements occurring in more than $\frac{m}{2}$ lists.
+    \item Identify these as the top $k$ elements.
+\end{enumerate}
+\begin{definition}[\textit{Depth}]
+    The maximum number of sorted accesses made on each list is called the depth reached by the algorithm. 
+\end{definition}
+\bigskip
 \begin{example}
-    For two transactions, $T_1$ and $T_2$, there are six possible schedules, with only two being serial:
-    \begin{enumerate}
-        \item $r_1(x) w_1(x) r_2(z) w_2(z) \rightarrow \textnormal{serial}$
-        \item $r_2(z) w_2(z) r_1(x) w_1(x) \rightarrow \textnormal{serial}$
-        \item $r_1(x) r_2(z) w_1(x) w_2(z) \rightarrow \textnormal{nested}$
-        \item $r_2(z) r_1(x) w_2(z) w_1(x) \rightarrow \textnormal{nested}$
-        \item $r_1(x) r_2(z) w_2(z) w_1(x) \rightarrow \textnormal{interleaved}$
-        \item $r_2(z) r_1(x) w_1(x) w_2(z) \rightarrow \textnormal{interleaved}$
-    \end{enumerate}
+    Consider sorting the following hotels based on three criteria using the MedRank algorithm. 
+    The hotels' reviews are as follows: 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|c|c}
+        \textbf{Price} & \textbf{Rating} & \textbf{Distance} \\ \hline
+        Ibis           & Crillon         & Le Roch           \\
+        Etap           & Novotel         & Lodge In          \\
+        Novotel        & Sheraton        & Ritz              \\
+        Mercure        & Hilton          & Lutetia           \\
+        Hilton         & Ibis            & Novotel           \\
+        Sheraton       & Ritz            & Sheraton          \\
+        Crillon        & Lutetia         & Mercure           \\
+        $\dots$        & $\dots$         & $\dots$          
+        \end{tabular}
+    \end{table}
+    Using MedRank with $k=3$, the resulting rank is:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cc}
+        \hline
+        \textbf{Top k hotels}       & \textbf{Median rank}          \\ \hline
+        Novotel                     & median$\{2,3,5\}=3$           \\ 
+        Hilton                      & median$\{4,5,?\}=5$           \\ 
+        Ibis                        & median$\{1,5,?\}=5$           \\ \hline
+        \end{tabular}
+    \end{table}
+    The depth in this case is equal to five.
 \end{example}
-Concurrency control must reject all schedules that lead to anomalies.
-\begin{definition}[\textit{Scheduler}]
-    The scheduler is a component that accepts or rejects operations requested by the transactions. 
+\begin{definition}[\textit{Optimal}]
+    An algorithm is optimal if its execution cost is never worse than any other algorithm on any input.
 \end{definition}
-\begin{definition}[\textit{Serial schedule}]
-    The serial schedule is a schedule in which the actions of each transaction occur in a contiguous sequence.
+\begin{definition}[\textit{Istance optimal}]
+    An algorithm is instance-optimal if is the best possible algorithm on every input of a specific instance. 
 \end{definition}
-A serializable schedule leaves the database in the same state as some serial schedule of the same transactions, making it correct. 
-To introduce other classes, two initial assumptions are made:
-\begin{itemize}
-    \item The transactions are observed a posteriori. 
-    \item Commit-projection: consider only the committed transactions. 
-\end{itemize}
+\begin{property}
+    MedRank is instace-optimal on ordered lists.
+\end{property}
+\begin{theorem}[Instance optimality]
+    Let $A$ be a family of algorithms, $I$ a set of problem instances. 
+    Let cost be a cost metric applied to an algorithm-instance pair. 
+    Algorithm $A^{*}$ is instance-optimal with respect to $A$ and $I$ for the cost metric cost if there exist constants $k_1$ and $k_2$ such that, for all $A \in A$ and $I \in I$: 
+    \[\textnormal{cost}(A^{*}, I) \leq k_1 \textnormal{cost}(A, I) + k_2\]
+\end{theorem}
+
+If $A^{*}$ is instance-optimal, then any algorithm can improve with respect to $A^{*}$ by only a constant factor $r$, known as the optimality ratio of $A^{*}$.
+Instance optimality is a much stronger notion than optimality in the average or worst case.

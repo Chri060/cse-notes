@@ -1,67 +1,86 @@
-\section{Conflict-serializability}
+\section{Skyline queries}
 
-\begin{definition}[\textit{Conflict}]
-    Two operations $o_i$ and $o_j$ ($i \neq j$) are in conflict if they address the same resource and at least one of them is write. 
-    There are two possible cases: read-write conflicts or write-write conflicts.
+Skyline queries aim to identify superior objects across multiple perspectives, relying on the concept of dominance.
+\begin{definition}[\textit{Domination}]
+    A tuple $t$ dominates a tuple $s$ ($t \prec s$) if and only if $t$ in nowhere worse than $s$: 
+    \[\forall i, 1 \leq i \leq m \rightarrow t[A_i] \leq s[A_i]\] 
+    And is better at least once: 
+    \[\exists j, 1 \leq j \leq m \land t[A_j] < s[A_j]\]
 \end{definition}
-\begin{definition}[\textit{Conflict equivalent}]
-    Two schedules are conflict-equivalent ($S_i \approx_C S_j$) if $S_i$ and $S_j$ contain the same operations and in all the conflicting pairs the transactions occur in the same order. 
-\end{definition}    
-\begin{definition}[\textit{Conflict serializable}]
-    A schedule is conflict-serializable (CSR) if and only if it is conflict equivalent to a serial schedule of the same transactions. 
+\begin{definition}[\textit{Skyline}]    
+    The skyline of a relation is the set of its non-dominated tuples.
 \end{definition}
-\begin{property}
-    VSR is a strict subset of CSR. 
-\end{property}
-\begin{proof}
-    Consider the schedule $S = r_1(x) w_2(x) w_1(x) w_3(x)$, which is VSR but not CSR. 
-    It can be verified that there is no conflict-equivalent serial schedule.
-\end{proof}
-\begin{property}
-    CSR implies VSR.
-\end{property}
-\begin{proof}
-    Assuming $S_1 \approx_C S_2$, we can prove that $S_1 \approx_V S_2$. 
-    $S_1$ and $S_2$ must have: the same final writes (if not, there would be at least two writes in a different order, and since two writes are conflicting operations, the schedules would not be CSR), and the same reads-from relations (if not, there would be at least one pair of conflicting operations in a different order, and therefore $\approx_C$ would be violated).
-\end{proof}
 
-\paragraph*{Conflict graph}
-To assess view-serializability, a conflict graph is constructed, with one node for each transaction $T_i$, and an arc from $T_i$ to $T_j$ if there exists at least one conflict between an operation $o_i$ of $T_i$ and an operation $o_j$ of $T_j$ such that $o_i$ precedes $o_j$.
-\begin{theorem}
-    A schedule is conflict-serializable if and only if its conflict graph is acyclic.
-\end{theorem}
+The convention on the skyline queries is that lower values are better than higher values.
+The convention is that lower values are considered better. 
+A tuple is part of the skyline if it is the top-1 result with respect to at least one monotone scoring function. 
+
+\paragraph*{Query syntax}
+The syntax for skyline queries can be expressed as follows:
+\begin{lstlisting}[style=SQL]
+SELECT <attributes>
+FROM R1,R2,...,Rn
+WHERE <conditions>
+GROUP BY <conditions>
+HAVING <conditions>
+SKYLINE OF [DISTINCT] d1[MIN|MAX|DIFF], ..., dm[MIN|MAX|DIFF]
+ORDER BY <conditions>
+\end{lstlisting}
+This query can be easily translated into a standard query, but the result is too slow and cannot be used in practice. 
+
+\subsection{Block Nested Loop algorithm}
+The Block Nested Loop algorithm takes a dataset $D$ of multidimensional points as input and outputs the skyline of $D$. 
+Its complexity is $O(n^2)$, making it inefficient for large datasets.
+\begin{algorithm}[H]
+    \caption{Block nested loop algorithm}
+        \begin{algorithmic}[1]
+            \State $W \leftarrow \varnothing$
+            \For {every point $p$ in $D$}
+                \If {$p$ not dominated by any point in $W$}
+                    \State remove from $W$ the points dominated by $p$
+                    \State add $p$ to $W$
+                \EndIf
+            \EndFor
+            \State \Return $W$
+        \end{algorithmic}
+\end{algorithm}
+
+\subsection{Sort Filter Skyline algorithm}
+The Sort Filter Skyline algorithm also takes a dataset $D$ of multidimensional points as input and outputs the skyline of $D$. 
+It performs better than the Block Nested Loop algorithm, especially for large datasets, but still has a complexity of $O(n^2)$.
+\begin{algorithm}[H]
+    \caption{Sort filter skyline algorithm}
+        \begin{algorithmic}[1]
+            \State $S \leftarrow D$
+            \State $W \leftarrow \varnothing$
+            \For {every point $p$ in $S$}
+                \If {$p$ not dominated by any point in $W$}
+                    \State add $p$ to $W$
+                \EndIf
+            \EndFor
+            \State \Return $W$
+        \end{algorithmic}
+\end{algorithm}
 \begin{example}
-    Consider the schedule 
-    \[S: w_0(x) r_1(x) w_0(z) r_1(z) r_2(x) w_0(y) r_3(z) w_3(z) w_2(y) w_1(x) w_3(y)\]
-    To test conflict serializability, follow these steps:
-    \begin{enumerate}
-        \item Create nodes based on the number of transactions in the schedule.
-        \item Group operations based on the requested resource.
-        \item Check all write-write and read-write relationships in each subset and add arcs accordingly. 
-    \end{enumerate}
-    For the given example, we obtain:
-    \begin{itemize}
-        \item $x: w_0 r_1 r_2 w_1$
-        \item $y: w_0 w_2 w_3$
-        \item $z: w_0 r_1 r_3 w_3$
-    \end{itemize}
-    \begin{figure}[H]
+    Consider the following unordered dataset: 
+    \begin{table}[H]
         \centering
-        \includegraphics[width=0.25\linewidth]{images/conflict.png}
-    \end{figure}
-    Since there are no cycles in the graph, the schedule is conflict-serializable.
+        \begin{tabular}{lcc}
+        \textbf{Name}                 & \textbf{Cost} & \textbf{Complaints} \\ \hline
+        \multicolumn{1}{l|}{Crillon}  & 0.25  & 0.1        \\
+        \multicolumn{1}{l|}{Ibis}     & 0.08  & 0.3        \\
+        \multicolumn{1}{l|}{Hilton}   & 0.175 & 0.3        \\
+        \multicolumn{1}{l|}{Sheraton} & 0.2   & 0.2        \\
+        \multicolumn{1}{l|}{Novotel}  & 0.15  & 0.1       
+        \end{tabular}
+    \end{table}
+    The skyline, consisting of Novotel and Ibis, is identified by the algorithm.
 \end{example}
-\begin{proof}
-    We prove that CSR implies acyclicity. 
-    Consider a schedule $S$ in CSR. 
-    As such, it is $\approx_C$ to a serial schedule. 
-    Without loss of generality we can label the transactions of $S$ to say that their order in the serial schedule is: $T_1 T_2 \dots T_n$.
-    Since the serial schedule has all conflicting pairs in the same order as schedule $S$, in the conflict graph there can only be arcs $(i,j)$, with $i<j$. 
-    Then the graph is acyclic, as a cycle requires at least an arc $(i,j)$ with $i>j$.
-\end{proof}
-\begin{proof}
-    We prove that acyclicity implies CSR. 
-    If $S$'s graph is acyclic then it induces a topological (partial) ordering on its nodes. 
-    The same partial order exists on the transactions of $S$. 
-    Any serial schedule whose transactions are ordered according to the partial order is conflict-equivalent to $S$, because for all conflicting pairs $(i,j)$ it is always $i<j$. 
-\end{proof}
+
+\subsection{Summary}
+Skyline queries are effective in identifying potentially interesting objects when user preferences are unknown. 
+They are simple to use but return a large number of objects, and their computation is not highly efficient. 
+Skyline queries are agnostic with respect to user preferences.
+
+\paragraph*{K-skyband} 
+To enhance skyline queries, the concept of $k$-skyband is introduced, where the result includes a set of tuples dominated by fewer than $k$ tuples.

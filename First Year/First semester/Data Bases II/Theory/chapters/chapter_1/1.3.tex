@@ -1,0 +1,52 @@
+\section{Concurrency theory}
+
+The anomalies resulting from incorrect scheduling include: 
+\begin{itemize}
+    \item \textit{Lost updates}: update applied from a state that ignores a preceding update, resulting in the loss of the earlier update.
+    \item \textit{Dirty reads}: an uncommitted value is used to update the data.
+    \item \textit{Non-repeatable reads}: another transaction updates a previously read value.
+    \item \textit{Phantom updates}: another transaction updates data that contributes to a previously valid constraint.
+    \item \textit{Phantom inserts}: another transaction inserts data that contributes to a previously read datum.
+\end{itemize}
+
+\begin{definition}[\textit{Model}]
+    A model is an abstraction of a system, object or process, which purposely disregards details to simplify the investigation of relevant properties. 
+\end{definition}
+Concurrency theory is founded on a model of transaction and concurrency control principles that aids in comprehending real systems.
+Actual systems leverage implementation-level mechanisms to attain desirable properties postulated by the theory.
+\begin{definition}[\textit{Operation}]
+    An operation consist in a reading or in a writing of a specific datum by a specific transaction. 
+\end{definition}
+\begin{definition}[\textit{Schedule}]
+    A schedule is a sequence of operations performed by concurrent transactions that respects the order of operations of each transaction. 
+\end{definition}
+
+\paragraph*{Schedule}
+Transactions can be categorized as serial, interleaved, or nested. 
+Let $N_S$ and $N_D$ be respectively the number of serial schedules and distinct schedules for $n$ transactions $\left\langle T_1,\dots,T_n\right\rangle $ each with $k_i$ operations. 
+Then:
+\[N_S=n! \qquad N_D=\dfrac{\left( \sum_{i=1}^nk_i \right)!}{\prod_{i=1}^n \left( k_i! \right)}\]
+\begin{example}
+    For two transactions, $T_1$ and $T_2$, there are six possible schedules, with only two being serial:
+    \begin{enumerate}
+        \item $r_1(x) w_1(x) r_2(z) w_2(z) \rightarrow \textnormal{serial}$
+        \item $r_2(z) w_2(z) r_1(x) w_1(x) \rightarrow \textnormal{serial}$
+        \item $r_1(x) r_2(z) w_1(x) w_2(z) \rightarrow \textnormal{nested}$
+        \item $r_2(z) r_1(x) w_2(z) w_1(x) \rightarrow \textnormal{nested}$
+        \item $r_1(x) r_2(z) w_2(z) w_1(x) \rightarrow \textnormal{interleaved}$
+        \item $r_2(z) r_1(x) w_1(x) w_2(z) \rightarrow \textnormal{interleaved}$
+    \end{enumerate}
+\end{example}
+Concurrency control must reject all schedules that lead to anomalies.
+\begin{definition}[\textit{Scheduler}]
+    The scheduler is a component that accepts or rejects operations requested by the transactions. 
+\end{definition}
+\begin{definition}[\textit{Serial schedule}]
+    The serial schedule is a schedule in which the actions of each transaction occur in a contiguous sequence.
+\end{definition}
+A serializable schedule leaves the database in the same state as some serial schedule of the same transactions, making it correct. 
+To introduce other classes, two initial assumptions are made:
+\begin{itemize}
+    \item The transactions are observed a posteriori. 
+    \item The transactions considered are only the committed ones. 
+\end{itemize}

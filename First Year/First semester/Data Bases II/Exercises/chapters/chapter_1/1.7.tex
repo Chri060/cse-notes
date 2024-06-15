@@ -1,26 +1,26 @@
 \section{Exercise 7}
-Determine the classification of the provided schedule with respect to the 2PL (Two-Phase Locking) and strict 2PL (Strict Two-Phase Locking) classes:
+Determine the classification of the provided schedule with respect to the 2PL and strict 2PL classes:
 \[r_1(x) r_2(y) w_3(y) r_5(x) w_5(u) w_3(s) w_2(u) w_3(x) w_1(u) r_4(y) w_5(z) r_5(z)\]
 
-\paragraph*{Solution}
+\subsection*{Solution}
 In the context of strict 2PL, the assumption is made that all transactions commit and release all locks immediately after their final operation. 
 The verification involves assessing whether these releases can be executed at the time of commit.
 \begin{table}[H]
     \centering
     \begin{tabular}{c|cccccccccccc}
             & \textit{1} & \textit{2}      & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7}                        & \textit{8}      & \textit{9}              & \textit{10} & \textit{11} & \textit{12}             \\ \hline
-    \textit{S} &            &                 &            &            &            & $w_3$      &                                   &                 &                         &             &             &                         \\
-    \textit{U} &            &                 &            &            & $w_5$      &            & $\searrow_5w_2\downharpoonleft_2$ &                 & $w_1\downharpoonleft_1$ &             &             &                         \\
-    \textit{X} & $r_1$      &                 &            & $r_5$      &            &            &                                   & $\searrow_1w_3$ &                         &             &             &                         \\
-    \textit{Y} &            & $r_2\searrow_2$ & $w_3$      &            &            &            &                                   &                 &                         & $r_4$       &             &                         \\
-    \textit{Z} &            &                 &            &            &            &            &                                   &                 &                         &             & $w_5$       & $r_5\downharpoonleft_5$
+    \textit{x} & $r_1$      &                 &            & $r_5$      &            &            &                                   & $\searrow_1w_3$ &                         &             &             &                         \\
+    \textit{y} &            & $r_2\searrow_2$ & $w_3$      &            &            &            &                                   &                 &                         & $r_4$       &             &                         \\
+    \textit{z} &            &                 &            &            &            &            &                                   &                 &                         &             & $w_5$       & $r_5\downharpoonleft_5$  \\
+    \textit{s} &            &                 &            &            &            & $w_3$      &                                   &                 &                         &             &             &                         \\
+    \textit{u} &            &                 &            &            & $w_5$      &            & $\searrow_5w_2\downharpoonleft_2$ &                 & $w_1\downharpoonleft_1$ &             &             &                         
     \end{tabular}
 \end{table}
 $S$ clearly cannot be in strict 2PL. The contradictions are:
 \begin{itemize}
-    \item $T_1$ must release $X$ before $8$. 
-    \item $T_2$ must release $Y$ before $7$.
-    \item $T_5$ must release $U$ before $12$.
+    \item $T_1$ must release $x$ before $8$. 
+    \item $T_2$ must release $y$ before $7$.
+    \item $T_5$ must release $u$ before $12$.
 \end{itemize}
 For 2PL we have:
 \begin{table}[H]
@@ -28,12 +28,12 @@ For 2PL we have:
     \resizebox{\columnwidth}{!}{%
     \begin{tabular}{c|cccccccccccc}
             & \textit{1} & \textit{2}      & \textit{3} & \textit{4} & \textit{5} & \textit{6} & \textit{7}                        & \textit{8}      & \textit{9}              & \textit{10} & \textit{11} & \textit{12}             \\ \hline
-    \textit{S} &                            &                                   &                           &                           &                           & $\nearrow_3w_3$       &                                       & $\searrow_3$                          &                         &                             &             &                         \\
-    \textit{U} &                            &                                   &                           &                           & $\nearrow_5w_5\searrow_5$ &                       & $\nearrow_2w_2\searrow_2\nearrow_1$   &                                       & $w_1\searrow_1$         &                             &             &                         \\
-    \textit{X} & $\nearrow_1r_1$            &                                   &                           & $\nearrow_5r_5$           &                           & $\searrow_5$          &                                       & $\searrow_1\nearrow_3w_3\searrow_3$   &                         &                             &             &                         \\
-    \textit{Y} &                            & $\nearrow_2r_2\searrow_2$         & $\nearrow_3w_3$           &                           &                           &                       &                                       &                                       & $\searrow_3$            & $\nearrow_4r_4\searrow_4$   &             &                         \\
-    \textit{Z} &                            &                                   &                           & $\nearrow_5$              &                           &                       &                                       &                                       &                         &                             & $w_5$       & $r_5\searrow_5$
+    \textit{x} & $\nearrow_1r_1$            &                                   &                           & $\nearrow_5r_5$           &                           & $\searrow_5$          &                                       & $\searrow_1\nearrow_3w_3\searrow_3$   &                         &                             &             &                         \\
+    \textit{y} &                            & $\nearrow_2r_2\searrow_2$         & $\nearrow_3w_3$           &                           &                           &                       &                                       &                                       & $\searrow_3$            & $\nearrow_4r_4\searrow_4$   &             &                         \\
+    \textit{z} &                            &                                   &                           & $\nearrow_5$              &                           &                       &                                       &                                       &                         &                             & $w_5$       & $r_5\searrow_5$         \\
+    \textit{s} &                            &                                   &                           &                           &                           & $\nearrow_3w_3$       &                                       & $\searrow_3$                          &                         &                             &             &                         \\
+    \textit{u} &                            &                                   &                           &                           & $\nearrow_5w_5\searrow_5$ &                       & $\nearrow_2w_2\searrow_2\nearrow_1$   &                                       & $w_1\searrow_1$         &                             &             &                         
     \end{tabular}%
     }
 \end{table}
-It is also not in 2PL: an assignment is not possible for $T_2$ (which must release $Y$ before locking $U$).
+It is also not in 2PL: an assignment is not possible for $T_2$ (which must release $y$ before locking $u$).
