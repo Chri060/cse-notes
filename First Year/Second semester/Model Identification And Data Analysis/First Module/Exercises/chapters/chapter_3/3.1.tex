@@ -1,52 +1,60 @@
-\section{Exercise one}
+\section{Exercise 1}
 
-Consider the stochastic process defined by the following diagram:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{images/block.png}
-\end{figure}
-Here, $\eta_1 \sim WN(1,1)$ and $\eta_2 \sim WN(0,1)$ are uncorrelated. 
-
-Find the characteristic values of the given process $y(t)$.
+Consider the given process:
+\[y(t)=\dfrac{1}{2}y(t-2)+\eta(t)+4\eta(t-1)\qquad \eta(t)\sim WN(0,1)\]
+\begin{enumerate}
+    \item Determine the transfer function.
+    \item Calculate $\hat{y}(t+1|t)$.
+    \item Validate the obtained predictor.
+    \item Find $\hat{y}(t+2|t)$.
+\end{enumerate}
 
 \subsection*{Solution}
-Remember that for an ARMA($n_a,n_b$) process:
-\begin{itemize}
-    \item If $n_a>n_b$, the covariance becomes recursive for $\tau=n_a$.
-    \item If $n_a \leq n_b$, the covariance becomes recursive for $\tau=n_b+1$
-\end{itemize}
-
-The output process is composed of two uncorrelated processes because the  White Noise sources are uncorrelated:
-\[y(t)=y_1(t)+y_2(t)\]
-Since both $y_1(t)$ and $y_2(t)$ are stationary, $y(t)$ is also stationary.
-
-The mean is: 
-\[m_y=\mathbb{E}\left[y(t)\right]=\mathbb{E}\left[y_1(t)+y_2(t)\right]=W_1(1)\mathbb{E}\left[\eta_1(t)\right]+W_2(1)\mathbb{E}\left[\eta_2(t)\right]=\dfrac{15}{2}\]
-
-The covariance can be computed as the sum of the covariances of $y_1(t)$ and $y_2(t)$ (since they are uncorrelated):
-\[\gamma_y(\tau)=\gamma_{y_1}(\tau)+\gamma_{y_2}(\tau)\]
-
-For the stochastic process $y_1(t)$ in the time domain:
-\[y_1(t)=\dfrac{1}{5}y_1(t-1)+\eta_1(t)+5\eta_1(t-1)\]
-Define the unbiased process by:
-\[\begin{cases}
-    \tilde{y}_1(t)=y_1(t)-m_{y_1}\\
-    \tilde{\eta}_1(t)=\eta_1(t)-m_{\eta_1}
-\end{cases}\]
-Then, the process becomes:
-\[\tilde{y}_1(t)=\dfrac{1}{5}\tilde{y}_1(t-1)+\tilde{\eta}_1(t)+5\tilde{\eta}_1(t-1)\]
-The covariance at different time lags is:
-\[\gamma_{y_1}(\tau)=\begin{cases}
-    \frac{175}{6} \qquad\qquad\qquad\qquad \tau=0 \\
-    \frac{65}{6} \qquad\qquad\qquad\qquad \left\lvert \tau\right\rvert =1 \\
-    \frac{13}{6} \qquad\qquad\qquad\qquad \left\lvert \tau\right\rvert =2 \\
-    \frac{1}{5}\gamma_{y_1}(\tau-1) \qquad\qquad \left\lvert \tau\right\rvert \geq 3 
-\end{cases}\]
-
-For the stochastic process $y_2(t)$:
-\[y_2(t)=-\dfrac{1}{10}y_2(t-1)+\eta_2(t)+10\eta_2(t-1)\]
-The covariance function is:
-\[\gamma_{y_2}(\tau)=\begin{cases}
-    100 \qquad\: \tau=0 \\
-    0 \qquad\quad  \left\lvert \tau\right\rvert \geq 1
-\end{cases}\]
+\begin{enumerate}
+    \item The transfer function is given by:
+        \[y(t)=\left[\dfrac{z(z+4)}{z^2-\frac{1}{2}}\right]\eta(t)\]
+    \item To find $\hat{y}(t+1|t)$, we need to follow these steps:
+        \begin{itemize}
+            \item Check if the process is in canonical form:
+                \begin{enumerate}
+                    \item Numerator and denominator are monic (coefficient of the highest power equal one): both are equal to one.
+                    \item Numerator and denominator have the same degree: both are of second degree.
+                    \item Numerator and denominator are co-prime: they have no common roots.
+                    \item The singularities must be inside the unit circle: not satisfied. 
+                        Therefore, redefine: 
+                        \[\left[\dfrac{z(z+4)}{z^2-\frac{1}{2}}\right]\left[\dfrac{z+\frac{1}{4}}{z+4}\right]=\dfrac{z\left(z+\frac{1}{4}\right)}{z^{2}-\frac{1}{2}}\]
+                        And we must redefine the  White Noise as $e(t)\sim WN(0,4^2\cdot 1)$
+                \end{enumerate}
+            \item Compute the predictor via long division:
+                \[\hat{y}(t|t-1)=E(z)e(t)+\dfrac{F(z)}{A(z)}e(t-1)=e(t)+\dfrac{\frac{1}{4}-\frac{1}{2}z^{-1}}{1-\frac{1}{2}z^{-2}}e(t-1)\]
+                But we don't know the value of $e(t)$ because we have given only past samples until $t-1$.
+                So the predictor is: 
+                \[\hat{y}(t|t-1)=\dfrac{\frac{1}{4}z^{-1}-\frac{1}{2}z^{-2}}{1-\frac{1}{2}z^{-2}}\dfrac{1-\frac{1}{2}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t)=\dfrac{\frac{1}{4}-\frac{1}{2}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t-1)\]
+                Equivalently: 
+                \[\hat{y}(t+1|t)=\dfrac{\frac{1}{4}-\frac{1}{2}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t)\]
+                In time domain, this becomes:
+                \[\hat{y}(t+1|t)=-\dfrac{1}{4}\hat{y}(t|t-1)+\dfrac{1}{4}y(t)+\dfrac{1}{2}y(t-1)\]
+        \end{itemize}
+        Note that predictors from noise can also be computed as:
+        \[\hat{y}(t|t-1)=\dfrac{C(z)-A(z)}{A(z)}e(t)\]
+        Predictors from data can be computed as:
+        \[\hat{y}(t|t-1)=\dfrac{C(z)-A(z)}{C(z)}y(t)\]
+    \item The prediction error is given by:
+        \[\varepsilon(t|t-1)=y(t)-\hat{y}(t|t-1)=E(z)e(t)\]
+        The variance is:
+        \[\text{Var}\left[\varepsilon(t|t-1)\right]=\mathbb{E}\left[{\varepsilon(t|t-1)}^2\right]=\mathbb{E}\left[1 \cdot {e(t)}^2\right]=16\]
+        Since the variance of the process is approximately 23, the predictor is optimal but not very good because the variance and covariance are similar.
+    \item The two-step ahead predictor can only be found via long division. 
+        After performing two steps in the division, we obtain:
+        \[\hat{y}(t|t-2)=\dfrac{F(z)}{A(z)}e(t)=\dfrac{\frac{1}{2}z^{-2}+\frac{1}{8}z^{-3}}{1-\frac{1}{2}z^{-2}}e(t)\]
+        The predictor from data can be found knowing that:
+        \[e(t)=\dfrac{1-\frac{1}{2}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t)\]
+        By substitution, we obtain:
+        \[\hat{y}(t|t-2)=\dfrac{\frac{1}{2}+\frac{1}{8}z^{-1}}{1+\frac{1}{4}z^{-1}}y(t-2)\]
+        
+        The prediction error is:
+        \[\varepsilon(t|t-2)=y(t)-\hat{y}(t|t-2)=E(z)e(t)\]
+        The variance is: 
+        \[\text{Var}\left[\varepsilon(t|t-2)\right]=\mathbb{E}\left[{\varepsilon(t|t-2)}^2\right]=\mathbb{E}\left[{\left( e(t) +\frac{1}{4}e(t-1) \right)}^2\right]=17\]
+        Since the variance of the process is approximately 23, the predictor is optimal but not very good because the variance and covariance are similar.
+\end{enumerate}

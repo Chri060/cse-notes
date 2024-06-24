@@ -1,28 +1,35 @@
-\section{Exercise three}
+\section{Exercise 3}
 
-Consider the process described by the function:
-\[y(t)=\dfrac{z^4}{\left(z-\frac{1}{2}-j\frac{1}{2}\right)\left(z-\frac{1}{2}+j\frac{1}{2}\right)\left(z+\frac{1}{2}-j\frac{1}{2}\right)\left(z+\frac{1}{2}+j\frac{1}{2}\right)}e(t)\]
-Here, $e(t) \sim WN(0,1)$. 
-Find the spectral density function of the given process.
+Consider the system: 
+\[\mathcal{S}:y(t)=e(t)+\dfrac{1}{2}e(t-1)\qquad e(t)\sim WN(0,1)\]
+And the model: 
+\[\mathcal{M}:y(t)=\dfrac{1}{1+az^{-1}+bz^{-2}}\eta(t)\qquad \eta(t)\sim WN(0,\lambda^2)\]
+Find the value of $\theta^\ast=\begin{bmatrix} a^\ast & b^\ast \end{bmatrix}$ and $\lambda^{\ast 2}$. 
 
 \subsection*{Solution}
-In this case, the spectral density function is computed as:
-\[\Gamma_y(\omega)=\dfrac{1}{\left\lvert a \right\rvert^2\left\lvert b \right\rvert^2\left\lvert c \right\rvert^2\left\lvert d \right\rvert^2}\lambda^2\]
-
-Starting at $e^{j0}$, we have:
-\begin{itemize}
-    \item $\left\lvert a \right\rvert^2=\frac{1}{2}$
-    \item $\left\lvert b \right\rvert^2=\frac{5}{2}$
-    \item $\left\lvert c \right\rvert^2=\frac{5}{2}$
-    \item $\left\lvert d \right\rvert^2=\frac{1}{2}$
-\end{itemize}
-Thus, $\Gamma_y(0)=\dfrac{16}{25}$. 
-
-For $e^{j\frac{\pi}{2}}$ and $e^{j\pi}$, we have the same result.
-
-Using the fundamental theorem of spectral analysis, we have:
-\[\Gamma_y(\omega)=\left\lvert W(e^{j\omega})\right\rvert^2\]
-This can be rewritten as:
-\[y(t)=\dfrac{z^4}{z^4+\frac{1}{4}}e(t)\]
-Thus,
-\[\Gamma_y(\omega)=\left\lvert \dfrac{e^{j\omega 4}}{e^{j\omega 4}+\frac{1}{4}}\right\rvert^2 \cdot 1=\dfrac{16}{17+8\cos(4\omega)}\]
+The steps are: 
+\begin{enumerate}
+    \item Compute the predictor:
+        \[\hat{y}(t|t-1)=\dfrac{C(z)-A(z)}{C(z)}y(t)\]
+    \item Compute the prediction error (by substituting the real system to $y(t)$): 
+        \[\varepsilon(t|t-1)=\dfrac{A(z)}{C(z)}y(t)=\dfrac{1+az^{-1}+bz^{-2}}{1}\left(e(t)+\dfrac{1}{2}e(t-1)\right)\]
+    \item Compute the variance of the prediction error:
+        \[\bar{J}(\theta^{\ast})=\text{Var}\left[\varepsilon(t|t-1)\right]=\mathbb{E}\left[{\varepsilon(t|t-1)}^2\right]=\dfrac{5}{4}a^2+\dfrac{5}{4}b^2+a+ab+\dfrac{5}{4}\]
+    \item Derive with respect to the variable $\theta^{\ast}$: 
+        \[\begin{cases}
+            \frac{\partial \theta^{\ast}}{\partial a^\ast} = \frac{5}{2}a^\ast+1+ b^\ast\\
+            \frac{\partial \theta^{\ast}}{\partial b^\ast} = \frac{5}{2} b^\ast+a^\ast
+        \end{cases}\]
+        We want a minimum, so we set those derivatives to zero:
+        \[\begin{cases}
+            \frac{5}{2}a^\ast+1+ b^\ast=0\\
+            \frac{5}{2} b^\ast+a^\ast=0
+        \end{cases}\rightarrow \begin{cases}
+            a=-\frac{10}{21} \\
+            b=\frac{4}{21}
+        \end{cases}\]
+    \item The value of $\lambda^{\ast 2}$ can be computed by substituting the value of $\theta^\ast$ into the variance function: 
+        \[\lambda^{\ast 2}=1.011\]
+        The prediction is good since it is similar to the variance of the  White Noise. 
+\end{enumerate}
+The model is stable since the poles are inside the unit circle. 
