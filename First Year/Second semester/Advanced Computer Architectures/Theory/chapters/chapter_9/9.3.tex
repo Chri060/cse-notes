@@ -1,0 +1,98 @@
+\section{Multiple Instruction Multiple Data architectures}
+
+In shared memory architectures, processors operate within a single logically shared address space, allowing any processor to reference any memory location. 
+This means that the address space is shared among processors, so the same physical address refers to the same memory location for all processors. 
+In contrast, message passing architectures use multiple and private address spaces where processors communicate through send and receive primitives. 
+Here, each processor has its own separate address space, meaning the same physical address in different processors refers to different memory locations.
+
+\paragraph*{Shared address spaces}
+In shared address space architectures, processors communicate through shared variables in memory. 
+Communication management is implicit, handled through load/store operations. 
+This model is the oldest and most popular in parallel computing. 
+It is important to note that shared memory does not necessarily imply a single centralized memory structure.
+
+\paragraph*{Private address spaces}
+In private address space architectures, processors communicate by sending and receiving messages. 
+This communication is managed explicitly through send/receive operations to access private memory. 
+One advantage of this setup is the absence of cache coherency issues among processors, which can be a significant challenge in shared memory systems.
+
+\subsection{Physical memory organization}
+Centralized shared-memory architectures typically support up to a few dozen processor chips (fewer than 100 cores) and feature large caches and multiple memory banks. 
+These systems are often referred to as symmetric multiprocessors (SMP) with a Uniform Memory Access (UMA) architecture. 
+On the other hand, distributed memory architectures are designed to support a larger number of processors and require a high-bandwidth interconnect. 
+These systems, known as Non-Uniform Memory Access (NUMA) architectures, present challenges in managing data communication among processors.
+
+It's important to understand that the concepts of addressing space (single vs. multiple) and physical memory organization (centralized vs. distributed) are orthogonal.
+A multiprocessor system can have a single addressing space with distributed physical memory.
+
+\paragraph*{Shared programming model}
+In the shared memory programming model, a program is a collection of threads of control, which can be created dynamically during execution in some languages. 
+Each thread has a set of private variables (e.g., local stack variables) and a set of shared variables (e.g., static variables, global heap).
+Threads communicate implicitly by reading and writing shared variables and coordinate by synchronizing on these shared variables.
+
+\paragraph*{Private programming model}
+In the message passing programming model, a program consists of a collection of named processes, usually fixed at startup. Each process has a local address space with no shared data, and logically shared data is partitioned over local processes. Processes communicate by explicit send/receive pairs, and coordination is implicit in every communication event. 
+The Message Passing Interface (MPI) is a commonly used software implementation of this model.
+
+\paragraph*{Comparison}
+The choice between shared memory and message passing depends on the specific program. 
+Both models are communication Turing complete, meaning each can simulate the other. 
+Shared memory has the advantage of implicit communication through loads/stores and low overhead when cached. 
+However, it can be complex to scale effectively, requires synchronization operations, and makes data placement control within the caching system difficult.
+
+Message passing, particularly in massively parallel processors, requires software to handle all data layout and remote data access via message requests and replies. 
+It incurs high software overhead for message passing, as early machines required operating system invocation for each message. 
+Even with user-level access, there is significant overhead. 
+While sending messages can be relatively inexpensive, receiving messages is costly due to the need for polling or interrupt handling.
+
+\paragraph*{Bus-based symmetric shared memory}
+Bus-based symmetric shared memory architectures dominate the server market and are making their way into desktop systems.
+They are attractive for throughput servers and parallel programs due to their fine-grain resource sharing, uniform access through loads/stores, automatic data movement, and coherent cache replication. 
+These architectures represent a cost-effective and powerful extension of uni-processor mechanisms for data access, with the key feature being the extension of the memory hierarchy to support multiple processors.
+
+\subsection{Shared memory machines}
+Shared memory machines can be categorized into two main types: non-cache coherent and hardware cache coherent. 
+Hardware cache coherent machines work with any data placement, although performance may vary.
+Optimization efforts can be focused on critical portions of the code. 
+These machines use load and store instructions for data communication, which does not involve the operating system and results in low software overhead. 
+Special synchronization primitives are usually employed. 
+In large-scale systems, logically distributed shared memory is implemented as physically distributed memory modules.
+
+\paragraph*{Cache coherence problem}
+Shared-memory architectures cache both private data (used by a single processor) and shared data (used by multiple processors). 
+When shared data are cached, the value may be replicated in multiple caches. 
+This replication reduces access latency and required memory bandwidth, while also decreasing contention when multiple processors read shared data simultaneously. 
+However, private processor caches can create issues because copies of a variable might be present in multiple caches. 
+Consequently, a write by one processor may not immediately be visible to others, leading to the problem of cache coherence.
+
+Informally, coherency means any read must return the most recent write, but this definition is too strict and difficult to implement.
+A more practical definition is any write must eventually be seen by a read, with all writes being seen in the proper order, a concept known as serialization. 
+To ensure coherence, two rules must be followed:
+\begin{enumerate}
+    \item If Processor $P$ writes $x$ and Processor $P_1$ reads it, $P$'s write will be seen by $P_1$ if the read and write are sufficiently far apart and no other writes to $x$ occur between the two accesses.
+    \item Writes to a single location are serialized, meaning two writes to the same location by any two processors are seen in the same order by all processors.
+\end{enumerate}
+These rules ensure that the latest write will be seen and prevent the possibility of observing writes in an illogical order.
+
+It is impractical to require that a read of $x$ by Processor $P_1$ can instantaneously see the write of $x$ by another processor if the write precedes the read by a small amount of time. 
+This introduces the problem of memory consistency. 
+Coherence and consistency are complementary concepts: coherence defines the behavior of reads and writes to the same memory location, while consistency defines the behavior of reads and writes with respect to accesses to other memory locations.
+For now, we assume the following:
+\begin{itemize}
+    \item A write does not complete (and allow the next write to occur) until all processors have seen the effect of that write.
+    \item The processor does not change the order of any write with respect to any other memory access.
+\end{itemize}
+This implies that if a processor writes $A$ followed by $B$, any processor that sees the new value of $B$ must also see the new value of $A$.
+
+\paragraph*{Coherent caches}
+A program running on multiple processors will typically have copies of the same data in several caches. 
+In a coherent multiprocessor, caches support both migration and replication of shared data items.
+\begin{itemize}
+    \item \textit{Migration}: a data item can be moved to a local cache and used there transparently. 
+        This reduces both the latency to access a remotely allocated shared data item and the bandwidth demand on the shared memory.
+    \item \textit{Replication}: for shared data being simultaneously read, caches make a copy of the data item in the local cache. This reduces both latency of access and contention for reading shared data.
+\end{itemize}
+
+To maintain coherency, hardware-based solutions such as cache-coherence protocols are employed. 
+The key issue in implementing a cache-coherent protocol in multiprocessors is tracking the status of any sharing of a data block. 
+There are two primary classes of protocols: snooping protocols and directory-based protocols.
