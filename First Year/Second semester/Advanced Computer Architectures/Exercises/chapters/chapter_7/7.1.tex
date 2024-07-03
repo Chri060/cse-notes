@@ -1,0 +1,28 @@
+\section{Exercise 1}
+
+Consider the following access pattern on a two processor system with a direct-mapped, write back cache with one cache block and a two cache block memory.
+Assume the MESI protocol is used, with write back caches, write-allocate, and invalidation of other caches on write (instead of updating the value in the other caches).
+
+In the initial state the cache of the processor zero is in state Exclusive(1) and the cache of the other one is in Invalid state. 
+Both main memory blocks are up to date. 
+
+\subsection*{Solution}
+The final table, considering the operations given is: 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|cc|cc}
+    \textbf{Clock cycle} & \textbf{Operation} & \textbf{P0 cache} & \textbf{P1 cache} & \textbf{Block 0} & \textbf{Block 1} \\ \hline
+    \textit{0}           & P0: read block 1   & Exclusive (1)     & Invalid           & Yes              & Yes              \\
+    \textit{1}           & P1: read block 0   & Exclusive (1)     & Exclusive (0)     & Yes              & Yes              \\
+    \textit{2}           & P0: write block 1  & Modified (1)      & Exclusive (0)     & Yes              & No               \\
+    \textit{3}           & P0: read block 1   & Modified (1)      & Exclusive (0)     & Yes              & No               \\
+    \textit{4}           & P1: read block 0   & Modified (1)      & Exclusive (0)     & Yes              & No               \\
+    \textit{5}           & P0: write block 1  & Modified (1)      & Exclusive (0)     & Yes              & No               \\
+    \textit{6}           & P1: read block 1   & Shared (1)        & Shared (1)        & Yes              & Yes              \\
+    \textit{7}           & P1: read block 0   & Shared (1)        & Exclusive (0)     & Yes              & Yes              \\
+    \textit{8}           & P0: read block 1   & Shared (1)        & Shared (1)        & Yes              & Yes              \\
+    \textit{9}           & P0: write block 1  & Modified (1)      & Invalid           & Yes              & Yes              \\
+    \textit{10}          & P1: write block 0  & Modified (1)      & Modified (0)      & Yes              & Yes              \\
+    \textit{11}          & P0: read block 1   & Shared (1)        & Shared (1)        & Yes              & Yes             
+    \end{tabular}
+\end{table}

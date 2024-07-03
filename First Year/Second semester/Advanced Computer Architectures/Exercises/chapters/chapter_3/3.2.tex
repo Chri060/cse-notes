@@ -1,4 +1,4 @@
-\section{Exercise two}
+\section{Exercise 2}
 
 Assuming the following:
 \begin{itemize}
@@ -38,13 +38,34 @@ Examine each conflict considering the operation durations:
 \subsection*{Solution}
 The conflicts are:
 \begin{itemize}
-\item RAW:\@ F2 (I1-I2), F3 (I2-I3), F3 (I4-I5), F3 (I4-I6), R7 (I8-I9).
-\item WAR:\@ R7 (I8-I5, I8-I3), R6 (I7-I1, I7-I4).
-\item WAW:\@ F3 (I2-I4).
-\item CNTRL.\@
+    \item RAW F2 I1-I2.
+    \item RAW F3 I2-I3.
+    \item RAW F3 I4-I5.
+    \item RAW F3 I4-I6.
+    \item RAW R7 I8-I9.
+    \item WAW F3 I2-I4.
+    \item WAR R7 I8-I5.
+    \item WAR R7 I8-I3.
+    \item WAR R6 I7-I1.
+    \item WAR R6 I7-I4.
+    \item CNTRL.
 \end{itemize}
 The corresponding pipeline schema is: 
-\begin{figure}[H]
+\begin{table}[H]
     \centering
-    \includegraphics[width=1\linewidth]{images/pip.png}
-\end{figure}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|llllllllllllllllllllllllllll}
+    \textbf{Instruction}     & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{10} & \textbf{11} & \textbf{12} & \textbf{13} & \textbf{14} & \textbf{15} & \textbf{16} & \textbf{17} & \textbf{18} & \textbf{19} & \textbf{20} & \textbf{21} & \textbf{22} & \textbf{23} & \textbf{24} & \textbf{25} & \textbf{26} & \textbf{27} & \textbf{28} \\ \hline
+    \textit{LD F2, VB(R6)}   & F          & D          & IS         & E1         & E2         & E3         & W          &            &            &             &             &             &             &             &             &             &             &             &             &             &             &             &             &             &             &             &             &             \\
+    \textit{FADD F3, F2, F6} &            & F          & D          & {\underline{S}}    & {\underline{S}}    & {\underline{S}}    & IS         & E1         & E2         & E3          & W           &             &             &             &             &             &             &             &             &             &             &             &             &             &             &             &             &             \\
+    \textit{ST F3, VA(R7)}   &            &            & F          & D          & {\underline{S}}    & {\underline{S}}    & {\underline{S}}    & {\underline{S}}    & {\underline{S}}    & {\underline{S}}     & IS          & E1          & E2          & E3          & W           &             &             &             &             &             &             &             &             &             &             &             &             &             \\
+    \textit{LD F3, VC(R6)}   &            &            &            & F          & {\underline{S}}    & {\underline{S}}    & {\underline{S}}    & {\underline{S}}    & {\underline{S}}    & {\underline{S}}     & {\underline{S}}     & {\underline{S}}     & {\underline{S}}     & D           & IS          & E1          & E2          & E3          & W           &             &             &             &             &             &             &             &             &             \\
+    \textit{ST F3, VC(R7)}   &            &            &            &            &            &            &            &            &            &             &             &             &             & F           & D           & {\underline{S}}     & {\underline{S}}     & {\underline{S}}     & IS          & E1          & E2          & E3          & W           &             &             &             &             &             \\
+    \textit{FADD F4, F4, F3} &            &            &            &            &            &            &            &            &            &             &             &             &             &             & F           & S           & D           & {\underline{S}}     & {\underline{S}}     & IS          & E1          & {\underline{S}}     & {\underline{S}}     & W           &             &             &             &             \\
+    \textit{ADDI R6, R6, 4}  &            &            &            &            &            &            &            &            &            &             &             &             &             &             &             & {\underline{S}}     & F           & {\underline{S}}     & {\underline{S}}     & {\underline{S}}     & D           & {\underline{S}}     & IS          & E1          & W           &             &             &             \\
+    \textit{ADDI R7, R7, 4}  &            &            &            &            &            &            &            &            &            &             &             &             &             &             &             &             & {\underline{S}}     & F           & {\underline{S}}     & {\underline{S}}     & {\underline{S}}     & D           & {\underline{S}}     & IS          & E1          & W           &             &             \\
+    \textit{BLT R7, R8, FOR} &            &            &            &            &            &            &            &            &            &             &             &             &             &             &             &             &             &             & {\underline{S}}     & {\underline{S}}     & {\underline{S}}     & F           & D           & {\underline{S}}     & {\underline{S}}     & IS          & E1          & W           \\
+    \textit{CNTRL}           &            &            &            &            &            &            &            &            &            &             &             &             &             &             &             &             &             &             &             &             &             &             & {\underline{S}}     & {\underline{S}}     & {\underline{S}}     & {\underline{S}}     & IF          & ID         
+    \end{tabular}%
+    }
+\end{table}

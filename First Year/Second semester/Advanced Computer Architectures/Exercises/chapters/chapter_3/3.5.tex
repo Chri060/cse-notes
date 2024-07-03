@@ -1,4 +1,4 @@
-\section{Exercise eleven}
+\section{Exercise 5}
 
 Consider now the code:
 \begin{verbnobox}[\verbarg]
@@ -11,28 +11,46 @@ LS S6, 4(S7)
 \begin{enumerate}
     \item Find the conflicts. 
     \item Simple Pipelining. 
-    \item Reschedule the instructions to reduce the stalls; Draw the pipeline schema showing all the data conflicts/dependencies.
+    \item Reschedule the instructions to reduce the stalls; draw the pipeline schema showing all the data dependencies.
 \end{enumerate}
 
 \subsection*{Solution}
 \begin{enumerate}
     \item The conflicts are: 
         \begin{itemize}
-            \item RAW S3 I1-I2
-            \item RAW S7 I4-I5
-            \item RAW S5 I2-I3
-            \item RAW S3 I1-I3
-            \item RAW S5 I2-I4
+            \item RAW S3 I1-I2.
+            \item RAW S7 I4-I5.
+            \item RAW S5 I2-I3.
+            \item RAW S3 I1-I3.
+            \item RAW S5 I2-I4.
         \end{itemize}
     \item With simple pipelining we have: 
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/simp.png}
-        \end{figure}
+            \resizebox{\textwidth}{!}{%
+            \begin{tabular}{l|ccccccccccccccc}
+            \textbf{Instruction}    & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{10} & \textbf{11} & \textbf{12} & \textbf{13} & \textbf{14} & \textbf{15} \\ \hline
+            \textit{ADDI S3, S2, 2} & IF         & ID         & EX         & MEM        & WB         &            &            &            &            &             &             &             &             &             &             \\
+            \textit{ADD S5, S4, S3} &            & IF         & {\underline{S}}    & {\underline{S}}    & ID         & EX         & MEM        & WB         &            &             &             &             &             &             &             \\
+            \textit{SW S5, 4(S3)}   &            &            & {\underline{S}}    & {\underline{S}}    & IF         & {\underline{S}}    & {\underline{S}}    & ID         & EX         & MEM         & WB          &             &             &             &             \\
+            \textit{SUB S7, S5, S6} &            &            &            &            & {\underline{}}     & {\underline{S}}    & {\underline{S}}    & IF         & ID         & EX          & MEM         & WB          & {\underline{}}      &             &             \\
+            \textit{LS S6, 4(S7)}   &            &            &            &            &            &            &            &            & IF         & {\underline{S}}     & {\underline{S}}     & ID          & EX          & MEM         & WB         
+            \end{tabular}%
+            }
+        \end{table}
     \item By using forwarding paths we have: 
-        \begin{figure}[H]
+        \begin{table}[H]
             \centering
-            \includegraphics[width=1\linewidth]{images/simp1.png}
-        \end{figure}
+            \resizebox{\textwidth}{!}{%
+            \begin{tabular}{l|ccccccccc|l}
+            \textbf{Instruction}    & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{Forwarding path} \\ \hline
+            \textit{ADDI S3, S2, 2} & IF         & ID         & EX         & MEM        & WB         &            &            &            &            &                          \\
+            \textit{ADD S5, S4, S3} &            & IF         & ID         & EX         & MEM        & WB         &            &            &            & EX-EX                    \\
+            \textit{SW S5, 4(S3)}   &            &            & IF         & ID         & EX         & MEM        & WB         &            &            & MEM-EX, MEM-MEM          \\
+            \textit{SUB S7, S5, S6} &            &            &            & IF         & ID         & EX         & MEM        & WB         &            & MEM-EX                   \\
+            \textit{LS S6, 4(S7)}   &            &            &            &            & IF         & ID         & EX         & MEM        & WB         & EX-EX                   
+            \end{tabular}%
+            }
+        \end{table}
 \end{enumerate}
 
