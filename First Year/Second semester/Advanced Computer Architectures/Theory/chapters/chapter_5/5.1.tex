@@ -1,18 +1,23 @@
 \section{Introduction}
 
-\begin{definition}[\textit{Interrupt}]
-    An interrupt refers to an external or internal event necessitating processing by another system program.
-\end{definition}
-Typically unexpected or infrequent from the program's perspective, interrupts can stem from various causes:
-\begin{itemize}
-    \item \textit{Asynchronous}: stemming from external events, such as input/output device service requests, timer expirations, power disruptions, or hardware failures.
-    \item \textit{Synchronous}: arising from internal events (exceptions), including undefined opcodes, privileged instructions, arithmetic overflows, FPU exceptions, misaligned memory access, virtual memory exceptions (such as page faults, TLB misses, and protection violations), and traps (system calls).
-\end{itemize}
+ILP aims to execute individual machine operations concurrently to enhance performance, transparently speeding up execution without user intervention.
 
-\subsection{History}
-The first system to incorporate exceptions was the Univac-I in 1951, where an arithmetic overflow would either trigger the execution of a two-instruction fix-up routine at address 0 or, optionally, cause the computer to halt.
+In contrast, parallel processing involves employing multiple processors to handle distinct parts of a program independently, aiming to improve execution speed and efficiency, but with user awareness.
+To achieve performance gains beyond a single CPI using parallel processing, techniques like Superscalar architecture or Very Long Instruction Word (VLIW) are utilized.
 
-The Univac 1103, modified in 1955, introduced external interrupts for gathering real-time wind tunnel data.
+\subsection{Very Long Instruction Word}
+VLIW architecture utilizes a fixed number of instructions arranged in wide templates scheduled by the compiler. 
+A significant milestone in VLIW development was the HP and Intel joint agreement in 1999/2000, leading to the creation of the Intel IA-64 architecture, known as Explicitly Parallel Instruction Computing (EPIC).
 
-The DYSEAC in 1954 was the first system with I/O interrupts, featuring two program counters, and an I/O signal facilitated switching between them. 
-Additionally, it was the first system to incorporate DMA (Direct Memory Access) by I/O devices.
+In VLIW, the processor can execute multiple operations per cycle, all predetermined by the compiler, contrasting with Superscalar architectures. 
+This method reduces hardware complexity by eliminating the need for scheduling hardware and accommodating variable latency instructions. 
+It also ensures explicit parallelism and a single control flow by prohibiting instruction reordering.
+
+Here, an operation denotes a computation unit akin to an instruction in sequential architectures. 
+However, instructions in VLIW encompass multiple operations slated for simultaneous execution, determined by compiler scheduling. 
+Each VLIW instruction mandates constant operation latencies and guarantees intra-instruction parallelism, thereby obviating cross-operation RAW dependencies and data interlocks.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/vliw.png}
+    \caption{VLIW machine configuration}
+\end{figure}

@@ -1,0 +1,103 @@
+\section{Performance analysis}
+
+Developing software has become increasingly complex, to the point where manually managing all constraints has become nearly unfeasible. 
+Despite the proliferation of processor cores and unprecedented computational power, energy consumption has emerged as a critical limitation. 
+Consequently, there is an urgent need for software to prioritize energy efficiency and consider space constraints.
+
+\subsection{Swiftness metrics}
+To assess the speed of computers, we examine the system from two perspectives: user and system manager.
+\paragraph*{User perspective}
+From the user's standpoint, the goal is to minimize program execution time, measured as the response time:
+\[T_{\text{response}} = T_{\text{end}} - T_{\text{start}}\]
+\paragraph*{System manager perspective}
+System managers aim to maximize throughput, which is the total amount of work completed within a specified time frame and is inversely related to the response time of the program:
+\[T_{\text{throughput}}=\dfrac{1}{T_{\text{response}}}\]
+This relationship holds true when there are no overlaps; otherwise, higher throughput can be achieved.
+\paragraph*{Swiftness enhancement}
+Improving system speed typically focuses on optimizing common cases, as they are generally easier and quicker to assess than less frequent cases.
+\begin{theorem}[\textit{Amdahl law}]
+    The speedup of a system due to improving one part of it is limited by the fraction of time that part is utilized.
+\end{theorem}
+Suppose an enhancement $E$ accelerates a fraction $F$ of the task by a factor $S$, while the remaining task remains unchanged.
+The overall speedup $S_{\text{overall}}$ can be calculated as:
+\[S_{\text{overall}}=\dfrac{1}{\left(1-F_{\text{enhanced}}\right)+\frac{F_{\text{enhanced}}}{S_{\text{enhanced}}}}\]
+\begin{example}
+    Consider a scenario where a new CPU is ten times faster, and in an I/O-bound server where 60\% of the time is spent waiting for I/O:
+    \[S_{\text{overall}}=\dfrac{1}{\left(1-F_{\text{enhanced}}\right)+\frac{F_{\text{enhanced}}}{S_{\text{enhanced}}}}=\dfrac{1}{\left(1-0.4\right)+\frac{0.4}{10}}=1.56\]
+    This example illustrates that despite a CPU being ten times faster, the actual improvement in performance is only about $1.56$ times, due to the limitations imposed by the fraction of time spent waiting for I/O.
+\end{example}
+\begin{corollary}[\textit{Amdahl's law}]
+    If an enhancement applies to only a fraction of a task, the maximum speedup that can be achieved is:
+    \[\text{S}_{\max}=\dfrac{1}{1-F_{\textnormal{enhanced}}}\]
+\end{corollary}
+These principles underscore the importance of understanding and managing bottlenecks in system performance to achieve meaningful improvements in efficiency and speed.
+
+\subsection{Performance metrics}
+The response time of a system measures the latency incurred while completing a task and is the sum of the input/output time and the CPU time:
+\[T_{\text{response}}=T_{\text{CPU}} + T_{\text{I/O}}\]
+Here, $T_{\text{CPU}}$ represents the processing time of the given instruction or program.
+It is calculated as the ratio of the clock cycles needed to perform the operations to the clock frequency of the processor:
+\[T_{\text{CPU}} = \dfrac{\text{clock cycles needed}}{\text{processor clock frequency}}\] 
+This formula can be expanded as: 
+\[T_{\text{CPU}}=\underbrace{\#\text{instructions}}_{\text{IC}} \cdot \underbrace{\dfrac{\#\text{clock total}}{\#\text{instruction}}}_{\text{CPI}} \cdot \underbrace{\text{cycle duration}}_{\text{CT}} \]
+The components involved in this calculation are:
+\begin{itemize}
+    \item \textit{Instruction count} (IC): the number of instructions executed, influenced by the algorithm, compiler, and ISA.
+    \item \textit{Cycles per instructions} (CPI): determined by the ISA and CPU organization, this metric accounts for the overlap among instructions. 
+        The CPI for a set of instructions is calculated as:
+        \[T_{\text{CPU}}=\text{CT} \cdot \sum_{i=1}^{n}\text{CPI}_i \cdot \text{I}_i\]
+    \item \textit{Cycle time} (CT): determined by the technology, organization, and circuit design.
+\end{itemize}
+Other metrics used to evaluate hardware performance include:
+\begin{itemize}
+    \item \textit{Million of instructions per second} (MIPS): 
+        \[\text{\text{MIPS}}=\dfrac{\text{IC}}{T_{\text{execution}} \cdot 10^6}=\dfrac{\text{Clock frequency}}{\text{CPI} \cdot 10^6}\]
+        MIPS quantifies the rate of operations per unit time, with faster machines having higher MIPS ratings.
+    \item \textit{Million of floating point operations} (MFLOPS): 
+        \[\text{MFLOPS}=\dfrac{\text{Floating point operations in a program}}{T_{\text{CPU}} \cdot 10^6}\]
+        Assuming floating-point operations are independent of the compiler and ISA, MFLOPS is a reliable metric for numerical codes, depending on the matrix size to determine the number of floating-point operations in a program.
+\end{itemize}
+
+\subsection{Power metrics}
+Energy and power consumption impose constraints on a variety of systems, making it essential to establish an energy and power budget for these systems.
+
+Thermal Design Power (TDP) is a metric used to characterize sustained power consumption. 
+It serves as a target for power supply and cooling systems and typically falls between peak power and average power consumption. 
+To manage power consumption, the clock rate can be dynamically reduced, and measuring energy per task often provides a more accurate assessment. 
+Various techniques are employed to reduce dynamic power consumption, including:
+\begin{itemize}
+    \item Optimizing existing processes.
+    \item Implementing dynamic voltage-frequency scaling.
+    \item Employing low-power states for DRAM and disks.
+    \item Utilizing methods like overclocking and turning off cores.
+\end{itemize}
+Additionally, static power consumption, which scales with the number of transistors, must be considered. 
+To mitigate static power, power gating is commonly employed.
+
+\subsection{Cost metrics}
+In addition to performance, hardware also incurs costs. 
+High-volume production offers several benefits, including a faster learning curve, increased manufacturing efficiency, and decreased research and development costs per unit produced. 
+Commodities refer to identical products offered by numerous vendors in substantial quantities. 
+These products are characterized by their low cost due to high production volume and competition among suppliers.
+
+\subsection{Benchmarks}
+The conventional method for conducting performance tests on programs involves using benchmarks. 
+In this methodology, certain groups select programs available to the community to measure performance. 
+These programs are executed on machines, and their performance is reported, allowing for comparison with reports from other machines. 
+The most commonly used benchmarks include:
+\begin{itemize}
+    \item \textit{Real programs}: these are representative of real workloads and provide the most accurate way to characterize performance. 
+        Occasionally, modified CPU-oriented benchmarks may eliminate I/O operations.
+    \item \textit{Kernels} or micro benchmarks: these are representative program fragments useful for focusing on individual features.
+    \item \textit{Synthetic benchmarks}: similar to kernels, these benchmarks attempt to match the average frequency of operations and operands from a large set of programs.
+    \item \textit{Instruction mixes} for CPI. 
+\end{itemize}
+he System Performance Evaluation Cooperative (SPEC) was established in 1989 to address benchmarking issues.
+Benchmarks may not be representative if the workload is I/O bound, rendering certain benchmarks like SPECint ineffective. 
+Benchmarks also become obsolete over time, and aging benchmarks can be problematic as benchmarking pressure incentivizes vendors to optimize systems for specific benchmarks.
+
+A straightforward method for comparing relative performance is to use the total execution time of the programs. 
+Another option is to calculate the arithmetic mean of the execution times, which is valid only if the programs run equally often. 
+If the programs have different execution frequencies, the weighted arithmetic mean is used:
+\[\sum_{i=1}^{n} \dfrac{\text{w}_i \cdot \text{time}_i}{n}\]
+In general, the arithmetic mean is used for times, the harmonic mean if rates must be used, and the geometric mean if ratios must be used.

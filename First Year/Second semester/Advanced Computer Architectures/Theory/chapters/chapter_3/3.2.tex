@@ -1,31 +1,58 @@
-\section{Speed measures}
+\section{Static branch prediction}
 
-To evaluate the speed of two computers, we can utilize two metrics:
+Static branch prediction is employed in processors where branch behavior is expected to remain predictable at compile time.
+It can also complement dynamic predictors by providing a baseline prediction strategy.
+
+\subsection{Branch always not taken}
+Branch always not taken assumes that every branch instruction will not be taken.
+In the pipeline, if the branch condition is evaluated to false during the ID stage, the sequential instruction flow proceeds without any penalties. 
+If the branch condition is true (an incorrect prediction), the pipeline must be flushed. 
+This involves discarding the fetched instructions after the branch and fetching the correct instructions from the branch target address, incurring a one-cycle penalty.
+
+\subsection{Branch always taken}
+Branch always taken predicts that every branch will be taken.
+Once the branch is decoded and its target address computed, the processor immediately begins fetching and executing instructions from the target address. 
+This approach is advantageous in pipelines where the branch target address is known early enough to initiate fetching without waiting for the branch outcome.
+However, in some pipelines like MIPS, where the branch target address isn't determined before the branch outcome, this approach offers no benefit.
+
+\subsection{Backward taken forward not taken}
+Backward taken forward not taken prediction strategy categorizes branches based on their direction. 
+Backward-going branches, such as loops, are predicted as taken, while forward-going branches, like conditional jumps to subsequent code, are predicted as not taken.
+
+\subsection{Profile-driven prediction}
+Profile-driven prediction utilizes profiling information gathered from previous executions to improve branch prediction accuracy. 
+This approach leverages data on branch behavior collected during runtime to predict future branch outcomes more effectively. 
+Additionally, compilers can provide hints to further refine these predictions based on the program's characteristics and execution patterns.
+
+\subsection{Delayed branch}
+In a delayed branch scenario, the compiler strategically places an independent instruction into a designated branch delay slot.
+This instruction executes regardless of whether the branch is taken or not.
+Typically, processors like MIPS have a single-cycle delay slot, while more complex pipelines may feature longer delays, though filling multiple slots can be challenging for compilers.
+For MIPS, the compiler routinely schedules an independent instruction immediately following the branch. 
+The behavior of the delayed branch is consistent:
 \begin{itemize}
-    \item \textit{User perspective} Users aim to minimize the elapsed time for program execution, which is measured by the response time: 
-        \[T_{response} : T_{execution} = T_{end} - T_{start}\]
-    \item \textit{System manager perspective}: system managers aim to maximize the completion rate, or throughput, which refers to the total amount of work done within a specified timeframe.
+    \item If the branch is not taken, the processor proceeds with the instruction following the branch.
+    \item If the branch is taken, execution continues at the branch target.
 \end{itemize}
-These metrics can be compared using the formula:
-\[T_{throughput}=\dfrac{1}{T_{response}}\]
-This equality holds true if there are no overlaps; otherwise, a greater throughput is achieved.
+The compiler's task is to ensure that the instruction placed in the delay slot is both valid and beneficial. 
+There are three primary strategies for scheduling the delay slot:
 
-Typically, we focus on the common case as it's usually simpler and quicker to assess than the uncommon case.
-\begin{theorem}[\textit{Amdahl law}]
-    The performance improvement of a system achieved by optimizing a particular part of the system is limited by the fraction of time that part is utilized.
-\end{theorem}
+\begin{enumerate}
+    \item \textit{From before}: an independent instruction preceding the branch is placed in the delay slot.
+        This instruction always executes, irrespective of the branch outcome.
+    \item \textit{From target}: the delay slot is filled with an instruction from the branch target. 
+        To prevent certain instructions from being moved after the branch, a register in the branch condition may be used. 
+        This strategy is effective for branches likely to be taken, such as loop branches.
+    \item \textit{From fall-through}: qn instruction from the fall-through path, where the branch is not taken, occupies the delay slot. 
+        Similar to the from target strategy, this may involve using a register in the branch condition to control instruction placement. 
+        It's favored for branches unlikely to be taken, such as forward branches.
+\end{enumerate}
+In deeply pipelined processors with multi-cycle delays, fully populating delay slots with useful instructions becomes more challenging.
+The primary challenges in scheduling delayed branches include: constraints on which instructions can occupy the delay slot, and the compiler's ability to accurately predict branch outcomes statically. 
 
-Suppose an enhancement $E$ accelerates a fraction $F$ of the task by a factor $S$, while the remainder of the task remains unaffected.
-The overall speedup can be calculated as:
-\[S_{overall}=\dfrac{1}{\left(1-F_{enhanced}\right)+\frac{F_{enhanced}}{S_{enhanced}}}\]
-As a result the best we could ever hope to do is: 
-\[\text{Speedup}_{overall}=\dfrac{1}{1-F_{enhanced}}\]
-\begin{example}
-    Considering a new CPU that is 10 times faster, and an I/O-bound server where 60\% of the time is spent waiting for I/O, the overall speedup would be:
-    \[S_{overall}=\dfrac{1}{\left(1-F_{enhanced}\right)+\frac{F_{enhanced}}{S_{enhanced}}}=\dfrac{1}{\left(1-0.4\right)+\frac{0.4}{10}}=1.56\]
-    It's important to note that despite the allure of a 10x speed increase, the actual improvement is only 1.6x. 
-    This illustrates a fundamental aspect of human perception regarding speed improvements.
-\end{example}
-\begin{corollary}[\textit{Amdahl's law}]
-    If an enhancement is only applicable for a fraction of a task, the task's speed cannot be increased by more than the reciprocal of one minus that fraction.
-\end{corollary}
+To mitigate these challenges, some processors employ a canceling or nullifying branch instruction. 
+This approach indicates the predicted branch direction:
+\begin{itemize}
+    \item When the prediction is correct, the instruction in the delay slot executes normally.
+    \item If the prediction is incorrect, the instruction is replaced with a nop.
+\end{itemize}

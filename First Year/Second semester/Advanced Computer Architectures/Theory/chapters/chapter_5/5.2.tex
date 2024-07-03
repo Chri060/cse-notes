@@ -1,14 +1,67 @@
-\section{Taxonomy}
+\section{Very Long Instruction Word compiler}
 
-Exceptions can be categorized as follows:
+The VLIW compiler plays a crucial role in optimizing instruction scheduling to maximize parallel execution, leveraging both ILP and LLP.
+This entails mapping instructions to the FUs of the machine while considering timing constraints and task dependencies. 
+The compiler ensures intra-instruction parallelism and schedules operations to prevent data hazards, often inserting explicit no-operation instructions (nop). 
+Its primary objective is to minimize the total execution time of the program.
+To enhance ILP, two main strategies are employed: static and dynamic scheduling. 
+
+\subsection{Static scheduling}
+Static scheduling aims to maintain a full pipeline in single-issue pipelines or utilize all FUs in each cycle within VLIW architectures. 
+
+Compilers employ advanced algorithms for code scheduling to exploit ILP effectively. 
+Within a basic block parallelism is inherently limited by data dependencies. 
+Therefore, maximizing performance necessitates exploiting ILP across multiple basic blocks, including those spanning branches.
+
+Static scheduling involves the compiler identifying and resolving dependencies through code reordering. 
+The compiler outputs dependency-free code, which is typical for VLIW processors. 
+
+Several methods are used for static scheduling, including:
 \begin{itemize}
-    \item \textit{Synchronous} or \textit{asynchronous}: asynchronous events stem from devices external to the CPU and memory, manageable after the current instruction completes (easier to handle).
-    \item \textit{User requested} or \textit{coerced}: user requested exceptions are predictable and treated similarly to exceptions, utilizing the same mechanisms for saving and restoring state; they are handled after instruction completion. 
-        Coerced exceptions arise from hardware events beyond the program's control.
-    \item \textit{User maskable} or \textit{user nonmaskable}: the mask dictates whether the hardware responds to the exception.
-    \item \textit{Within instructions} or \textit{between instructions}: exceptions occurring within instructions are typically synchronous as the instruction initiates the exception.
-        The instruction must halt and restart. 
-        Asynchronous exceptions between instructions arise from critical situations, leading to program termination.
-    \item \textit{Resume} or \textit{terminate}: terminating events result in program execution always halting after the interrupt. 
-        Resuming events allow program execution to continue after the interrupt.
+    \item \textit{Simple code motion}: reordering instructions to avoid stalls.
+    \item \textit{Loop unrolling and loop peeling}: increasing loop body size to reduce overhead and improve parallelism.
+    \item \textit{Software pipelining}: overlapping the execution of operations from different iterations of a loop.
+    \item \textit{Global code scheduling}: optimizing code across multiple basic blocks.
+        \begin{itemize}
+            \item \textit{Trace scheduling}: identifying and optimizing frequently executed paths.
+            \item \textit{Super-block scheduling}: grouping basic blocks to optimize their execution as a single unit.
+            \item \textit{Hyper-block scheduling}: extending super-blocks to include predicated instructions for increased parallelism.
+            \item \textit{Speculative trace scheduling}: scheduling instructions based on probable execution paths, even if they involve branches.
+        \end{itemize}
 \end{itemize}
+
+\paragraph*{Summary}
+VLIW architecture benefits from straightforward hardware requirements, simplifying design and maintenance. 
+It supports easy scalability by extending the number of FUs. Moreover, proficient compilers can detect and exploit parallelism adeptly, optimizing performance gains.
+However, VLIW demands a substantial register count to keep all FUs active and requires ample storage for operands and results. 
+It necessitates high data transport capacity between FUs, Register Files, and memory, as well as high bandwidth between the instruction cache and fetch unit, resulting in larger code sizes. 
+Challenges include binary compatibility and the need for profiling to assess branch probabilities, adding complexity to the build process. 
+Static scheduling is also challenging for unpredictably branched code paths, as optimal schedules may vary.
+
+\subsection{Trace Scheduling}
+Trace scheduling optimizes sequences of instructions, known as traces, within a control flow graph. 
+A trace is defined as a loop-free sequence of basic blocks that represents an execution path for specific input conditions. 
+The execution frequency of a trace depends on the input data, with some traces being more frequently executed than others.
+
+The process of trace scheduling begins by identifying a sequence of basic blocks that corresponds to the most commonly taken branch path. 
+This selection is guided by profiling feedback or compiler heuristics. 
+Once identified, the entire trace is scheduled as a cohesive unit, with additional fix-up code inserted to manage branches that exit the trace.
+
+A significant limitation of trace scheduling is its inability to extend beyond loop boundaries. 
+This limitation is typically addressed through techniques like loop unrolling, which allows scheduling to continue past loops but may lead to increased code size and performance overhead due to the management of loop iteration boundaries.
+
+Despite these challenges, trace scheduling offers notable benefits by prioritizing the optimization of frequently executed paths. 
+This approach ensures that the most commonly used traces receive optimal scheduling.
+ During scheduling, traces are treated similarly to basic blocks, without requiring special handling for branches.
+
+\subsection{Code Motion}
+In addition to managing fix-up code, trace scheduling imposes constraints on code movement within traces. 
+It is crucial to preserve the dataflow integrity of the program and maintain exception behavior. 
+his preservation is achieved by addressing two primary dependencies: data dependencies and control dependencies.
+
+To mitigate control dependencies, two effective techniques are commonly employed:
+\begin{itemize}
+    \item \textit{Predicate instructions} (hyper-block): these instructions allow bypassing branches to maintain flow within a trace.
+    \item \textit{Speculative instructions} (speculative): these instructions enable moving an operation before a branch conditionally, anticipating the outcome to maintain flow.
+\end{itemize}
+These strategies enhance scheduling efficiency within traces, optimizing performance while ensuring program correctness across varying execution scenarios.

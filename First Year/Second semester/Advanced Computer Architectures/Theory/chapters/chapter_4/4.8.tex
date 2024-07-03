@@ -1,0 +1,78 @@
+\section{Instruction-Level Parallelism limits}
+
+Enabling multiple instructions to start execution within each clock cycle necessitates fetching more instructions per cycle and effectively managing data and control dependencies. 
+Superscalar processors exemplify this capability by issuing multiple instructions per clock cycle, ranging from one to eight instructions simultaneously. 
+Instruction scheduling can be handled either by compilers or by hardware mechanisms like Tomasulo's algorithm. 
+The success of superscalar architectures has shifted the focus from CPI to Instructions Per Clock cycle (IPC) as a primary performance metric.
+In an ideal scenario, where every available instruction slot is utilized in every cycle, the ideal CPI equals 1 divided by the issue width.
+
+\paragraph*{Ideal machine structure}
+Assumptions for an ideal machine:
+\begin{enumerate}
+    \item \textit{Register Renaming}: assume infinite virtual registers are available, and all WAW and WAR hazards are effectively mitigated through renaming.
+    \item \textit{Branch prediction}: assume perfect branch prediction with no mis-predictions, ensuring streamlined execution flow.
+    \item \textit{Jump Prediction}: assume perfect prediction of jumps, facilitating flawless speculation and an infinite buffer of readily available instructions.
+    \item \textit{Memory-address alias analysis}: assume perfect knowledge of memory addresses, enabling freedom to reorder stores before loads unless their addresses conflict.
+    \item \textit{Uniform latency}: assume uniform one-cycle latency for all instructions across all functional units, allowing unlimited instruction issuance per clock cycle.
+    \item The CPU can issue an unlimited number of instructions simultaneously, with the capability to foresee computation arbitrarily far ahead.
+    \item There are no restrictions on the types of instructions that can be executed in a single cycle, including loads and stores.
+    \item All functional unit latencies are uniform at one cycle, and any sequence of dependent instructions can issue on successive cycles.
+    \item  Perfect caches are assumed, implying all loads and stores complete in one cycle.
+\end{enumerate}
+These assumptions yield highly optimistic results regarding ILP, as such an ideal CPU configuration is not achievable in practice.
+
+\subsection{Limits}
+\paragraph*{Window size}
+Dynamic analysis plays a crucial role in striving towards perfect branch prediction, especially since achieving such precision at compile time remains unattainable. 
+For a CPU with perfect dynamic scheduling, several conditions ideally need to be fulfilled:
+\begin{enumerate}
+    \item \textit{Lookahead capability}: the CPU must possess the ability to look far ahead into the instruction stream to identify a suitable set of instructions for issuance while accurately predicting all branches.
+    \item \textit{Register Renaming}: all uses of registers should undergo renaming to prevent hazards such as WAW and WAR.
+    \item \textit{Dependency analysis}: the CPU should analyze potential data dependencies among instructions within the issue packet and rename registers as necessary to resolve these dependencies.
+    \item \textit{Memory dependency handling}: it must detect and manage memory dependencies among issuing instructions effectively to ensure correct execution order and data coherence.
+    \item \textit{FU replication}: to enable maximal instruction throughput, the CPU should provide sufficient replicated FUs so that all ready instructions can execute simultaneously.
+\end{enumerate}
+The size of the window significantly impacts the complexity and efficiency of dynamic scheduling.
+In modern CPUs, constraints arise due to the limited number of registers and the requirement to search for dependent instructions while adhering to in-order issue policies. 
+Therefore, all instructions within the window must remain within the processor's active processing range.
+Present-day CPUs typically feature window sizes ranging from 32 to 200 instructions. 
+Larger window sizes increase the number of comparisons necessary to identify raw data dependencies. 
+
+\paragraph*{CPU}
+Several factors contribute to limiting CPU performance, including the number of FUs, buses, and ports in the Register File. 
+These limitations determine the maximum number of instructions that can be issued, executed, or committed in a single clock cycle, often significantly fewer than the window size. 
+Achieving the maximum possible instructions per cycle, which can reach up to six in certain cases, remains rare.
+Processors range in width from single-issue to configurations supporting up to six-issue executions. 
+However, selecting the optimal 8 or 16 instructions to execute each cycle poses a formidable challenge due to the inherent complexity involved.
+
+\subsection{Superscalar and VLIW processors}
+Dynamically-scheduled superscalar processors represent the forefront of commercial general-purpose computing. 
+Conversely, VLIW processors have found success primarily in embedded media processors for consumer electronics. 
+
+Increasing issue rates from the current typical range of 3-6 instructions per clock to 6-12 instructions would likely necessitate a processor capable of handling:
+\begin{itemize}
+    \item Multiple data memory accesses per cycle (3-4).
+    \item Branch resolutions per cycle (2-3).
+    \item Register renaming and access to over 20 registers per cycle.
+    \item Fetching 12-24 instructions per cycle.
+\end{itemize}
+Implementing these capabilities is intricate and often involves trade-offs with maximum clock rates and increased power consumption. 
+Most performance-enhancing techniques tend to escalate power usage. 
+The critical consideration revolves around whether a technique is energy-efficient—enhancing performance without disproportionately increasing power consumption.
+
+Techniques employing multiple issue processors generally exhibit inefficiencies:
+\begin{itemize}
+    \item Issuing multiple instructions introduces logic overhead that scales faster than the issue rate.
+    \item This discrepancy between peak issue rates and sustained performance widens over time.
+    \item Transistor switching correlates with peak issue rates, while sustained performance depends on a different metric, resulting in an escalating energy-per-performance ratio.
+\end{itemize}
+
+\subsection{Summary}
+To advance performance in the future, we need to consider the limitations of ILP (ILP) and explore explicit parallelism that programmers can directly leverage, as opposed to relying solely on implicit parallelism exploited by compilers and hardware.
+However, several challenges remain:
+\begin{itemize}
+    \item \textit{Processor-memory performance gap}: this gap poses a significant hurdle to achieving further performance gains.
+    \item \textit{VLSI scaling problems}: challenges related to wiring and other VLSI scaling issues need to be addressed.
+    \item \textit{Energy and leakage problems}: increasing energy consumption and leakage present additional concerns.
+\end{itemize}
+Despite these challenges, alternative forms of parallelism offer potential solutions such as multicore and SIMD architectures.

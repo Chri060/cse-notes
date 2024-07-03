@@ -1,26 +1,22 @@
-\section{Virtual memory}
+\section{Scheduling}
 
-Virtual memory is utilized to confine processes within their allocated memory space boundaries. 
-This architecture serves multiple functions:
-\begin{itemize}
-    \item It facilitates user mode and supervisor mode.
-    \item It safeguards specific CPU state components.
-    \item It incorporates mechanisms for transitioning between user mode and supervisor mode.
-    \item It provides tools for restricting memory accesses.
-    \item It includes a Translation Lookaside Buffer (TLB) for address translation.
-\end{itemize}
+Two essential properties must be maintained to ensure program correctness, typically achieved by preserving both data and control dependencies. 
+The first is exception behavior, which ensures that any changes in the execution order of instructions do not affect how exceptions are triggered within the program. 
+The second is data flow, which pertains to the actual movement of data values among instructions, ensuring that the correct results are produced and consumed.
 
-\subsection{Virtual machines}
-Virtual memory's concept enables the creation of virtual machines.
-These machines support isolation and security, allowing multiple unrelated users to share a computer. 
-This capability is made feasible by the processors' raw speed, which mitigates the associated overhead.
+There are two main strategies to support ILP: dynamic scheduling and static scheduling. 
+Dynamic scheduling relies on hardware to identify and exploit parallelism within the program, while static scheduling depends on software to identify potential parallelism beforehand. 
 
-Virtual machines enable the presentation of different Instruction Set Architectures (ISAs) and operating systems to user programs.
+\subsection{Dynamic scheduling}
+Dynamic scheduling involves hardware reordering instruction execution to mitigate pipeline stalls while upholding data flow and exception behavior. 
+The main advantages of this approach include handling cases where dependencies are unknown at compile time, simplifying compiler complexity, and facilitating efficient execution of compiled code on different pipeline architectures. 
+However, these benefits come with costs such as a significant increase in hardware complexity, higher power consumption, and the potential for imprecise exceptions. 
+In dynamic scheduling, instructions are fetched and issued in program order, but execution begins as soon as operands are available, potentially allowing out-of-order execution. 
+This introduces the possibility of WAR and WAW data hazards and implies out-of-order completion unless a reorder buffer is present to ensure in-order completion.
 
-The software responsible for system virtual machines is called a hypervisor, with individual virtual machines operating under it referred to as guest virtual machines.
-Each guest operating system maintains its set of page tables:
-\begin{itemize}
-    \item The hypervisor introduces a layer of memory between physical and virtual memory, termed real memory.
-    \item The hypervisor maintains a shadow page table mapping guest virtual addresses to physical addresses. 
-        This necessitates the hypervisor's ability to detect changes made by the guest to its page table, which naturally occurs if accessing the page table pointer is a privileged operation.
-\end{itemize}
+\subsection{Static scheduling}
+In static scheduling, compilers use sophisticated algorithms for code scheduling to harness ILP. 
+While the ILP available within a basic block is often limited, significant performance improvements can be achieved by exploiting ILP across multiple basic blocks, transcending branches. 
+Static scheduling involves the compiler detecting and resolving dependencies by reordering code to avoid conflicts. 
+The compiler's output is typically dependency-free code, which is well-suited for architectures like Very Long Instruction Word (VLIW) processors. 
+However, there are limits to ILP exploitation, including unpredictable branches, variable memory latency such as unpredictable cache misses, code size explosion, and increased compiler complexity.

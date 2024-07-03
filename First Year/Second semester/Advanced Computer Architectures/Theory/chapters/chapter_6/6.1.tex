@@ -1,18 +1,43 @@
-\section{Introduction}
+\section{Multithreading}
 
-Every branch incurs a single stall to fetch the correct instruction flow: either the (PC+4) or the branch target address. 
-Our goal is to predict the outcome of a branch instruction as early as possible to enhance performance. 
-The performance of a branch prediction technique depends on three key factors:
-\begin{enumerate}
-    \item \textit{Accuracy}: this is determined by the percentage of incorrect predictions made by the predictor.
-    \item \textit{Cost of misprediction}: this refers to the time lost executing unnecessary instructions due to an incorrect prediction (misprediction penalty). 
-        This cost increases notably in deeply pipelined processors.
-    \item \textit{Branch frequency}: the frequency of branches within the application plays a significant role. 
-        Accurate branch prediction is particularly crucial in programs with higher branch frequencies.
-\end{enumerate}
-Various methods address the performance degradation resulting from branch hazards:
+Modern processors often struggle to efficiently utilize their execution resources due to issues such as memory conflicts, control hazards, branch mispredictions, and cache misses.
+Addressing these challenges individually often provides limited effectiveness. 
+Therefore, there is a need for a comprehensive latency-tolerance solution capable of masking all sources of latency to significantly improve performance.
+
+\subsection{Parallel programming}
+Explicit parallelism involves organizing applications into concurrent and communicating tasks. 
+Operating systems support various types of tasks, with processes and threads being the most prevalent. 
+Multitasking implementations vary based on the characteristics of the processor, whether it is single-core, single-core with multithreading support, or multicore.
+
+Multithreading allows multiple threads to share the functional units (FUs) of a single processor by overlapping their execution. 
+Each thread requires independent state duplication, including separate copies of the Register File, PC, and, for running independent programs, separate page tables. 
+Memory sharing occurs through virtual memory mechanisms, which inherently support multiple processes. 
+Hardware is optimized for rapid thread switching, which is significantly faster than switching between full processes.
+Thread switching can occur in two main ways:
 \begin{itemize}
-    \item \textit{Static branch prediction techniques}: predefined actions for each branch remain constant throughout program execution, determined at compile time.
-    \item \textit{Dynamic branch prediction techniques}: decisions leading to branch prediction may alter during program execution.
+    \item \textit{Fine-grained multithreading}: the processor switches between threads at every instruction, interleaving the execution of multiple threads. 
+        This requires the CPU to be capable of changing threads every clock cycle, necessitating duplicated hardware resources.
+    \item \textit{Coarse-grained multithreading}: the processor switches between threads only during extended stalls, such as when there is a cache miss. 
+        Two threads share many system resources, and switching between them requires several clock cycles to save and restore context. 
+        This approach does not impact the throughput of a single thread under normal conditions and does not require extremely rapid thread-switching capabilities. 
+        However, it does not reduce throughput loss for short stalls, as the CPU must drain the pipeline before switching to a new thread.
 \end{itemize}
-In both approaches, caution is essential to avoid altering the processor state until the branch outcome is definitively determined.
+
+\subsection{Thread-level parallelism}
+ILP and TLP exploit different forms of parallelism within a program.
+Processors designed for ILP often experience idle FUs due to stalls or dependencies in code execution. 
+TLP addresses this by providing independent instructions from multiple threads to keep the processor busy during these stalls, effectively utilizing otherwise idle FUs. 
+Modern superscalar processors can leverage both ILP and TLP simultaneously.
+
+The primary motivation behind TLP is that modern CPUs possess more functional resources than a single thread can fully utilize. 
+Techniques like Register Renaming and dynamic scheduling enable the processor to issue independent instructions from different threads without concerns about dependencies, which are managed by hardware mechanisms.
+
+Simultaneous Multithreading (SMT) further builds upon these concepts by leveraging existing hardware mechanisms in dynamically scheduled processors. 
+This includes a large set of virtual registers to accommodate register sets from multiple threads, and Register Renaming to ensure unique register identifiers. 
+Instructions from multiple threads can be interleaved in the data path without confusion over their sources and destinations across threads. 
+Out-of-order completion enhances hardware utilization by allowing instructions to complete as soon as their operands are available.
+
+Implementation of SMT typically involves adding a per-thread renaming table and maintaining separate Program Counters (PCs) for each thread. 
+Independent commitment is supported by logically segregating a reorder buffer for each thread. 
+This dynamic adaptation enables the CPU to execute instructions from each thread as needed, efficiently utilizing all available functional units. 
+The number of threads can significantly increase the CPU's potential issue opportunities per cycle, constrained primarily by resource availability and demand imbalance.

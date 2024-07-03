@@ -1,83 +1,40 @@
-\section{Cache performance}
+\section{Dependency}
 
-\begin{definition}[\textit{Memory stall cycles}]
-    Memory stall cycles is the number of cycles in which the CPU is not working (stalled) waiting for a memory access. 
-\end{definition}
-We assume that the cycle time includes the time necessary to manage a cache hit and that during a cache miss the CPU is stalled. 
-We can now compute: 
-\[\text{CPU execution time}=\left(\text{CPU clock cycles}+\text{Memory stall cycles} \right) \cdot \text{Clock cycle time}\]
-\[\text{Memory stall cycles}=\text{Number of misses} \cdot \text{Miss penalty}\]
-We can simplify by averaging reads and writes: 
-\[\text{Memory stall cycles} = \text{IC} \cdot (\dfrac{\text{Memory accesses}}{\text{Instruction}})\cdot \text{Miss rate} \cdot \text{Miss penalty}\]
-This value is independent of the hardware implementation, but dependent on the architecture. 
+To achieve higher performance within a given technology, it is crucial to extract more parallelism from the program. 
+This involves detecting and resolving dependencies and scheduling instructions to maximize execution parallelism with the available resources.
 
-On the other hand the average access time is computed as: 
-\begin{align*}
-    T_A &= H_{rate} \cdot H_{time}+ M_{rate} \cdot M_{time} \\
-        &= H_{rate} \cdot H_{time}+ M_{rate} \cdot \left( H_{time}+M_{penalty} \right) \\
-        &= H_{time} \cdot \left(H_{rate} + M_{rate}\right) + M_{rate} \cdot M_{penalty} \\
-        &= H_{time} + M_{rate} \cdot M_{penalty}
-\end{align*}
+Dependencies among instructions are key to determining the level of parallelism in a program. 
+If two instructions are dependent on each other, they cannot execute simultaneously and must be executed sequentially or with limited overlap. 
+There are three types of dependencies: name, data, and control dependencies.
 
-\subsection{Basic cache optimizations}
-The access time for a cache can be optimized by: 
+\subsection{Name dependency}
+A name dependency occurs when two instructions use the same register or memory location without any data flow between them.
+There are two types of name dependencies between an instruction $i$ preceding instruction $j$:
 \begin{itemize}
-    \item Reducing $M_{rate}$: 
-        \begin{itemize}
-            \item Larger Block size (compulsory misses): 
-            \item Larger Cache size (capacity misses): 
-            \item Higher Associativity (conflict misses): 
-        \end{itemize}
-    \item Reducing $M_{penalty}$: 
-        \begin{itemize}
-            \item Multilevel Caches: 
-        \end{itemize}
-    \item Reducing $H_{time}$: 
-        \begin{itemize}
-            \item Giving Reads Priority over Writes: 
-        \end{itemize}
+    \item \textit{Anti-dependence} (WAR): occurs when $j$ writes to a register or memory location that instruction $i$ reads. 
+    \item \textit{Output dependence} (WAW): arises when both $i$ and $j$ write to the same register or memory location. 
 \end{itemize}
+Name dependencies differ from true data dependencies as there is no data flow between the instructions.
 
-\subsection{Cache design}
-Within the realm of cache design, various factors interplay: cache size, block size, associativity, replacement policy, and the choice between write-through and write-back mechanisms. 
-Determining the best option involves finding a balance influenced by access patterns (workload and usage) and technological expenses. 
-Often, simplicity emerges as the preferred solution.
+\paragraph*{Register Renaming}
+If the names used in the instructions can be altered, the instructions do not conflict. 
+Detecting dependencies through memory locations is more challenging since two addresses might refer to the same location but appear different. 
+Register renaming is easier to implement and can be accomplished statically by the compiler or dynamically by the hardware.
 
-The performance metrics used to evaluate the performance are: 
+\subsection{Data dependency}
+Data dependencies can potentially create data hazards, but the actual hazard and the number of stalls required to eliminate it depend on the pipeline. 
+There are three types of data hazards:
 \begin{itemize}
-    \item Latency is concern of cache.
-    \item Bandwidth is concern of multiprocessors and I/O.
-    \item Access time: time between read request and when desired word arrives. 
-    \item Cycle time: minimum time between unrelated requests to memory.
+    \item \textit{RAW hazards}: true data dependence.
+    \item \textit{WAW hazards}: output dependence
+    \item \textit{WAR hazards}: anti-dependence.
 \end{itemize}
-DRAM used for main memory, SRAM used for cache. 
+It is important to note that data dependencies are inherent to the program, while hazards are specific to the pipeline.
 
-\paragraph*{SRAM}
-SRAM memory requires low power to retain bit and requires six transistors for each bit. 
-
-\paragraph*{DRAM}
-The DRAM must be re-written after being read and also periodically refreshed (each row simultaneously every eight milliseconds). 
-However, this type of memory requires only one transistor per bit. 
-The address lines are multiplexed:
+\subsection{Control dependency}
+Control dependencies dictate the order of instruction execution, preserved by:
 \begin{itemize}
-    \item Upper half of address: row access strobe (RAS). 
-    \item Lower half of address: column access strobe (CAS). 
+    \item Executing instructions in program order to ensure that an instruction before a branch executes before the branch.
+    \item Detecting control hazards to ensure that an instruction dependent on a branch is not executed until the branch direction is known.
 \end{itemize}
-
-\paragraph*{Flash memory}
-Flash memory belongs to the category of EEPROM, necessitating block erasure prior to overwrite. 
-It retains data without power, constituting non-volatile storage.
-With a finite number of write cycles, it falls in price between SDRAM and disk storage. 
-Although slower than SRAM, it outpaces traditional disk speeds.
-
-\paragraph*{Optimizations}
-The Amdahl law states that the memory capacity should grow linearly with processor speed. 
-Unfortunately, memory capacity and speed has not kept pace with processors. 
-To overcome this issue some optimizations are possible: 
-\begin{itemize}
-    \item Multiple accesses to same row. 
-    \item Synchronous DRAM: added clock to DRAM interface, and burst mode with critical word first.
-    \item Wider interfaces.
-    \item Double data rate (DDR).
-    \item Multiple banks on each DRAM device.
-\end{itemize}
+While preserving control dependence is a simple way to maintain program order, it is not the most critical property that must be preserved for execution.
