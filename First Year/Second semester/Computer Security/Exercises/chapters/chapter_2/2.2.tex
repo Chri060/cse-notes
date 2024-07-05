@@ -1,24 +1,30 @@
-\section{Exercise two}
-Translate the given C code into assembly x86. 
-\begin{verbatim}
-a = 0;
-for(i = 0; i < 10; i++)
-    a += i;
-\end{verbatim}
-Assume $a$ is stored in EAX.
+\section{Exercise 2}
+
+Consider the following authentication system. 
+Each legitimate user generates a key pair for an asymmetric encryption scheme, and uploads on the server which should be authenticating her the corresponding public key. 
+To get authenticated, the user draws a random string $r$, decrypts it with her own private key obtaining a string $s$, and sends the pair $(r,s)$ to the server over a confidential and integrity preserving channel. 
+The server encrypts $s$ with the user's public key and checks if the result matches $r$, in which case it authenticates the user.
+\begin{enumerate}
+    \item Argue on whether this system is providing proper authentication, either justifying why it is secure, or showing an attack and proposing a working countermeasure. 
+        To this end, consider an attacker which comes into possession of a user's public key $k_{pub}$.
+    \item Consider the following password-based authentication mechanism: you mandate that the user inputs six words, uniformly randomly drawn from an English dictionary (containing $2^{14}$ words).
+        Whilst your users have been trained to randomly pick the words, you want to put up an extra layer of defenses, locking an account after some number $n$ of failed attempts.
+        Consider the following scenario: one user every eight picks two words from the dictionary at random, and repeats them three times.
+        What is the value of $n$ capping the probability of a successful sequence of $n$ guesses to at most one in a billion? 
+        Justify your answer.
+        Describe a simple check upon password enrollment/renewal, which is more effective than the guessing cap, and quantify its effectiveness.
+\end{enumerate}
 
 \subsection*{Solution}
-The equivalent assembly code for the C program is as follows:
-\begin{verbatim}
-    mov eax, 0
-    mov ebx, 0
-    mov ecx, 10
-LOOP:
-    cmp ebx, ecx
-    jge END
-    add eax, ebx
-    inc ebx
-    jmp LOOP
-END:
-    nop
-\end{verbatim}
+\begin{enumerate}
+    \item  The authentication system can be broken in the following way. 
+        The attacker picks a random string $s^\prime$, encrypts it with $k_{pub}$ obtaining $r^\prime$, and sends $(r^\prime,s^\prime)$ to the server. 
+        Switching the asymmetric primitive from an encryption to a signature scheme fixes the problem, as an attacker would need to randomly guess a valid signature string which can be verified with the user's public key.
+    \item Notice that the system does not prevent an attacker from trying to guess the passwords of multiple accounts simultaneously: the accounts will be locked only when the failed attempts against a single account are more than $n$.
+        As a consequence, we can assume that the attacker will always be hitting at least an account of a user with poor password policies. 
+        This results in a single guess succeeding with probability $(2^{-14})^2 = 2^{-28}$, which is already higher than our target ($\sim 2^{-30}$). 
+        No cap can improve this. 
+        A simple check upon password enrollment is to test that at least a subset of the words composing the password are different. 
+        While this reduces the possible passwords, it does so by a negligible amount.
+        As an example consider testing that at least four words are different: this reduces the number of potential passwords from $2^{84}$ to $2^{84-(2^{14}+20\cdot 2^{28}+30\cdot 2^{42})} < 2^{84-(32\cdot 2^{42})} = 2^{84-(2^{47})}$, which is still way larger than $2^{83}$, thus definitely large enough.
+\end{enumerate}

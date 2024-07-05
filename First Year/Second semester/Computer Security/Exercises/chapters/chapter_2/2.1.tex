@@ -1,24 +1,20 @@
-\section{Exercise one}
-Translate the given C code into assembly x86. 
-\begin{verbatim}
-if (c == 0)
-    a = b;
-else
-    a = -b;
-\end{verbatim}
-Assume $b$ is stored in EBX, $c$ is stored in ECX, and $a$ is stored in EAX.
+\section{Exercise 1}
+
+Consider a data protection mechanism which encrypts an entire hard disk, block by block, by means of AES in Counter (CTR) mode, employing a 128 bit key.
+The system administrator, following a new directive which mandates keys to be at least 256 bits long, implements the following compatibility measure: it encrypts the volume again, with the same 128 bit key and counter. 
+Argue on whether the method provides a security margin which is larger, smaller or the same with respect to the original encryption scheme. 
+\begin{enumerate}
+    \item Describe an alternative measure to comply with the directory, other than decrypting and re-encrypting the entire volume.
+    \item Considering the aforementioned scenario, is it possible to claim that the information on the disk cannot be tampered with in a meaningful way, given that all the information on disk is fully encrypted? 
+        Either support the claim or disprove it providing a practical example and a solution to prevent tampering.
+\end{enumerate}
 
 \subsection*{Solution}
-The equivalent assembly code for the C program is as follows:
-\begin{verbatim}
-    mov edx, 0
-    cmp ecx, edx
-    jne ELSE
-    mov eax, ebx
-    jmp ENDIF
-ELSE:
-    mov eax, 0
-    sub eax, ebx
-ENDIF:
-    nop
-\end{verbatim}
+\begin{enumerate}
+    \item The compatibility measure is actually decrypting the volume, as applying twice the AES-CTR encryption function with the same key and counter adds via xor the same pseudorandom pad to the ciphertext. 
+        The security margin is clearly lower than before: it's non-existent.
+        Encrypting with AES-CTR and a different 128 bit key actually solves the decryption issue, and provides 256 bits of equivalent security (under the largely believed assumption that AES is not a group).
+    \item Encrypting data with AES in counter mode does not provide any protection against tampering. 
+        Indeed, an attacker could modify the ciphertext at her own will, knowing that a bit flip in the ciphertext will result in a bit flip in the plaintext, in the same position. 
+        Adding a message authentication code (MAC) to the data (e.g., disk-block-wise) prevents tampering altogether.
+\end{enumerate}

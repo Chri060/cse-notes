@@ -1,0 +1,46 @@
+\section{Exercise 5}
+
+Tomb-Bino is a novel malware family that spreads through email attachments, turning infected computers into peers of a command and control infrastructure. 
+An attacker can then command an infected computer remotely, for instance, to perform DDoS, steal data, etc.
+Its body comprises three functions, which are loaded into memory when the victim clicks on the email attachment: spread, mutate, and sit\_and\_wait.
+spread performs the following operations (in order):
+\begin{enumerate}
+    \item Steals the list of the user's contacts.
+    \item Calls mutate.
+    \item Creates a new file, new\_attachment.jpeg.exe, whose instructions are dumped from the process memory.
+    \item Sends new\_attachment.jpeg.exe to every user in the contact list as an email attachment.
+\end{enumerate}
+mutate takes as input (start\_address, number\_of\_bytes) and substitutes each instruction found in memory at [start\_address, (start\_address + number\_of\_bytes)] with a semantically equivalent one. 
+For instance, instruction sub eax, 0x1 is substituted with add eax, -0x1. 
+Substitutions are performed directly to the memory.
+Lastly, sit\_and\_wait simply waits for commands from the server and executes them.
+The following is a simplified view of the process memory when a Tomb-Bino instance is executed:
+\begin{verbatim}
+0x00100000 <spread>
+(1000 bytes long)
+0x001003e8 <sit_and_wait>
+(2000 bytes long)
+0x00100bb8 <mutate>
+(4000 bytes long)
+\end{verbatim}
+\begin{enumerate}
+    \item What type of class does this malware most likely belong to (encrypted, polymorphic, metamorphic, evasive)?
+        Motivate your answer. 
+    \item Suppose that the headers (i.e., library imports, file details, etc) of each “new\_attachment.jpeg.exe” cannot be used to generate signatures. 
+        Moreover, suppose that spread invokes mutate with parameters (0x00100000, 3000).
+        Could this family of malware be detected through signatures? 
+        If yes, explain why. 
+        If not, propose a different detection strategy. 
+    \item Given the nature of Tomb-Bino (i.e., a command and control trojan that spreads via email), how would you employ dynamic analysis to detect it? 
+        In particular, what kind of resources or operations would you monitor? 
+        (Note: a description of command and control malware is provided at the beginning of this section)
+\end{enumerate}
+
+\subsection*{Solution}
+\begin{enumerate}
+    \item Metamorphic: mutate produces semantically equivalent but different code. 
+    \item Yes, it can be detected through signatures.
+        When the malware mutates (i.e., when the function mutate is invoked), it only changes the first two functions, leaving the mutation engine (i.e., mutate) unchanged. 
+        Therefore, an antivirus could use mutate as a target for its signatures.
+    \item Email access (retrieve contacts, send emails) and general networking operations (listen on a port, sending/receiving data to specific IPs).
+\end{enumerate}

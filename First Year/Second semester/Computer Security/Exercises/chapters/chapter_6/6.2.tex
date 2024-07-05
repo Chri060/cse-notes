@@ -1,77 +1,85 @@
 \section{Exercise 2}
 
-“SHIPSTUFF” is a new online service that allow registered users to send stuff to other registered users by filling a form. 
-The form must contain the product\_id of the product to send and the receiver\_id of the receiver. 
-After clicking on the submit button, the web browser will make the following GET request to the web server:
+A new malware just broke out, causing a world-wide infection and a huge amount of damages. 
+Unfortunately, all the anti-malware systems are not able to detect this malware. 
+You were able to retrieve a couple of samples.
+Consider the code snippets reported below, extracted from the two malware samples you retrieved:
 \begin{verbatim}
-https://shipstuff.org/ship?product_id=<product_id>&receiver_id=<receiver_id>
+0000000000000675 <decrypt>:
+[...]
+    6a3: 83 f1 42 xor ecx,0x42
+[...]
+00000000000007b0 <payload>:
+    7b0: 28 00 sub BYTE PTR
+[rax],al
+    7b2: 1a bc 86 0a db 10 0a sbb bh,BYTE PTR
+[rsi+rax*4+0xa10db0a]
+    7b9: fd std
+    7ba: 6d ins DWORD PTR
+es:[rdi],dx
+    7bb: 20 2b and BYTE PTR
+[rbx],ch
+    7bd: 2c 6d sub al,0x6d
+    7bf: 6d ins DWORD PTR
+es:[rdi],dx
+    7c0: 31 2a xor DWORD PTR
+[rdx],ebp
+    7c2: 15 16 1c 0b cb adc eax,0xcb0b1c16
+    7c7: 92 xchg edx,eax
+    7c8: 0b cb or ecx,ebx
+    7ca: 90 nop
+    7cb: 4d rex.WRB
+    7cc: 47 rex.RXB
 \end{verbatim}
-The Python-like pseudocode that will handle the shipment is the following:
-\begin{verbnobox}[\verbarg]
-def ship_stuff(request):
-    # code to send HTTP header (not relevant) 
-    user = check_cookie(request.cookie)
-    if user is None:
-        print "Please log in first"
-        return
 
-    product_id = request.params['product_id'] # GET parameter
-    receiver_id = request.params['receiver_id'] # GET parameter
-
-    query1 = 'SELECT p_id, product_name FROM warehouse, ownership WHERE p_id = ' + product_id + 'AND user.id = ownership.u_id ' + 'AND ownership.p_id = warehouse.p_id;'
-    db.execute(query)
-    row = db.fetchone()
-    if row is None:
-        print "Product", product_id, "is not existent"
-        return
-
-    query2 = 'SELECT u_id, username FROM accounts WHERE u_id = ' + receiver_id + ';'
-    db.execute(query)
-    row = db.fetchone()
-    if row is None:
-        print "User", receiver_id, "is not existent"
-        return
-    # code to actually send the product and print the product name 
-\end{verbnobox}
-The above code checks if the user is logged in using the function check\_cookie, which returns the username of the authenticated user checking the session cookie. 
-Then, the code attempts to retrieve the product\_id or the receiver\_id from the database and, if they cannot be located the page will contain an error message.
-Assume that request.params['product\_id'] and request.params[receiver\_id'] are controllable by the user, and that all the functionalities concerning the user authentication (i.e., check\_cookie) are securely implemented and do not contain vulnerabilities.
-
-Now assume that SHIPSTUFF executes all the database queries against the following tables:
-\begin{itemize}
-    \item Accounts: UserID, Username, Password. 
-    \item Ownership: UserID, ProductID. 
-    \item Warehouse: ProductID, ProductName.
-\end{itemize}
+\begin{verbatim}
+0000000000000675 <decrypt>:
+[...]
+    6a3: 83 f1 42 xor ecx,0x12
+[...]
+00000000000007b0 <payload>:
+    7b0: 78 50 js 802
+<__GNU_EH_FRAME_HDR+0x32>
+    7b2: 4a ec rex.WX in al,dx
+    7b4: d6 (bad)
+    7b5: 5a pop rdx
+    7b6: 8b 40 5a mov eax,DWORD PTR
+[rax+0x5a]
+    7b9: ad lods eax,DWORD PTR
+ds:[rsi]
+    7ba: 3d 70 7b 7c 3d cmp eax,0x3d7c7b70
+    7bf: 3d 61 7a 45 46 cmp eax,0x46457a61
+    7c4: 4c 5b rex.WR pop rbx
+    7c6: 9b fwait
+    7c7: c2 5b 9b ret 0x9b5b
+    7ca: c0 .byte 0xc0
+    7cb: 1d .byte 0x1d
+    7cc: 17 (bad) 
+\end{verbatim}
 \begin{enumerate}
-    \item Only considering the code above, identify which of the following classes of web application vulnerabilities are present. 
-    \item Write an exploit for one of the vulnerability/ies just identified to get the username and the password of the only user that owns the product excalibur.
-    By assuming that products are unique, state all the necessary steps and conditions for the exploit to take place.
+    \item It is clear that the malware is showing evasive behavior. 
+        What technique is implemented? How this technique works?
+\end{enumerate}
+In order to avoid signature detection, a malware sample saves his own assembly code in text format on the victim machine, and then uses a standard assembler to generate and execute the real malicious object code on the machine. 
+\begin{enumerate}
+    \item [2. ] How can a signature-based detection method (e.g., antivirus) detect this kind of malware ? 
+    \item [3. ] You suspect that your machine have been compromised with a kernel rootkit. 
+        You tried to use network traffic tools from your machine but you do not see any malicious traffic. 
+        Can you conclude that your machine is safe? If is not there are other way to prove you have been compromised?
+    \item [4. ] A colleague suggests to replace the hard drive of a machine to be sure to get rid of a very sophisticated rootkit.
+        However, after reinstalling the operating system, it seems like that the machine is infected by the same rootkit. 
+        Provide an explanation of what happened. 
+        Whatever your answer is, explain why.
 \end{enumerate}
 
 \subsection*{Solution}
 \begin{enumerate}
-    \item We have the following vulnerabilities: 
-        \begin{itemize}
-            \item Reflected XSS: an attacker can supply a product\_id or the receiver\_id containing e.g.,
-\begin{verbatim}
-<script>alert(document.cookie)</script>
-\end{verbatim}
-                and the web server would print that script tag to the browser, and the browser will run the code from the URL.
-                The simplest procedure to prevent this vulnerability is to apply escaping/filtering to the vulnerable variable. For example: \texttt{product\_id}. 
-            \item CSFR: an attacker can send a link to a victim and let the victim ship a product to him by just visiting the link. 
-                The simplest procedure to prevent this vulnerability is to apply CSRF token.
-            \item SQL injection: user-controlled data is concatenated a query, allowing an attacker to modify such query.
-                The simplest procedure to prevent this vulnerability is to apply prepared statement
-        \end{itemize}
-    \item We need to modify the queries as follows: 
-\begin{verbatim}
-0 AND 0=1 UNION SELECT a.u_id, a.password FROM accounts AS a,
-ownership AS o, products AS p WHERE o.u_id = a.u_id AND o.p_id 
-= p.p_id AND p.product_name = 'excalibur';--
-
-0 AND 0=1 UNION SELECT a.u_id, a.username FROM accounts AS a,
-ownership AS o, products AS p WHERE o.u_id = a.u_id AND o.p_id 
-= p.p_id AND p.product_name = 'excalibur';--
-\end{verbatim}
+    \item Polymorphism. 
+    \item Have a signature to detect the malware in its textual assembly format. 
+        Note that having a signature to detect the assembler is a wrong solution, as it leads to lots of false positives (the system assembler it's a legitimate program, after all).
+    \item No you cannot conclude that the machine have not been compromised. 
+        Because the malware can hide its own traffic from tools running on the compromised machine. 
+        You could inspect network traffic using an external machine as a MitM between your machine and the router.
+    \item If it is a BIOS rootkit then no. 
+        If it is a kernel rootkit it is ok to just replace the HD or even just reinstall the OS.
 \end{enumerate}

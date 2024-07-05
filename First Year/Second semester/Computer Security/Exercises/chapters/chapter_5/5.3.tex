@@ -1,0 +1,31 @@
+\section{Exercise 3}
+
+A network analyst is analyzing some traffic captured from a network belonging to Politecnico di Milano. 
+The network is: 131.175.0.0/16. 
+In particular, we suspect that a database server, whose IP address is 131.175.14.12, is victim of an attack. 
+Indeed, observing the network traffic, we notice the following pattern:
+\begin{itemize}
+    \item 131.175.14.12 $\rightarrow$ 131.175.255.255 [ICMP] Echo (ping) request (broadcast)
+    \item 131.175.0.2 $\rightarrow$ 131.175.14.12 [ICMP] Echo (ping) reply
+    \item 7a:ce:29 $\rightarrow$ ff:ff:ff (broadcast) [ARP] Who has 131.175.14.12? Tell 131.175.0.2
+    \item 4b:74:28 $\rightarrow$ 7a:ce:29 [ARP] 131.175.14.12 is at 4b:74:28
+    \item 131.175.0.3 $\rightarrow$ 131.175.14.12 [ICMP] Echo (ping) reply
+    \item 131.175.0.4 $\rightarrow$ 131.175.14.12 [ICMP] Echo (ping) reply $\vdots$
+    \item 131.175.255.251 $\rightarrow$ 131.175.14.12 [ICMP] Echo (ping) reply
+    \item 131.175.255.252 $\rightarrow$ 131.175.14.12 [ICMP] Echo (ping) reply
+    \item 131.175.255.253 $\rightarrow$ 131.175.14.12 [ICMP] Echo (ping) reply
+\end{itemize}
+
+\begin{enumerate}
+    \item Describe what attack you think is going on, and what is the feature (or lack thereof) of the involved protocol(s) that enable this attack.
+    \item Describe what you think is the concrete goal(s) of the attack in this scenario. 
+    \item Can you tell the IP and MAC address of the attacker? Why?
+\end{enumerate}
+
+\subsection*{Solution}
+\begin{enumerate}
+    \item PING Smurf. 
+    \item The goal is to saturate the resources of the victim using other machines on the network as an amplification mean. 
+        This results in a denial of service. 
+    \item No, the IP address is spoofed for sure, and the MAC address can be spoofed as well.
+\end{enumerate}

@@ -1,78 +1,117 @@
 \section{Exercise 3}
 
-A web application contains three pages to handle login, post comments, and read comments, all served over a secure HTTPS connection.
-Here you can find code snippet of these pages:
-Show comments
-\begin{verbnobox}[\verbarg]
-var id = request.get['id'];
-var prep_query = prepared_statement("SELECT username FROM users WHERE id=? LIMIT 1");
-var username = query(prep_query, id);
-var prep_query = prepared_statement("SELECT * FROM comments WHERE username=?");
-var comments = query(prep_query, username);
-for comment in comments {
-    echo htmlentities(comment);
-}   
-\end{verbnobox}
-Login 
-\begin{verbnobox}[\verbarg]
-var password = md5(request.post['password']);
-var username = request.post['username'];
-var prep_query = prepared_statement("SELECT username FROM users WHERE username=? AND password=? LIMIT 1");
-var result = query(prep_query, username, password);
-if (result) {
-    session.set('username', username);
-    echo "Logged in.";
-} else {
-    echo "User" + username + "does not exists!";
-}
-\end{verbnobox}
-Write comment
-\begin{verbnobox}[\verbarg]
-var username = session.get['username']; // You need to be logged in
-var comment = request.get['comment'];
-var res = query("INSERT INTO comments (username, comment, timestamp) VALUES ( “ + username + ” , “+ comment + ” , NOW())");
-    echo "Comment saved.";
-\end{verbnobox}
-Assume the following:
-\begin{itemize}
-    \item The framework used to develop the web application securely and transparently manages the users' sessions through the object session.
-    \item The dictionaries request.get and request.post store the content of the parameters passed through a GET or POST request respectively. 
-    \item The function htmlentities() converts special characters such as <, >, ", and ' to their equivalent HTML entities (i.e., \&lt;, \&gt;, \&quot; and \&apos; respectively).
-\end{itemize}
-As it is clear from the code, this application uses a database to store data.
-These are tables of the database:
-\begin{itemize}
-    \item Users: Id, Name, Password. 
-    \item Comments: Id, User, Comment, Timestamp.
-\end{itemize}
-\begin{enumerate}
-    \item Only considering the code above, identify which of the following classes of web application vulnerabilities are present. 
-    \item Exploiting one of the vulnerability detected before, write down an exploit to get the hash of the password of admin. 
-        You must also specify all the steps and assumptions.
-    \item You are the database administrator and have no way to modify the above code. 
-        How would you mitigate the damage that an attacker can do?
-\end{enumerate}
+Our systems have been compromised by a very powerful malware that encrypted all the files in the /home directories of our systems.
+Luckily, we succeeded in collecting two samples. 
+Luckily, we succeeded in collecting two versions of the same malware. 
+The code of the two malware samples is reported below.
+\begin{verbatim}
+.text
+0x08048047<evil>:
+0x08048047: push ebp
+0x08048049: mov ebp,esp
+0x08048050: mov eax,0x8090000
+0x08048055: mov ebx,0x8048086
+0x0804805a: mov cl,BYTE PTR [eax]
+0x0804806c: mov dl,BYTE PTR [ebx]
+0x0804806e: cmp cl,0x0
+0x08048071: je 0x08048086
+0x08048077: xor dl,cl
+0x08048079: mov BYTE PTR [ebx],dl
+0x0804807b: add eax,0x1
+0x0804807e: add ebx,0x1
+0x08048081: jmp 0x0804805a
+0x08048086: sub DWORD PTR [ebx+0x2e],eax
+0x08048089: push DWORD PTR [edi]
+0x0804808b: sub ebx,DWORD PTR [eax-0x3f66bf99]
+0x08048091: retf
+0x08048092: mov bh,0xdf
+0x08048094: sub ebp,DWORD PTR [ebx+0x3ef5045b]
+0x0804809a: imul ecx,DWORD PTR [eax+0x40],0x31
+0x0804809e: and al,0x39
+0x080480a0: pop eax
+0x080480a1: mov edi,0x5d97e942
+0x080480a6: loope 0xffffffb2
+0x080480a8: cli
+0x080480a9: (bad)
+0x080480aa: (bad)
+0x080480ab: movs DWORD PTR es:[edi],DWORD PTR ds:[esi]
+0x080480ac: shl BYTE PTR [ecx],1
+0x080480ae: leave
+0x080480af: ret
+.rodata
+0x08090000: <Data with length 40, null terminated>
+\end{verbatim}
 
+\begin{verbatim}
+.text
+0x08048046<evil>:
+0x08048046: push ebp
+0x08048048: mov ebp,esp
+0x0804804a: mov ebx,0x0804806b
+0x0804804f: xor eax,eax
+0x08048051: cmp eax,0x28
+0x08048054: jge 0x0804806b
+0x0804805a: mov cl,BYTE PTR [ebx + eax]
+0x0804805d: sub cl,0x3
+0x08048060: mov BYTE PTR [ebx + eax],cl
+0x08048063: add eax,1
+0x08048066: jmp 0x08048051
+0x0804806b: fstp QWORD PTR [eax+eiz*2+0x22e70b6d]
+0x08048072: jg 0xfffffffa
+0x08048074: push ebp
+0x08048075: lea ecx,ds:0xf130af40
+0x0804807b: fisub WORD PTR [edx-0x703c814d]
+0x08048081: mov eax,edi
+0x08048083: or eax,DWORD PTR ds:0xd19fe443
+0x08048089: bswap esp
+0x0804808b: stos DWORD PTR es:[edi],eax
+0x0804808c: sbb eax,DWORD PTR [eax+0x50]
+0x0804808f: fimul WORD PTR [esp+edi*4]
+0x08048092: (bad)
+0x08048093: leave
+0x08048094: ret 
+\end{verbatim}
+\begin{enumerate}
+    \item It is clear that the malware is showing evasive behavior.
+        What technique is implemented? Explain how it is implemented in this specific case. 
+        If this malware is metamorphic, explain which instructions implement the obfuscation functionality.
+        If this malware is evasive, explain how it is evading the environment. 
+        If this malware is polymorphic, describe how the decryption routine is implemented. 
+    \item We executed the two samples in a Virtual Environment. 
+        Tracing the system calls of two different executions with strace yields the following outputs (trimmed for readability):
+        \begin{verbatim}
+...
+open(“/home/law/.bashrc”, O_RDONLY) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=3979, ...}) = 0
+read(3, 0x7f508000, 3979) = 3979
+close(3) = 0
+open(“/home/law/.bashrc”, O_WRONLY|O_TRUNC) = 3
+write(3, 0x7f508000, 3984) = 3984
+close(3) = 0
+...
+(similar lines as above)
+...
+exit(0)
+        \end{verbatim}
+        \begin{verbatim}
+...
+sleep(0x1000)
+exit(0)
+        \end{verbatim}
+        What kind of technique does the malware employ? Is such a technique adopted by both samples? How can you spot it in both cases?
+    \item Is it possible to analyze this malware through static analysis? 
+        Why? 
+        Which instructions would you consider for fingerprint based detection? 
+        Do you expect this would be effective?
+ \end{enumerate}
 \subsection*{Solution}
 \begin{enumerate}
-    \item The vulnerabilities in the given code are: 
-        \begin{itemize}
-            \item Reflected XSS on line ten of the second code. 
-                An adversary can set up a form (hidden form) that submits a request with an username containing a malicious script e.g.,
-\begin{verbatim}
-<script>alert(document.cookie)</script>
-\end{verbatim}
-                and the web server would print that script tag to the browser, and the browser will run the code.
-                The simplest procedure to prevent this vulnerability is to apply escaping/filtering to the “username” variable. 
-            \item CSRF: on lines zero and four of the third code. 
-                An adversary can set up a form that submits a request to send a message, as this request will be honored by the server. 
-                To solve this problem, include a CSRF token with every legitimate request, and check that cookie['csrftoken']==param['csrftoken']. 
-            \item SQL injection: on lines three and four of the third code. 
-                The simplest procedure to prevent this vulnerability is to apply escaping/filtering to the “comment/username” variable.
-        \end{itemize}
-    \item The query is: 
-\begin{verbatim}
-... comment = '( SELECT password from users where name =“admin”)
-\end{verbatim}
-    \item As this page/application needs only to read data from the users table, we could restrict, at the database level, the privileges of the user of this application to only perform SELECTs involving the user table (and no operation involving the account\_balance table).
+    \item Polymorphism, the two malware samples employ an OTP (1st sample) and a shift-cipher (2nd sample) with $K = 3$ (Caesar's Cipher) to decrypt/unpack the malicious code.
+        Can't say if the malware is evasive or not since some part of the malware is packed.
+    \item The malware employs an evasive technique called dormant code.
+        Since it detects that it is running in a VM, it doesn't show its malicious behavior. 
+        Such a technique is performed with a sleep of 0x1000 seconds.
+        Only the second sample employs dormant code by performing a sleep syscall, clearly visibile in the strace of its execution.
+    \item No, because we only see the decryption routines.
+        No relevant instructions can be considered for a fingerprint based detection since the ones of the decryption routines are too generic and would lead to many false positives.
 \end{enumerate}

@@ -1,30 +1,59 @@
-\section{Exercise two}
+\section{Exercise 2}
 
-Consider the following authentication system. 
-Each legitimate user generates a key pair for an asymmetric encryption scheme, and uploads on the server which should be authenticating her the corresponding public key. 
-To get authenticated, the user draws a random string $r$, decrypts it with her own private key obtaining a string $s$, and sends the pair $(r,s)$ to the server over a confidential and integrity preserving channel. 
-The server encrypts $s$ with the user's public key and checks if the result matches $r$, in which case it authenticates the user.
+Consider the C program below:
+\begin{verbnobox}[\verbarg]
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+
+void vuln() {
+    char str[8];
+
+    scanf("%25s", str);
+    strrev(str); // reverse the string
+    if (strncmp(str, "DAVINCI:", 8) == 0) {
+        printf(“%s”, str);
+        return;
+    }
+    else
+        abort();
+}
+
+void main(int argc, char** argv) {
+    vuln()
+}
+\end{verbnobox}
 \begin{enumerate}
-    \item Argue on whether this system is providing proper authentication, either justifying why it is secure, or showing an attack and proposing a working countermeasure. 
-        To this end, consider an attacker which comes into possession of a user's public key $k_{pub}$.
-    \item Consider the following password-based authentication mechanism: you mandate that the user inputs six words, uniformly randomly drawn from an English dictionary (containing $2^{14}$ words).
-        Whilst your users have been trained to randomly pick the words, you want to put up an extra layer of defenses, locking an account after some number $n$ of failed attempts.
-        Consider the following scenario: one user every eight picks two words from the dictionary at random, and repeats them three times.
-        What is the value of $n$ capping the probability of a successful sequence of $n$ guesses to at most one in a billion? 
-        Justify your answer.
-        Describe a simple check upon password enrollment/renewal, which is more effective than the guessing cap, and quantify its effectiveness.
+    \item The program is affected by a typical buffer overflow. 
+        Find the line affected and describe the reason. 
+    \item Write an exploit for this vulnerability that must execute the following shell code, composed of 8 bytes, which opens a shell: \texttt{0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90}.
+        Describe all the steps and assumptions required to successfully exploit the vulnerability. 
+        Include also any assumption on how you must call and run the program: e.g., the values for the command-line arguments required to trigger the exploit correctly and/or environment variables (if any), the input provided during the execution, if multiple executions are necessary. 
+    \item Make sure that you show how the exploit will appear in the process memory with respect to the stack layout right before and after the execution of the vulnerable line during the program exploitation showing:
+        \begin{itemize}
+            \item Direction of growth and high-low addresses.
+            \item The name of each allocated variable.
+            \item The content of relevant registers.
+            \item The functions stack frames.
+        \end{itemize}
 \end{enumerate}
 
 \subsection*{Solution}
 \begin{enumerate}
-    \item  The authentication system can be broken in the following way. 
-        The attacker picks a random string $s^\prime$, encrypts it with $k_{pub}$ obtaining $r^\prime$, and sends $(r^\prime,s^\prime)$ to the server. 
-        Switching the asymmetric primitive from an encryption to a signature scheme fixes the problem, as an attacker would need to randomly guess a valid signature string which can be verified with the user's public key.
-    \item Notice that the system does not prevent an attacker from trying to guess the passwords of multiple accounts simultaneously: the accounts will be locked only when the failed attempts against a single account are more than $n$.
-        As a consequence, we can assume that the attacker will always be hitting at least an account of a user with poor password policies. 
-        This results in a single guess succeeding with probability $(2^{-14})^2 = 2^{-28}$, which is already higher than our target ($\sim 2^{-30}$). 
-        No cap can improve this. 
-        A simple check upon password enrollment is to test that at least a subset of the words composing the password are different. 
-        While this reduces the possible passwords, it does so by a negligible amount.
-        As an example consider testing that at least four words are different: this reduces the number of potential passwords from $2^{84}$ to $2^{84-(2^{14}+20\cdot 2^{28}+30\cdot 2^{42})} < 2^{84-(32\cdot 2^{42})} = 2^{84-(2^{47})}$, which is still way larger than $2^{83}$, thus definitely large enough.
+    \item The buffer overflow occurs on line eight due to the buffer being sized at eight, while the program attempts to read 25 characters.
+    \item The input required to exploit the vulnerability is as follows:
+        \begin{verbatim}
+DAVINCI:AAAA<ptr_to_shell code>\x31\x32\x33\x34\x35\x36\x37\x38
+        \end{verbatim}
+        However, due to the \texttt{strrev}, we need to revert the string. 
+        Hence the input will be:
+        \begin{verbatim}
+\x38\x37\x36\x35\x34\x33\x32\x31<ptr_to_shell code_inv>AAAA:ICNIVAD
+        \end{verbatim}
+    \item The stack is: 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.85\linewidth]{images/stack2.png}
+    \end{figure}
 \end{enumerate}

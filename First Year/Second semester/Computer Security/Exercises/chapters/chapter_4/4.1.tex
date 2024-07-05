@@ -1,57 +1,66 @@
-\section{Exercise one}
+\section{Exercise 1}
 
-Consider the C program below, which is affected by a typical buffer overflow vulnerability.
+Watson Files is a new system that lets you store files in the cloud. 
+Customers complain that old links often return a “404 File not found” error. 
+Sherlock decides to fix this problem modifying how the web server responds to requests for missing files. 
+The Python-like pseudocode that generates the “missing file” page is the following:
 \begin{verbnobox}[\verbarg]
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+def missing_file(cookie, reqpath):
+print "HTTP/1.0 200 OK"
+    print "Content-Type: text/html"
+    print ""
+    user = check_cookie(cookie)
+    if user is None:
+        print "Please log in first"
+        return
 
-void vuln() {
-    char buf[32];
-
-    scanf("%s", buf);
-    if (strncmp(buf, "Knight_King!", 12) != 0) {
-        abort();
-    }
-}
-
-int main(int argc, char** argv) {
-    vuln();
-}
+    print "<p>We are sorry, but the server could not locate file" + reqpath
+    print "<br>Try using the search function.</p>"
 \end{verbnobox}
+where \texttt{reqpath} is the requested path (e.g., if the user visits https://www.watsonfiles.com/dir/file.txt, the variable \texttt{reqpath} contains dir/file.txt). 
+The function \texttt{check\_cookie} returns the username of the authenticated user checking the session cookie (this function is securely implemented and does not have vulnerabilities).
+To download the files stored in Watson Files, users visit the page /download, which is processed by the following server-side pseudocode:
+\begin{verbnobox}[\verbarg]
+def download_file(cookie, params):
+    # code to initialize the HTTP response
+    user_id = check_cookie(cookie)
+    if user is None:
+        print "Please log in first"
+        return
+    filename = params['filename']
+    query = "SELECT file_id, data FROM files WHERE FILENAME = '" + filename + "';"
+    result = db.execute(query)
+    # code to print result['data']
+\end{verbnobox}
+where params is a dictionary containing the GET parameters (e.g., if a user visits /download?filename=holmes.txt, then params['filename'] will contain 'holmes.txt').
+The database queries are executed against the following tables:
+\begin{itemize}
+    \item UserID, Username, Password. 
+    \item FileId, Filename, Data.
+\end{itemize}
 \begin{enumerate}
-    \item Assume that the program runs on the usual IA-32 architecture (32-bits), with the usual \texttt{cdecl} calling convention. 
-        Also assume that the program is compiled without any mitigation against exploitation (ASLR is off, stack is executable, and stack canary is not present).
-        Draw the stack layout when the program is executing the instruction at line seven, showing:
-        \begin{itemize}
-            \item Direction of growth and high-low addresses.
-            \item The name of each allocated variable.
-            \item The boundaries of frame of the function frames (\texttt{main} and \texttt{vuln}).
-        \end{itemize}
-        Show also the content of the caller frame.
-    \item Write an exploit for the buffer overflow vulnerability in the above program. 
-        Your exploit should execute the following simple shell code, composed only by four instructions: \texttt{0x12 0x34 0x56 0x78}.
-        Write clearly all the steps and assumptions you need for the exploitation, and show the stack layout right after the execution of the \texttt{scanf()} during the program exploitation.
+    \item Check if there are cross-site scripting or cross-site request forgery in the \texttt{missing\_file} function. 
+        If there is a vulnerability, explain the simplest procedure to remove it. 
+    \item Identify the class of the vulnerability and briefly explain how it works in general.
+    \item Write an exploit for the vulnerability just identified to get the password of user John.
 \end{enumerate}
 
 \subsection*{Solution}
 \begin{enumerate}
-    \item To represent the stack layout described, we need to allocate space for the \texttt{buf} array, the saved EBP, and the saved EIP:
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.5\linewidth]{images/stack.png}
-        \end{figure}
-    \item The stack in this case is: 
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.75\linewidth]{images/stack1.png}
-        \end{figure}
-        In this layout:
-        \begin{itemize}
-            \item The first 16 bytes (four cells) are filled with no-operation instructions to avoid any unintended actions.
-            The next 8 bytes (two cells) are reserved for the \texttt{buf} array.
-            The following 4 bytes (one cell) are allocated for the saved EBP.
-            The last 4 bytes (one cell) contain the address of the shell code.
-        \end{itemize}
-        The first twelve characters of \texttt{buf} are ensured to be different from "Knight\_King!" to avoid invoking \texttt{abort()}.
+    \item There is an XSS because an attacker can supply a filename containing
+\begin{verbatim}
+<script>alert(document.cookie)</script> 
+\end{verbatim}
+        and the web server would print that script tag to the browser, and the browser will run the code from the URL.
+        The simplest procedure to prevent this vulnerability is to apply escaping/filtering to the reqpath variable.
+
+        There are no cross site request forgery because there is no state-changing action in the page that needs to be protected against CSRF.
+    \item SQL Injection. 
+        There must be a data flow from a user-controlled HTTP variable (e.g., parameter, cookie, or other header fields) to a SQL query, without appropriate filtering and validation. 
+        If this happens, the SQL structure of the query can be modified.
+    \item The SQL injection exploit is: 
+\begin{verbatim}
+' UNION SELECT user_id, password FROM users WHERE name = 'John';--
+\end{verbatim}
+        Note that we assume that password must be of the same type of data.  
 \end{enumerate}

