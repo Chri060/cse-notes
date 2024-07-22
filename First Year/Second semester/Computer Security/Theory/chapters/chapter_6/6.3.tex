@@ -1,40 +1,63 @@
-\section{Sniffing}
+\section{Firewall}
 
-Normally, a network interface card (NIC) intercepts and forwards to the operating system only the packets addressed to the host's IP.
-
-In promiscuous mode, the NIC passes any packet it reads off the wire to the operating system, regardless of the packet's destination address.
-
-Originally, Ethernet networks operated on a shared medium, using BNC cables. 
-Although RJ-45 cables changed the physical connector, the medium remained shared due to the use of hubs, which broadcast traffic to every host within the broadcast domain.
-
-In contrast, switches selectively relay traffic only to the specific wire corresponding to the correct NIC, based on the Ethernet address. 
-This selective relaying is primarily for performance enhancement, not for security reasons.
-
-\subsection{ARP spoofing}
-Address Resolution Protocol (ARP) is responsible for mapping 32-bit IPv4 addresses to 48-bit hardware, or MAC, addresses.
-RP works with a simple request-reply mechanism with a request and a reply. 
-However, ARP lacks authentication, making it susceptible to spoofing. 
-An attacker can easily forge ARP replies, leading to a lack of trust in the received information. 
-Each host caches these replies, which can be viewed using the command \texttt{arp -a}.
-\paragraph*{Mitigation}
-To counter ARP spoofing, it's essential to verify responses before trusting them, especially if they conflict with existing address mappings. 
-One approach is to add a sequence or ID number in the request to help validate the responses.
-
-\subsection{CAM tables}
-CAM tables are integral to switches as they cache the mapping of MAC addresses to specific ports.
-Switches are susceptible to ARP spoofing attacks, compromising the integrity of CAM tables.
-A CAM table can be saturated in the following way: 
+\begin{definition}[\textit{Firewall}]
+    A firewall is a network security system designed to monitor and control incoming and outgoing network traffic based on predetermined security rules.
+\end{definition}
+The primary functions of a firewall include:
 \begin{itemize}
-    \item Switches rely on CAM tables to efficiently direct traffic based on MAC addresses.
-    \item Tools like Dsniff (macof) can inundate switches with a massive volume of spoofed packets, saturating the CAM table within seconds (known as MAC flooding).
-    \item When the CAM table reaches full capacity, the switch can no longer effectively cache ARP replies. 
-        Consequently, it resorts to broadcasting all incoming traffic to every port, resembling the behavior of a hub.
+    \item \textit{IP packet filtering}: examining and controlling packet flow based on IP address and port number.
+    \item \textit{Network Address Translation} (NAT): modifying IP address information in packet headers to improve network security and efficiency.
 \end{itemize}
-\paragraph*{Mitigation}
-Implementing PORT Security, a term coined by CISCO, helps mitigate these vulnerabilities.
+A firewall acts as a gatekeeper, enforcing security policies between a protected internal network and external networks.
 
-\subsection{Spanning Tree Protocol}
-The Spanning Tree Protocol (STP) 802.1d is crucial for preventing loops in switched networks by constructing a spanning tree (ST). 
-Switches determine the structure of the ST through the exchange of Bridge Protocol Data Unit (BPDU) packets to elect the root node.
+While firewalls are effective at managing traffic between different networks, they are generally ineffective against insider threats unless the network is properly segmented.
+They cannot prevent unauthorized activities originating from within the network itself.
 
-However, since BPDU packets are not authenticated, attackers can manipulate the topology of the spanning tree for malicious purposes such as sniffing or ARP spoofing.
+Firewalls are essentially specialized computers and may have vulnerabilities of their own. 
+Most firewalls are purpose-built appliances with minimal firmware and limited additional services, reducing their attack surface. 
+They enforce security policies by applying rules that should follow a default-deny approach, where all traffic is denied unless explicitly allowed.
+
+Firewalls can be categorized based on their packet inspection capabilities:
+\begin{itemize}
+    \item \textit{Network layer firewalls}: include packet filters and stateful packet filters that operate at the network layer.
+    \item \textit{Application layer firewalls}: include circuit-level gateways and application proxies that operate at the application layer.
+\end{itemize}
+
+\subsection{Packet filters}
+Packet filters process individual packets by examining IP and part of the TCP headers. 
+They are stateless, meaning they do not track the state of TCP connections or fully inspect packet payloads. 
+Packet filters, often implemented as Access Control Lists (ACLs) on routers, base their decisions on packet-specific conditions such as IP addresses and port numbers.
+
+\subsection{Stateful packet filters}
+Stateful packet filters build upon basic packet filtering by tracking the state of active TCP connections. 
+They ensure packets follow the correct sequence and provide more robust security.
+While they offer deeper inspection and additional features such as NAT, packet defragmentation, and reassembly, they can also impact performance due to their connection-oriented nature.
+
+\subsection{Circuit firewalls}
+Circuit firewalls function as TCP-level proxies. 
+They relay TCP connections by allowing clients to connect to a specific port on the firewall, which then establishes a connection to the desired server on behalf of the client.
+
+\subsection{Application proxies}
+pplication proxies operate at the application layer, inspecting, validating, and modifying protocol data. 
+They provide additional features such as user authentication, specific filtering policies, advanced logging, and content filtering. 
+Application proxies may require modifications to clients and servers to function properly.
+
+\subsection{Multi-zone architecture}
+Traditional perimeter defense strategies often assume that once external threats are blocked, the internal network remains secure. 
+However, this assumption is challenged by scenarios such as remote access to resources and remote user access to corporate networks. 
+These scenarios can compromise internal network security by mixing externally accessible servers with internal clients.
+
+A robust approach to addressing these security concerns is the implementation of a multi-zone architecture. 
+This approach divides the network into distinct zones based on privilege levels and uses firewalls to control access between them. 
+A key component of this architecture is the creation of a Demilitarized Zone (DMZ) where public-facing servers are placed. 
+The DMZ is considered a high-risk area similar to the internet, and critical data and systems are kept separate from it.
+
+\paragraph*{Virtual Private Network}
+Virtual Private Networks (VPN) allow remote employees to securely access corporate resources and connect remote sites without requiring dedicated leased lines. 
+They ensure the confidentiality, integrity, and availability (CIA) of data over public networks by creating encrypted connections. 
+VPNs support two main types of tunneling:
+\begin{itemize}
+    \item \textit{Full tunneling}: all traffic is routed through the VPN, which allows comprehensive control over security policies and traffic monitoring.
+    \item \textit{Split tunneling}: only traffic intended for the corporate network is routed through the VPN, while other traffic goes directly to the internet. 
+        This method can improve efficiency but reduces control over non-corporate traffic.
+\end{itemize}

@@ -1,52 +1,46 @@
 \section{SQL injection}
 
-To end a statement in SQL we simply put a semicolon followed by a double dash line that it is used to comment a part of the line. 
-In that way we can modify the query as we desire. 
+SQL injection is a vulnerability that allows attackers to manipulate SQL queries by injecting malicious input.
+This often involves terminating a query prematurely, commenting out parts of the query, or adding additional SQL commands.
 
-Another way to modify a query is to use the following line where a parameter is requested: 
+To terminate an SQL statement, a semicolon followed by a double dash (--) is used to comment out the remainder of the line. 
+This technique can be exploited to alter the behavior of a query. For example:
 \begin{verbatim}
 ' OR '1'='1';--
 \end{verbatim}
-In that way the query will be modified resulting in always true. 
+This injection alters the query to always return true, potentially bypassing authentication or other security checks.
 
 \paragraph*{Unions}
-By using unions we can retrieve data from different tables: 
+Union-based SQL injection allows attackers to retrieve data from different tables within a single query. 
+For example:
 \begin{verbatim}
 SELECT name, phone, address FROM Users
 WHERE Id='' UNION ALL SELECT name,creditCardNumber,CCV2 
 FROM CreditCardTable;--';
 \end{verbatim}
-Will show contents of a different table.
-Will work only if the number and the data types of the columns are the same.
+This query combines results from two different tables. 
+It works only if the number and types of columns in the original and injected queries match.
 
-\subsection{Insert injection}
-On insert we can use the double dash line to comment a section of the statement and change the inserted values. 
-We can also modify the insertion query by adding a sub-query that retrieve some wanted data like passwords and then retrieve the value of the data with another query: 
+\paragraph*{Insertions}
+Insert injection involves modifying an insert statement to insert arbitrary data or execute sub-queries. For example:
 \begin{verbatim}
 INSERT INTO results VALUES (NULL, 's.zanero',
     (SELECT password from USERS where user='admin')
     )--', '18')
 \end{verbatim}
+Here, the injected sub-query retrieves the password of an admin user, which is then inserted into the results table.
 
-\subsection{Blind injections}
-Some SQL queries do not display returned values. 
-Rather, they do, or do not do, stuff based on the return value. 
-As a result, we cannot use them to directly display data, but we can play with their behavior to infer data. 
+\paragraph*{Blind injections}
+Blind SQL injection occurs when the SQL queries do not return data directly but still allow an attacker to infer information based on the application's behavior. 
+For example, you may infer whether a condition is true or false based on the response or timing of the application.
 
-\subsection{Solutions}
-We can avoid SQL injections in the following ways: 
+\subsection{Countermeasures}
+To protect against SQL injection attacks, consider the following measures:
 \begin{itemize}
-    \item Input sanitization (validation and filtering). 
-    \item Using prepared statements (parametric query) instead of building query strings (if languages allows). 
-        In this case we have variable placeholders, that is not a string concatenation. 
-        For instance, in PHP we have: 
-        \begin{verbatim}
-            $stmt = $db->prepare(SELECT * 
-                                 FROM users
-                                 WHERE username = ? AND password = ?” )
-            $stmt -> execute(array($username,$psw));
-        \end{verbatim}
-    \item Not using table names as field names (to avoid information leakage). 
-    \item Limitations on query privileges. 
-        Different users can execute different types of queries on different tables/DBs, so separate privileges from DB admin point of view. 
+    \item \textit{Input sanitization}: validate and filter user inputs to ensure they do not contain harmful SQL syntax.
+    \item \textit{Prepared statements}: use parameterized queries instead of directly concatenating user inputs into SQL statements. 
+        Prepared statements use placeholders for variables, which prevents injection.
+    \item \textit{Avoid dynamic queries}: minimize the use of dynamic SQL and avoid using table names or other sensitive identifiers as field names to prevent information leakage.
+    \item \textit{Restrict database privileges}: implement least privilege principles by limiting the types of queries that different users can execute on the database. 
+        Ensure that users have only the permissions necessary for their roles.
 \end{itemize}

@@ -8,10 +8,10 @@ To mitigate malleability, it is crucial to design encryption schemes that are in
 While current encryption schemes primarily provide confidentiality, they do not detect changes in the ciphertext effectively.
 
 To address this limitation, a small piece of information known as a tag can be added to the encrypted message, allowing for integrity testing of the encrypted data itself.
-Simply adding the tag to the plaintext before encryption is not sufficient, as Message Authentication Codes (MACs) are required for proper data authentication.
+Simply adding the tag to the plaintext before encryption is not sufficient, as Message Authentication Codes (MAC) are required for proper data authentication.
 
-\subsection{Message authentication codes}
-A message authentication code consists of a pair of functions:
+\subsection{Message Authentication Codes}
+A MAC consists of a pair of functions:
 \begin{itemize}
     \item \texttt{compute\_tag(string, key)}: generates the tag for the input string.
     \item \texttt{verify\_tag(string, tag, key)}: verifies the authenticity of the tag for the input string.
@@ -20,7 +20,7 @@ In an ideal attacker model, the attacker may possess knowledge of numerous messa
 Additionally, tag splicing from valid messages should also be prevented.
 
 \paragraph*{CBC-MAC}
-Cipher block chaining message authentication code (CBC-MAC) is a method for generating a fixed-size authentication tag from variable-length messages using a block cipher in CBC mode.
+Cipher Block Chaining MAC (CBC-MAC) is a method for generating a fixed-size authentication tag from variable-length messages using a block cipher in CBC mode.
 Here's how CBC-MAC works:
 \begin{enumerate}
     \item \textit{Initialization}: CBC-MAC operates on fixed-size blocks of data, so if the message is not a multiple of the block size, padding is applied to make it fit. 
@@ -42,12 +42,6 @@ Additionally, CBC-MAC offers collision resistance, making it extremely difficult
 CBC-MAC is widely used in practice for message authentication in various cryptographic protocols and applications, including network protocols, file authentication, and secure messaging systems. 
 However, it is important to use CBC-MAC correctly and securely to avoid potential vulnerabilities.
 
-\paragraph*{MAC usages}
-HTTP cookies serve as a form of note to self for HTTP servers, providing a means to store information locally within a user's browser. 
-However, it is crucial that this information remains unaltered between server reads. 
-To address this concern, the server employs a process where it computes a tag for the cookie using a cryptographic function, denoted as \texttt{compute\_tag(cookie, k)}. 
-This tag is then stored alongside the corresponding cookie as a pair (cookie, tag), ensuring the integrity and authenticity of the cookie's contents.
-
 \subsection{Cryptographic hashes}
 Ensuring the integrity of a file typically involves either comparing it bit by bit with an intact copy or reading the entire file to compute a message authentication code.
 However, it would be highly advantageous to verify the integrity of a file using only short, fixed-length strings, regardless of the file's size, thereby simplifying the process and reducing computational overhead.
@@ -66,13 +60,13 @@ In an ideal scenario, the performance of a concrete cryptographic hash function 
     \item Finding the second preimage similarly demands around $O(2^d)$ hash computations, involving guessing potential inputs $r$.
     \item Discovering a collision involves approximately $O(2^{2d})$ hash computations.
 \end{enumerate}
-The resulting output bitstring of a hash function is commonly referred to as a digest.
+The resulting output bit-string of a hash function is commonly referred to as a digest.
 
 \paragraph*{Hash functions}
 For preferred cryptographic hash functions, consider utilizing SHA-2 and SHA-3. 
 SHA-2, developed privately by the NSA, offers digest sizes of 256, 384, and 512 bits. 
 SHA-3, on the other hand, emerged from a public design contest akin to AES and boasts digest sizes ranging from 256 to 512 bits. 
-Both SHA-2 and SHA-3 are currently unbroken and enjoy wide standardization by bodies such as NIST and ISO.
+Both SHA-2 and SHA-3 are currently unbroken and enjoy wide standardization.
 
 Conversely, it's advisable to steer clear of SHA-1 and MD-5. 
 SHA-1, with its fixed 160-bit digest size, has been compromised for collisions, achievable in around $2^{61}$ operations. 
@@ -83,11 +77,9 @@ MD-5 is particularly vulnerable to collisions with arbitrary input prefixes, ach
 Hash functions serve various purposes, including:
 \begin{itemize}
     \item \textit{Pseudonymized matching}: employed in scenarios like signal's contact discovery, where hashes of values are stored and compared instead of the actual values themselves.
-    \item \textit{MAC construction}: hash functions are integral in generating Message Authentication Codes (MACs), where a tag is produced by hashing both the message and a secret string. 
+    \item \textit{MAC construction}: hash functions are integral in generating MACs, where a tag is produced by hashing both the message and a secret string. 
         Verification involves recomputing the same hash and comparing it with the original tag. 
-        HMAC (Hash-based Message Authentication Code) is a widely adopted method, standardized in RFC 2104 and NIST FIPS 198. 
-        It utilizes a generic hash function as a plug-in, denoted as HMAC-hash name. 
-        Examples include HMAC-SHA1, HMAC-SHA2, and HMAC-SHA3.
+        Hash-based MAC (HAMC) utilizes a generic hash function as a plug-in, denoted as HMAC-hash name. 
     \item \textit{Forensic applications}: hash functions are crucial in forensic investigations. 
         For instance, only the hash of a disk image obtained can be documented in official reports, ensuring data integrity and facilitating verification processes.
 \end{itemize}

@@ -1,63 +1,55 @@
-\section{Cross site scripting}
-Imagine a basic blog application where anyone can post comments. 
-Users enter their comments into a text field, which is then displayed to other visitors.
+\section{Cross-Site Scripting}
 
-Without any filtering mechanism, an attacker could input malicious code like:
+Consider a simple blog application where users can post comments. 
+If the application displays comments directly without filtering, an attacker could insert malicious code, such as:
 \begin{verbatim}
-<script>
-    alert('JavaScript Executed');
-</script>
+<script> alert('JavaScript Executed'); </script>
 \end{verbatim}
-If this input isn't filtered, the malicious script would execute on subsequent visitors' screens. 
-This type of attack is called Cross-Site Scripting (XSS).
+If this input is not properly sanitized, the script will execute on the screens of other visitors. 
+This vulnerability is known as Cross-Site Scripting (XSS).
 
-XSS is a vulnerability where client-side code can be injected into a page.
-There are three types:
+XSS is a security flaw where an attacker can inject client-side code into a web page. 
+There are three primary types of XSS attacks:
 \begin{enumerate}
-    \item \textit{Stored XSS}: the attacker's input is stored on the target server in a database. 
-        When a victim retrieves the stored malicious code from the web application, it's not made safe to render in the browser.
-    \item \textit{Reflected XSS}: client input (i.e., request payload) is returned to the client by the web application in a response (e.g., error message, search result). 
-        The response includes some or all of the input provided in the request without being stored and made safe to render in the browser.
-    \item \textit{DOM-based XSS}: user input never leaves the victim's browser. 
-        The malicious payload is directly executed by client-side script (e.g., script that modifies/updates the DOM in-memory representation of a page including forms).
+    \item \textit{Stored XSS}: the malicious input is saved on the target server, such as in a database. 
+        When a victim accesses the affected content, the malicious code is retrieved and executed in the victim's browser.
+    \item \textit{Reflected XSS}: the malicious input is sent to the Web Application in a request. 
+        The application includes this input in its response without sanitizing it, causing the malicious script to execute in the client's browser.
+    \item \textit{DOM-based XSS}: the attack occurs entirely within the victim's browser. 
+        Malicious scripts are executed by client-side JavaScript code without the need to send data back to the server.
 \end{enumerate}
-With XSS, it's possible to:
+XSS can lead to severe consequences, including:
 \begin{itemize}
-    \item Steal cookies or hijack sessions.
-    \item Manipulate sessions and execute fraudulent transactions.
-    \item Eavesdrop on private information.
-    \item Initiate drive-by downloads.
-    \item Effectively bypass the same-origin policy.
+    \item \textit{Cookie theft}: stealing session cookies or hijacking user sessions.
+    \item \textit{Session manipulation}: altering sessions and performing unauthorized actions.
+    \item \textit{Data theft}: eavesdropping on sensitive information.
+    \item \textit{Drive-by downloads}: initiating unwanted software downloads.
+    \item \textit{Bypassing Same Origin Policy}: overcoming restrictions intended to isolate content from different origins.
 \end{itemize}
-For added security, consider browsing with \texttt{noscript} enabled.
 
-\paragraph*{Same-Origin Policy}
-The Same-Origin Policy is a standard implemented by all web clients. 
-SOP dictates that all client-side code (such as JavaScript) loaded from one origin, A, should only access data from the same origin, A. 
-However, the modern web often blurs these boundaries with mechanisms like Cross-Origin Resource Sharing (CORS) and client-side extensions.
+\paragraph*{Same Origin Policy}
+The Same Origin Policy (SOP) is a fundamental security feature enforced by web browsers. 
+SOP ensures that client-side code loaded from one origin (domain) can only interact with data from the same origin. 
+This policy helps prevent malicious scripts from accessing sensitive data on other origins. 
+However, modern web technologies, such as Cross-Origin Resource Sharing (CORS) and various client-side extensions, can sometimes bypass these restrictions, leading to potential security concerns.
 
-\subsection{Content security policy}
-Content Security Policy is a W3C specification designed to instruct the browser about what content should be trusted and what should not. 
-Think of it as an extension of the same-origin policy, offering more flexibility and expressiveness in defining policies. 
-Technically, CSP consists of a set of directives transmitted from the server to the client via HTTP response headers.
+\subsection{Content Security Policy}
+Content Security Policy (CSP) is a W3C specification designed to enhance web security by instructing browsers on which content sources are considered trustworthy. 
+It acts as an extension of the Same-Origin Policy, providing more control and flexibility in defining what content can be loaded and executed. 
+CSP is implemented through a set of directives sent from the server to the client via HTTP response headers.
 
-\paragraph*{Directives}
-Numerous directives are available in Content Security Policy (CSP), including:
+CSP includes a variety of directives to control different aspects of web content, such as:
 \begin{itemize}
-    \item \texttt{script-src}: specifies origins from which client code can be loaded.
-    \item \texttt{form-action}: lists valid endpoints for form submission.
-    \item \texttt{frame-ancestors}: lists sources permitted to embed the current page as frames and applets.
-    \item \texttt{img-src}: defines origins from which images can be loaded.
-    \item \texttt{style-src}: similar to script-src, but for stylesheets.
+    \item \texttt{script-src}: specifies the sources from which JavaScript can be loaded.
+    \item \texttt{form-action}: defines the valid endpoints to which forms can be submitted.
+    \item \texttt{frame-ancestors}: lists the sources allowed to embed the page within frames or iframes.
+    \item \texttt{img-src}: specifies the allowed origins for loading images.
+    \item \texttt{style-src}: controls the sources from which stylesheets can be loaded.
 \end{itemize}
-It's important to note that while these directives are specified, their implementation ultimately depends on the browser.
-
-CSP is gradually gaining popularity, but faces challenges due to its potential to disrupt functionality with strict policies and susceptibility to bypassing with relaxed policies.
-
-Practical barriers and challenges include:
+The effectiveness of these directives depends on the browser's implementation, and while CSP is increasingly adopted, it comes with its own set of challenges:
 \begin{itemize}
-    \item Determining who writes the policies.
-    \item The predominantly manual process of policy creation.
-    \item Limited automation possibilities, leaving some aspects manual.
-    \item Maintenance of policies over time, particularly challenging as modern pages load content from numerous resources, and both pages and resources can evolve dynamically.
+    \item \textit{Policy creation}: identifying who is responsible for writing and managing CSP rules.
+    \item \textit{Manual process}: the process of creating and maintaining CSP policies is largely manual and complex.
+    \item \textit{Limited automation}: there are few automated tools available to assist with policy creation, leaving much of the task to manual efforts.
+    \item \textit{Ongoing maintenance}: keeping CSP policies up-to-date can be difficult, especially as web pages often load resources from multiple sources, and both pages and resources can change dynamically.
 \end{itemize}

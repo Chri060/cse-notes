@@ -5,13 +5,6 @@ Desirable features include the ability to establish a short secret agreement ove
 The solution lies in asymmetric cryptosystems, which revolutionized cryptography. Before 1976, methods relied on human carriers or physical signatures. 
 Then, innovations such as the Diffie-Hellman key agreement in 1976, public key encryption in 1977, and the introduction of digital signatures in the same year paved the way for modern cryptographic solutions.
 
-\paragraph*{Note}
-Until now, the most effective attack method has been enumerating the secret parameter. 
-This approach suffices for modern block ciphers, with the best attack requiring approximately $\mathcal{O}(2^\lambda)$ operations.
-However, asymmetric cryptosystems depend on complex computational problems, where brute-forcing the secret parameter is not the optimal strategy. 
-For instance, factoring a number of $\lambda$ bits demands computational effort approximately $\mathcal{O}\left(e^{k(\lambda)^\frac{1}{3} \cdot \log(\lambda)^\frac{2}{3}}\right)$.
-It's crucial to note that comparing the sizes of security parameters rather than their actual complexities can lead to misleading conclusions.
-
 \subsection{Diffie-Hellman key agreement}
 The objective of the Diffie-Hellman key agreement protocol is to enable two parties to securely share a secret value using only public messages.
 Assuming an attacker model where interception of communications is possible, but tampering is not, and relying on the Computational Diffie-Hellman (CDH) assumption, the protocol operates under the following principle:
@@ -34,7 +27,6 @@ In practical implementations, a subgroup $\left(\mathbb{Z}_N^\ast,\cdot\right)$ 
 
 In this scenario, breaking the computational Diffie-Hellman assumption requires a minimum of:
 \[\min \left( O\left( e^{k\log(n)^{\frac{1}{3}}\cdot\log(\log(n))^{\frac{2}{3}}}\right), O\left(2^\frac{\lambda}{2}\right)\right)\]
-Alternatively, when utilizing elliptic curve points with dedicated addition, breaking the computational Diffie-Hellman assumption takes $O\left(2^\frac{\lambda}{2}\right)$ time. 
 
 \subsection{Public key encryption}
 In public key encryption, distinct keys are utilized for decryption and encryption purposes. 
@@ -50,7 +42,7 @@ Rivest, Shamir, Adleman (RSA) is a groundbreaking encryption algorithm introduce
 It supports message and key sizes ranging from 2048 to 4096 bits, ensuring robust security against modern computational threats.
 Originally patented, RSA's intellectual property rights have since expired, fostering widespread adoption and further development within the cryptographic community.
 One notable advantage of RSA is its capability to encrypt messages without expanding ciphertext, ensuring efficient transmission and storage of encrypted data.
-Additionally, RSA encryption with a fixed key exhibits pseudorandom permutation (PRP) properties, enhancing its versatility and applicability in various cryptographic scenarios.
+Additionally, RSA encryption with a fixed key exhibits PRP properties, enhancing its versatility and applicability in various cryptographic scenarios.
 
 The ElGamal encryption scheme, conceived in 1985, offers a versatile cryptographic solution characterized by its flexibility and patent-free nature.
 ElGamal encryption accommodates keys spanning either the k-bit range or hundreds of bits, contingent upon the chosen variant, allowing for tailored security configurations to suit various applications.
@@ -64,8 +56,8 @@ In this method, the secret key is encapsulated or wrapped within another encrypt
 The recipient, possessing the corresponding private key, can then decrypt and extract the encapsulated key.
 \begin{example}
     Let's consider a scenario where there exists a public channel between users A and B, and the attacker can only observe but not alter the communication.
-    Subsequently, user B randomly selects a bitstring $s$ from the set $\left(k_{pri},k_{pub}\right)$ encrypts it using $k_{pub}$, and forwards the resulting ciphertext to user A. 
-    User A, possessing the corresponding private key $k_{pri}$, decrypts the ciphertext and retrieves the bitstring $s$. 
+    Subsequently, user B randomly selects a bit-string $s$ from the set $\left(k_{pri},k_{pub}\right)$ encrypts it using $k_{pub}$, and forwards the resulting ciphertext to user A. 
+    User A, possessing the corresponding private key $k_{pri}$, decrypts the ciphertext and retrieves the bit-string $s$. 
 
     The process is then repeated with the roles of users A and B swapped. 
     Consequently, both users obtain separate secrets. 
@@ -85,48 +77,3 @@ This concept serves as the cornerstone for all contemporary secure transport pro
     \includegraphics[width=0.75\linewidth]{images/menc.png}
     \caption{Modern encryption}
 \end{figure}
-
-\subsection{Digital signatures}
-Authenticating data serves as a crucial aspect in the establishment of secure hybrid encryption schemes. 
-It ensures that the public key utilized by the sender corresponds accurately to the intended recipient. 
-Additionally, the ability to verify the authenticity of data without relying on a pre-shared secret is highly desirable.
-Digital signatures play a pivotal role in achieving data authentication objectives:
-\begin{itemize}
-    \item They offer robust evidence linking data to a specific user, enhancing data integrity.
-    \item Verification of digital signatures does not necessitate a shared secret, simplifying the authentication process.
-    \item Properly generated digital signatures cannot be repudiated by the user, ensuring accountability.
-    \item Asymmetric cryptographic algorithms underpin digital signatures, providing a solid foundation for their security.
-    \item It has been formally demonstrated that achieving non-repudiation without digital signatures is impractical, reinforcing their indispensable role in data authentication.
-\end{itemize}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{images/aut.png}
-    \caption{Digital signature}
-\end{figure}
-The computational challenges inherent in digital signatures encompass several key aspects:
-\begin{itemize}
-    \item Signing a message without possessing the signature key, which includes attempting to splice signatures from unrelated messages.
-    \item Computing the signature key when provided only with the verification key.
-    \item Attempting to derive the signature key solely from signed messages, without access to additional information.
-\end{itemize}
-
-\paragraph*{Algorithms}
-In 1977, Rivest, Shamir, and Adleman (RSA) introduced a groundbreaking cryptographic method. 
-This method employs a singular hard-to-invert function to craft both an asymmetric encryption scheme and a signature, with distinct message processing for each. 
-Notably, the process of signing is significantly slower than verification, roughly around 300 times slower. 
-This innovative approach has been standardized in NIST DSS (FIPS-184-4), underscoring its widespread adoption and importance in modern cryptographic practices.
-
-The Digital Signature Standard (DSA) draws its foundations from adjustments made to signature schemes initially proposed by Schnorr and ElGamal. 
-It, too, has been formalized in NIST DSS (FIPS-184-4), reflecting its establishment as a recognized cryptographic protocol. 
-Notably, in DSA, the processes of signature creation and verification unfold at comparable speeds, distinguishing it from some other cryptographic methods.
-
-\paragraph*{Usages}
-Digital signatures serve various purposes:
-\begin{itemize}
-    \item Authenticating digital documents: in order to enhance efficiency, digital signatures frequently entail signing the hash of a document rather than the document itself. 
-        However, the assurance of the signature's reliability relies on the robustness of both the signature and hash algorithms.
-    \item Authenticating users: digital signatures present an alternative approach to user authentication, serving as a viable replacement for traditional password-based logins. 
-        During this procedure, the server retains the user's public verification key, typically acquired during the account creation phase. 
-        Upon authentication requests, the server initiates the client to sign a lengthy, randomly generated bitstring, referred to as a challenge. 
-        Successful verification of the challenge signature by the client serves as compelling evidence of identity to the server.
-\end{itemize}

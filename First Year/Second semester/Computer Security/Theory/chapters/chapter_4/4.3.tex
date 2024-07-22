@@ -1,123 +1,84 @@
-\section{Format string bugs}
+\section{Buffer overflow}
 
-\begin{definition}[\textit{Format string}]
-    A format string provides a solution for crafting output strings that incorporate variables formatted as desired by the programmer.
+Stack smashing, commonly seen in C programming, occurs due to unsafe practices when a buffer is filled with data exceeding its allocated size, leading to a buffer overflow vulnerability. 
+Several standard C library functions are prone to causing stack smashing if not used carefully, including: \texttt{strcpy}, \texttt{strcat}, \texttt{fgets}, \texttt{gets}, \texttt{sprintf}, \texttt{scanf}.
+
+Improper handling of these functions can result in stack smashing vulnerabilities, allowing attackers to execute arbitrary code, crash the program, or gain unauthorized access to sensitive information. 
+Therefore, it's essential for programmers to use safer alternatives or apply proper input validation and buffer size checks to mitigate these risks.
+
+\subsection{Buffer address}
+Guessing the buffer address for executing arbitrary machine code in the overflowed buffer can be challenging due to several factors:
+\begin{itemize}
+    \item \textit{Proximity to ESP}: one common approach is to guess that the overflowed buffer is near the stack pointer (ESP).
+        Debugging tools like gdb can help determine the approximate location of ESP at runtime.
+    \item \textit{Variability}: the exact address of the buffer may change with each execution or across different machines, making it difficult to predict reliably.
+    \item \textit{CPU precision}: CPUs are not designed to handle imprecise memory accesses gracefully.
+\end{itemize}
+The problem of precision arises because executing arbitrary machine code relies on accurately predicting the memory location of the buffer. 
+However, due to the dynamic nature of memory allocation and the lack of precision in CPU operations, achieving reliable execution of arbitrary code in a stack overflow scenario is challenging. 
+Security measures such as Address Space Layout Randomization (ASLR) further complicate this task by introducing additional randomness to memory addresses, making it even harder to predict the buffer's location.
+
+In practical scenarios, obtaining the ESP value can be done using a debugger or reading from the process directly. 
+However, it's important to note that certain debuggers, like gdb, may introduce an offset to the allocated process memory. 
+Consequently, the ESP value obtained from gdb might differ slightly from the ESP value obtained by reading directly within the process.
+
+Despite these methods, precision issues persist. Even with accurate ESP values, precisely determining the buffer's location remains challenging. 
+This lack of precision can impede the reliable execution of arbitrary code in a stack overflow scenario.
+
+\paragraph*{nop sled}
+To address the precision issue, we can utilize a nop sled. A nop sled is a sequence of nop (no operation) instructions, represented by the hexadecimal value \texttt{0x90} on x86 architecture.
+These instructions do nothing when executed and serve as a landing strip for the program's execution flow.
+
+At the beginning of the buffer, we place a sequence of nop instructions, creating the nop sled. 
+This sled acts as a safe landing zone for the program's execution flow. 
+By jumping to anywhere within the nop sled range, we ensure that even if the precise location of the buffer is not accurately determined, the program will still land on valid instructions within the nop sled and continue execution until it reaches the desired executable code.
+
+\subsection{Process selection}
+Historically, attackers have often aimed to spawn a privileged shell on a local or remote machine.
+\begin{definition}[\textit{Shell code}]
+    Shell code refers to a sequence of machine instructions designed to open a shell, typically a privileged one.
 \end{definition}
-\begin{definition}[\textit{Variable placeholder}]
-    Variable placeholders dictate how data is formatted into a string.
-\end{definition}
-Placeholders serve to specify the formatting type for data inclusion in a string:
-\begin{itemize}
-    \item \texttt{\%d} or \texttt{\%i}: decimal. 
-    \item \texttt{\%u}: unsigned decimal.
-    \item \texttt{\%o}: unsigned octal.
-    \item \texttt{\%X} or \texttt{\%x}: unsigned hexadecimal.
-    \item \texttt{\%c}: character.
-    \item \texttt{\%s}: string (char*), printing characters until the null terminator \texttt{/0} is encountered.
-\end{itemize}
-Examples of format print functions include: \texttt{printf}, \texttt{fprintf}, \texttt{vfprintf}, \texttt{sprintf}, \texttt{vsprintf}, \texttt{snprintf}, and \texttt{vsnprintf}.
+While shell code can perform various actions, spawning a shell has been a common objective due to the elevated privileges it provides.
+To achieve this, attackers typically invoke the \texttt{execve} system call, which executes a program specified by its path name.
 
-\paragraph*{snprintf()}
-Consider the following call: 
-\begin{verbatim}
-snprintf(buf, 250, "%x %x %x");
-\end{verbatim}
-When \texttt{snprintf()} parses the format string, it anticipates three additional parameters from the caller to substitute for the three \texttt{\%x} placeholders. 
-As per the calling convention, these parameters should be pushed onto the stack by the caller. 
-Consequently, \texttt{snprintf()} assumes they are on the stack prior to the preceding arguments. 
-This situation enables the possibility of unintentionally reading up to fifteen bytes from the stack. 
+In Linux systems, invoking a system call involves executing a software interrupt using the \texttt{int} instruction with the value \texttt{0x80}. 
 
-When examining the stack in reverse, we typically encounter a portion of our format string. 
-This is logical since the format string is commonly stored on the stack. 
-Consequently, we can retrieve what we've placed on the stack.
-To inspect the stack, we employ the \texttt{\%N\$x} syntax, indicating the $N$-th parameter, coupled with straightforward shell scripting.
-This method can also be utilized to search for valuable data in memory, representing a vulnerability known as information leakage.
-
-\subsection{Stack writing}
-The placeholder \texttt{\%n} allows us to write the number of characters (bytes) printed so far into the memory address pointed to by the argument.
-Stack writing can be implemented as follows:
+\paragraph*{Shell code}
+Creating shell code usually starts with high-level code and involves translating it into machine instructions, often using assembly language. 
+An alternative approach is to write the code in C and then extract the relevant instructions to compose the shell code. 
+The process can be outlined as follows:
 \begin{enumerate}
-    \item Place the address (addr) of the memory cell (target) to be modified onto the stack.
-    \item Utilize \texttt{\%x} to locate it on the stack (\texttt{\%N\$x}).
-    \item Replace \texttt{\%x} with \texttt{\%n} to write a number into the cell pointed to by addr, i.e., target.
-\end{enumerate}
-To ascertain the number of bytes printed thus far, the placeholder \texttt{\%c} can be employed. 
-This placeholder specifies the precision of the printed number and can also be applied to strings.
-If you prepend a \texttt{0} before the number, it inserts zero padding before the first character.
-
-To write an arbitrary number (0x6028) to the target address (0xBFFFF6CC), we can proceed as follows:
-\begin{enumerate}
-    \item Include the target address as part of the format string, pushing it onto the stack.
-    \item Use \texttt{\%x} to locate the target address on the stack (\texttt{\%N\$x}). 
-        Let's denote the displacement as pos.
-    \item Employ \texttt{\%c} and \texttt{\%n} to write 0x6028 into the cell pointed to by the target address. 
-        Remember to consider the parameter of \texttt{\%c} along with the length of the printed characters.
+    \item \textit{Write high-level code}: begin by writing the desired functionality in high-level C code.
+    \item \textit{Compile and disassembly}: compile the C code and then disassemble the resulting binary to obtain its assembly instructions.
+    \item \textit{Analyze assembly}: analyze the disassembled code to identify and extract only the relevant instructions needed to achieve the desired functionality.
+    \item \textit{Extract opcode}: identify the operation code for each relevant instruction.
+    \item \textit{Create the shell code}: finally, assemble the extracted opcodes into a sequence of bytes to form the shell code.
 \end{enumerate}
 
-\paragraph*{32 bit addresses}
-To facilitate efficient writing and avoid processing excessive data, we'll split each DWORD (32 bits, up to 4GB) into two WORDs (16 bits, up to 64KB) and execute two writing rounds.
-
-Keep in mind that once we commence counting upwards with \texttt{\%c}, we cannot count downwards. 
-Our progression must remain in an upward direction, necessitating some mathematical calculations.
-We first insert the word with the lower absolute value, followed by the word with the higher absolute value.
-
-We must execute this writing procedure twice within the same format string.
-We need the following: 
-\begin{itemize}
-    \item Identify the target addresses for the two writes, which are 2 bytes apart.
-    \item Determine the displacements of the two targets.
-    \item Perform mathematical computations to derive the arbitrary numbers to write. 
-        These numbers, when summed, should yield the 32-bit address.
-\end{itemize}
-Here's the general procedure for performing the writing operation:
+\subsection{Countermeasures}
+A layered defense strategy is effective in mitigating buffer overflow vulnerabilities:
 \begin{enumerate}
-    \item Place the two target addresses of the memory cells to be modified onto the stack as part of the format string.
-    \item  Utilize \texttt{\%x} to locate \texttt{<target\_1>} on the stack (\texttt{\%N\$x}). 
-        Let's denote the displacement as pos. 
-        For instance, \texttt{<target\_2>} will be located at pos+1 (i.e., it's positioned one DWORD up).
-    \item Employ \texttt{\%c} and \texttt{\%n} to:
-        \begin{itemize}
-            \item Write the lower absolute value into the cell pointed to by \texttt{<target\_1>}.
-            \item Write the higher decimal value into the cell pointed to by \texttt{<target\_2>}.
-        \end{itemize}
+    \item \textit{Source code level defenses}: address vulnerabilities within the source code to prevent buffer overflows.
+        This involves educating developers on secure coding practices, conducting targeted testing, and using source code analyzers.
+        Additionally, adopting safer libraries and programming languages with dynamic memory management, such as Java, can provide inherent protection against these vulnerabilities.
+    \item \textit{Compiler level defenses}: utilize compiler-level techniques to make vulnerabilities harder to exploit.
+        Compiler warnings can alert developers to potential issues before the code is executed. 
+        Techniques such as randomizing the order of stack variables can introduce variability that complicates exploitation.
+        Incorporating stack protection mechanisms during compilation further enhances security.
+    \item \textit{Operating system level defenses}: implement operating system-level measures to obstruct or complicate attacks.
+        Non-executable stack configurations help prevent stack smashing attacks by distinguishing data from executable code.
+        Despite non-executable stack defenses, attackers may bypass them by redirecting the return address to existing machine instructions, a technique known as code-reuse attacks. 
+        Despite these defenses, attackers may use techniques like code-reuse attacks to bypass protections.
+        Address Space Layout Randomization (ASLR) adds further security by randomizing memory locations, including the stack, making it difficult for attackers to predict return addresses.
 \end{enumerate}
 
-\paragraph*{Target addresses}
-The TARGET address can vary depending on the specific context of the exploit. 
-Here are some common locations where the TARGET address might be found:
+\paragraph*{Stack canary}
+The stack canary mechanism involves placing a sentinel value between local variables and control values to detect tampering.
+The integrity of this canary is checked during the function's epilogue, and if tampering is detected, the program is terminated. 
+Various types of canaries enhance security:
 \begin{itemize}
-    \item \textit{Saved return address} (saved EIP): this is typical in scenarios resembling a basic stack overflow.
-        You must locate the address on the stack, often by overflowing a buffer and overwriting the return address of a function.
-    \item \textit{Global offset table (GOT)}: used for dynamic relocations of functions in shared libraries.
-        Overwriting entries in the GOT can redirect the execution flow to attacker-controlled code.
-    \item \textit{C library hooks}: functions such as \texttt{malloc}, \texttt{free}, \texttt{printf}, may have hooks that allow customization or interception of their behavior.
-        Overwriting these hooks can alter program behavior.
-    \item \textit{Exception handlers}: overwriting exception handlers can allow control of program execution when exceptions occur.
-    \item \textit{Other structures and function pointers}: depending on the application, there may be other structures or function pointers stored in memory that can be manipulated to redirect program flow.
+    \item \textit{Terminator canaries}: use terminator characters, such as \texttt{/0}, which are not copied by string-copy functions, making them resistant to overwriting during attacks.
+    \item \textit{Random canaries}: generated as random sequences of bytes at program execution.
+    \item \textit{Random XOR canaries}: randomly generated canaries that are XORed with a portion of the protected structure. 
+        This XOR operation adds complexity, making the canary harder to manipulate even if the buffer overflow does not occur.
 \end{itemize}
-
-\subsection{Countermeasure}
-Here's an overview of countermeasures against format string vulnerabilities:
-\begin{itemize}
-    \item Memory error countermeasures, as discussed earlier, play a significant role in preventing exploitation by introducing safeguards like stack canaries, ASLR, and DEP.
-    \item Modern compilers aid in vulnerability mitigation by issuing warnings upon detecting risky calls to printf-like functions during code compilation.
-    \item Patched versions of \texttt{libc} (C standard library) are developed to mitigate format string vulnerabilities. 
-        For example, some versions count the expected arguments and verify their alignment with the number of placeholders in the format string.
-\end{itemize}
-
-\subsection{Generalization}
-The core issue with format string vulnerabilities extends beyond printing functions. 
-Essentially, any function with specific characteristics is at risk:
-\begin{itemize}
-    \item Known as variadic functions, they accept a variable number of parameters.
-    \item Parameters are dynamically resolved at runtime by retrieving them from the stack.
-    \item These functions incorporate a mechanism, like placeholders, enabling direct or indirect read/write access to arbitrary memory locations.
-    \item Users have control over these functions, influencing their behavior.
-\end{itemize}
-C-like format string interpreters (e.g., printf, sprintf) operate based on a user-specified string. This string can express various functionalities:
-\begin{itemize}
-    \item Counters, tracking the number of characters printed.
-    \item Conditional writes to arbitrary memory locations.
-    \item Read operations and arithmetic computations.
-\end{itemize}
-These capabilities are sufficient to implement conditional jumps and loops, making the behavior of printf and similar functions Turing complete.

@@ -1,42 +1,21 @@
-\section{Cookies}
+\section{Cross-Site Request Forgery}
 
-HTTP operates in a stateless manner, meaning it lacks inherent memory of previous interactions. 
-While HTTP predominantly facilitates data flow from client to server, it lacks a native ability for the server to persist information on the client side. 
-However, cookies emerged as a solution, enabling client-side storage of information and providing a dependable mechanism for maintaining stateful data.
-Originally conceived for website customization purposes, cookies have been susceptible to misuse, leading to privacy infringements. 
-Additionally, notions such as user authentication and session management, when implemented through cookies, can pose security risks if not handled properly.
+Cross-Site Request Forgery (CSRF) is an attack that tricks a user into performing unwanted actions on a Web Application where they are currently authenticated. 
+This is achieved by leveraging the user's existing credentials, such as cookies, which are automatically included with each request made from their browser. 
+Consequently, attackers can craft malicious requests that are processed by the vulnerable Web Application using the victim's credentials. 
+Since the Web Application cannot differentiate between legitimate user actions and those initiated by an attacker, it is at risk of executing unauthorized commands.
 
-\subsection{Session creation with cookies}
-The process of establishing a session using cookies involves the following steps:
-\begin{enumerate}
-\item The user submits their Web Server username and password.
-\item The Web Server generates and stores a Session ID.
-\item The Web Server responds by sending a cookie containing this Session ID.
-\item The user's browser stores the session ID and includes it in subsequent requests to the Web Server.
-\end{enumerate}
-Issues concerning session cookies include:
+\subsection{Countermeasures}
+To protect against CSRF attacks, several effective countermeasures can be implemented:
 \begin{itemize}
-    \item Preventing the prediction of tokens received or to be received by the client (next token) to thwart impersonation and spoofing attacks and minimize the impact of session stealing.
-    \item Ensuring that every token has a reasonable expiration period, although this should not be set in the cookies themselves.
-    \item Employing cookie encryption for sensitive information and utilizing storage mechanisms such as Message Authentication Codes (MACs) to prevent tampering.
+    \item \textit{Anti-CSRF tokens}: use a unique, random token associated with each user session. 
+        This token should be included in any form or request that performs sensitive operations. 
+        The server generates and stores this token, and it must match the token submitted with the request for the operation to proceed. 
+        Importantly, these tokens should not be stored in cookies to avoid exposure to cross-site requests.
+    \item \textit{SameSite cookies}: utilize the SameSite attribute for cookies to restrict how cookies are sent with cross-site requests. 
+        This attribute helps prevent session cookies from being included in requests originating from other sites:
+        \begin{itemize}
+            \item SameSite=Strict: cookies are sent only in requests originating from the same site, providing strong protection against CSRF.
+            \item SameSite=Lax: cookies are sent with top-level navigation requests but not with cross-site post requests, images, or iframes, offering a balance between usability and security.
+        \end{itemize}
 \end{itemize}
-\paragraph*{Session hijacking}
-Due to the stateless nature of HTTP, session hijacking can occur through methods such as stealing a cookie via an XSS attack or brute-forcing a weak session ID parameter.
-
-\subsection{Cross-site request forgery}
-Cross-site request forgery (CSRF) forces a user to execute unwanted actions on a web application in which they are currently authenticated using ambient credentials, such as cookies. 
-In this context, cookies play a crucial role in session management as they are automatically included with every request originating from the browser. 
-This automatic inclusion allows attackers to craft malicious requests that are routed to the vulnerable web application through the victim's browser. 
-As a result, websites cannot distinguish whether the requests from authenticated users are the result of explicit user interaction or not.
-
-\paragraph*{Mitigation}
-To mitigate CSRF attacks, implementing a random challenge token is effective. 
-This token is unique and associated with the user's session. 
-It is regenerated at each request and included in forms that involve sensitive operations. 
-The token is sent to the server and compared against the stored token; server-side operations are permitted only if the tokens match. 
-Importantly, these tokens should not be stored in cookies.
-
-Additionally, using the SameSite attribute for cookies helps prevent session cookies from being sent with cross-site requests.
-By setting the SameSite attribute, websites can specify cookie behavior. 
-When SameSite is set to "strict," cookies are not sent for any cross-site usage. 
-When set to "lax," cookies are sent for cross-domain navigation but not for cross-site POST forms, images, frames, and similar requests.

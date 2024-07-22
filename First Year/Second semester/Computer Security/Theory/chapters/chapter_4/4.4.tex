@@ -1,0 +1,67 @@
+\section{Format string bugs}
+
+\begin{definition}[\textit{Format string}]
+    A format string is used to craft output strings that include variables, allowing for customizable formatting as specified by the programmer.
+\end{definition}
+\begin{definition}[\textit{Variable placeholder}]
+    Variable placeholders dictate how data is formatted into a string when using format functions.
+\end{definition}
+Common format printing functions include: \texttt{printf}, \texttt{fprintf}, \texttt{vfprintf} and \texttt{sprintf}.
+
+In a stack examination, we often encounter a portion of our format string, as it is commonly stored on the stack.
+By retrieving what's placed on the stack, we can analyze it using the \texttt{\%N\$x} syntax to access the $N$-th parameter and perform straightforward shell scripting. 
+This method can also be leveraged to discover valuable data in memory, highlighting a vulnerability known as information leakage.
+
+\subsection{Stack writing}
+The \texttt{\%n} placeholder in format strings allows us to write the number of characters printed so far into a memory address specified by an argument.
+To determine the number of bytes printed so far, the \texttt{\%c} placeholder can be used. 
+This placeholder specifies the precision of the printed number and can be applied to both characters and strings.
+
+To write an arbitrary number (e.g., \texttt{0x6028}) to a target address (e.g., \texttt{0xBFFFF6CC}), follow these steps:
+\begin{enumerate}
+    \item \textit{Include the target address}: push the target address onto the stack as part of the format string.
+    \item \textit{Locate the target address}: use \texttt{\%x} to find the target address on the stack, identified as \texttt{\%N\$x}, where \texttt{N} represents the position on the stack. 
+        Let's call this displacement \texttt{pos}.
+    \item \textit{Write the value}: use \texttt{\%c} and \texttt{\%n} to write \texttt{0x6028} into the memory cell pointed to by the target address.
+        Ensure to account for the parameter of \texttt{\%c} and the length of the printed characters.
+\end{enumerate}
+
+\paragraph*{32 bit addresses}
+To efficiently write to a 32-bit address and avoid processing excessive amounts of data, we can split the address into two 16-bit components and perform two separate write operations.
+Here's the procedure to write a 32-bit address in two stages:
+\begin{enumerate}
+    \item \textit{Identify target addresses}: determine the target memory addresses for the two write operations.
+    \item \textit{Calculate displacements}: compute the positions (displacements) of these target addresses on the stack.
+    \item \textit{Compute write values}: calculate the values to be written into these addresses. 
+        The sum of these values should equal the original 32-bit address.
+    \item \textit{Prepare the format string}: push the two target addresses (one for each write operation) onto the stack as part of the format string.
+    \item \textit{Locate target addresses}: use \texttt{\%x} to find the first target address \texttt{<target\_1>} on the stack (indicated as \texttt{\%N\$x}). 
+        The second target address \texttt{<target\_2>} will be located at \texttt{pos+1}.
+    \item \textit{Execute write operations}: use \texttt{\%c} and \texttt{\%n} to:
+        \begin{itemize}
+            \item Write the lower 16-bit value to the memory cell pointed to by \texttt{<target\_1>}.
+            \item Write the higher 16-bit value to the memory cell pointed to by \texttt{<target\_2>}.
+        \end{itemize}
+\end{enumerate}
+The final format string will become:
+\begin{verbatim}
+<tg><tg+2>%<low-8>c%pos$hn<high-low>c%pos+1$hn
+\end{verbatim}
+
+\subsection{Process selection}
+The choice of target address can vary depending on the exploit's context. 
+Here are some common locations for the target address:
+\begin{itemize}
+    \item \textit{Saved return address} (saved EIP). 
+    \item \textit{Global Offset Table} (GOT): used for dynamic relocations of functions in shared libraries.
+    \item \textit{C library hooks}: overwriting these hooks can alter program behavior.
+    \item \textit{Exception handlers}: overwriting exception handlers can allow control of program execution when exceptions occur.
+\end{itemize}
+
+\subsection{Countermeasures}
+Here's an overview of countermeasures against format string vulnerabilities:
+\begin{itemize}
+    \item \textit{Memory error countermeasures}: implement safeguards such as stack canaries and ASLR to prevent exploitation.
+    \item \textit{Compiler warnings}: compilers help mitigate vulnerabilities by issuing warnings.
+    \item \textit{Library patches}: updated versions of the C standard library address format string vulnerabilities.
+\end{itemize}

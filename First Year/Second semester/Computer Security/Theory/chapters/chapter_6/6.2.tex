@@ -1,30 +1,160 @@
-\section{Denial Of Service}
+\section{Network attacks}
 
-Denial of Service (DoS) attacks aim to disrupt the availability of services. 
-Examples include Killer Packets, SYN floods, Smurf attacks, amplification attacks, and Distributed DoS (DDoS).
+In typical network operations, a Network Interface Card (NIC) is configured to intercept and forward only the packets addressed specifically to its host IP address. 
+However, when a NIC is set to promiscuous mode, it captures all packets it reads from the network, regardless of their destination address.
+This mode can be used for network diagnostics, but it also exposes all traffic to potential snooping.
 
-\subsection{Killer packets}
-\paragraph*{Ping of Death}
-A pathological ICMP echo request that exploits memory errors in the protocol implementation, causing the target system to crash or behave unpredictably.
+\paragraph*{Historical context}
+Originally, Ethernet networks utilized a shared medium with BNC cables, meaning that all traffic was broadcast to every device on the network.
+Even though RJ-45 cables replaced BNC, the use of hubs maintained this broadcast behavior. 
+Hubs transmit all incoming traffic to every device within the broadcast domain, making all network traffic visible to all connected hosts.
 
-\paragraph*{Teardrop}
-This attack exploits vulnerabilities in the TCP reassembly process.
-It sends fragmented packets with overlapping offsets, causing the target system's kernel to hang or crash during reassembly.
+Modern networks often use switches instead of hubs. 
+Switches enhance performance by forwarding packets only to the specific port associated with the destination MAC address, rather than broadcasting to all ports. 
+This selective forwarding improves efficiency but is not designed for security purposes.
 
-\paragraph*{Land attack}
-\paragraph*{Land Attack}
-In older systems, such as Windows 95, sending a packet with the source IP equal to destination IP, and the SYN flag set could cause the TCP/IP stack to loop and lock up.
+\paragraph*{Spoofing}
+UDP (User Datagram Protocol) does not authenticate the source IP address, making it vulnerable to spoofing.
+Attackers can easily alter the source address in UDP or ICMP packets, leading to various malicious outcomes.
+If an attacker is on a different network than the target, they won't receive responses to their spoofed packets, as these responses are sent to the forged source address. 
+This is known as blind spoofing.
+Conversely, if the attacker is on the same network as the target, they can capture responses or use techniques like ARP spoofing to exploit further network vulnerabilities.
+
+TCP (Transmission Control Protocol) differs from UDP by using sequence numbers for packet ordering and acknowledgment. 
+During connection establishment, TCP uses a semi-random Initial Sequence Number (ISN).
+An attacker who can accurately predict the ISN might complete the TCP three-way handshake without receiving responses. 
+However, this requires that the attacker's spoofed source address does not receive any responses. 
+If response packets are received, the target may send a Reset (RST) packet, which can disrupt the connection and potentially alert the target to the attack.
+
+\subsection{Killer packets attacks}
+We may use killer packets to perform a DoS on a user. 
+We may use: 
+\begin{itemize}
+    \item \textit{Smurf attack}: this attack involves sending ICMP echo requests (pings) with a spoofed source address (the victim) to a network's broadcast address. 
+        This results in a flood of responses from all devices on the network, overwhelming the victim and potentially causing system crashes or erratic behavior.
+    \item \textit{Teardrop attack}: this exploit takes advantage of vulnerabilities in the TCP reassembly process.
+        By sending fragmented packets with overlapping offsets, the attacker can cause the target system's kernel to hang or crash during packet reassembly.
+    \item \textit{Land attack}: this attack targets older systems, such as Windows 95. 
+        It involves sending a packet where the source IP address is the same as the destination IP address, with the SYN flag set. 
+        This can cause the TCP/IP stack to enter a loop, leading to a system lock-up.
+\end{itemize}
 
 \subsection{Syn flood attacks}
-These attacks exploit the TCP three-way handshake. 
-The attacker sends a large volume of SYN requests with spoofed source addresses, filling up the queue with half-open connections. 
-As a result, SYN requests from legitimate clients are dropped.
-\paragraph*{Mitigation}
-SYN cookies mitigate this attack by replying with a SYN+ACK while discarding the half-open connection, waiting for a subsequent ACK to establish a connection.
+SYN Flood attacks exploit the TCP three-way handshake process. 
+An attacker sends a high volume of SYN requests with spoofed source addresses, filling the server's queue with half-open connections. 
+This congestion prevents legitimate SYN requests from being processed, effectively denying service to legitimate users.
 
-\paragraph*{Botnet case}
-A botnet is a network of compromised computers, known as bots, controlled by an attacker through a command-and-control infrastructure. 
-Botnets are used for various malicious activities, including spamming, phishing, information theft, and DDoS attacks.
+\paragraph*{Countermeasures}
+To mitigate SYN Flood attacks, SYN cookies can be employed. 
+This technique involves sending a SYN+ACK response while discarding the half-open connection. 
+The server waits for a subsequent ACK from the client to complete the connection establishment, reducing the impact of the attack.
 
-\subsection{Smurf}
-The attacker sends ICMP packets with a spoofed sender address (victim) to a network's broadcast address, causing a flood of responses to overwhelm the victim.
+\subsection{Botnets}
+A botnet is a network of compromised computers, known as bots, that are controlled remotely by an attacker through a command-and-control infrastructure. 
+Botnets are used for various malicious activities, including spamming, phishing, information theft, and conducting large-scale DDoS attacks.
+
+\subsection{ARP spoofing}
+The Address Resolution Protocol (ARP) is used to map 32-bit IPv4 addresses to 48-bit MAC addresses. 
+ARP operates through a simple request-reply mechanism: a device sends an ARP request to find the MAC address associated with a given IP address, and the device holding that IP address responds with an ARP reply containing its MAC address.
+
+However, ARP lacks authentication, making it vulnerable to spoofing attacks. In ARP spoofing, an attacker sends forged ARP replies to a network, associating their own MAC address with the IP address of another device, such as the gateway. 
+This can lead to a range of issues including MITM attacks, traffic interception, and DoS.
+
+\paragraph*{Countermeasures}
+To counter ARP spoofing, it's essential to verify responses before trusting them, especially if they conflict with existing address mappings. 
+Validate ARP replies before accepting them, particularly if they conflict with known or expected address mappings. 
+This helps ensure that ARP responses are legitimate.
+
+\subsection{MAC flooding}
+Content Addressable Memory (CAM) tables are essential components of network switches, used to map MAC addresses to specific ports. 
+This mapping allows switches to efficiently direct traffic only to the appropriate port based on the destination MAC address.
+However, CAM tables are vulnerable to attacks such as ARP spoofing, which can compromise their integrity.
+
+One common attack on CAM tables is MAC flooding, where attackers use tools to overwhelm the CAM table with a large volume of spoofed MAC addresses. 
+When the CAM table becomes saturated, the switch loses its ability to store MAC address-to-port mappings effectively. 
+As a result, the switch defaults to broadcasting all incoming traffic to every port, similar to the behavior of a hub, leading to reduced network performance and potential security risks.
+
+\paragraph*{Countermeasures}
+Implementing port security, a concept often associated with Cisco, can help mitigate MAC flooding attacks. 
+Port security features allow administrators to define and limit the number of MAC addresses that can be learned on a switch port, thus preventing CAM table saturation.
+
+\subsection{TCP hijacking}
+TCP session hijacking involves taking over an active TCP connection between two parties. 
+Here's a typical process for executing this attack:
+\begin{enumerate}
+    \item \textit{Intercept and monitor}: the attacker (C) intercepts and observes packets exchanged between two parties (A and B), capturing critical information such as sequence numbers.
+    \item \textit{Disrupt the connection}: the attacker disrupts A's connection, potentially through methods like a SYN Flood attack. 
+        This causes A to experience a random or seemingly arbitrary service interruption.
+    \item \textit{Impersonate and engage}: the attacker, then, impersonates A by spoofing A's IP address and using a correct Initial Sequence Number (ISN) to initiate communication with B. 
+        B is unaware that they are now interacting with C instead of A.
+\end{enumerate}
+Various tools and scripts can automate this attack, making it more efficient. 
+When an attacker is positioned as a MITM, they can inject content into the communication flow without disrupting B's session, allowing them to control or resynchronize all traffic passing through.
+\begin{definition}[\textit{Man In The Middle}]
+    A Man In The Middle (MITM) attack encompasses various techniques where an attacker impersonates either the server or the client to intercept or manipulate communication between them.
+\end{definition}
+
+\subsection{DNS poisoning}
+The Domain Name System (DNS) is essential for converting domain names into IP addresses. 
+Instead of using a single comprehensive file or hash for mappings, DNS relies on a distributed database system:
+\begin{itemize}
+    \item \textit{Hierarchical servers}: the DNS system is structured with a hierarchy of servers, each maintaining a cache of domain-to-IP mappings.
+    \item \textit{UDP communication}: DNS queries and responses use UDP on Port 53 and do not include authentication.
+    \item \textit{Query process}: when a domain name is requested and not found in the local cache, the system queries a series of DNS servers.
+\end{itemize}
+Each DNS server in this hierarchy holds resource records that link domain names with IP addresses.
+
+\paragraph*{Cache poisoning attack}
+A cache poisoning attack manipulates DNS responses to redirect users to malicious sites. 
+Here's how it typically unfolds:
+\begin{itemize}
+    \item \textit{Initiate query}: the attacker sends a recursive query to a target DNS server.
+    \item \textit{Contact authoritative server}: the target DNS server queries the authoritative DNS server for the domain.
+    \item \textit{Spoofed response}: the attacker intercepts or guesses the DNS query ID and sends a forged response, pretending to be the authoritative server.
+    \item \textit{Cache malicious record}: the target DNS server accepts and caches the fraudulent record, believing it to be legitimate.
+\end{itemize}
+As a result, any client querying the poisoned DNS server will be redirected to the attacker's malicious website.
+
+\subsection{DHCP poisoning}
+The Dynamic Host Configuration Protocol (DHCP) is used to automatically assign IP addresses and network configuration parameters to devices on a network. 
+Here's how DHCP operates:
+\begin{itemize}
+    \item \textit{Automatic IP assignment}: when a device connects to the network, DHCP assigns it a new IP address automatically.
+    \item \textit{Centralized management}: network administrators can centrally manage and distribute configuration settings such as IP addresses, router information, and subnet masks.
+\end{itemize}
+Despite its convenience, DHCP has some limitations:
+\begin{itemize}
+    \item \textit{Lack of authentication}: DHCP does not authenticate requests or responses, making it vulnerable to attacks.
+    \item \textit{UDP dependency}: DHCP operates over UDP, which does not guarantee delivery or order of messages.
+    \item \textit{Server dependency}: DHCP servers must be continuously operational.
+        If a DHCP server becomes unavailable, devices may lose access to network resources.
+\end{itemize}
+
+\paragraph*{DHCP poisoning}
+In a DHCP poisoning attack, the lack of authentication is exploited to manipulate network configurations. 
+Here's how the attack typically works:
+\begin{enumerate}
+    \item \textit{Intercept requests}: the attacker intercepts DHCP requests from clients on the network.
+    \item \textit{Spoof responses}: the attacker sends spoofed DHCP responses before the legitimate server can reply.
+    \item \textit{Manipulate configurations}: through these forged responses, the attacker can assign malicious IP addresses, DNS servers, and default gateways to the victim devices.
+\end{enumerate}
+As a result, victim clients may receive incorrect network settings, potentially leading to network breaches, traffic interception, or DoS.
+
+\subsection{ICMP redirect}
+The Internet Control Message Protocol (ICMP) is used for sending error messages and diagnostic information between network devices, such as hosts and routers. 
+ICMP messages are categorized into three main types: requests, responses, and error messages.
+
+Routing information is primarily managed and updated by routers, not hosts.
+Routers determine and maintain the best paths for reaching different destinations. 
+Initially, hosts may have limited routing knowledge and rely on routers to learn and update routes.
+
+\paragraph*{ICMP redirect}
+An ICMP Redirect message notifies a host that a more efficient route to a specific destination is available and provides the address of the better gateway. 
+The typical process is as follows:
+\begin{itemize}
+    \item \textit{Detection}: a router detects that a host is using a suboptimal route for a particular destination.
+    \item \textit{Notification}: the router sends an ICMP Redirect message to the host and forwards the original packet.
+    \item \textit{Update}: the host updates its routing table to use the suggested gateway.
+\end{itemize}
+However, attackers can exploit ICMP Redirect messages by sending spoofed redirects. 
+This can hijack traffic and facilitate DoS attacks. 

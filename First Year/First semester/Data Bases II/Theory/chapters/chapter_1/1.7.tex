@@ -20,17 +20,15 @@ If this occurs, the bumping rule is employed to adjust the timestamp of the rece
 
 \paragraph*{Counters}
 The scheduler uses two counters: one for writes (WTM($x$)) and another for reads (RTM($x$)).
-Read/write requests are tagged with the timestamp of the requesting transaction.
-For read operations:
-\begin{itemize}
-    \item If $\textnormal{ts}<\textnormal{WTM}(x)$, the request is rejected, and the transaction is killed.
-    \item Otherwise, access is granted, and $\textnormal{RTM}(x)=\max(\textnormal{RTM}(x),\textnormal{ts})$. 
-\end{itemize}
-For write operations:
-\begin{itemize}
-    \item If $\textnormal{ts}<\textnormal{RTM}(x)$ or $\textnormal{ts}<\textnormal{WTM}(x)$, the request is rejected, and the transaction is killed.
-    \item Otherwise, access is granted, and $\textnormal{WTM}(x)=\textnormal{ts}$. 
-\end{itemize}
+Read and write requests are tagged with the timestamp of the requesting transaction.
+
+A read is accepted if its timestamp is higher than the last write timestamp.
+In this case, $\textnormal{RTM}(x)=\max(\textnormal{RTM}(x),\textnormal{ts})$. 
+
+A write is accepted if its timestamp is higher than the last write and last read timestamps. 
+In this case $\textnormal{WTM}(x)=\textnormal{ts}$. 
+
+In case a read or a write is not accepted, the transaction is killed.
 However, these rules may lead to excessive transaction killings.
 \begin{example}
     Assuming $\textnormal{RTM}(x)=7$ and $\textnormal{WTM}(x)=4$, consider the following schedule:
@@ -80,30 +78,23 @@ Since restarting a transaction is costlier than waiting, 2PL is preferable when 
 Commercial systems often combine these techniques to leverage the best features of both. 
 
 \paragraph*{Thomas rule}
-To reduce the number of killings, the Thomas rule can be used, altering the rule for write operations:
-\begin{itemize}
-    \item If $\textnormal{ts}<\textnormal{RTM}(x)$ the request is rejected and the transaction is killed. 
-    \item If $\textnormal{ts}<\textnormal{WTM}(x)$ then our write is obsolete: it can be skipped. 
-    \item Else, access is granted, and we set $\textnormal{WTM}(x)=\textnormal{ts}$. 
-\end{itemize}
+To reduce the number of killings, the Thomas rule can be used, altering the rule for write operations. 
 
-\subsection{Multi-version timestamps}
+A write is accepted if its timestamp is higher than the last read timestamp, and the write timestamp is updated. 
+A write is skipped if its timestamp is lower than the last write timestamp. 
+
+\subsection{Multi-version timestamp}
 The concept of multi-versioning involves generating new versions with each write operation, and reads access the relevant version.
 Each write produces new copies, each with a new write timestamp (WTM($x$)), ensuring that each object $x$ always has $N \geq 1$ active versions.
 A unique global read timestamp (RTM($x$)) is maintained, and old versions are discarded when there are no transactions requiring their values.
-In theory, the following rules can be applied:
+
+The reads are always accepted and a copy $x_k$ is selected for reading, where:
 \begin{itemize}
-    \item $r_{\textnormal{ts}}(x)$ is always accepted. A copy $x_k$ is selected for reading, where:
-        \begin{itemize}
-            \item If $\textnormal{ts} \geq \textnormal{WTM}_N(x)$, then $k=N$.
-            \item Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq \textnormal{ts} < \textnormal{WTM}_{k+1}(x)$. 
-        \end{itemize}
-    \item $w_{\textnormal{ts}}(x)$: 
-        \begin{itemize}
-            \item If $\textnormal{ts} < \textnormal{RTM}(x)$, the request is rejected. 
-            \item  Otherwise, a new version is created for timestamp $\textnormal{ts}$ (incrementing $N$).
-        \end{itemize}
+    \item If $\textnormal{ts} \geq \textnormal{WTM}_N(x)$, then $k=N$.
+    \item Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq \textnormal{ts} < \textnormal{WTM}_{k+1}(x)$. 
 \end{itemize}
+The write is accepted if its timestamp is higher than the last read timestamp, and the write timestamp is updated. 
+
 \begin{example}
     Assuming  $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$, consider the schedule:
     \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x) r_{12}(x) w_{14}(x) w_{13}(x)\]
@@ -126,19 +117,14 @@ In theory, the following rules can be applied:
 \end{example}
 
 \paragraph*{Multi-versioning in practice}
-In practice, the rule set is modified slightly:
+In practice, the rule set is modified slightly.
+The reads are always accepted and a copy $x_k$ is selected for reading, where:
 \begin{itemize}
-    \item $r_{\textnormal{ts}}(x)$ is always accepted. A copy $x_k$ is selected for reading, where:
-        \begin{itemize}
-            \item If $\textnormal{ts} \geq \textnormal{WTM}_N(x)$, then $k=N$. 
-            \item  Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq \textnormal{ts} < \textnormal{WTM}_{k+1}(x)$. 
-        \end{itemize}
-    \item $w_{ts}(x)$:
-        \begin{itemize}
-            \item If $\textnormal{ts} < \textnormal{RTM}(x)$ or $\textnormal{ts} < \textnormal{WTM}_N(x)$, the request is rejected. 
-            \item  Otherwise, a new version is created for timestamp $\textnormal{ts}$ (incrementing $N$).
-        \end{itemize}
+    \item If $\textnormal{ts} \geq \textnormal{WTM}_N(x)$, then $k=N$. 
+    \item Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq \textnormal{ts} < \textnormal{WTM}_{k+1}(x)$. 
 \end{itemize}
+The write is accepted if its timestamp is higher than the last read and last write timestamps, and the write timestamp is updated. 
+
 \begin{example}
     Assuming $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$, consider the schedule:
     \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x) r_{12}(x) w_{14}(x) w_{13}(x)\]

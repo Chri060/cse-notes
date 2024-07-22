@@ -1,87 +1,54 @@
-\subsection{Spoofing}
+\section{Network security protocols}
 
-\paragraph*{UDP spoofing}
-In UDP (User Datagram Protocol), the IP source address lacks authentication, making it susceptible to modification in UDP or ICMP packets.
-This process is relatively simple for attackers. 
-However, if the attacker is on a different network, they won't receive responses to their spoofed packets, as these responses will be directed to the spoofed host (known as blind spoofing).
-However, if the attacker is on the same network, they can sniff the remaining traffic or employ ARP spoofing to further exploit vulnerabilities.
-\paragraph*{TCP spoofing}
-Unlike UDP, TCP (Transmission Control Protocol) employs sequence numbers for packet reordering and acknowledgment. 
-It utilizes a semi-random Initial Sequence Number (ISN) during the connection setup.
-If a blind spoofer can predict the ISN, they can complete the TCP three-way handshake blindly without receiving responses. 
-However, it's crucial that the spoofed source does not receive response packets. 
-Otherwise, it might respond with a Reset (RST) packet, potentially disrupting the connection.
+Communications security must address several critical challenges:
+\begin{itemize}
+    \item \textit{Trust and integrity}: establishing trust between parties, protecting sensitive data, and ensuring the atomicity of transactions—ensuring each transaction is complete and accurate.
+    \item \textit{Protocol limitations}: internet protocols often face issues with authentication and confidentiality.
+    \item \textit{Adoption and consistency}: ensuring that security protocols are widely adopted and consistently implemented across different systems and organizations.
+\end{itemize}
+Two prominent protocols that tackle these challenges are HTTPS (HTTP over SSL/TLS) and SET (Secure Electronic Transaction).
+\begin{itemize}
+    \item \textit{HTTPS}: Ensures the confidentiality and integrity of communications while allowing for mutual authentication. 
+        Despite its strengths, HTTPS does not guarantee how data is used nor does it always enforce strict client authentication in practice.
+    \item \textit{SET}: Developed by the VISA and MasterCard consortium, SET focuses on securing transactions rather than just the connections.
+        It ensures data usage and transaction security through mechanisms like dual signatures. 
+        However, SET struggled with adoption due to scalability issues and the requirement for cardholders to obtain digital certificates. 
+        Today, simpler and more scalable methods, such as redirects with tokens to bank websites, are commonly used.
+\end{itemize}
 
-\subsection{TCP session hijacking}
-TCP session hijacking involves seizing control of an active TCP session. 
-Here's how it typically occurs:
+\subsection{Transport Layer Security}
+TLS, the successor to SSL (Secure Sockets Layer), was developed by the IETF. 
+It is designed to ensure:
+\begin{itemize}
+    \item \textit{Confidentiality and integrity}: protects data during transmission.
+    \item \textit{Authentication}: provides server and optional client authentication.
+\end{itemize}
+TLS uses both symmetric and asymmetric cryptography to balance performance and security. 
+The TLS handshake involves the following steps:
 \begin{enumerate}
-    \item The attacker (C) intercepts and monitors packets between two parties (A and B), recording sequence numbers.
-    \item C disrupts A's connection, such as by launching a SYN Flood attack, causing A to experience a seemingly random disruption in service.
-    \item C assumes A's identity by spoofing A's address and using a correct Initial Sequence Number (ISN) to engage in dialogue with B. B remains unaware of the deception.
+    \item \textit{Client hello}: the client sends a list of supported cipher suites and random data to the server.
+    \item \textit{Server hello}: the server responds with the chosen cipher suite, additional random data, and its certificate. 
+        The client must verify this certificate.
+    \item \textit{Key exchange}: the client sends a pre-master secret encrypted with the server's public key, along with a client certificate if required.
+    \item \textit{Secure communication}: an encrypted channel is established for communication.
 \end{enumerate}
-Numerous tools, like hunt and dsniff, automate this attack process.
-If the attacker is a man in the middle, they can inject content into the flow without disrupting B's session, thereby controlling or resynchronizing all traffic passing through.
-\begin{definition}[\textit{Man in the Middle}]
-    A man in the middle attack encompasses various techniques where an attacker impersonates either the server or the client to intercept or manipulate communication between them.
-\end{definition}
+TLS supports a range of algorithms for key exchange, encryption, digital signatures, and hashing. 
+It is designed to be flexible and can adapt to advancements in cryptographic techniques. 
+TLS is inherently resistant to MITM attacks, ensuring that only legitimate parties can decrypt and modify data.
 
-\subsection{Domain Names System}
-The Domain Name System (DNS) is responsible for translating domain names into numerical IP addresses. 
-Rather than employing a hash or a file of all mappings, DNS operates through a distributed database system:
-\begin{itemize}
-    \item A hierarchy of servers maintains mappings, with each server retaining a small cache of these mappings.
-    \item DNS operates over UDP on Port 53, with messages lacking authentication.
-    \item When a domain name is requested and not found in the local cache, the system queries a DNS server.
-\end{itemize}
-This hierarchy of DNS servers contains resource records to match domain names with IP addresses.
+TLS offers robust protection for the confidentiality and integrity of transmitted data and authenticates servers and clients.
+However, it does not secure data before or after transmission, such as on the server or client side, and it relies on PKI, which can have its own limitations.
+The effectiveness of TLS depends on the security and trustworthiness of CAs. 
+CAs are responsible for validating domains and organizations and must meet stringent requirements to be included in browser and OS root programs. 
+Removing a non-compliant CA can disrupt many websites, making such decisions complex.
 
-\paragraph*{Domain name resolution}
-Consider the example of typing "sports.polimi.com":
-\begin{itemize}
-    \item he system checks /etc/hosts and the DNS cache.
-    \item If not found locally, it traverses the hierarchy, querying DNS servers from the root to the authoritative server of "polimi.com".
-    \item Finally, it sends an HTTP request to the obtained IP address.
-\end{itemize}
-When a non-authoritative DNS server receives a resolution request, it may:
-\begin{itemize}
-    \item Respond from cache if available.
-    \item Recursively resolve the name on behalf of the client.
-    \item Iteratively provide the authoritative DNS address.
-\end{itemize}
-
-\paragraph*{Cache poisoning attack}
-Here's how a cache poisoning attack unfolds:
-\begin{enumerate}
-    \item The attacker initiates a recursive query to the victim DNS server.
-    \item The victim DNS server contacts the authoritative server.
-    \item Impersonating the authoritative DNS server, the attacker sniffs or guesses the DNS query ID and spoofs the answer.
-    \item The victim DNS server, trusting the response, caches the malicious record. 
-\end{enumerate}
-Subsequently, all clients redirected to the poisoned DNS server are led to the malicious website.
-
-\subsection{Dynamic Host Configuration Protocol}
-The Dynamic Host Configuration Protocol (DHCP) is a protocol designed to dynamically allocate IP addresses and network parameters to devices within a network. 
-Here's how it functions:
-\begin{itemize}
-    \item DHCP automatically assigns a new IP address to a computer when it connects to the network.
-    \item It enables network administrators to centrally manage and distribute configuration parameters to network hosts, including IP addresses, router information, and subnet masks.
-\end{itemize}
-
-\paragraph*{Limitations}
-However, DHCP lacks authentication, potentially impacting performance. 
-It operates over UDP, and a DHCP server must run continuously. 
-If the DHCP server becomes unavailable, clients may lose access to the enterprise network.
-
-\paragraph*{DHCP Operations}
-DHCP involves several key operations:
-\begin{enumerate}
-    \item DHCP DISCOVER: Client requests an IP address.
-    \item  DHCP OFFER: DHCP server offers an IP address to the client.
-    \item Upon receiving DHCP ACK from the server, the client can begin using the assigned IP address.
-    \item DHCP RELEASE: Client voluntarily relinquishes the IP address.
-\end{enumerate}
-
-\paragraph*{DHCP poisoning attack}
-Since DHCP is unauthenticated, attackers can intercept DHCP requests, respond first, and manipulate client configurations. 
-Through spoofed DHCP responses, attackers can set IP addresses, DNS addresses, and default gateways for victim clients, leading to potential network breaches.
+\subsection{Secure Electronic Transaction}
+SET, a collaborative effort by VISA and MasterCard, was designed to secure transactions by using dual signatures to link order details sent to merchants with payment data sent to payment gateways. 
+Despite its innovative approach, SET faced scalability challenges and the complexity of requiring digital certificates for cardholders. 
+This hindered its widespread adoption. 
+Modern methods, such as token-based redirects to bank websites, have largely replaced SET for secure transactions.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{images/dsg.png}
+    \caption{Dual signature generation}
+\end{figure}

@@ -1,4 +1,30 @@
-\section{Other issues}
+\section{Other vulnerabilities}
+
+\subsection{Cookies}
+HTTP operates in a stateless manner, meaning it lacks inherent memory of previous interactions. 
+While HTTP predominantly facilitates data flow from client to server, it lacks a native ability for the server to persist information on the client side. 
+However, cookies emerged as a solution, enabling client-side storage of information and providing a dependable mechanism for maintaining stateful data.
+Originally conceived for website customization purposes, cookies have been susceptible to misuse, leading to privacy infringements. 
+Additionally, notions such as user authentication and session management, when implemented through cookies, can pose security risks if not handled properly.
+
+The process of establishing a session using cookies involves the following steps:
+\begin{enumerate}
+\item The user submits their Web Server username and password.
+\item The Web Server generates and stores a Session ID.
+\item The Web Server responds by sending a cookie containing this Session ID.
+\item The user's browser stores the session ID and includes it in subsequent requests to the Web Server.
+\end{enumerate}
+Issues concerning session cookies include:
+\begin{itemize}
+    \item Preventing the prediction of tokens received or to be received by the client (next token) to thwart impersonation and spoofing attacks and minimize the impact of session stealing.
+    \item Ensuring that every token has a reasonable expiration period, although this should not be set in the cookies themselves.
+    \item Employing cookie encryption for sensitive information and utilizing storage mechanisms such as Message Authentication Codes (MACs) to prevent tampering.
+\end{itemize}
+
+\paragraph*{Session hijacking}
+Due to the stateless nature of HTTP, session hijacking can occur through methods such as stealing a cookie via an XSS attack or brute-forcing a weak session ID parameter.
+
+
 
 \subsection{Information leakage}
 While detailed error messages enhance Human-Computer Interaction (HCI), they can inadvertently lead to security vulnerabilities. 
@@ -7,7 +33,7 @@ Additionally, risks stem from the insertion of user-supplied data in errors, whi
 Side channels are another potential source of data leaks.
 
 \subsection{Password security}
-The essentials of password security stay the same: passwords should never be stored in plain text in web applications to reduce the risk of exposure in case of a breach. 
+The essentials of password security stay the same: passwords should never be stored in plain text in Web Applications to reduce the risk of exposure in case of a breach. 
 Employing techniques like salting and hashing is crucial to prevent attacks like rainbow tables. 
 It's crucial to handle password reset processes carefully: Typically, resetting a password involves providing an alternative login method. 
 Common methods include sending a reset link to a registered email. 

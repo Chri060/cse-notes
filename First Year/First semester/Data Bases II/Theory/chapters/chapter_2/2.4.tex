@@ -74,21 +74,30 @@ When examining the distances, the model can be characterized by the following co
     The distance function, denoted as $\text{L}_{\text{p}}$-norms, is defined by the formula:
     \[L_p(t,q)=\left(\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert^{p}}\right)^{\frac{1}{p}}\]
 \end{definition}
-Significant instances of the $L_p$-norm include:
-\begin{itemize}
-    \item \textit{Euclidean distance} (ellipsoids): $L_2(t,q)=\sqrt{\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert^{2}}}$
-    \item \textit{Manhattan distance} (rhomboids): $L_1(t,q)=\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert}$
-    \item \textit{Čebyšëv distance} (rectangles): $L_{\infty}(t,q)=\max_{i}\{\left\lvert t_i-q_i\right\rvert\}$
-\end{itemize}
-The shape of the attribute space depends on the distance function and the weight associated to each coordinate: 
-\begin{itemize}
-    \item \textit{Euclidean distance} (hyper-ellipsoids):
-        \[L_2(t,q;W)=\sqrt{\sum_{i=1}^{m}{w_i\left\lvert t_i-q_i \right\rvert^{2}}}\]
-    \item \textit{Manhattan distance} (hyper-rhomboids): 
-        \[L_1(t,q;W)=\sum_{i=1}^{m}{w_i\left\lvert t_i-q_i \right\rvert}\]
-    \item \textit{Čebyšëv distance} (hyper-rectangles): 
-        \[L_{\infty}(t,q;W)=\max_{i}\{w_i \left\lvert t_i-q_i\right\rvert\}\]
-\end{itemize}
+
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|cc|}
+    \hline
+    \textbf{Euclidean distance}                     & $L_2(t,q)=\sqrt{\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert^{2}}}$                                                 \\ \hline
+    \textbf{Manhattan distance}                     & $L_1(t,q)=\sum_{i=1}^{m}{\left\lvert t_i-q_i \right\rvert}$                                                 \\ \hline
+    \textbf{Čebyšëv distance}                       & $L_{\infty}(t,q)=\max_{i}\{\left\lvert t_i-q_i\right\rvert\}$ \\ \hline
+    \end{tabular}
+    \caption{Examples of $L_p$ norms}
+\end{table}
+The shape of the attribute space depends on the distance function and the weight associated to each coordinate. 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|cc|}
+    \hline
+    \textbf{Euclidean distance}                     & $L_2(t,q;W)=\sqrt{\sum_{i=1}^{m}{w_i\left\lvert t_i-q_i \right\rvert^{2}}}$                                                 \\ \hline
+    \textbf{Manhattan distance}                     & $L_1(t,q;W)=\sum_{i=1}^{m}{w_i\left\lvert t_i-q_i \right\rvert}$                                                 \\ \hline
+    \textbf{Čebyšëv distance}                       & $L_{\infty}(t,q;W)=\max_{i}\{w_i \left\lvert t_i-q_i\right\rvert\}$ \\ \hline
+    \end{tabular}
+    \caption{Examples of weighted $L_p$ norms}
+\end{table}
+\renewcommand*{\arraystretch}{1}
 
 \paragraph*{Top-k join query}
 In a top-$k$ join query with $n>1$ input relations and a scoring function $S$ defined on the result of the join, the general formulation is as follows:
@@ -179,16 +188,19 @@ With $S:[0,1]^m \rightarrow \mathbb{R}^{+}$.
 
 \paragraph*{Scoring functions}
 The most common scoring functions are: 
-\begin{itemize}
-    \item Average, that weighs preferences equally: 
-        \[\textnormal{SUM}(o) \equiv \textnormal{SUM}(p(o)) = p_1(o) + p_2(o) + \dots + p_m(o)\]
-    \item Weighted sum, that weighs the preferences differently:
-        \[\textnormal{WSUM}(o) \equiv \textnormal{WSUM}(p(o)) = w_1p_1(o) + w_2p_2(o) + \dots + w_mp_m(o)\]
-    \item Minimum, that considers the worst partial score: 
-        \[\textnormal{MIN}(o) \equiv \textnormal{MIN}(p(o)) = \min\{p_1(o),p_2(o),\dots, p_m(o)\}\]
-    \item Maximum, that considers the best partial score: 
-        \[\textnormal{MAX}(o) \equiv \textnormal{MAX}(p(o)) = \max\{p_1(o),p_2(o),\dots, p_m(o)\}\]       
-\end{itemize}
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|cc|}
+    \hline
+    \textbf{Average}                                & $\textnormal{SUM}(o) \equiv \textnormal{SUM}(p(o)) = p_1(o) + p_2(o) + \dots + p_m(o)$                                                 \\ \hline
+    \textbf{Weighted sum}                     & $\textnormal{WSUM}(o) \equiv \textnormal{WSUM}(p(o)) = w_1p_1(o) + w_2p_2(o) + \dots + w_mp_m(o)$                                                 \\ \hline
+    \textbf{Minimum}                       & $\textnormal{MIN}(o) \equiv \textnormal{MIN}(p(o)) = \min\{p_1(o),p_2(o),\dots, p_m(o)\}$ \\ \hline
+    \textbf{Minimum}                       & $\textnormal{MAX}(o) \equiv \textnormal{MAX}(p(o)) = \max\{p_1(o),p_2(o),\dots, p_m(o)\}$ \\ \hline   
+    \end{tabular}
+    \caption{Scoring functions}
+\end{table}
+\renewcommand*{\arraystretch}{1}
 Even with the minimum scoring function, the goal is to retrieve the $k$ objects with the highest global scores.
 
 \paragraph*{Iso-score curves}

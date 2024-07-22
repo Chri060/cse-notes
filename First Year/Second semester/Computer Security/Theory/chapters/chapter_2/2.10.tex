@@ -1,0 +1,68 @@
+\section{Shannon's information theory}
+
+Shannon's information theory provides a mathematical framework for understanding communication and quantifying information.
+
+Communication occurs between two endpoints:
+\begin{itemize}
+    \item The sender comprises an information source and an encoder.
+    \item The receiver consists of an information destination and a decoder.
+\end{itemize}
+Information is transmitted through a channel in the form of a sequence of symbols from a finite alphabet.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{images/sha.png}
+    \caption{Shannon's communication structure}
+\end{figure}
+The receiver exclusively receives information through the channel. 
+Until the symbol arrives, there remains uncertainty about what the next symbol will be. 
+Consequently, we represent the sender as a random variable. 
+Hence, obtaining information is akin to determining an outcome of a random variable $\mathcal{X}$, and the quantity of information relies on the distribution of $\mathcal{X}$. 
+Encoding involves mapping each outcome to a finite sequence of symbols: more symbols are necessary when transmitting more information.
+
+\subsection{Entropy}
+We require a non-negative measure of uncertainty. 
+The combination of uncertainties should correspond to adding entropies.
+\begin{definition}[\textit{Entropy}]
+    Let $\mathcal{X}$ be a discrete random variable with $n$ outcomes in $\left\{ x_0,\dots,x_{n-1} \right\}$, where $\Pr(\mathcal{X}=x_i)=p_i$ for all $0 \leq 1 \leq n$. 
+    The entropy of $\mathcal{X}$ is given by:
+    \[H(\mathcal{X})=\sum_{i=0}^{n-1}-p_i\log_b\left(p_i\right)\]
+\end{definition}
+The unit of measurement for entropy is contingent on the base $b$ of the logarithm, where the typical case for $b = 2$ is bits.
+\begin{example}
+    The random variable $\mathcal{X}$ represents a sequence of 6 uniform random letters (with $6^{26}$ combinations). 
+    In this case, the entropy is calculated as:
+    \[H(\mathcal{X})=\sum_{i=0}^{6^{26}-1}-\dfrac{1}{6^{26}}\log_b\left(\dfrac{1}{6^{26}}\right)\approx 28.2b\]
+
+    On the other hand, if $\mathcal{X}$ represents a uniform selection from six-letter English words (with $6^{6}$ combinations), the entropy is computed as:
+    \[H(\mathcal{X})=\sum_{i=0}^{6^{6}-1}-\dfrac{1}{6^{6}}\log_b\left(\dfrac{1}{6^{6}}\right)\approx 12.6b\]
+\end{example}
+
+\begin{theorem}
+    It is possible to encode the outcomes $n$ of independent and identically distributed random variables, each with entropy $H(\mathcal{X})$, using at least $nH(\mathcal{X})$ bits per outcome. 
+    Encoding with fewer than $nH(\mathcal{X})$ bits will result in loss of information.
+\end{theorem}
+Consequently, achieving arbitrary compression of bit-strings without loss is unattainable, necessitating cryptographic hashes to discard certain information.
+
+Additionally, the task of guessing a piece of information (equivalent to one outcome of $\mathcal{X}$) is no less challenging than guessing a bit-string of length $H(\mathcal{X})$, disregarding momentarily the effort involved in decoding the guess.
+
+\subsection{Minimum entropy}
+\begin{definition}[\textit{Min-entropy}]
+    The min-entropy is a measure of the most conservative assessment of the unpredictability of a set of outcomes.
+    It is defined for $\mathcal{X}$ as:
+    \[H_\infty(\mathcal{X})=-\log(\max_ip_i)\]
+\end{definition}
+In essence, it represents the entropy of a random variable with a uniform distribution, where each outcome has a probability of $\max_ip_i$.
+
+It's worth noting that guessing the most common outcome of $\mathcal{X}$ is no less challenging than guessing a bit-string of length $H_\infty(\mathcal{X})$.
+\begin{example}
+    Consider the random variable $\mathcal{X}$ defined as:
+    \[\mathcal{X}=\begin{cases}
+        0^{128}  \qquad \qquad          \text{with probability} \frac{1}{2}\\
+        a        \quad \qquad \qquad    \text{with probability} \frac{1}{2^{128}}
+    \end{cases}\]
+    Here, $a \in 1\{0,1\}^{127}$.
+    Predicting an outcome shouldn't be too difficult: just predict $0^{128}$:
+    \[H(\mathcal{X})=\dfrac{1}{2}\left(-\log_2\left(\dfrac{1}{2}\right)\right)+2^{127}\frac{1}{2^{128}}\left(-\log_2\left(\frac{1}{2^{128}}\right)\right)= 64.5b\]
+    \[H_\infty(\mathcal{X})=-\log_2\left(\dfrac{1}{2}\right)=1b\]
+    Min-entropy indicates that guessing the most common output is as difficult as guessing a single bit string.
+\end{example}
