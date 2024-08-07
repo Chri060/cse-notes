@@ -1,0 +1,85 @@
+\section{Running time analysis}
+
+The running time of an algorithm depends on the input: an already sorted sequence is easier to sort. 
+So, we parametrize the running time by the size of the input, since short sequences are easier to sort than long ones.
+Generally, we seek upper bounds on the running time, because everybody likes a guarantee.
+
+The running time analysis can be based on: 
+\begin{itemize}
+    \item \textit{Worst-case} (usually): in this case $T(n)$ is the maximum time of algorithm on any input of size $n$. 
+        This case is considered in situation where the time is a critical factor. 
+    \item \textit{Average-case} (sometimes):  in this case $T(n)$ is the expected time of algorithm over all inputs of size $n$. 
+        The average case needs assumption of statistical distribution of inputs.
+    \item \textit{Best-case} (bogus): cheat with a slow algorithm that works fast on some input.
+\end{itemize}
+To have a general measure of the complexity, we need a machine-independent evaluation. 
+In order to do that we may ignore all machine-dependent constants or to look at the growth of $T(n)$ as $n$ tends to infinity.
+This framework is called asymptotic analysis. 
+
+When the length of the input $n$ gets large enough, an algorithm with a lower complexity will always beat the ones with higher degrees.
+However, we should not ignore asymptotically slower algorithms since in real world design situations often we often need a careful balancing of engineering objectives. 
+Then, asymptotic analysis is a useful tool to help in designing a solution for a given problem 
+
+\subsection{Theta notation}
+In mathematics we have that the theta notation: 
+\[\Theta\left(g(n)\right)=f(n)\]
+Here, $f(n)$ is such that there exists positive constants $c_1$, $c_2$, and $n_0$ such that $0 \leq c_1 \cdot g(n) \leq f (n) \leq c_2 \cdot g(n)$ for all $n \geq n_0$. 
+
+In engineering we simply ignore the lower-order terms and ignore the constants. 
+\begin{example}
+    Consider the following expression: 
+    \[3n^3+90n^2-5n+6046\]
+    The theta notation corresponding to it is as follows: 
+    \[\Theta(n^3)\]
+\end{example}
+
+From the theta notation we can also define: 
+\begin{itemize}
+    \item \textit{Upper bound}: the upper bound is defined as: 
+        \[O(g(n))=f(n)\]
+        Here, $f(n)$ is such that there exist constants $c > 0$,$ n_0 > 0$ such that $0 \leq f(n) \leq c \cdot g(n)$ for all $n \geq n_0$. 
+    \item \textit{Lower bound}: the lower bound is defined as: 
+        \[\Omega(g(n))=f(n)\]
+        Here, $f(n)$ is such that there exist constants $c > 0$,$ n_0 > 0$ such that $0 \leq c \cdot g(n) \leq f(n)$ for all $n \geq n_0$. 
+    \item \textit{Strict upper bound}: the strict upper bound is defined as: 
+        \[o(g(n))=f(n)\]
+        Here, $f(n)$ is such that there exist constants $c > 0$,$ n_0 > 0$ such that $0 \leq f(n) < c \cdot g(n)$ for all $n \geq n_0$. 
+    \item \textit{Strict lower bound}: the strict lower bound is defined as: 
+        \[\omega(g(n))=f(n)\]
+        Here, $f(n)$ is such that there exist constants $c > 0$,$ n_0 > 0$ such that $0 \leq c \cdot g(n) < f(n)$ for all $n \geq n_0$. 
+\end{itemize}
+\begin{example}
+    Consider the expression $2n^2$, we have that its upper bound is: 
+    \[2n^2 \in O(n^3)\]
+    Consider the expression $\sqrt{n}$, we have that its upper bound is: 
+    \[\sqrt{n} \in \Omega(\ln(n))\]
+\end{example}
+From this we can redefine the strict bound as: 
+\[\Theta(g(n))=O(g(n))\cap\Omega(g(n))\]
+
+\subsection{Sorting problem}
+The problem of sorting consists in, given an array of numbers $\left\langle a_1,a_2,\dots,a_n \right\rangle$, we need to return the permutation $\left\langle a_1^\prime,a_2^\prime,\dots,a_n^\prime \right\rangle$ such that $a_1^\prime\leq a_2^\prime \leq \dots \leq a_n^\prime$. 
+
+\paragraph*{Insertion sort}
+One possible solution to this problem is the insertion sort algorithm, that takes as input an array $A[n]$.  
+\begin{algorithm}[H]
+    \caption{Insertion sort}
+        \begin{algorithmic}[1]
+            \For{$j := 2$ \textbf{to} $n$} 
+                \State $key := A[j]$
+                \State $i := j-1$
+                \While{$i > 0$ \textbf{and} $A[i]>key$}
+                    \State $A[i+1] := A[i]$
+                    \State $i := i - 1$
+                \EndWhile
+                \State $A[i+1] := key$
+            \EndFor
+        \end{algorithmic}
+\end{algorithm}
+For the insertion sort we have a worst case scenario in which the input is sorted but in reverse, and the complexity is: 
+\[T_{\text{worst}}(n)=\sum_{j=2}^n\Theta(j)=\Theta(n^2)\]
+For the average case we consider that all permutations are equally likely, yielding a complexity of: 
+\[T(n)_{\text{average}}=\sum_{j=2}^n\Theta\left(\dfrac{j}{2}\right)=\Theta(n^2)\]
+For the best case scenario we have an ordered list, and so we simply need to check all the elements in the list: 
+\[T(n)_{\text{best}}=\sum_{j=2}^n\Theta\left(1\right)=\Theta(n)\]
+As a final result, we have that this algorithm is fast for small $n$, but becomes infeasible for larger input dimensions. 
