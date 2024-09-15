@@ -1,0 +1,71 @@
+\section{Impartial combinatorial games}
+
+\begin{definition}[\textit{Impartial combinatorial game}]
+    An impartial combinatorial game is a game such that:
+    \begin{enumerate}
+        \item There are two players moving in alternate order.
+        \item There is a finite number of positions in the game.
+        \item The players follow the same rules.
+        \item The game ends when no further moves are possible.
+        \item The game does not involve chance.
+        \item In the classical version, the winner is the player leaving the other player with no available moves, in the mis`ere version the opposite.
+    \end{enumerate}
+\end{definition}
+\begin{example}
+    Examples of impartial combinatorial games are: 
+    \begin{itemize}
+        \item $k$ piles of cards. At her turn each player takes as many cards as she wants (at least one!) from one and only one pile. 
+        \item $k$ piles of cards. At her turn each player takes as many cards as she wants (at least one) from no more than $j < k$ piles. 
+        \item $k$ cards in a row. At her turn each player takes either $j_1$ or $\vdots$ or $j_l$ cards. 
+    \end{itemize}
+    In all these variants of the game, the player remaining without cards loses.
+    In the first two cases the positions are $(n_1, \cdots , n_k)$ where $n_i$ is a non negative integer for all $i$. 
+    In the last example positions can be seen as all non negative integers smaller or equal to $k$.
+\end{example}
+To solve this type of games we start by partitioning the set of all possible (finitely many) positions into two sets:
+\begin{enumerate}
+    \item $P$-positions (i.e. previous player has a winning strategy): loosing.
+    \item $N$-positions (i.e. next player has a winning strategy): winning.
+\end{enumerate}
+Note: it is the state of the game that matters, and not who is called to move.
+Rules for the partition (for the classical version):
+\begin{itemize}
+    \item Terminal position $(0, 0, \cdots, 0)$ is a $P$-position (it is a losing position, as the player does not have any card left)
+    \item From a $P$-position only $N$-positions are available
+    \item From a $N$-position it is possible, yet not necessary, to go to a $P$-position. 
+\end{itemize}
+Therefore, the player starting from a $N$-position wins. 
+
+\subsection{Nim game}
+The Nim game is defined as $(n_1, \cdots, n_k)$ where $n_i$ is a positive integer for all $i$.
+At her turn any player is supposed to take one (and only one) $n_i$ and substitute it with $\hat{n}_i < n_i$. 
+The winner is the player who arrives at the position $(0, \dots, 0)$. 
+\begin{itemize}
+    \item Actions: taking away cards from one pile.
+    \item Goal: to clear the whole table.
+\end{itemize}
+
+\begin{theorem}[Bouton]
+    In the Nim game the position $(n_1, n_2, \dots, n_k)$ is a $P$-position if and only if:
+    \[n_1 \oplus n_2 \oplus \dots \oplus n_k = 0\]
+\end{theorem}
+\begin{proof}
+    Terminal position $(0, 0, \dots , 0)$ is a $P$-position, with zero Nim-sum.
+
+    Positions with $n_1 \oplus n_2 \oplus \dots \oplus n_N = 0$ go only to positions with non-zero Nim-sum. 
+    For, suppose that the next position $( \hat{n}_1, n_2, \dots , n_N )$ is such that $\hat{n}_1 \oplus n_2 \oplus \dots \oplus n_N = 0 = n_1 \oplus n_2 \oplus \dots \oplus n_N$ : then, by the cancelation law one has $\hat{n}_1 = n_1$, which is impossible since the game requires $\hat{n}_1 < n_1$.
+
+    Positions with $n_1 \oplus n_2 \oplus \dots \oplus n_N \neq 0$ can go to positions with zero Nim-sum
+    Let $z := n_1 \oplus n_2 \oplus \dots \oplus n_N\neq 0$. Take a pile having 1 in the first column on the left of the expansion of $z$ and put 0 there; then go right, leaving unchanged digits corresponding to 0 and changing them otherwise. 
+    Provably, the result is smaller than the original number.
+\end{proof}
+\begin{example}
+    From the following arrangement yielding non-zero Nim-sum: $4, 6,5$. 
+    by taking a card out of the first row we go to the next one with zero Nim-sum  $3, 6,5$. 
+    So, there are three initial good moves, one for each row.
+\end{example}
+
+\subsection{Conclusions}
+Games with perfect information can be solved by using backward induction. 
+However backward induction is a concrete solution method only for very simple games, because of limited rationality.
+Depending on the game, we can reach different levels of solutions.
