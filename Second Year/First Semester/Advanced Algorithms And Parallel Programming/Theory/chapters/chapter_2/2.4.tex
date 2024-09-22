@@ -1,9 +1,9 @@
 \section{Matrix multiplication}
 
-The matrix multiplication needs as input two matrices $A$ and $B$, and returns a matrix $C$, that is the product of the two input matrices. 
-In formula, we have that each element of the matrix $C$ is computed as: 
+Matrix multiplication involves taking two matrices $A$ and $B$ as input and producing a resulting matrix $C$, which is their product.
+Each element of the matrix $C$ is computed as follows:
 \[c_{ij}=\sum_{k=1}^{n}a_{ik}\cdot b_{kj}\]
-The standard algorithm is the following: 
+The standard algorithm for matrix multiplication is outlined below:
 \begin{algorithm}[H]
     \caption{Standard matrix multiplication}
         \begin{algorithmic}[1]
@@ -17,37 +17,37 @@ The standard algorithm is the following:
             \EndFor
         \end{algorithmic}
 \end{algorithm}
-The comlexity of this algorithm due to the three nested loops is $\Theta(n^3)$.
+The complexity of this algorithm, due to the three nested loops, is $\Theta(n^3)$.
 
-For the divide and conquer algorithm we divide the original $n\times n$ matrix into a $2 \times 2$ matrix of $\frac{n}{2}\times\frac{n}{2}$ sumatrices: 
+For the divide and conquer approach, we divide the original $n\times n$ matrix into four $\frac{n}{2}\times\frac{n}{2}$ sumatrices: 
 \[\begin{bmatrix} r & s \\ t & u \end{bmatrix}=\begin{bmatrix} a & b \\ c & d \end{bmatrix} \cdot \begin{bmatrix} e & f \\ g & h \end{bmatrix}\]
-In this way, we need to solve the following system: 
+This requires solving the following system:
 \[\begin{cases} r = ae + bg \\ s = af + bh \\ t = ce + dg \\ u = cf + dh \end{cases}\]
-That is a total of eight multiplications and four additions of the submatrices.
-The part that becomes recursive is the matrix multiplication.
-In the end, we need eight recursions on half the problem, and the time needed to add the subatrices is $n^2$: 
+This results in a total of eight multiplications and four additions of the submatrices. 
+The recursive part of the algorithm involves the matrix multiplications. 
+The time complexity can be expressed as:
 \[T(n)=8T\left(\dfrac{n}{2}\right)+\Theta(n^2)\]
-Thus, for the masther method we have that the total complexity is $\Theta(n^3)$. 
-This complexity is the same as the one in the standard algorithm. 
+Using the master method, we find that the total complexity remains $\Theta(n^3)$, the same as the standard algorithm.
 
 \subsection{Strassen algorithm}
-To lower the complexity of the algorithm for this problem Strassen proposed to multiply the $2 \times 2$ matrices with only seven recursive multiplications instead of eight. 
-Starting from the following factors: 
+To improve efficiency, Strassen proposed a method that reduces the number of multiplications from eight to seven for $2 \times 2$ matrices.
+This is achieved using the following factors:
 \[\begin{cases} P_1=a\cdot(f-h) \\ P_2=(a+b)\cdot h \\ P_3=(c+d)\cdot e \\ P_4=d\cdot(g-e) \\ P_5=(a+d)\cdot(e+h) \\ P_6=(b-d)\cdot(g+h) \\ P_7=(a-c)\cdot(e+f) \end{cases}\]
-It is possible to find the four elements of the resulting matrix as: 
+Using these products, we can compute the elements of the resulting matrix:
 \[\begin{cases} r=P_5+P_4-P_2+P_6 \\ s=P_1+P_2 \\ t=P_3+P_4 \\ u=P_5+P_1-P_3-P_7 \end{cases}\]
-So, in this case we have only seven multiplications and eighteen additions and subtractions. 
-This problem is solved in a divide and conquer manner in the following way: 
+This approach requires seven multiplications and a total of eighteen additions and subtractions.
+
+The divide and conquer steps are as follows:
 \begin{enumerate}
-    \item \textit{Divide}: partition $A$ and $B$ into $\frac{n}{2}\times\frac{n}{2}$ submatrices and form temrs to be multiplied using addition and subtraction.
-    \item \textit{Conquer}: perform seven multiplications of $\frac{n}{2}\times\frac{n}{2}$ submatrices recursively.
-    \item \textit{Combine}: form $C$ using addition and subtraction on $\frac{n}{2}\times\frac{n}{2}$ sumbatrices. 
+    \item \textit{Divide}: partition matrices $A$ and $B$ into $\frac{n}{2}\times\frac{n}{2}$ submatrices and formulate terms for multiplication using addition and subtraction.
+    \item \textit{Conquer}: recursively perform seven multiplications of $\frac{n}{2}\times\frac{n}{2}$ submatrices.
+    \item \textit{Combine}: construct matrix $C$ using additions and subtractions on the $\frac{n}{2}\times\frac{n}{2}$ sumbatrices. 
 \end{enumerate}
-The recurrent form for the complexity is the: 
+The recurrence relation for the complexity is:
 \[T(n)=7T\left(\dfrac{n}{2}\right)+\Theta(n^2)\]
-By solving the recurrence with the master method we have a complecity $\Theta(n^{\log_27})$. 
+By solving this recurrence with the master method, we obtain a complexity of $\Theta\left(n^{\log_27}\right)$, which is approximately $\Theta\left(n^{2.81}\right)$. 
 
-The number 2.81 may not seem much smaller than 3, but because the difference is in the exponent, the impact on running time is significant. 
-In fact, Strassen's algorithm beats the ordinary algorithm on today's machines for $n \geq 32$ or so.
+Although $2.81$ may not seem significantly smaller than $3$, the impact of this reduction in the exponent is substantial in terms of running time.
+In practice, Strassen's algorithm outperforms the standard algorithm for $n \geq 32$.
 
-Best idea to date (of theoretical interest only because there is no existing algorithm): $\Theta(n^{2.376})$.
+The best theoretical complexity achieved so far is $\Theta\left(n^{2.37}\right)$, although this remains of theoretical interest, as no practical algorithm currently achieves this efficiency.
