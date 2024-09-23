@@ -1,58 +1,73 @@
-\section{Extensive game}
+\section{Extensive games}
 
 \begin{definition}[\textit{Extensive form game with perfect information}]
-    An extensive form game with perfect information consists of: 
-    \begin{enumerate}
-        \item A finite set $N = \{1,\dots,n\}$ of players. 
-        \item A game tree $(V,E,x_0)$.
-        \item A partition of the vertices that are not leaves into sets ${P1, P2, \dots , Pn+1}$.
-        \item A probability distribution for each vertex in $P_{n+1}$, defined on the edges from the vertex to its children.   
-    \end{enumerate}
+    An extensive form game with perfect information consists of:
 \end{definition}
-We have the following: 
 \begin{enumerate}
-    \item The set $P_i$ , for $i \leq n$, is the set of the nodes $v$ where Player $i$ must choose a child of $v$, representing a possible move from him at $v$.
-    \item $P_{n+1}$ is the set of the nodes where a chance move is present: that is $n + 1$ is the number of players plus the random component. 
-        $P_{n+1}$ can be empty, meaning that the game does not admit any chance.
-    \item When $P_{n+1}$ is empty, the $n$ players have only preferences on the leaves: a utility function is not required. 
+    \item A finite set $N = \{1,\dots,n\}$ of players. 
+    \item A game tree $(V,E,x_0)$.
+    \item A partition of the non-leaf vertices into sets ${P1, P2, \dots , Pn+1}$.
+    \item A probability distribution for each vertex in $P_{n+1}$, defined on the edges from that vertex to its children.
+\end{enumerate}
+The game includes the following:
+\begin{enumerate}
+    \item The set $P_i$, for $i \leq n$, consists of nodes where Player $i$ must choose a child of $v$, representing a possible move by that player.
+    \item $P_{n+1}$ is the set of nodes where chance plays a role (i.e., random events). 
+        Here, $n + 1$ refers to the players plus the random component. $P_{n+1}$ can be empty, indicating no random events in the game.
+    \item When $P_{n+1}$ is empty, the $n$ players only have preferences over the leaves, meaning no random component influences the outcome, so a utility function isn't required.
 \end{enumerate}
 
-\subsection{Solving an extensive game}
-In order to find the optimal outcome, we employ the rationality axioms. 
+\subsection{Extensive game solution}
+To determine the optimal outcome, we apply the axioms of rationality.
 \begin{example}
-    For the voting game described before: 
+    For the voting game described earlier:
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.75\linewidth]{images/tree.png}
         \caption{Voting game tree}
     \end{figure}
-    We have the following: 
+    We can identify the preferences as follows:
     \begin{itemize}
-        \item Player3: h = (3, 3, 4) over g = (3, 3, 3) ; j = (3, 4, 3) over k = (1, 2, 2); l = (4, 3, 3) over m= (2, 1, 2) ; o = (2, 2, 2) over n= (2, 2, 1)
-        \item Player2: d =(3,4,3)overc =(3,3,4);e =(4,3,3)overf =(2,2,2) 
-        \item Player1: b = (4, 3, 3) over a = (3, 4, 3), thereby finding the optimal outcome
+        \item For Player 3: 
+            \begin{itemize}
+                \item $h = \begin{pmatrix} 3 & 3 & 4 \end{pmatrix}$ over $g = \begin{pmatrix} 3 & 3 & 3 \end{pmatrix}$.
+                \item $j = \begin{pmatrix} 3 & 4 & 3 \end{pmatrix}$ over $k = \begin{pmatrix} 1 & 2 & 2 \end{pmatrix}$.
+                \item $l = \begin{pmatrix} 4 & 3 & 3 \end{pmatrix}$ over $m = \begin{pmatrix} 2 & 1 & 2 \end{pmatrix}$.
+                \item $o = \begin{pmatrix} 2 & 2 & 2 \end{pmatrix}$ over $n = \begin{pmatrix} 2 & 2 & 1 \end{pmatrix}$.
+            \end{itemize}
+        \item For Player 2: 
+            \begin{itemize}
+                \item $d = \begin{pmatrix} 3 & 4 & 3 \end{pmatrix}$ over $c = \begin{pmatrix} 3 & 3 & 4 \end{pmatrix}$.
+                \item $e = \begin{pmatrix} 4 & 3 & 3 \end{pmatrix}$ over $f = \begin{pmatrix} 2 & 2 & 2 \end{pmatrix}$.
+            \end{itemize}
+        \item For Player 1:
+            \begin{itemize}
+                \item $b = \begin{pmatrix} 4 & 3 & 3 \end{pmatrix}$ over $a = \begin{pmatrix} 3 & 4 & 3 \end{pmatrix}$.
+            \end{itemize}
     \end{itemize}
+    Thus, the optimal outcome is found. 
 \end{example}
 \begin{definition}[\textit{Length}]
-    Define Length of the game as the length of the longest path in the game.
+    The length of a game is defined as the length of the longest path in the game tree.
 \end{definition}
-Decision theory, i.e. rationality assumption 5, enables us to solve games of length $1$. 
-Rationality assumption 4 allows us to solve a game of length $i + 1 $if the games of length at most $i$ are solved.
-Thus, by repeated applications, we can solve games of any finite length.
-This method takes the name of backward induction: it is the process of reasoning backwards in time (that is from the leaves of the tree up to the root), so as to determine a sequence of actions leading one to the optimal outcome.
-
+Using decision theory and the assumption of rationality:
+\begin{itemize}
+    \item Rationality assumption 5 allows us to solve games of length 1.
+    \item Rationality assumption 4 allows us to solve games of length $i + 1$ if all games of length at most $i$ have already been solved.
+\end{itemize}
+This iterative process is called backward induction, where we work backwards from the leaves of the tree to the root to determine the optimal sequence of actions.
 \begin{theorem}[First rationality theorem]
-    The rational outcomes of a finite, perfect information game are those given by the procedure of backward induction.
+    The rational outcomes of a finite game with perfect information are those determined by the backward induction procedure.
 \end{theorem}
-The method of backwards induction can be applied since every vertex $v$ of the game is the root of a new game, made by all followers of v in the initial game.
-Such a game is called a subgame of the original one.
+Backward induction can be applied because every vertex $v$ in the game is the root of a subgame consisting of all the vertices that follow $v$. 
+These subgames are derived from the original game.
 \begin{example}
-    For the second game: 
+    For the chance game: 
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.75\linewidth]{images/tree1.png}
         \caption{Chance game tree}
     \end{figure}
-    The outcomes obtained by backward induction are: (4, 3) and (3, 4). In fact, Pl2 does not have any preference between (4, 3) and (0, 3)!
-    Therefore, in general, uniqueness of solutions is not guaranteed. 
+    The outcomes obtained through backward induction are $\begin{pmatrix} 4 & 3 \end{pmatrix}$ and $\begin{pmatrix} 3 & 4 \end{pmatrix}$. 
+    Player 2 has no strict preference between $\begin{pmatrix} 4 & 3 \end{pmatrix}$ and $\begin{pmatrix} 0 & 3 \end{pmatrix}$, indicating that in general, the solutions may not be unique.
 \end{example}

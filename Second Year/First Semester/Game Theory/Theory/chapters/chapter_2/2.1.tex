@@ -1,60 +1,65 @@
-\section{Tree representation}
+\section{Games tree}
 
-\subsection{Voting gmae}
+\begin{example}
+    Three politicians are tasked with deciding whether to raise their salaries. 
+    The voting is public and happens sequentially. 
+    Each politician prefers a salary increase but also wants to vote against it to maintain public support.
 
-    Three politicians are supposed to decide whether to raise their salaries or not. The vote is public and in sequence. They would prefer to receive a salary increase,
-    yet they would also like to vote against it so as not to lose public support.
-    Optimal result for each player: having salary increase while voting against it!
-    Main features of the game:
-1 The moves take place in sequence: the politicians vote one after the other
-2 Every possible situation is known to the players: at any time they know the
-whole past history, as well as the possible developments
-3 The final outcome is determined by the majority of votes
-This is an example of what is called a game with perfect information:
-each player has knowledge about all the events that have previously occurred.
-How can we represent such a game? And how can we solve it?
-We may use a tree in which Each player’s vote is represented at a branch: YES on the left and NO on the right. 
-Utilities are based on individual votes and possible final outcomes:
-1= YES and no raise; 2= NO and no raise; 3= YES and raise; 4= N0 and raise
-The tree in this case will become:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{images/tree.png}
-    \caption{Voting game tree}
-\end{figure}
-
-
-\subsection{A game with chance}
-Two players 1 and 2 must decide in sequence whether to play or not.
-If both of them decide to play, then a coin is tossed (random component R): the first player wins with heads, whereas the second one with tails.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{images/tree1.png}
-    \caption{Chance game tree}
-\end{figure}
-
-\subsection{Definitions}
+    The optimal outcome for each politician is to receive a salary increase while voting against it. 
+    The game has the following characteristics:
+    \begin{enumerate}
+        \item The voting process is sequential, with politicians voting one after another.
+        \item Every possible situation is fully known to all players: they are aware of the entire history and all possible future actions.
+        \item The final outcome is determined by the majority vote.
+    \end{enumerate}
+    To represent such a game we can use a tree, where each branch represents a player's vote: a YES vote goes left, and a NO vote goes right. 
+    The utilities depend on each player's vote and the final outcome:
+    \begin{enumerate} 
+        \item YES, but no raise. 
+        \item NO, and no raise. 
+        \item YES, and a raise. 
+        \item NO, and a raise. 
+    \end{enumerate}
+    The corresponding decision tree looks like this:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/tree.png}
+        \caption{Voting game tree}
+    \end{figure}
+\end{example}
+This is an example of a game with perfect information, where each player is fully aware of all prior events.
+\begin{example}
+    Two players, Player 1 and Player 2, must decide sequentially whether to participate in a game.
+    If both choose to play, a coin is flipped (random component $R$): Player 1 wins if it lands heads, and Player 2 wins if it lands tails.
+    The corresponding decision tree is as follows:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/tree1.png}
+        \caption{Chance game tree}
+    \end{figure}
+\end{example}
 \begin{definition}[\textit{Finite directed graph}]
     A finite directed graph is a pair $(V,E)$ where:
-    \begin{itemize}
-        \item $V$ is a finite set, called the set of vertices. 
-        \item $E \subset V \times V$ is a set of ordered pairs of vertices called the set of the (directed) edges.
-    \end{itemize}
 \end{definition}
+\begin{itemize}
+    \item $V$ is a finite set, called the set of vertices. 
+    \item $E \subset V \times V$ is a set of ordered pairs of vertices, called the directed edges.
+\end{itemize}
 \begin{definition}[\textit{Path}]
-    A path from a vertex $v_1$ to a vertex $v_{k+1}$ is a finite sequence of vertices-edges $v_1,e_1,v_2,\dots,v_k,e_k,v_{k+1}$ such that $e_i \neq e_j$ if $i \neq j$ and $e_j = (v_j,v_{j+1})$. 
-    $k$ is called the length of the path. 
+    A path from a vertex $v_1$ to a vertex $v_{k+1}$ is a finite sequence of vertices and edges $v_1,e_1,v_2,\dots,v_k,e_k,v_{k+1}$ such that $e_i \neq e_j$ if $i \neq j$ and $e_j = (v_j,v_{j+1})$. 
 \end{definition}
+The number $k$ is called the length of the path.
 \begin{definition}[\textit{Oriented graph}]
-    An oriented graph is finite directed graph having no bidirected edges, that is for all $j,k$ at most one between $(v_j,v_k)$ and $(v_k,v_j)$ may be arrows of the graph.
+    An oriented graph is a finite directed graph with no bidirectional edges. 
+    That is, for all vertices $v_j$ and $v_k$, at most one of $(v_j,v_k)$ and $(v_k,v_j)$ can be an edge in the graph.
 \end{definition}
 \begin{definition}[\textit{Tree}]
-    A tree is a triple $(V,E,x_0)$ where $(V,E)$ is an oriented graph and $_x0$ is a vertex in $V$ such that there is a unique path from $x_0$ to $x$, where $x$ is any vertex in $V$. 
+    A tree is a triple $(V,E,x_0)$ where $(V,E)$ is an oriented graph, and $x_0$ is a vertex in $V$ such that there is a unique path from $x_0$ to any other vertex $x \in V$. 
 \end{definition}
 \begin{definition}[\textit{Child}]
     A child of a vertex $v$ is any vertex $x$ such that $(v,x) \in E$. 
-    A vertex is called a leaf if it has no children. 
-    We say that the vertex $x$ follows the vertex $v$ if there is a path from $v$ to $x$.
 \end{definition}
-
-
+\begin{definition}[\textit{Leaf}]
+    A vertex is called a leaf if it has no children. 
+\end{definition}
+We say that the vertex $x$ follows the vertex $v$ if there is a path from $v$ to $x$.
