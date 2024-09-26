@@ -34,7 +34,45 @@ A few years later, in 1957, Frank Rosenblatt developed the first Perceptron, wit
 By 1960, Bernard Widrow introduced a significant advancement by representing the threshold value as a bias term in the ADALINE (Adaptive Linear Neuron or later, Adaptive Linear Element). 
 
 \begin{example}
-    SLIDE 10
+    Consider a neuron designed to implement the OR operation:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccc|c}
+        $x_0$ & $x_1$ & $x_2$ & \textbf{OR} \\ \hline
+        1     & 0     & 0     & 0           \\
+        1     & 0     & 1     & 1           \\
+        1     & 1     & 0     & 1           \\
+        1     & 1     & 1     & 1          
+        \end{tabular}
+    \end{table}
+    The corresponding neuron is illustrated below:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/or.png}
+        \caption{OR artificial neuron}
+    \end{figure}
+    The output function for this neuron is defined as:
+    \[h_{\text{OR}}(w_0+w_1x_1+w_2x_2)=h_{\text{OR}}\left(-\dfrac{1}{2}+x_1+x_2\right)=\begin{cases} 1\qquad\text{if }\left(-\dfrac{1}{2}+x_1+x_2\right)>0 \\ 0\qquad\text{otherwise} \end{cases}\]
+
+    Now, consider a neuron designed to implement the AND operation:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccc|c}
+        $x_0$ & $x_1$ & $x_2$ & \textbf{AND} \\ \hline
+        1     & 0     & 0     & 0           \\
+        1     & 0     & 1     & 0           \\
+        1     & 1     & 0     & 0           \\
+        1     & 1     & 1     & 1          
+        \end{tabular}
+    \end{table}
+    The corresponding neuron is shown below:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{images/and.png}
+        \caption{AND artificial neuron}
+    \end{figure}
+    The output function for this neuron is given by:
+    \[h_{\text{AND}}(w_0+w_1x_1+w_2x_2)=h_{\text{AND}}\left(-2+\dfrac{3}{2}x_1+x_2\right)=\begin{cases} 1\qquad\text{if }\left(-2+\dfrac{3}{2}x_1+x_2\right)>0 \\ 0\qquad\text{otherwise} \end{cases}\]
 \end{example}
 
 \subsection{Hebbian learning}
@@ -48,24 +86,71 @@ Mathematically, this is expressed as:
 \[\begin{cases}
     w_i^{k+1}=w_i^k+\Delta w_i^k \\
     \Delta w_i^k=\eta x_i^kt^k
-\end{cases}\]
+\end{cases} \implies w_i^{k+1}=w_i^k+\eta x_i^kt^k\]
 Here, $\eta$ represents the leraning rate, $x_i^k$ is the $i$-th input to  the perceptron at time $k$, and $t^k$ is the desired output at time $k$.
 
 \begin{example}
-    SLIDE 12
-    we aim to learn the weights necessary to implement the OR operator using a sinusoidal output. 
+    We aim to learn the weights necessary to implement the OR operator with a sinusoidal output. 
+    The modified OR truth table is as follows:
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ccc|c}
+        $x_0$ & $x_1$ & $x_2$ & \textbf{OR} \\ \hline
+        1     & -1     & -1     & -1           \\
+        1     & -1     & 1     & 1           \\
+        1     & 1     & -1     & 1           \\
+        1     & 1     & 1     & 1          
+        \end{tabular}
+    \end{table}
     We begin with random weights:
     \[\mathbf{w}=\begin{bmatrix} 0 & 0 & 0 \end{bmatrix}\]
-    We set the learning rate to $\eta=0.5$. 
-    The output function is defined as follows:
-    \[h(\mathbf{w}^T\mathbf{x})=\begin{cases}
-        1 \qquad\text{ if }\mathbf{w}^T\mathbf{x} > 0 \\
-        0 \qquad\text{ if }\mathbf{w}^T\mathbf{x} = 0 \\
-        -1 \qquad\text{ if }\mathbf{w}^T\mathbf{x} < 0
-    \end{cases}\]
-    The process involves cycling through the data records and adjusting the weights for incorrectly classified samples. 
-    The learning continues until all records are correctly predicted. 
-    In this way, Hebbian learning is applied to achieve the correct implementation of the OR operator.
+    The learning rate is set to $\eta=\dfrac{1}{2}$. 
+    The output function is defined as:
+    \[h(\mathbf{w}^T\mathbf{x})=\begin{cases} 1 \qquad\text{ if }\mathbf{w}^T\mathbf{x} > 0 \\ 0 \qquad\text{ if }\mathbf{w}^T\mathbf{x} = 0 \\ -1 \qquad\text{ if }\mathbf{w}^T\mathbf{x} < 0 \end{cases}\]
+
+    The training involves iterating through the data records and adjusting the weights for incorrectly classified samples until all records are correctly predicted.
+
+    Starting from the first row, we have: 
+    \[y_{\text{first row}}=x_0w_0+x_1w_1+x_2w_2=1\cdot 0+(-1)\cdot 0 + (-1)\cdot 0=0\]
+    This does not match the expected output of $-1$.
+    We adjust the weights:
+    \[w_0^{\text{new}}=w_0+\eta x_0y=0+\dfrac{1}{2}\cdot 1 \cdot (-1)=-\dfrac{1}{2}\]
+    \[w_1^{\text{new}}=w_1+\eta x_1y=0+\dfrac{1}{2}\cdot (-1) \cdot (-1)=\dfrac{1}{2}\]
+    \[w_2^{\text{new}}=w_2+\eta x_2y=0+\dfrac{1}{2}\cdot (-1) \cdot (-1)=\dfrac{1}{2}\]
+    Now, the weights vector is:
+    \[\mathbf{w}=\begin{bmatrix} -\dfrac{1}{2} & \dfrac{1}{2} & \dfrac{1}{2} \end{bmatrix}\]
+
+    For the second row, we have: 
+    \[y_{\text{second row}}x_0w_0+x_1w_1+x_2w_2=1\cdot \left(-\dfrac{1}{2}\right)+(-1)\cdot \dfrac{1}{2} + 1\cdot \dfrac{1}{2}=-\dfrac{1}{2}\]
+    This does not match the expected output of $1$.
+    We adjust the weights:
+    \[w_0^{\text{new}}=w_0+\eta x_0y=\left(-\dfrac{1}{2}\right)+\dfrac{1}{2}\cdot 1 \cdot 1=0\]
+    \[w_1^{\text{new}}=w_1+\eta x_1y=\dfrac{1}{2}+\dfrac{1}{2}\cdot (-1) \cdot 1=0\]
+    \[w_2^{\text{new}}=w_2+\eta x_2y=\dfrac{1}{2}+\dfrac{1}{2}\cdot 1 \cdot 1=1\]
+    Now, the weights vector is:
+    \[\mathbf{w}=\begin{bmatrix} 0 & 0 & 1 \end{bmatrix}\]
+
+    For the third row, we have: 
+    \[y_{\text{third row}}x_0w_0+x_1w_1+x_2w_2=1\cdot 0+1\cdot 0 + (-1)\cdot 1=-1\]
+    This does not match the expected output of $1$.
+    We adjust the weights:
+    \[w_0^{\text{new}}=w_0+\eta x_0y=0+\dfrac{1}{2}\cdot 1 \cdot 1=\dfrac{1}{2}\]
+    \[w_1^{\text{new}}=w_1+\eta x_1y=0+\dfrac{1}{2}\cdot 1 \cdot 1=\dfrac{1}{2}\]
+    \[w_2^{\text{new}}=w_2+\eta x_2y=1+\dfrac{1}{2}\cdot (-1) \cdot 1=\dfrac{1}{2}\]
+    Now, the weights vector is:
+    \[\mathbf{w}=\begin{bmatrix} \dfrac{1}{2} & \dfrac{1}{2} & \dfrac{1}{2} \end{bmatrix}\]
+
+    For the third row, we have: 
+    \[y_{\text{fourth row}}x_0w_0+x_1w_1+x_2w_2=1\cdot \dfrac{1}{2}+1\cdot \dfrac{1}{2} + 1\cdot \dfrac{1}{2}=\dfrac{3}{2}\]
+    This matches the expected output of 1.
+
+    After verifying the outputs for all rows, we recognize that further iterations (epochs) are needed for full convergence.
+    We repeat the training until all records produce the desired outputs.
+
+    After multiple epochs, the final weights vector is:
+    \[\mathbf{w}=\begin{bmatrix} -\dfrac{1}{2} & 1 & 1 \end{bmatrix}\]
+
+    The number of epochs required depends on both the initialization of the weights and the order in which the data is presented.
 \end{example}
 A perceptron computes a weighted sum and returns the sign (thresholding) of the result:
 \[h_j(\mathbf{x}|\mathbf{w})=h_j\left(\sum_{i=0}^Iw_ix_i\right)=\text{Sign}(w_0+w_1x_1+\dots+w_Ix_I)\]
