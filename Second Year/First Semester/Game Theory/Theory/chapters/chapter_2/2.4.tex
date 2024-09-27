@@ -1,71 +1,80 @@
 \section{Impartial combinatorial games}
 
 \begin{definition}[\textit{Impartial combinatorial game}]
-    An impartial combinatorial game is a game such that:
-    \begin{enumerate}
-        \item There are two players moving in alternate order.
-        \item There is a finite number of positions in the game.
-        \item The players follow the same rules.
-        \item The game ends when no further moves are possible.
-        \item The game does not involve chance.
-        \item In the classical version, the winner is the player leaving the other player with no available moves, in the mis`ere version the opposite.
-    \end{enumerate}
+    An impartial combinatorial game is defined by the following characteristics:
 \end{definition}
-\begin{example}
-    Examples of impartial combinatorial games are: 
-    \begin{itemize}
-        \item $k$ piles of cards. At her turn each player takes as many cards as she wants (at least one!) from one and only one pile. 
-        \item $k$ piles of cards. At her turn each player takes as many cards as she wants (at least one) from no more than $j < k$ piles. 
-        \item $k$ cards in a row. At her turn each player takes either $j_1$ or $\vdots$ or $j_l$ cards. 
-    \end{itemize}
-    In all these variants of the game, the player remaining without cards loses.
-    In the first two cases the positions are $(n_1, \cdots , n_k)$ where $n_i$ is a non negative integer for all $i$. 
-    In the last example positions can be seen as all non negative integers smaller or equal to $k$.
-\end{example}
-To solve this type of games we start by partitioning the set of all possible (finitely many) positions into two sets:
 \begin{enumerate}
-    \item $P$-positions (i.e. previous player has a winning strategy): loosing.
-    \item $N$-positions (i.e. next player has a winning strategy): winning.
+    \item There are two players who alternate turns.
+    \item The game consists of a finite number of positions.
+    \item Both players adhere to the same set of rules.
+    \item The game concludes when no further moves can be made.
+    \item The outcome of the game is not influenced by chance.
+    \item In the classical version of the game, the winner is the player who leaves the opponent with no available moves; in the misère version, the objective is reversed.
 \end{enumerate}
-Note: it is the state of the game that matters, and not who is called to move.
-Rules for the partition (for the classical version):
+\begin{example}
+    Several examples illustrate impartial combinatorial games:
+    \begin{itemize}
+        \item $k$ piles of cards: each player, on their turn, can take any number of cards (at least one) from a single pile.
+        \item $k$ piles of cards with restrictions: each player can take any number of cards (at least one) from no more than $j < k$ piles during their turn.
+        \item $k$ cards in a row: players can take $j_l$ cards on their turn.
+    \end{itemize}
+    In all these variations, the player who is left without cards loses. 
+    In the first two examples, the positions can be represented as $(n_1, \cdots , n_k)$, where each  $n_i$ is a non-negative integer corresponding to the number of cards in each pile.
+    In the third example, the positions are characterized by all non-negative integers less than or equal to $k$.
+\end{example}
+To solve impartial combinatorial games, we begin by partitioning the set of all possible positions (which are finite in number) into two distinct categories:
+\begin{enumerate}
+    \item $P$-positions: these are positions where the previous player has a winning strategy, meaning they are losing positions for the player who is about to move.
+    \item $N$-positions: these are positions where the next player has a winning strategy, indicating they are winning positions for the player who is about to move.
+\end{enumerate}
+It is important to note that the current state of the game is what matters, rather than which player is designated to move.
+
+\paragraph*{Partition rules}
+The rules for the partitions are:
 \begin{itemize}
-    \item Terminal position $(0, 0, \cdots, 0)$ is a $P$-position (it is a losing position, as the player does not have any card left)
-    \item From a $P$-position only $N$-positions are available
-    \item From a $N$-position it is possible, yet not necessary, to go to a $P$-position. 
+    \item The terminal position $(0, 0, \cdots, 0)$ is classified as a $P$-position. 
+        This is a losing position because the player has no cards left to play.
+    \item From any $P$-position, only $N$-positions can be reached. 
+        This means that the next player is guaranteed to have a winning strategy.
+    \item From any $N$-position it is possible (but not obligatory) to move to a $P$-position. 
+        The player in an $N$-position can make a move that leads their opponent to a losing position.
 \end{itemize}
-Therefore, the player starting from a $N$-position wins. 
+Therefore, the player who starts from an $N$-position is assured of a victory, given that they play optimally. 
 
 \subsection{Nim game}
-The Nim game is defined as $(n_1, \cdots, n_k)$ where $n_i$ is a positive integer for all $i$.
-At her turn any player is supposed to take one (and only one) $n_i$ and substitute it with $\hat{n}_i < n_i$. 
-The winner is the player who arrives at the position $(0, \dots, 0)$. 
-\begin{itemize}
-    \item Actions: taking away cards from one pile.
-    \item Goal: to clear the whole table.
-\end{itemize}
+The Nim game is characterized by a tuple $(n_1, \cdots, n_k)$, where each $n_i$ is a positive integer.
+During their turn, each player must choose one pile $n_i$ and replace it with $\hat{n}_i$, ensuring that $\hat{n}_i < n_i$. 
+The player who reduces the position to $(0, \dots, 0)$ wins. 
+
+Therefore, each player's action involves removing cards from a single pile with the objective of clearing the entire table.
 
 \begin{theorem}[Bouton]
-    In the Nim game the position $(n_1, n_2, \dots, n_k)$ is a $P$-position if and only if:
+    A position $(n_1, n_2, \dots, n_k)$ in the Nim game is a $P$-position if and only if:
     \[n_1 \oplus n_2 \oplus \dots \oplus n_k = 0\]
 \end{theorem}
 \begin{proof}
-    Terminal position $(0, 0, \dots , 0)$ is a $P$-position, with zero Nim-sum.
+    The terminal position $(0, 0, \dots , 0)$ is a $P$-position corresponding to a Nim-sum of zero.
 
-    Positions with $n_1 \oplus n_2 \oplus \dots \oplus n_N = 0$ go only to positions with non-zero Nim-sum. 
-    For, suppose that the next position $( \hat{n}_1, n_2, \dots , n_N )$ is such that $\hat{n}_1 \oplus n_2 \oplus \dots \oplus n_N = 0 = n_1 \oplus n_2 \oplus \dots \oplus n_N$ : then, by the cancelation law one has $\hat{n}_1 = n_1$, which is impossible since the game requires $\hat{n}_1 < n_1$.
-
-    Positions with $n_1 \oplus n_2 \oplus \dots \oplus n_N \neq 0$ can go to positions with zero Nim-sum
-    Let $z := n_1 \oplus n_2 \oplus \dots \oplus n_N\neq 0$. Take a pile having 1 in the first column on the left of the expansion of $z$ and put 0 there; then go right, leaving unchanged digits corresponding to 0 and changing them otherwise. 
-    Provably, the result is smaller than the original number.
+    If the Nim-sum $n_1 \oplus n_2 \oplus \cdots \oplus n_k = 0$, any subsequent position will have a non-zero Nim-sum. 
+    Assume the next position is $(\hat{n}_1, n_2, \ldots, n_k)$ such that $\hat{n}_1 \oplus n_2 \oplus \cdots \oplus n_k = 0$. 
+    Then we would have:
+    \[n_1 \oplus n_2 \oplus \cdots \oplus n_k = 0\]
+    Which, by the cancellation law, implies $\hat{n}_1 = n_1$. 
+    This is a contradiction, as the game rules stipulate that $\hat{n}_1 < n_1$.
+    
+    Conversely, if $n_1 \oplus n_2 \oplus \cdots \oplus n_k \neq 0$, it is possible to move to a position with a zero Nim-sum. 
+    Let $z = n_1 \oplus n_2 \oplus \cdots \oplus n_k \neq 0$.
+    Identify a pile where the binary representation of $z$ has a 1 in its leftmost column. 
+    Change that digit to 0 and adjust the digits to the right, leaving unchanged the digits that correspond to 0. 
+    This operation produces a new number that is smaller than the original. 
 \end{proof}
 \begin{example}
-    From the following arrangement yielding non-zero Nim-sum: $4, 6,5$. 
-    by taking a card out of the first row we go to the next one with zero Nim-sum  $3, 6,5$. 
-    So, there are three initial good moves, one for each row.
+    Consider the configuration with a non-zero Nim-sum: $4,6,5$. 
+    By removing a card from the first pile, we can reach the configuration $3,6,5$, which has a zero Nim-sum. 
+    Thus, there are three initial advantageous moves, one available for each pile. 
 \end{example}
 
 \subsection{Conclusions}
-Games with perfect information can be solved by using backward induction. 
-However backward induction is a concrete solution method only for very simple games, because of limited rationality.
-Depending on the game, we can reach different levels of solutions.
+Games with perfect information can typically be resolved through backward induction. 
+However, this method is primarily effective for relatively simple games due to the constraints of limited rationality. 
+Depending on the specifics of the game, we may arrive at varying degrees of solutions.
