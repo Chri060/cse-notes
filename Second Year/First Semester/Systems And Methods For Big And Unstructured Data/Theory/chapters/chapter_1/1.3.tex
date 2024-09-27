@@ -1,0 +1,56 @@
+\section{Data architectures}
+
+The data schema ensures typing, coherence, and uniformity within a system.
+\begin{definition}[\textit{Transaction}]
+    A transaction is an elementary unit of work performed by an application.
+\end{definition}
+Each transaction is encapsulated between two commands: \texttt{BEGIN TRANSACTION} and \texttt{END TRANSACTION}. 
+During a transaction, exactly one of the following commands is executed:
+\begin{itemize}
+    \item \texttt{COMMIT WORK} (commit): confirms the successful completion of the transaction.
+    \item \texttt{ROLLBACK WORK} (abort): reverts the system to its state before the transaction began.
+\end{itemize}
+
+\begin{definition}[\textit{OnLine Transaction Processing}]
+    A transactional system (OLTP) is a system that defines and executes transactions on behalf of multiple, concurrent applications.
+\end{definition}
+
+\subsection{Data partitioning}
+The main goal of data partitioning is to achieve scalability and distribution. 
+Partitioning divides the data in a database and allocates different pieces to various storage nodes. 
+This can be done in two ways:
+\begin{itemize}
+    \item \textit{Horizontal partitioning} (sharding): data is divided by rows, where different rows are stored on separate nodes. 
+        Sharding is often used to distribute data in large-scale systems, spreading the load across multiple machines.
+    \item \textit{Vertical partitioning}: data is divided by columns, where different columns are stored on different nodes. 
+        This method is useful when certain columns are accessed more frequently than others, allowing for optimization of data retrieval.
+\end{itemize}
+Partitioning has its advantages and disadvantages. 
+On the plus side, it allows for faster data writes and reads, and comes with low memory overhead. 
+However, it can also lead to potential data loss if not properly managed, especially in cases of node failures or partition mismanagement.
+
+\subsection{Data replication}
+The aim of data replication is to provide fault-tolerance and reliable backups. 
+In replication, the entire database is copied across all nodes within a distributed system, ensuring that there are multiple copies available in case of failure.
+
+Replication offers certain benefits.
+For instance, it provides faster data reads since multiple copies of the data are stored on different nodes, and it greatly increases the reliability of the system, as the risk of losing all copies of the data is significantly reduced.
+
+However, replication also comes with certain drawbacks. 
+It leads to high network overhead, as nodes must constantly synchronize data to ensure consistency. 
+Additionally, replication increases memory overhead since the full dataset is duplicated across all nodes in the system.
+
+\subsection{Scalability}
+We aim to create a system with elasticity.
+\begin{definition}[\textit{Elasticity}]
+    Elasticity refers to the ability of a system to automatically scale resources up or down based on demand, ensuring efficient use of resources and cost-effectiveness without compromising performance.
+\end{definition}
+
+\paragraph*{Data Ingestion}
+Data ingestion is the process of importing, transferring, and loading data for storage and future use. 
+It involves loading data from a variety of sources and may require altering or modifying individual files to fit into a format that optimizes storage efficiency.
+
+\paragraph*{Data Wrangling}
+Data wrangling is the process of cleansing and transforming raw data into a format that can be analyzed to generate actionable insights. 
+This process includes understanding, cleansing, augmenting, and shaping the data.
+The result is data in its optimal format for analysis.
