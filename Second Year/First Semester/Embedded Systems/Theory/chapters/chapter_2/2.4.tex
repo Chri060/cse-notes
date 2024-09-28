@@ -1,103 +1,45 @@
-\section{Application specific microprocessors}
+\section{Application Specific Microprocessors}
 
-Embedded systems need to solve problem with high degree of specialization and with a limited number of functions.
-GPP are frequently not the best choice
-Specialized architectures have been designed
+Embedded systems often require high specialization and a limited set of functions, making GPPs less suitable for certain applications. 
+To address these specific needs, specialized architectures have been developed.
 
 \subsection{Digital Signal Processors}
-DSP are the popular one dedicated processors
-They can vary a lot among the producers, but they have in common the design tailored to perform numerical computing. 
-To understand their structure, let's review the main operations used in the algorithm for numeric processing
-Widely used operation
+Digital Signal Processors (DSPs) are among the most widely used application-specific processors, designed specifically for numerical computing tasks. 
+Despite variations among different manufacturers, DSPs share a common architecture optimized for handling operations like multiplication and accumulation, crucial for many algorithms.
+
+A typical operation in DSPs is represented by the equation:
 \[z_{t+1} = z_t + x \cdot y\]
-It is so important for DSP to worth a specific name, MAC : Multiply Accumulate
-A valuable DSP architecture should optimized as much as possible the sum and mul operation, possibly by exploiting a single 3-operand instruction
+This operation, known as Multiply-Accumulate (MAC), is essential for DSP performance, leading to architectures that optimize both addition and multiplication, often through a single three-operand instruction.
 
-Given the nature of the operations, a relevant part of the
-algorithms to be executed, contains loops
-– The possibility to optimize loops in a DSP is possible, since
-• The body is typically small (~10 asm instructions)
-• The control loop variable is not altered within the loop body
-• The update of the control loop variable is simple
-• The pattern to access the vector is generally regular and simple
-– Specific Hw to optimize loops
-• Circular buffer to store the loop body
-• Dedicated register where to store the control loop variable
-• Add/Sub to perform inc/dec operation without using ALU
+To achieve high efficiency, DSPs are designed to optimize the execution of loops, which are prevalent in many numerical algorithms. 
+This is possible due to certain characteristics of loop structures, such as having small bodies—typically around ten assembly instructions—where the control loop variable remains unchanged.
+The update of this variable is straightforward, and the access patterns for vectors are generally regular.
+As a result, DSPs incorporate specific hardware enhancements to facilitate loop optimization, including circular buffers for storing loop bodies and dedicated registers for control loop variables, which allow for increments and decrements without burdening the ALU.
 
-Access to the data in memory could be a bottleneck
-• High bandwidth interfaces are designed to this purpose
-– Memory hierarchy for DSP
-• High speed bus with word width up to 256 bits
-• Multi-level cache hierarchy
-– Classic
-» Stanford: unified for data and instructions
-– Specialised
-» Harvard: cache L0 separate for data and instructions
-» SHARC: Three L0 caches for data, instructions and constants
+Another challenge for DSPs is memory access speed, which can become a bottleneck.
+To combat this, DSP architectures often include high-bandwidth interfaces and sophisticated memory hierarchies. 
+This might consist of high-speed buses capable of transferring wide data words, unified cache systems for both data and instructions, and specialized caches, such as Harvard architecture, which maintains separate caches for instructions and data, or SHARC architecture, which can incorporate multiple Level 0 caches for different types of data.
 
-n addition to the flexibility and computing power offered by the
-special instructions and by the specific ALUs, modern DSPs are
-frequently organized by following a VLIW approach
-– In fact, it is suitable for numerical applications, where the control
-is limited and there exists a high intrinsic parallelisms of
-operation
+In addition to their flexibility and computational power, many modern DSPs adopt a VLIW architecture. 
+This design is particularly suited for numerical applications, where control is limited, and significant parallelism can be leveraged.
 
 \subsection{Network Processors}
-Dedicated architectures tailored to process network packets
-Complex system-on-chip with high parallelism, for network applications (e.g. routers)
-Functionalities and protocols are evolving, the design of a NP is not trivial
-Classes of the typical operations of a NP
-• Buffering of input/output packets
-• Remove/add of header at the level of data-link
-• Search for a specific field in an IP header
-• Search for an address in a lookup table
-• Computation of CRC codes
-• Send or delete of packets
+Network Processors (NPs) represent another class of specialized microprocessors tailored for processing network packets. 
+These complex SoC architectures utilize high levels of parallelism to handle the demands of network applications, such as routers. 
+Given the ever-evolving functionalities and protocols within the networking domain, designing an NP can be quite complex.
+Typical operations performed by NPs include buffering packets, modifying data-link headers, searching for specific fields in IP headers, and computing CRC codes.
+To maximize performance, NPs incorporate dedicated hardware for high-speed I/O interfaces, queue management, cryptographic cores, and multiple RISC cores.
 
-To increase performance, dedicated hw is used
-• Fast I/O interfaces, queue management, cripto-cores, multi RISC
-cores
-– Frequently packet processing application requires the
-management of several independent channels who can benefit
-from parallel processing
-– Each channels is managed by a dedicated hw units frequently
-named as PP (Packet Processor) or CP (Channel Processor)
-
-When the separate flows and not fully disjoint
-• Use of RISC cores, to supervise and for high-level management
-– The typical structure of an application of packet processing is a
-set of simple routines, each working on a huge amount of
-packets
-• Small programs working on a enormous amount of data
-
-Which type of programming?
-• Core RISC
-RISC
-– Development of programs starting from C source code like that of a
-• Single PP
-– Sometime is still carried out in assembly, bunch of simple routines
-» Programming CP is not well structured and only some time we can use a
-functional approach based on pattern recognition
+As network applications frequently handle multiple independent data channels, dedicated hardware units, often called Packet Processors (PPs) or Channel Processors (CPs), are utilized to manage these flows. 
+In cases where data streams are interdependent, RISC cores may be employed for supervision and high-level management. 
+The nature of packet processing typically involves executing a series of straightforward routines on a large volume of data, often requiring programs to be written in assembly for specific PPs, although higher-level languages like C are becoming increasingly common.
 
 \subsection{Summary}
-(MCU – Micro Controller Unit) is a class of microprocessor
-integrating peripherals and interfaces on a single-chip
-– Their SoC nature is fine to deal with not top computing power,
-but with application having constraints on the use of hw
-resources and development time
-Frequently there is no interface to external memory
-• Programs for MCU are typically small
-• Memory interface increases the pinout
-– Small size in frequently a strict requirement
-• To provide a memory interface limiting the pinout, some
-architectures use a multiplexing of the I/O ports
-– The control logic must be properly configured to exploit this operating
-mode
-The architectures offer several peripheral and interfaces
-• I2C, SPI, CAN, JTAG, PWM, UART/USART, watchdog, timer,
-analog I/O and comparators, etc…
-– Programming in typically in C, only sometime in assembly
-– SDKs for microcontrollers ranges from simple C compiler up to
-integrated framework for performance analysis and configuration
-management
+Microcontroller Units (MCUs) constitute another category of application-specific microprocessors. 
+These devices integrate peripherals and interfaces onto a single chip, making them ideal for applications that do not demand high computational power but do require careful management of hardware resources and development time. 
+MCUs are often designed without interfaces to external memory, which results in smaller programs. 
+The lack of memory interfaces can increase pin counts, prompting some architectures to employ multiplexing techniques to limit this increase.
+
+MCUs typically provide a variety of peripheral interfaces, including I2C, SPI, CAN, JTAG, PWM, UART/USART, watchdog timers, and analog I/O capabilities. 
+While programming for MCUs is primarily conducted in C, assembly language is sometimes utilized for specific tasks. 
+The SDKs available for microcontrollers can vary significantly, ranging from basic C compilers to comprehensive frameworks that assist in performance analysis and configuration management.

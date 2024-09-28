@@ -1,104 +1,72 @@
 \section{General Pupropose Processors}
 
-GPP - generic architecture valid for a range of application fields
-Common in PC/PDA
-For embedded systems low end when energy and performance are not crucial and the nature of the application is quite heterogeneous.
-Control and management of a slow interfacing with sensors, interactivity via GUI.
-GPPs can have different architectures: 
-\begin{itemize}
-    \item CISC: huge amount of complex instructions. 
-    \item RISC: few simple instructions
-\end{itemize} 
+General Purpose Processors (GPPs) are characterized by a generic architecture that is applicable across a wide range of fields. 
+They are commonly found in PCs and Personal Digital Assistants (PDAs), and for embedded systems, they are suitable for low-end applications where energy efficiency and performance are not critical, and the application nature is quite heterogeneous.
+GPPs handle tasks such as controlling and managing slow interfaces with sensors and enabling interactivity through graphical user interfaces (GUIs).
+GPPs can be categorized into two main architectural styles:
+\begin{itemize} 
+    \item \textit{Complex Instruction Set Computer} (CISC): features a large number of complex instructions. 
+    \item \textit{Reduced Instruction Set Computer} (RISC): utilizes a smaller set of simple instructions. 
+\end{itemize}
 
-\subsection{CISC GPP}
-Ideally, each Arith/Logic operation should be capable to access (read) data and write the result by exploiting any of the available addressing modes.
-Fully orthogonal architecture and Instruction Set.
-In the reality, the number of operation-addressing mode combinations has been limited.
-Usually one of the operand refers to the memory, while the other is a register with the role of both source and destination.
-Despite this simplification, CISC instructions are coded in variable length formats. 
-More complex fetch and decode units and need of more speed when accessing the memory.
+\subsection{Complex Instruction Set Computer} 
+CISC architectures aim to allow each arithmetic or logic operation to access data and write results using any available addressing mode. 
+They feature a fully orthogonal architecture and instruction set. 
+However, in practice, the number of combinations of operations and addressing modes is often limited, typically with one operand referencing memory and the other being a register that acts as both source and destination.
+Despite the complexity, CISC instructions are encoded in variable-length formats, which necessitates more complex fetch and decode units and a higher speed for memory access.
 
-\paragraph*{Architecture}
-The ALU, is implementing a variety of the basic operations: Add/Sub, mul, div, logic operations, shift, comparison
-In some architectures the instructions can be vectorial, working on more registers at the same time, so this is a Single Instruction Multiple Data architecture.
-So many addressing mode and A/L operations, require a complex data-path that is hard to make fast. 
+The Arithmetic Logic Unit (ALU) implements various basic operations such as addition, subtraction, multiplication, division, logic operations, shifting, and comparisons. 
+Some architectures even support vector instructions, enabling operations on multiple registers simultaneously, indicative of a Single Instruction Multiple Data (SIMD) architecture. 
+The diversity in addressing modes and arithmetic/logical operations requires a complex data path that is challenging to optimize for speed.
+To enhance throughput, CISC processors often employ intricate pipelining techniques (e.g., up to 23 stages), which can be challenging to manage. 
+Additionally, they may alter the order of execution for assembly instructions without changing the program's semantics. 
+This complexity makes it difficult for compilers to predict instruction execution status, potentially leading to suboptimal instruction decoding. 
+Modern CISC processors integrate hardware units that dynamically reschedule instructions, enabling out-of-order execution.
 
-To increase the throughput, the CISC processors implement complex pipeline (e.g. up to 23 stages) that are hard to manage
-Another strategy, still very costly in terms of hw resources, is based on altering the order of execution of the assembly instruction without modifying the semantics of the program.
-For a compiler, when considering so complex pipelines, it is hard to control the status of the execution of the instruction.
-The instructions could arrive to the decoding in an order that is not optimal w.r.t. the status of the pipelines at that time
-Modern CISCs have dedicated hw units to dynamically reschedule the instructions
-Out-of-order execution 
+Although CISC architectures provide impressive performance, the focus on energy efficiency and cost has gradually shifted toward other architectures.
 
-CISC have remarkable performance but, over the time, energy efficiency and cost moved in favor of other architectures.
+\subsection{Reduced Instruction Set Computer}
+RISC architectures simplify instruction sets, utilizing a limited number of straightforward instructions. 
+By the late 1980s, the declining prices of DRAMs and the increasing scale of integration allowed for more complex architectures on a single chip. 
+CISC operations could be decomposed into multiple RISC instructions, streamlining architecture.
 
-\subsection{RISC GPP}
-Restricted Instruction Set Computer, when the
-architecture has few simple instructions.
-End of '80 the price of DRAMs fall down
-Size of the program is no longer a wall
-CISC operations can be decomposed into RISC instructions to simplify the architecture
-In the same period the integration scale raised up, dramatically
-Possibility to realize on a single chip complex architectures
-Pipeline and quantity of GP registers
-To exploit pipelining, the execution time of the instructions must be uniform. 
-This is possible when instructions are simple
+The primary advantages of RISC architectures include a simple instruction set and straightforward architecture, which simplify instruction decoding. 
+RISC instructions typically have fixed lengths, facilitating balanced pipeline stages and higher clock speeds. 
+Execution units, such as the ALU and Branch Processing Unit (BPU), benefit from simpler instructions, allowing RISC architectures to operate predominantly on registers, thus improving speed and predictability.
 
-Main advantage is simple instructions set and simple architecture
-Instruction decoding is simplified
-Frequently RISC instruction have fixed lengths
-Easy balancing the stages of the pipeline and to increase clock
-Execution units (ALU and BPU) take advantage from simple inst
-RISC operates only on registers hence more speed and duration is predictable
-RISC processor tends to have many registers, so the presence of memory spill is reduced significantly
+RISC employs a load/store architecture for input/output operations, which involves preloading data and writing results back to memory. 
+While the limited number of addressing modes can aid performance, effective use of memory hierarchy is crucial for minimizing data access time.
 
-I/O, namely load/store from memory/registers and viceversa
-Each instruction requires to pre-load of the date and, eventually, to write the result in memory: load/store architecture
-Data transfer operation are crucial for performance
-Fortunately, the instructions have a limited number and simple of addressing modes
-Aggressive use of memory (cache) hierarchy to reduce the access time to data
+When comparing RISC and CISC using the same high-level source code, RISC generally requires a higher number of instructions. 
+RISC architectures do not have hardware mechanisms to resolve pipeline conflicts, but their predictable execution allows compilers to generate efficient code. 
+Furthermore, RISC architectures typically exhibit lower power consumption due to their inherent simplicity compared to CISC architectures.
 
-Software development flow
-Considering the same high level source code, the number of RISC instructions will be higher that CISC
-RISC architectures has no hw units to solve pipeline conflicts
-But good predictability of execution allow the compiler to generate efficient code
-Power consumption: RISC are simple and inherently low power w.r.t. CISC
+\subsection{Superscalar}
+Superscalar architectures feature multiple execution units, enabling the simultaneous execution of more than one instruction per clock cycle. 
+This parallelism enhances throughput but also increases the complexity of control logic, impacting clock speed and power consumption. 
+In these architectures, the microprocessor dynamically schedules instructions, relieving the compiler from managing code organization for specific hardware structures. 
+However, a significant portion of the processor's resources is dedicated to implementing complex scheduling mechanisms and maintaining consistency.
 
-\subsection{Superscalar GPP}
-There exists a lot of parallelism at the level of assembly instruction.
-It is superscalar an architecture having more than one executing units, hence more ALUs and or BPU.
+\subsection{Complex Instruction Set Computer and Reduced Instruction Set Computer}
+Some architectures combine out-of-order execution with superscalarity while maintaining compatibility with legacy code. 
+The x86 instruction set serves as the de facto standard for CISC, where each instruction is decomposed into a series of simpler instructions that can be executed by an efficient core. 
+This approach incurs additional hardware costs but merges the advantages of backward compatibility with the high performance achievable through a RISC core.
 
-The parallelism offered by the execute stage allows to deliver more instruction per clock cycle.
-The complexity of the control logic increases as the impact on clock speed and power consumption. 
-Moreover, it is the microprocessor to define dynamically the scheduling of the instructions. 
-Pros: compiler has not to work on organizing the code for a specific hardware structure
-Cons: a relevant part of the processor is deserved to implement complex scheduling mechanisms and to manage the consistency
+\subsection{Very Long Instruction Word}
+To address the challenges associated with hardware scheduling complexity, Intel developed a class of processors known as EPIC (Explicitly Parallel Instruction Computing) or VLIW (Very Long Instruction Word). 
+VLIW supports explicit parallelism, allowing multiple instructions to be executed simultaneously under program control. 
+A VLIW instruction consolidates multiple elementary instructions, typically of RISC nature, into a single wide word with a fixed structure.
 
-\subsection{CISC and RISC GPP}
-Approach combining out-of-order execution and superscalarity with the goal to remain compatible with code developed in the past. 
-Instruction set x86 is the standard de-facto for CISC
-Each CISC instruction is decomposed in a set of simple instructions easy to be executed by a simple and efficient core.
-There is an hardware cost, but this solution joins the benefit of backward compatibility with the high-performance achievable by a RISC core. 
+Once fetched from memory, the VLIW word is decoded in parallel, with individual RISC instructions dispatched to various execution units. 
+This fixed structure shifts the complexity of scheduling onto the compiler, which must optimize algorithms to fit the specific architecture.
 
-\subsection{VLIW GPP}
-To overcome the limits related to the complexity of the hw scheduling of the instructions, Intel developed in the past a new class of processors named EPIC (or VLIW). 
-Itanium has been the first commercialized. 
-These architectures support explicit parallelism: possibility to execute more instructions at the some time under the control of the program. 
-A VLIW instruction is the packing of more elementary instructions, typically RISC, in a single wide word, having a fixed structure.
+The goal of EPIC/VLIW is to transfer the burden of scheduling and code optimization to the compiler, resulting in simpler architectures, although with large sizes due to the number of execution units. 
+Power consumption for VLIW architectures falls between that of simpler RISC and superscalar designs. 
+Similar strategies have also been implemented in specialized architectures such as digital signal processors (DSPs) to achieve peak performance.
 
-The VLIW word, once fetched from the memory, is decoded in parallel.
-At the end of the decoding, the single RISC instructions corresponding to the various slots, are dispatched to the different execution units.
-This fixed structures moves to the compiler the task to perform a complex scheduling.
-The algorithms to be optimized should be well structure to fit well a specific architecture.
-
-EPIC/VLIW has the goal to move the complexity of the scheduling and code optimization towards the compiler.
-The architectures are simple, even if of large size given the number of execution units.
-Power consumption is in between simple and superscalar RISC
-Similar solutions, allowing to achieve peak performance, has been adopted also in non general purpose architecture like the digital signal processors (DSPs).
-
-\subsection{CISC and VLIW GPP}
-Similar to CISC/RISC, performance of VLIW with the goal of backward compatibility.
-CISC instructions are decomposed in terms of basic ones execute by a VLIW (simple and efficient) core.
+\subsection{Complex Instruction Set Computer and Very Long Instruction Word}
+Similar to the CISC/RISC relationship, VLIW architectures aim for high performance while ensuring backward compatibility. 
+CISC instructions are broken down into basic instructions that can be executed by a VLIW core, which is both simple and efficient.
 
 \subsection{Comparison}
 \begin{figure}[H]

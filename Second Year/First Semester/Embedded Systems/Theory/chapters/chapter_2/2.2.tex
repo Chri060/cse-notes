@@ -1,66 +1,54 @@
 \section{Processors taxonomy}
 
-The processors can be cathegorized into: 
+Processors can be categorized into two main types:
 \begin{itemize}
-    \item \textit{Application Specific Processors} (ASP): tailored for specific classes of applications that works with a lot of operations per seconds.
-    \item \textit{General Purpose Processors} (GPP): four season processor, not optimized for any specific applications.
-        Versatile, it can be used for different type of applications.
+    \item \textit{Application Specific Processors} (ASP): these processors are tailored for specific classes of applications that require high performance, handling numerous operations per second.
+    \item \textit{General Purpose Processors} (GPP): known as versatile four-season processors, GPPs are not optimized for any particular application, making them suitable for various types of tasks.
 \end{itemize}
-The embedded systems multi-processors Typical solution is to use GPP for supervision and control of the
-activities of one or more ASPs
+In typical embedded systems, a multi-processor solution often employs GPPs for supervising and controlling the activities of one or more ASPs.
 
-The processors can be: 
+\paragraph*{Processors availability}
+Processors can further be classified as follows:
 \begin{itemize}
-    \item \textit{Components Off The Shelf} (COTS): just buy a chip off-the-shelf and mount in on a board (PCB) together with the interfaces to the rest of the systems
-    \item \textit{Intellectual Property} (IP): the design (description) of the micro is purchased. 
-        Several abstraction levels: 
+    \item \textit{Components Off The Shelf} (COTS): these are standard chips purchased off-the-shelf and mounted onto a printed circuit board (PCB) along with the necessary interfaces to integrate with the rest of the system.
+    \item \textit{Intellectual Property} (IP): this involves purchasing the design specifications of a microprocessor. 
+        There are several abstraction levels in IP:
         \begin{itemize}
-            \item \textit{Soft-macro}: the micro is described in HDL at RT-level.
-            \item \textit{Hard-macro}: description down to the level of layout.
+            \item \textit{Soft-macro}: the microprocessor is described using Hardware Description Language (HDL) at the register-transfer (RT) level.
+            \item \textit{Hard-macro}: the description includes details down to the layout level.
         \end{itemize} 
 \end{itemize}
-Give the diffusion of Programmable Logic Devices (PLD), the used of IP is becoming more and more popular.
-Typically the suppliers of CPLD and/or FPGA make available one or more cores (even for free). 
+With the increasing prevalence of Programmable Logic Devices (PLDs), the use of IP is becoming more popular.
+Suppliers of Complex Programmable Logic Devices (CPLDs) and/or Field Programmable Gate Arrays (FPGAs) often provide one or more cores, sometimes even for free.
 
 \subsection{Selection process}
 The selection process is based on: 
 \begin{itemize}
-    \item \textit{Class}: the main driver is the nature of the algorithm, the operations and data to be elaborated.
-    \item \textit{Form}: the main driver is the target architecture of the systems. 
-        But performance and power, in addition to royalties, can make the difference.
-    \item \textit{Performance}: ain metric is the average number of instructions per clock cycle (IPC/CPI). 
-        It is relative to the clock frequency, hence it need to be scaled to compare different architectures.
-        MIPS is absolute measure of the throughput. 
-        It can be misleading when processors have different Instruction Sets (ISA). 
-        MFLOPS is the same but for Floating Points operations, for more specific architectures, like DSP or NP, metrics can change
-        DSP, frequently it is used MMACS.
-        NP, average number of processed packets in a time unit.
-    \item \textit{Power}: probably the most important driver for embedded systems. 
-        Average power or peak power, useful to roughly estimate the max power or the avg power of the overall systems.
-        Frequently, especially at the beginning, it is used a joint measure between power and speed (related to performance).
-        These information are very useful but must be properly used during the design process.
+    \item \textit{Class}: the nature of the algorithm and the operations and data to be processed are the primary drivers for selecting a processor class.
+    \item \textit{Form}: the target architecture of the system plays a crucial role. 
+    \item \textit{Performance}: a key metric for performance is the average number of instructions per clock cycle (IPC/CPI), which is relative to the clock frequency and should be scaled for comparison across different architectures. 
+        MIPS (Million Instructions Per Second) serves as an absolute measure of throughput but can be misleading when comparing processors with different Instruction Sets (ISAs).
+        For floating-point operations, MFLOPS is commonly used, while specialized architectures like Digital Signal Processors (DSPs) often use MMACS (Million Multiply-Accumulate Operations Per Second), and Network Processors (NPs) typically measure the average number of processed packets per time unit.
+    \item \textit{Power}: power efficiency is perhaps the most critical driver for embedded systems. 
+        Both average power and peak power are important metrics for estimating the maximum or average power consumption of the overall system. 
+        Initially, a combined measure of power and speed (related to performance) is often used.
 \end{itemize}
-Other important elements to be considered are:
+Other important considerations include:
 \begin{itemize}
-    \item \textit{Memory}: bandwidth and size of the application can be a hard constraint.
-        In some case it could be impossible to use external memory only that internal to the micro is available.
-        Maybe that some bandwidth can be achieved only by integrated memories.
-        For complex systems, the crucial point could be the addressing space.
-    \item \textit{Peripherals}: an embedded systems typ elaborates external signals and control physical apparatus. 
-        It is possible to select and architecture oriented toward the computing, and to design the rest of the system, or to look for a single chip solution integrating computing, interfacing and some peripherals
-        The choice of the micro require a PCB or a SoC integrating all the peripherals under the responsibility of the designer.
-        Using a microcontroller, the designer get rid of the integration problem, paid in terms of reduction in the number of alternatives.
-    \item \textit{Software}: Many embedded applications have a limited legacy code, most of them exploit standard functions and libraries
-        The availability of libraries simplifies both design and validation of the applications, making feasible in some cases the development of sw solutions otherwise impractical.
-        The availability of an operating systems and SDK for the specific processor is important, too.
-        It is the cornerstone of the software development, many differences exist among the various SDKs. 
-        Important aspects to be evaluated are the software compilation flow, the quality of the code generated and the flexibility and knobs offered to the designer
-        Concerning the analysis tools, the richness, their accuracy and reliability are important. 
-        Debuggers should be carefully analyzed
-        Documentation and reference design
-        Community end ecosystem.
-    \item \textit{Packaging}: if the micro is a COTS, different packages are available: size, pinout, material (e.g. plastic, metal), certification (consumer, industrial, aerospace, and so on).
-    \item \textit{Certifications}: there exists several certification: Consumer, industrial, aerospace, automotive, military, and so on.
-        Some are specifically tailored for narrow fields (e.g. MISRA rules for the code for automotive).
-        The availability of a component with a proper certification could be a must constraint for its adoption.
+    \item \textit{Memory}: the bandwidth and size requirements of the application can impose hard constraints. 
+        In some cases, only internal memory may be available, making external memory utilization impractical. 
+        Achieving sufficient bandwidth may require integrated memory solutions, and for complex systems, addressing space can be a critical factor.
+    \item \textit{Peripherals}: embedded systems often process external signals and control physical devices. 
+        Designers can either choose an architecture focused on computation and design the rest of the system accordingly or opt for a single-chip solution that integrates computing, interfacing, and peripherals. 
+        Selecting the appropriate microprocessor can necessitate using a PCB or a System on Chip (SoC) that consolidates all peripherals. 
+        Using a microcontroller simplifies integration challenges, albeit with fewer alternatives available.
+    \item \textit{Software}: many embedded applications have limited legacy code and primarily utilize standard functions and libraries. 
+        The availability of libraries can simplify both the design and validation processes, making the development of software solutions feasible that might otherwise be impractical. 
+        Access to an operating system and SDK specific to the processor is also vital, serving as the foundation for software development. 
+        Differences among SDKs are significant, and factors such as the software compilation flow, code quality, and flexibility offered to the designer are important. 
+        The availability and reliability of analysis tools, including debuggers, as well as documentation and reference designs, contribute to the ecosystem surrounding the microprocessor.
+    \item \textit{Packaging}: for COTS processors, various packages are available, differing in size, pinout, and materials.
+    \item \textit{Certifications}: different certification standards exist, including consumer, industrial, aerospace, automotive, and military certifications. 
+        Some certifications are tailored for specific fields, such as MISRA rules for automotive code. 
+        The availability of a component with the appropriate certification can be a critical constraint for its adoption.
 \end{itemize}
