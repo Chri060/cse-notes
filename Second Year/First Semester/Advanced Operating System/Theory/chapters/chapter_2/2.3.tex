@@ -1,0 +1,23 @@
+\section{Task scheduling}
+
+A task switch occurs whenever the system needs to execute a task other than the currently running one. 
+This switch is typically triggered by a system call or an interrupt.
+
+When the new process enters kernel mode, it saves the current exception state and registers onto the kernel stack. 
+If the process encounters a nested exception, this state is not added to the stack. 
+Instead, only the \texttt{preempt\_count} is incremented, simplifying the handling of nested tasks by avoiding unnecessary stack operations.
+
+Upon task completion, the \texttt{handle} function asks the kernel if there are other tasks ready to run. 
+It checks whether \texttt{preempt\_count} is zero before selecting the next process according to a specific scheduling policy. 
+Once the next process is chosen, the function \texttt{switch\_to} is called. 
+This function saves the callee-saved registers of the outgoing process onto its stack and loads the corresponding registers of the incoming process, facilitating the switch between tasks.
+
+\subsection{Scheduling classes}
+A scheduling class is an API (a set of functions) that includes policy-specific code. It provides functions to:
+\begin{itemize}
+    \item Update current task statistics (\texttt{task\_tick}).
+    \item Select the next task from the scheduling queue (\texttt{pick\_next\_task}).
+    \item Choose the CPU core on which the task should be queued (\texttt{select\_task\_rq}).
+    \item Place the task in the appropriate queue (\texttt{enqueue\_task}).
+\end{itemize}
+This structure allows developers to implement custom thread schedulers without needing to rewrite generic scheduling code, helping to minimize bugs and improve system efficiency.
