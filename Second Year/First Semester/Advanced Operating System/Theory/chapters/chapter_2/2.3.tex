@@ -12,7 +12,6 @@ It checks whether \texttt{preempt\_count} is zero before selecting the next proc
 Once the next process is chosen, the function \texttt{switch\_to} is called. 
 This function saves the callee-saved registers of the outgoing process onto its stack and loads the corresponding registers of the incoming process, facilitating the switch between tasks.
 
-\subsection{Scheduling classes}
 A scheduling class is an API (a set of functions) that includes policy-specific code. It provides functions to:
 \begin{itemize}
     \item Update current task statistics (\texttt{task\_tick}).
@@ -21,3 +20,42 @@ A scheduling class is an API (a set of functions) that includes policy-specific 
     \item Place the task in the appropriate queue (\texttt{enqueue\_task}).
 \end{itemize}
 This structure allows developers to implement custom thread schedulers without needing to rewrite generic scheduling code, helping to minimize bugs and improve system efficiency.
+
+All processes have a priority level denoted a $\pi$.
+We can categorize processes as follows:
+\begin{itemize}
+    \item \textit{Real-time processes}: these have $\pi\in[0, 99]$ and belong to scheduling classes such as \texttt{SCHED\_FIFO}, \texttt{SCHED\_RR}, \texttt{SCHED\_DEADLINE} (with $\pi=0$ for deadline scheduling). 
+    In this case, the priority is referred to as \texttt{rt\_priority}.
+    \item \textit{Non-realtime processes}: These belong to scheduling classes like \texttt{SCHED\_OTHER}, \texttt{SCHED\_BATCH} ($\pi \approx 139$), and \texttt{SCHED\_IDLE} ($\pi \approx 139$). 
+        For these processes, the priority is called \texttt{static\_prio}, which is determined by a nice value $v \in [-20, +19]$:
+        \[\pi(v)=120+v\]
+\end{itemize}
+
+\subsection{Linux run queue}
+The core data structure used by the scheduler to manage processes waiting to run is the run queue, represented by the \texttt{rq} structure. 
+Each CPU has its own \texttt{rq}, which reduces contention during task selection. Inside each \texttt{rq}, there are sub-queues like \texttt{cfs\_rq}, \texttt{rt\_rq}, and \texttt{dl\_rq}, corresponding to different scheduling classes.
+
+The \texttt{rq} structure tracks the number of running tasks, CPU state, and load metrics. 
+The \texttt{cfs\_rq} structure, used by the Completely Fair Scheduler (CFS), employs an \texttt{rb\_tree} to manage tasks as \texttt{sched\_entity} objects, which hold data related to CFS statistics.
+
+The \texttt{sched\_class} determines how tasks are scheduled, while the \texttt{thread\_info} structure sets scheduling flags like \texttt{TIF\_NEED\_RESCHED}, which forces a context switch when set.
+
+Multiple run queues can exist on a CPU through the use of task groups. 
+By default, each CPU has a single task group known as the root group. 
+When using control groups (cgroups), multiple task groups can be defined, each with its own set of scheduling entities and run queues on each CPU.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
