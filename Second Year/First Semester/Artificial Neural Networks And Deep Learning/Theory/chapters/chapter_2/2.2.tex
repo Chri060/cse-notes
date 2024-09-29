@@ -1,42 +1,39 @@
 \section{Activation functions}
 
-Typical activation functions are: 
-linear: $g(a)=a$ with a derivative of $g^\prime (a)=1$
-sigmoid $g(a)=\dfrac{1}{1+e^{-a}}$ with a derivative of $g(a)(1-g(a))$ (veary easy and convenient). 
-hyperbolic tangent $g(a)=\dfrac{e^a-e^{-a}}{e^a+e^{-a}}$ with a derivative of $1-g(a)^2$.
-the activation function is a design choice. 
-
+Activation functions play a critical role in neural networks by introducing non-linearity into the model. 
+Common activation functions include:
+\begin{itemize}
+    \item \textit{Linear}: $g(a)=a$ with a derivative of $g^\prime (a)=1$. 
+    \item \textit{Sigmoid}: $g(a)=\dfrac{1}{1+e^{-a}}$ with a derivative of $g(a)(1-g(a))$. 
+        This function is widely used due to its simplicity and ability to model probabilities.
+    \item \textit{Hyperbolic tangent} (Tanh): $g(a)=\frac{e^a-e^{-a}}{e^a+e^{-a}}$ with a derivative of $1-g(a)^2$.
+        This function is often preferred for hidden layers as it outputs values in the range $[-1,1]$, centering the data.
+\end{itemize}
+The choice of the activation function is a design decision, influenced by the nature of the task and the structure of the network.
 
 \subsection{Output layer}
-In regression the output spans thr $\mathbb{R}$ domain: use a linear activation function for the output neuron.
+The activation function for the output layer depends on the type of problem being addressed:
+\begin{itemize}
+    \item \textit{Regression}: in regression tasks, where the output spans the real number domain $\mathbb{R}$, a linear activation function is typically used for the output neuron.
+    \item \textit{Binary classification}: the choice of activation depends on the coding of the class labels: 
+        \begin{enumerate}
+            \item For classes coded as $\Omega_0=-1$, $\Omega_1=1$, a Tanh activation function is appropriate. 
+            \item For classes coded as $\Omega_0=0$, $\Omega_1=1$, a Sigmoid activation function is commonly used, as it can be interpreted as representing the posterior probability of a class.
+        \end{enumerate}
+    \item \textit{Multi-class classification}: for problems with $K$ classes, the output layer contains $K$ neurons, one for each class. 
+        The classes are typically encoded using one-hot encoding, e.g., $\Omega_0=\begin{bmatrix} 0 & 0 & 1 \end{bmatrix}$, $\Omega_1=\begin{bmatrix} 0 & 1 & 0 \end{bmatrix}$, and $\Omega_2=\begin{bmatrix} 1 & 0 & 0 \end{bmatrix}$.
+        The output neurons utilize a softmax activation function:
+        \[y_k=\dfrac{e^{z_k}}{\sum_ke^{z_k}}=\dfrac{e^{\sum_jw_{kj}h_j(\sum_i^Iw_{ji}x_i)}}{\sum_{k=1}^Ke^{\sum_jw_{kj}h_j(\sum_i^Iw_{ji}x_i)}}\]
+        Here, $z_k$ is the activation value of the $k$-th output neuron. 
+        The softmax function normalizes the output vector, providing class probabilities.
+\end{itemize}
 
-In binary classification, chose according to their coding:
-\begin{enumerate}
-    \item Two classes $\Omega_0 = -1$, $\Omega_1 = +1$ then use Tanh output activation.
-    \item Two classes $\Omega_0 = 0$, $\Omega_1 = 1$ then use Sigmoid output activation (it can be interpreted as class posterior probability)
-\end{enumerate}
-When dealing with multiple classes (K) use as many neuron as classes
-Classes are coded as $\Omega_0 = 0 0 1$ , $\Omega_1 = 0 1 0$ , $\Omega_2 = [1 0 0]$
-utput neurons use a softmax unit: 
-\[y_k=\dfrac{e^{z_k}}{\sum_ke^{z_k}}=\dfrac{e^{\sum_jw_{kj}h_j(\sum_i^Iw_{ji}x_i)}}{\sum_{k=1}^Ke^{\sum_jw_{kj}h_j(\sum_i^Iw_{ji}x_i)}}\]
-Here, $z_k$ is the activation value of the $k$ element.
-This function normalize the vector, interpretable as a probability vector.
-
-\subsection{Hidden layer}
-Hidden layer 
-For all hidden neurons use sigmoid or hyperbolic tangent.
+\subsection{Hidden layers}
+For the hidden layers, activation functions such as the Sigmoid or Tanh are commonly used. 
+These functions introduce non-linearity, allowing the network to model complex patterns in the data.
 \begin{theorem}
-    A single hidden layer feedforward neural network with S shaped activation functions can approximate any measurable function to any desired degree of accuracy on a compact set.
+    A single hidden layer feedforward neural network with S-shaped activation functions (such as Sigmoid or Tanh) can approximate any measurable function to any desired degree of accuracy on a compact set.
 \end{theorem}
-Regardless the function we are learning, a single layer can represent it:
-Doesn't mean a learning algorithm can find the necessary weights!
-In the worse case, an exponential number of hidden units may be required
-The layer may have to be unfeasibly large and may fail to learn and generalize
-Classification requires just one extra layer
-
-
-
-
-
-
-
+This theorem implies that a single hidden layer can theoretically represent any function, though it does not guarantee that the learning algorithm will find the necessary weights. 
+In practice, an excessively large number of hidden units may be required, and the network may struggle to generalize, particularly if overfitting occurs. 
+However, for classification tasks, typically only one additional hidden layer is needed to achieve satisfactory performance.
