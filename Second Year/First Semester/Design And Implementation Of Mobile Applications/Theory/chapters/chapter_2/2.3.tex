@@ -70,3 +70,37 @@ The framework performs the following steps:
     \item \textit{Selective re-rendering}: only the parts of the UI that have changed are re-rendered, which enhances efficiency and responsiveness.
 \end{enumerate}
 This architecture of widgets allows for flexible and dynamic user interfaces that can easily adapt to user interactions and data changes.
+
+All widgets have a state, which can be categorized as either mutable or immutable.
+The state of a stateful widget is changeable; for example, it may represent the current position of a slider or whether a checkbox is checked. 
+This state is stored in a State object, allowing for a clear separation between appearance and content. 
+To update the appearance of the widget in response to changes, we need to call \texttt{setState}, which informs the framework to redraw the widget.
+
+In contrast, a stateless widget does not manage any internal state. 
+Stateful widgets maintain state that can change, allowing them to alter their appearance based on user events or incoming data. 
+Implementing a stateful widget requires two classes: one that extends \texttt{StatefulWidget} and another that defines the mutable values and includes the \texttt{build} method to render the widget.
+
+\paragraph*{Const and final}
+In Dart, the keyword \texttt{const} is used for values known at compile time (e.g., \texttt{const a = 1}), while \texttt{final} is appropriate for values that are determined at runtime. 
+Anything not known at compile time should be declared as \texttt{final} instead of \texttt{const}.
+
+\paragraph*{State management}
+The \texttt{setState} method notifies Flutter of a state change, prompting the widget to be re-rendered. 
+This triggers the re-execution of the \texttt{build} method, ensuring the GUI reflects any updates. 
+If the state variable (e.g.,\texttt{\_counter}) is modified without invoking \texttt{setState}, the \texttt{build} method will not be called, and the GUI will remain unchanged.
+
+\paragraph*{Flexible}
+The \texttt{Flexible} widget allows for resizable elements within the layout.
+Unlike inflexible widgets, which are fixed in size, flexible widgets adjust according to their properties: \texttt{flex} and \texttt{fit}. 
+The \texttt{fit} property dictates whether the widget occupies extra space, with \texttt{FlexFit.loose} using the widget's preferred size by default, and \texttt{FlexFit.tight} enforcing the widget to fill all available space. 
+The \texttt{flex} property defines the resize ratio relative to other widgets.
+
+\paragraph*{Other options}
+The \texttt{Expanded} widget can wrap a widget, compelling it to fill any available extra space.
+Conversely, \texttt{SizedBox} can wrap a widget and resize it using specified height and width properties; it can also create empty space by setting these dimensions. 
+The \texttt{Spacer} widget generates space between widgets, utilizing the flex property, while \texttt{SizedBox} provides space based on a specific number of logical pixels.
+
+\subsection{Assets}
+To incorporate external assets, they must be explicitly declared in the project. 
+To include all assets within a directory, use the directory name followed by a slash (e.g., \texttt{assets/}). 
+If assets are located in subdirectories, each directory must have a separate entry in the asset declaration.
