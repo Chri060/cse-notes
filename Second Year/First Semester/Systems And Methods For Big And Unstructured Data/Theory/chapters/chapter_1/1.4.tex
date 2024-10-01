@@ -5,3 +5,142 @@ Unlike traditional relational databases, which rely on rigid schemas, most NoSQL
 
 The absence of a fixed schema allows NoSQL databases to handle a wide variety of data formats, making them suitable for unstructured or semi-structured data, such as JSON, XML, or key-value pairs. 
 This flexibility enables the efficient storage and retrieval of large-scale data in modern applications, where data structures may change frequently and unpredictably.
+
+Paradigmatic shift introduce by Big Data: from
+Schema On Write …
+• Long lasting discussion
+about the schema that
+can accommodate all
+needs
+• Some analysis can no
+longer be performed
+because the data were
+lost at writing time 
+Load data first, ask
+question later
+All data are kept, the
+minimal schema need for
+an analysis is applied
+when needed
+New analyses can be
+Write Data
+introduced in any point in
+time
+
+\paragraph*{Object relational mapping}
+• Impedance Mismatch
+• Object-Relational Mapping problem
+(and solution)
+• Object Orientation (OODB)
+• Commercial failure!
+
+
+The process that extracts data
+from heterogeneous data
+sources, transforms it in the
+schema that better fits the
+analysis to perform and loads
+it in the system that will
+perform the analysis.
+
+\subsection{Data lake definition}
+
+\subsection{Scalability}
+"Traditional" SQL system scale vertically:
+• Adding data to a "traditional" SQL system may degrade its performances
+• When the machine, where the SQL system runs, no longer performs as
+required, the solution is to buy a better machine (with more RAM, more cores
+and more disk)
+• Big Data solutions scale horizontally
+• Adding data to a Big Data solution may degrade its performances
+• When the machines, where the big data solution runs, no longer performs as
+required, the solution is to add another machine
+
+
+\subsection{CAP theorem}
+A transaction is a unit of work enjoying the following properties:
+• Atomicity: atransaction is an atomic transformation from the initial state to the final state
+• Consistency: the transaction satisfies the integrity constraints
+• Isolation: a  transaction is not affected by the behavior of other, concurrent transactions
+• Durability: the effect of a transaction that has successfully committed will last forever
+\begin{theorem}
+    It is impossible for a distributed computer system to simultaneously provide all three of the following guarantees:
+\end{theorem}
+\begin{itemize}
+    \item \textit{Consistency: all nodes see the same data at the same time.}
+    \item \textit{Availability: node failures do not prevent other survivors from continuing to operate (a guarantee that every request receives a response about whether it succeeded or failed).}
+    \item \textit{Partition tolerance: the system continues to operate despite arbitrary partitioning due to network failures (e.g., message loss)}
+\end{itemize}
+A distributed system can satisfy any two of these guarantees at the same time but not all three.
+
+In a distributed system, a network (of networks) in inevitable (by definition).
+Failures can, and will, occur to a networked system -> partitioned tolerance should be accommodated.
+Then, the only option left is choosing between Consistency and Availability- i.e., CA doesn’t make any sense (expect
+when we have, e.g., a single-site databases; 2-phase commit, cache validation protocols))
+Not necessarily in a mutually exclusive manner, but possibly by partial accommodation of both
+→ trade-off analysis important
+CP: A partitioned node returns
+a correct value, if in a consistent state;
+a timeout error or an error, otherwise
+AP: A partitioned note returns the most recent version of the data, which could be stale.
+It’s a trade-off!
+It’s a
+continuous
+space!
+It’s not at
+DBMS level,
+It’s at
+operation level!
+
+CA relational databases 
+CP and AP NoSQL
+
+\subsection{BASE properties}
+ACID properties may not hold -> no properties at all then???
+• focuses on availability of data even in the presence of multiple failures
+• spread data across many storage systems with a high degree of replication
+Rationale:
+• It’s ok to use stale data (Accounting systems do this all the time. It’s called “closing out the books.”) ; it’s ok
+to give approximate answers
+• Use resource versioning -> say what the data really is about – no more, no less.
+• The value of x is 5, at time T and date D
+•- So, shift the PH from 0-6 (acidic) to 8-14 (basic) – pure water’s PH is 7 and neutral
+• Can some compromise be made between C and A?:
+• instead of completely giving up on C, for A
+• Instead of completely giving up on A, instead of c
+
+
+(Basically Available, Soft-State, Eventually Consistent)
+• Basic Availability: fulfill request, even in partial consistency.
+• Soft State: abandon the consistency requirements of the ACID model pretty much completely
+• Eventual Consistency: at some point in the future, data will converge to a consistent state; delayed consistency, as opposed to immediate consistency of the ACID properties.  purely a liveness guarantee (reads eventually return the requested value); but does not make safety guarantees, i.e., an eventually consistent system can return any value before it converges
+
+No general answer to whether your application needs an ACID versus BASE
+consistency model.
+• Given BASE’s loose consistency, developers need to be more knowledgeable
+and rigorous about consistent data if they choose a BASE store for their
+application.
+• Planning around BASE limitations can sometimes be a major disadvantage
+when compared to the simplicity of ACID transactions.
+• A fully ACID database is the perfect fit for use cases where data reliability
+and consistency are essential.
+
+\subsection{NoSQL history}
+• MultiValue databases at TRW in 1965.
+• DBM is released by AT\&T in 1979.
+• Lotus Domino released in 1989.
+• Carlo Strozzi used the term NoSQL in 1998 to name his lightweight, open-
+source relational database that did not expose the standard SQL interface.
+• Graph database Neo4j is started in 2000.
+• Google BigTable is started in 2004. Paper published in 2006.
+• CouchDB is started in 2005.
+The research paper on Amazon Dynamo is released in 2007.
+• The document database MongoDB is started in 2007 as a part of a
+open
+• source cloud computing stack and first standalone release in 2009.
+• Facebooks open sources the Cassandra project in 2008.
+• Project Voldemort started in 2008.
+• The term NoSQL was reintroduced in early 2009.
+
+KINDS NOSQL
+
