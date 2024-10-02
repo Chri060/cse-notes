@@ -1,0 +1,122 @@
+\section{Performance measures}
+
+The main values used to evaluate the performance are: 
+
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+    \hline
+    $T^\ast(n)$ & \makecell{Time to solve a problem of input size $n$ on one processor, \\ using the best sequential algorithm}                 \\ \hline
+    $T_p(n)$ & Time to solve a problem of input size $n$ on $p$ processors                \\ \hline
+    $\text{SU}_p = \frac{T^\ast(n)}{T_p(n)}$ & Speedup on $p$ processors           \\ \hline
+    $E_p = \frac{T_1}{p T_p(n)}$ & \makecell{Efficiency (work on $1$ processor divided by work that could be\\ done on $p$ processors)} \\ \hline
+    $T_{\infty}(n)$ & Shortest possible run time on an infinite number of processors             \\ \hline
+    $C(n) = P(n) \cdot T(n)$ & Cost (processors and time)        \\ \hline
+    $W(n)$ & Work, which is the total number of operations           \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+\begin{example}
+    \begin{algorithm}[H]
+        \caption{Matrix-Vector Multiplication}
+        \begin{algorithmic}[1]
+            \State Global read $z \leftarrow x$ \Comment{Broadcast vector $x$ to all processors}
+            \State Global read $b \leftarrow a_i$ \Comment{Read corresponding rows of matrix $A$}
+            \State Compute $w = b \cdot z$ \Comment{Multiply matrix row with vector $x$}
+            \State Global write $w \rightarrow y_i$ \Comment{Write result to the output vector $y$}
+        \end{algorithmic}
+    \end{algorithm}  
+    The performance measures of this algorithm in the best-case scenario are shown in the following table:
+    \renewcommand*{\arraystretch}{2}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|}
+        \hline
+        \textit{Measure} & \textit{Complexity} \\ \hline
+        $T^\ast(n^2)$ & $O(n^2)$ \\ \hline
+        $T_p(n^2)$ & $O\left(\frac{n^2}{p}\right)$ \\ \hline
+        $E_p(n^2)$ & $\frac{T_1}{p T_p} = \frac{n^2}{p \cdot \frac{n^2}{p}} = 1$ \\ \hline
+        $C(n^2)$ & $O\left(p \cdot \frac{n^2}{p}\right) = O(n^2)$ \\ \hline
+        $W(n^2)$ & $\frac{W}{T_p} = p$ \\ \hline
+
+        \end{tabular}
+    \end{table}
+    \renewcommand*{\arraystretch}{1}
+\end{example}
+\begin{example}
+    \begin{algorithm}[H]
+        \caption{Single Program Multiple Data sum}
+        \begin{algorithmic}[1]
+            \State Global read $a \leftarrow a(i)$
+            \State Global write $a \rightarrow b(i)$
+            \For{$h = 1$ to $k$}
+                \If{$i \leq \frac{n}{2^h}$}
+                    \State \textbf{begin}
+                    \State Global read $x \leftarrow b(2i-1)$
+                    \State Global read $y \leftarrow b(2i)$
+                    \State Compute $z = x + y$
+                    \State Global write $z \rightarrow b(i)$
+                    \State \textbf{end}
+                \EndIf
+            \EndFor
+            \If{$i = 1$}
+                \State Global write $z \rightarrow s$
+            \EndIf
+        \end{algorithmic}
+    \end{algorithm}
+    The performance measures of this algorithm are shown in the following table:
+    \renewcommand*{\arraystretch}{2}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|c|}
+        \hline
+        \textit{Measure} & \textit{Complexity $p=n$} & \textit{Complexity $p\gg n$} \\ \hline
+        $T^\ast(n)$ & $O(n)$ & $O(n)$\\ \hline
+        $T_p(n)$ & $O\left(2+\log n\right)$ & $O\left(\frac{n}{p}+\log p\right)$\\ \hline
+        $\text{SU}_p(n)$ & $O\left(\frac{n}{2+\log n}\right)$ & $O\left(\frac{n}{\frac{n}{p}+\log p}\right)\approx O(p)$ \\ \hline
+        $E_p(n)$ & $\frac{T_1}{p T_p} = \frac{n}{n \log n} = \frac{1}{\log n}$ & $\frac{T_1}{p T_p} = \frac{n}{p\left(\frac{n}{p}+\log p\right)} \approx 1$ \\ \hline
+        $C(n)$ & $O\left(p \cdot (2+\log n)\right) = O(n\log n)$ & $O\left(p \cdot \left(\frac{n}{p}+\log p\right)\right) \approx O(n)$ \\ \hline
+        $W(n)$ & - & $O\left(n+p\right) \approx (n)$ \\ \hline
+        \end{tabular}
+    \end{table}
+    \renewcommand*{\arraystretch}{1}
+\end{example}
+\begin{example}
+    \begin{algorithm}[H]
+        \caption{Single Program Multiple Data sum}
+        \begin{algorithmic}[1]
+            \State Global read $a \leftarrow a(i)$
+            \State Global write $a \rightarrow b(i)$
+            \For{$h = 1$ to $k$}
+                \If{$i \leq \frac{n}{2^h}$}
+                    \State \textbf{begin}
+                    \State Global read $x \leftarrow b(2i-1)$
+                    \State Global read $y \leftarrow b(2i)$
+                    \State Compute $z = x + y$
+                    \State Global write $z \rightarrow b(i)$
+                    \State \textbf{end}
+                \EndIf
+            \EndFor
+            \If{$i = 1$}
+                \State Global write $z \rightarrow s$
+            \EndIf
+        \end{algorithmic}
+    \end{algorithm}
+    
+    The performance measures of this algorithm are shown in the following table:
+    \renewcommand*{\arraystretch}{2}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|}
+        \hline
+        \textit{Measure} & \textit{Complexity} \\ \hline
+        $T^\ast(n^3)$ & $O(n^3)$ \\ \hline
+        $T_p(n^3)$ & $O\left(\log n\right)$ \\ \hline
+        $\text{SU}_p(n^3)$ & $O\left(\frac{n^3}{\log n}\right)$ \\ \hline
+        $E_p(n^3)$ & $\frac{T_1}{p T_p} = \frac{1}{\log n}$ \\ \hline
+        $C(n^3)$ & $O\left(n^3\log n\right)$ \\ \hline
+        \end{tabular}
+    \end{table}
+    \renewcommand*{\arraystretch}{1}
+\end{example}

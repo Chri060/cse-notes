@@ -1,0 +1,20 @@
+\section{PRAM analysis}
+
+\begin{lemma}
+    Assume $M^\prime < M$. 
+    Any problem that can be solved for a $P$-processor and $M$-cell PRAM in $T$ steps can be solved on a $(\max(P, M^\prime))$-processor $M^\prime$-cell PRAM in $O\left(\frac{TM}{M^\prime}\right)$ steps.
+\end{lemma}
+
+\begin{proof}
+    We can partition the $M$ simulated shared memory cells into $M^\prime$ continuous segments $S_i$ of size $\frac{M}{M^\prime}$ each.
+    Each simulating processor $P^\prime_i$ ($1 \leq i \leq P$) will simulate processor $P_i$ of the original PRAM.
+    Each simulating processor $P^\prime_i$ ($1 \leq i \leq M^\prime$) stores the initial contents of segment $S_i$ into its local memory and will use $M^\prime[i]$ as an auxiliary memory cell for simulating accesses to cells of $S_i$.
+    
+    Each $P^\prime_i$ ($i=1, \ldots, \max(P, M^\prime)$) repeats the following for $k = 1, \ldots, \frac{M}{M^\prime}$. 
+    Write the value of the $k$-th cell of segment $S_i$ into $M^\prime[i]$ for $i=1, \ldots, M^\prime$.
+    Read the value that the simulated processor $P_i$ ($i=1, \ldots, P$) would read in this simulated substep, if it appeared in the shared memory.
+    The local computation substep of $P_i$ ($i=1, \ldots, P$) is simulated in one step by $P^\prime_i$.
+    The simulation of one original write operation is analogous to that of the read operation.
+\end{proof}
+
+\subsection{Implementation}
