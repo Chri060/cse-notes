@@ -1,0 +1,60 @@
+\section{Kernel debugging}
+
+Kernel debugging often requires creative problem-solving rather than a one-size-fits-all approach. 
+There are many possible strategies for arriving at the same solution, and the process usually involves experimentation and iteration.
+
+\subsection{GNU debugger}
+Using live GDB can be beneficial in the following cases:
+\begin{itemize}
+    \item \textit{Understanding code flow}: tracing how code is executed at runtime.
+    \item \textit{Dumping data structures and assembly}: inspecting kernel data and understanding how assembly relates to the higher-level code.
+    \item \textit{Debugging hangs}: identifying why the system is not responding.
+\end{itemize}
+However, there are scenarios where live GDB might not be the best option:
+\begin{itemize}
+    \item \textit{Issue is not reproducible}: the bug might not happen consistently, making it hard to trace in real time.
+    \item \textit{Unclear debugging path}: when you're unsure what to search for, live debugging can be cumbersome.
+\end{itemize}
+
+\paragraph*{KGDB}
+KGDB allows full control of kernel execution using GDB from another machine over a serial connection, enabled by \texttt{CONFIG\_KGDB\_SERIAL\_CONSOLE}.
+This method supports inserting breakpoints even in interrupt handlers and comes with Python scripts that make debugging easier.
+
+\paragraph*{JTAG}
+JTAG is useful for debugging low-level system issues when there's almost no functional software. 
+It is commonly used during system bring-up when it's unclear if the kernel has reached a point where KGDB could be effective.
+
+\paragraph*{QEMU}
+With QEMU, the system can be emulated, allowing you to debug as if you were using JTAG, even if KGDB isn't enabled. 
+The GDB commands used remain the same.
+
+\paragraph*{GDB commands}
+Here are some of the most commonly used GDB commands in kernel debugging: 
+\begin{verbatim} 
+// Inserts a breakpoint at a symbol
+    break <sym> 
+// Continues execution until the next breakpoint
+    continue 
+// Steps into subroutines and breaks at each line
+    step 
+// Steps over subroutines without entering them
+    next 
+// Prints a stack backtrace
+    bt
+// Lists loaded modules 
+    lx-lsmod 
+// Lists processes
+    lx-ps 
+// Searches for a relevant command or symbol in GDB
+    apropos lx 
+// Prints task struct of a process by address
+    p *(struct task_struct *) <address of process from lx-ps> 
+// Gets a container struct from a list head pointer
+    p $container_of(listheadp, "struct <type x>", "list head name <type x>") 
+// Prints the task struct of a process by PID
+    p $lx_task_by_pid(<PID>) 
+// Sets a GDB variable to a task struct
+    set $t = $lx_task_by_pid(<PID>) 
+// Prints the state of the process
+    p $t -> __state 
+\end{verbatim}
