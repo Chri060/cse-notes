@@ -3,10 +3,21 @@
 A programmable timer is a specialized clock used to measure time intervals or count events, and it is a fundamental component in many embedded systems. 
 Timers can operate in different modes, either counting upwards to measure elapsed time (like a stopwatch) or counting downwards to generate a delay for timing purposes. 
 Additionally, timers often incorporate counters, which track and record the number of events triggered by external signals.
-\begin{figure}[H]
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{images/tim.png}
-\end{figure}
+    \begin{tabular}{|c|c|c|}
+    \hline
+    & \textbf{Timer} & \textbf{Counter} \\ 
+    \hline
+    \textbf{Increment} & \makecell{The register is incremented \\ for every machine cycle} & \makecell{The register is incremented \\ based on a 1 to 0 transition \\ at an external input pin (T0, T1)} \\ 
+    \hline
+    \makecell{\textbf{Maximum} \\ \textbf{count rate}} & 1/12 of the oscillator frequency & $\frac{1}{24}$ of the oscillator frequency \\ 
+    \hline
+    \textbf{Source of signal} &\makecell{A timer uses the frequency of the \\ internal clock to generate delay} & \makecell{A counter uses an external \\ signal to count pulses} \\ 
+    \hline
+    \end{tabular}
+    \caption{Comparison between timer and counter}
+\end{table}
 
 \paragraph*{Counters}
 Counters are similar to timers but are designed to count external events (e.g., signal pulses) instead of clock cycles. 
@@ -63,17 +74,17 @@ Timers can be operated either by polling or by using interrupts:
 \subsection{Structure}
 The basic structure of a timer in an microcontroller consists of several essential components:
 \begin{itemize}
-    \item Clock source: every timer requires a clock to measure time intervals. 
+    \item \textit{Clock source}: every timer requires a clock to measure time intervals. 
         Multiple clock sources may be available, with the possibility of selecting an external clock if needed.
     \item Prescaler: to extend the count range, the clock signal is passed through a prescaler, which divides the input clock by a factor (often a power of 2). 
         Some prescalers allow division by factors as large as $2^{16}$ (up to 65536).
-    \item Main counter: after the prescaler, the clock feeds into a main counter. 
+    \item \textit{Main counter}: after the prescaler, the clock feeds into a main counter. 
         Typically 16 bits wide, this counter can count up to 65,535. 
         It increments or decrements depending on the timer mode.
-    \item Modulus Value (M): the main counter's range is controlled by a modulus value, which can be programmed into a register.
+    \item \textit{Modulus value} (M): the main counter's range is controlled by a modulus value, which can be programmed into a register.
         When the counter reaches zero, it reloads this value and continues counting. 
         This configuration allows for generating periodic signals or interrupts.
-    \item Control logic: the control logic defines the operational mode of the timer. 
+    \item \textit{Control logic}: the control logic defines the operational mode of the timer. 
         This includes configuring the clock source, prescaler, modulus value, and other control bits. 
         The control registers vary across different microcontrollers, providing flexibility to adapt the timer to different applications.
 \end{itemize}
