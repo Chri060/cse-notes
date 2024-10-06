@@ -1,0 +1,28 @@
+\section{Training}
+
+
+
+
+
+
+
+
+\subsection{Dropout}
+In droput we limit overfitting using stochastic regularization.
+By turning off randmoly some neurons we force to learn an indipendent feature preventinng hidden units to rely on other units (co-adaptation). 
+
+To do so, each hidden unit is set to zero with probability $p_j^{(l)}$ probability.
+Thus, we put a mask after the layer to remove some signal. 
+Wit this we obtain a sub-net of the original one on which we can perform the training. 
+Then, we apply a different mask, and redo the same operations. 
+
+Each step of the iteration a different network, that is a subset of the original network. 
+At the end, we activate all the neurons, and the behavior of the full network is the mean of all sub-networks created. 
+
+Dropout trains weaker classifiers, on different mini-batches and then at test time we implicitly average the responses of all ensemble members.
+At testing time we remove masks and average output (by weight scaling). 
+
+Dropout regularization can be applied also on a specific layer (the more thense usually), instead of all layers. 
+
+A good practive is to train a model that overfits (check if the problem is solvable).
+Then, reduce overfitting with a selected teqnique like restopping, dropout, or weight decay. 
