@@ -1,0 +1,21 @@
+\section{Karger's min-cut algorithm}
+
+
+Let $G = (V, E)$ be a connected, undirected graph, where $n = |V|$ and $m = |E|$ represent the number of vertices and edges, respectively. 
+For any subset $S \subset V$, the set $\delta(S) = \{(u, v) \in E : u \in S, v \in S^\prime\}$ represents a cut, since removing these edges from $G$ would disconnect the graph into two or more components. 
+The goal of the min-cut problem is to find the cut with the smallest size, i.e., the fewest number of edges.
+
+\paragraph*{St-cut problem}
+A closely related problem is the minimum st-cut problem. 
+In this version, for specified vertices $s \in V$ and $t \in V$, we restrict attention to cuts $\delta(S)$ where $s \in S$ and $t \notin S$. 
+The goal here is to find the cut that minimizes the number of edges crossing between $S$ and $S^\prime$.
+
+Traditionally, the min-cut problem could be solved by computing $n - 1$ minimum st-cuts, one for each pair of vertices.
+In the min-st-cut problem, we are given two vertices $s$ and $t$, and the goal is to find the set $S$ such that $s \in S$ and $t \notin S$, minimizing the size of the cut $(S, S^\prime)$, i.e., minimizing $|\delta(S)|$.
+By linear programming duality, the size of the minimum st-cut is equal to the value of the maximum st-flow. 
+The fastest known algorithm for solving the max-st-flow problem runs in time $O(nm \log(\frac{n^2}{m}))$. 
+Furthermore, all $n - 1$ max-st-flow computations can be performed simultaneously within the same time bounds.
+
+\subsection{Karger's Solution}
+Karger introduced a randomized algorithm to solve the min-cut problem that avoids the need for max-flow computations. 
+This clever approach is based on the idea of randomly contracting edges to shrink the graph while preserving the minimum cut with high probability.

@@ -1,0 +1,58 @@
+\section{Hiring problem}
+
+Imagine you need to hire a new employee, and a headhunter sends you one applicant per day for $n$ days. 
+If an applicant is better than the current employee, you fire the current one and hire the new applicant. 
+Since both hiring and firing are costly, you are interested in minimizing these operations.
+
+We may have two estreme cases: 
+\begin{itemize}
+    \item \textit{Worst-case scenario}: the headhunter sends applicants in increasing order of quality, meaning each new applicant is better than the previous one. 
+        In this case, you hire and fire each applicant, resulting in $n$ hires.
+    \item \textit{Best-case scenario}: the best applicant arrives on the first day, so you hire them and make no further changes. 
+        The total cost is just one hire.
+\end{itemize}
+In the average case, the input to the hiring problem is a random ordering of $n$ applicants. 
+There are $n!$ possible orderings, and we assume that each is equally likely (though other distributions could be considered). 
+We want to compute the expected cost of our hiring algorithm, which in this case is the expected number of hires.
+
+Let $X(s)$ be the random variable representing the number of applicants hired given the input sequence $s$. 
+We are interested in $\mathbb{E}[X]$, the expected number of hires.
+To solve this, we can break the problem down using indicator random variables. 
+Instead of counting the total number of hires with a single random variable, we define $n$ indicator variables—one for each applicant.
+
+Let $X_i$ be the indicator variable for whether applicant $i$ is hired:
+\[X_i=\begin{cases}
+    1\qquad\text{if applicant }i\text{ is hired} \\
+    0\qquad\text{otherwise}
+\end{cases}\]
+The total number of hires, $X$, is the sum of these indicator variables:
+\[X=X_1+X_2+\cdots+X_n\]
+Now, using the linearity of expectation, we have:
+\[\mathbb{E}[X]=\mathbb{E}\left[\sum X_i\right]=\sum\mathbb{E}[X_i]\]
+Next, we need to compute $\mathbb{E}[X_i]$, the probability that applicant $i$ is hired. 
+An applicant $i$ is hired only if they are better than all previous applicants ($i-1$ applicants). 
+For a uniformly random order of applicants, the probability that applicant $i$ is better than the previous $i-1$ applicants is $\frac{1}{i}$.
+
+Thus, the expected value for each $X_i$ is:
+\[\mathbb{E}[X_i]=\Pr(\text{applicant }i\text{ is hired})=\dfrac{1}{i}\]
+Finally, the expected total number of hires is:
+\[\mathbb{E}[X]=\sum_{i=1}^n\dfrac{1}{i}\]
+This sum is the harmonic series, which is bounded by $\ln n + 1$. 
+Therefore, the average number of hires is approximately $\ln n$, which is significantly better than the worst-case scenario of $n$ hires.
+
+\subsection{Active randomization}
+The analysis above assumes that the headhunter sends applicants in a random order. 
+However, if the headhunter is biased you cannot rely on this randomness. 
+In such cases, if you have access to the entire list of applicants in advance, you can take control by randomizing the input yourself.
+
+By randomly permuting the list of applicants before interviewing them, you essentially convert the hiring problem into a randomized algorithm. 
+This way, the hiring process no longer depends on the headhunter's input order, and you maintain the same expected number of hires, $O(\log n)$, regardless of the original order.
+
+In general, randomized algorithms allow for multiple possible executions on the same input, which ensures that no single input can guarantee worst-case performance. 
+Instead of assuming some distribution for the inputs, you actively create your own distribution, thereby moving from passive probabilistic analysis to a more robust, actively randomized approach. 
+This is especially useful when facing potentially adversarial or biased inputs.
+
+\subsection{Summary}
+In summary, the hiring problem demonstrates the effectiveness of probabilistic analysis and randomized algorithms. 
+By leveraging indicator variables and the linearity of expectation, we can show that, on average, the number of hires is much lower than in the worst case. 
+Moreover, through active randomization, you can control the input order and reduce the number of hires to $O(\log n)$, making the process much more efficient in practice.
