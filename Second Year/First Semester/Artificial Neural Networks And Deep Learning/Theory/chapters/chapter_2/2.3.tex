@@ -32,10 +32,10 @@ This increases the chances of converging to a better solution by exploring vario
 
 \subsection{Gradient descent}
 \begin{example}
-    Consider the following FFNN. 
+    Consider the following feed-forward neural network:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.75\linewidth]{images/ffnn1.png}
+        \includegraphics[width=0.60\linewidth]{images/ffnn1.png}
     \end{figure}
     The output of the network is defined as:
     \[g_1(x_n|\mathbf{w})=g_1\left(\sum_{j=0}^Jw_{1,j}^{(2)}h_j\left(\sum_{i=0}^Iw_{j,i}^{(1)}x_{i,n}\right)\right)\]
@@ -66,9 +66,6 @@ This approach provides a good balance between the computation cost and the varia
 The gradient descent process can be computed automatically from the structure of the neural network using backpropagation.
 This method allows for efficient weight updates that can be performed in parallel and locally, requiring just two passes through the network.
 
-
-
-
 Let $x$ be a real number, and consider two functions $f: \mathbb{R} \rightarrow \mathbb{R}$ and g: $\mathbb{R} \rightarrow \mathbb{R}$.
 Now, define the composite function $z = f(g(x)) = f(y)$, where $y = g(x)$.
 Using the chain rule, the derivative of $z$ with respect to $x$ is:
@@ -97,3 +94,78 @@ This flexibility allows for a more efficient calculation of the gradients and we
     \caption{Forward and backward passes in Neural Networks}
 \end{figure}
 This approach allows for a systematic and parallelizable way of calculating the gradient, minimizing the computation needed for each update and ensuring that the network can be trained efficiently.
+
+\subsection{Batch normalization}
+To achieve faster convergence in neural networks, it is beneficial for the inputs to be whitened, meaning they should have a zero mean and unit variance while also being uncorrelated. 
+This practice helps mitigate covariate shift. 
+However, in addition to external covariate shifts, networks can experience internal covariate shifts, where the distribution of each layer's inputs changes during training.
+Batch normalization is a powerful technique to address this issue.
+
+Batch normalization normalizes the activations of each layer, forcing them to take on values that approximate a unit Gaussian distribution at the start of training. 
+It is typically implemented as follows:
+\begin{itemize}
+    \item A BatchNorm layer is added after fully connected or convolutional layers and before the activation functions (nonlinearities).
+    \item This layer effectively acts as a preprocessing step at each level of the network but is integrated in a differentiable manner, allowing for backpropagation.
+\end{itemize}
+
+\paragraph*{Algorithm}
+The input comprises values of $x$ over a mini-batch $\mathcal{B} = \{ x_1, \dots, x_m \}$. 
+The outputs are the parameter to be learned $\gamma, \beta$ with respect to the given min-batch.
+\begin{algorithm}
+    \caption{Batch normalization}
+    \begin{algorithmic}[1]
+        \State Compute mini-batch mean: $\mu_{\mathcal{B}} \gets \frac{1}{m} \sum_{i=1}^m x_i$
+        \State Compute mini-batch variance: $\sigma_{\mathcal{B}}^2 \gets \frac{1}{m} \sum_{i=1}^m (x_i - \mu_{\mathcal{B}})^2$
+        \State Normalize: $\hat{x}_i \gets \frac{x_i - \mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2 + \epsilon}}$     
+        \State Scale and shift: $y_i \gets \gamma \hat{x}_i + \beta$
+    \end{algorithmic}
+\end{algorithm}
+Batch normalization has several notable benefits:
+\begin{itemize}
+    \item \textit{Improved gradient flow}: it enhances the flow of gradients through the network, making it easier to train deep architectures.
+    \item \textit{Higher learning rates}: allows for the use of higher learning rates, leading to faster convergence.
+    \item \textit{Reduced dependency on weight initialization}: the strong dependence on initial weights is mitigated, as the normalization process stabilizes the learning.
+    \item \textit{Regularization effect}: acts as a form of regularization, slightly decreasing the need for techniques like dropout.
+\end{itemize}
+By incorporating batch normalization into neural network architectures, practitioners can significantly enhance training efficiency and model performance.
+
+\subsection{Weight initialization}
+The effectiveness of gradient descent in neural networks is highly dependent on how weights are initialized at the start. 
+Various approaches to weight initialization can significantly impact the convergence speed and stability of the network: 
+\begin{itemize}
+    \item \textit{Zero initialization}: setting all weights to zero is ineffective because it results in zero gradients, meaning no learning occurs. 
+        Symmetry is never broken, and the model fails to converge.
+    \item \textit{Large weights}: Initializing with large weights is also problematic. 
+        In deep networks, large initial weights can cause gradients to explode as they propagate back through the layers, leading to instability and slow convergence.
+    \item \textit{Small weights} (Gaussian distribution): initializing weights with small values from a Gaussian distribution, such as $\mathbf{w}\sim \mathcal{N}(0,\sigma^2)=0.01$, works for shallow networks but may pose challenges for deeper architectures. 
+        Small initial weights in deep networks can cause the gradients to shrink as they pass through each layer, slowing down learning and potentially leading to the vanishing gradient problem.
+\end{itemize}
+In deep networks, weight initialization plays a critical role in avoiding the vanishing or exploding gradient problems:
+\begin{itemize}
+    \item \textit{Small weights}: if the initial weights are too small, gradients shrink during backpropagation, eventually becoming so small that learning effectively halts.
+    \item \textit{Large weights}: if the initial weights are too large, gradients can grow excessively, leading to unstable learning or divergence.
+\end{itemize}
+To address these issues, specific initialization methods have been proposed to ensure that the gradients remain balanced as they propagate through the network.
+
+\paragraph*{Xavier initialization}
+Xavier initialization, proposed by Glorot and Bengio, aims to maintain the variance of the activations across layers, ensuring that signals neither vanish nor explode.
+Suppose we have an input vector $\mathbf{x}$ with $I$ components, and a linear neuron with random weights $\mathbf{w}$. 
+The output of the neuron is:
+\[h_j=w_{j,1}x_1+\dots+w_{j,i}x_i+\dots+w_{j,I}x_I\]
+The variance of each term $w_{j,i}x_i$ is:
+\[\text{Var}(w_{j,i}x_i)=\text{Var}(w_{j,i})\text{Var}(x_i)\]
+Assuming $x_i$ and $w_i$ are independent and identically distributed , the variance of the output $h_j$ becomes:
+\[\text{Var}(h_j)=I\times\text{Var}(w_i)\text{Var}(x_i)\]
+To keep the variance of the output the same as the input, Xavier initialization sets the weights as:
+\[\mathbf{w}\sim \mathcal{N}\left(0,\frac{1}{n_{\text{in}}}\right)\]
+Here, $n_{\text{in}}$ is the number of input units to the neuron.
+For the gradients, Glorot and Bengio derived that the variance of the weights should also consider the number of output units $n_{\text{out}}$, leading to the refined initialization:
+\[\mathbf{w}\sim \mathcal{N}\left(0,\frac{2}{n_{\text{in}}+n_{\text{out}}}\right)\]
+This approach works well for activation functions like sigmoid or hyperbolic tangent.
+
+\paragraph*{He initialization}
+More recently, He initialization was proposed specifically for networks using ReLU activations. 
+Since ReLU activation functions only pass positive values, He initialization sets a slightly larger variance to prevent shrinking gradients. 
+It uses the following distribution:
+\[\mathbf{w}\sim \mathcal{N}\left(0,\frac{2}{n_{\text{in}}}\right)\]
+This method helps maintain better gradient flow, especially in deep networks with ReLU activations, and is widely adopted in modern architectures.

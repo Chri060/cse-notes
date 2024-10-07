@@ -1,28 +1,157 @@
-\section{Training}
+\section{Overfitting}
 
+When learning a function, a single-layer model can theoretically approximate any measurable function to a high degree of accuracy on a compact set. 
+However, this does not guarantee that we can find the necessary weights.
+In fact, an exponential number of hidden units may be required, making it impractical in practice, especially if the model does not generalize well to unseen data.
 
+Underfitting occurs when the model is too simple to capture the underlying patterns in the data, leading to poor performance. 
+To mitigate this, we can increase the model's complexity. 
+However, if we increase the complexity too much, the model may adhere too closely to the training data, resulting in overfitting. 
+Overfitting causes the model to capture noise rather than the true signal, reducing its ability to generalize to new, unseen data.
 
+The goal of training is to find an approximation that balances complexity and generality, allowing the model to perform well not only on the training set but also on future data. 
+This process involves finding a good balance between underfitting and overfitting, aiming for a model that generalizes well to new, unseen data rather than simply memorizing the training data.
 
+The error or loss on the training data is not a reliable indicator of how well the model will perform on future data. There are several reasons for this:
+\begin{itemize}
+    \item The model has been trained on the same data, so any estimate of performance based on the training set will likely be overly optimistic.
+    \item New data will rarely match the training data exactly, meaning the model may encounter patterns it hasn't seen before.
+    \item It's possible to find patterns even in random data, leading to the false belief that the model is performing well.
+\end{itemize}
+To accurately assess model performance, it's essential to evaluate it on a separate test set, which represents new, unseen data.
 
+To properly evaluate the model's ability to generalize, we follow these steps:
+\begin{enumerate}
+    \item \textit{Test on an independent dataset}: it's critical to evaluate the model on a dataset that was not used during training.
+    \item \textit{Data splitting}: split the available data into training, validation, and test sets. 
+        The test set is hidden and only used for final evaluation.
+    \item \textit{Cross-validation}: perform random subsampling (with replacement) to split the data. 
+        In classification problems, ensure the class distribution is preserved using stratified sampling.
+\end{enumerate}
 
+\begin{definition}[\textit{Training dataset}] 
+    The training dataset is the entire dataset available for building the model. 
+\end{definition}
+\begin{definition}[\textit{Training set}] 
+    The training set is subset of the data used to learn the model parameters. 
+\end{definition}
+\begin{definition}[\textit{Test set}] 
+    The test set is a separate subset of the data used for the final evaluation of the model's performance. 
+\end{definition}
+\begin{definition}[\textit{Validation set}] 
+    The validation set is a subset of the data used to fine-tune model hyperparameters and perform model selection.
+\end{definition}
+\begin{definition}[\textit{Training data}] 
+    The training data is the data used during the training phase for both fitting and selection of the model. 
+\end{definition}
+\begin{definition}[\textit{Validation data}]
+    The validation data is the data used to assess the model's performance during training, aiding in hyperparameter tuning and model selection. 
+\end{definition}
 
+\subsection{Cross validation}
+Cross-validation is a technique used to estimate the performance of a model by utilizing the available training data for both training (parameter fitting and model selection) and error estimation on unseen data. 
+This helps assess the model-s ability to generalize to new data without the need for a separate test set in the early stages of model development.
+The possible tecniques are:
+\begin{itemize}
+    \item \textit{Hold-out validation}: when a large amount of data is available, it's common to split the dataset into distinct subsets for training and validation. 
+        This allows for a straightforward estimation of model performance on unseen data. 
+        However, this method may not be suitable when the available data is limited, as it reserves part of the data for validation, reducing the amount used for training.
+    \item \textit{Leave-one-out cross-validation} (LOOCV): in cases where data is scarce, LOOCV can be applied. 
+        Here, the model is trained on all but one data point, which is then used for validation. 
+        This process is repeated for each data point, ensuring that every instance is used for both training and validation. 
+        While this method provides an unbiased estimate of model performance, it can be computationally expensive, particularly for large datasets.
+    \item \textit{K-fold cross-validation}: a more practical and commonly used approach is K-fold cross-validation. 
+        In this method, the dataset is randomly split into $K$ equally sized subsets (folds). 
+        The model is trained on $K-$1 folds and validated on the remaining fold. 
+        This process is repeated $K$ times, with each fold serving as the validation set once. 
+        The final model performance is computed as the average error across all $K$ iterations. 
+        K-fold cross-validation offers a good balance between computational efficiency and performance estimation, and it is often preferred over LOOCV as it tends to provide more stable results with fewer repetitions.
+\end{itemize}
+
+\subsection{Early stopping}
+Overfitting in neural networks often manifests as a monotonically decreasing training error as the number of gradient descent iterations $k$ increases (especially when using stochastic gradient descent). 
+However, while the model continues to perform better on the training set, its ability to generalize to unseen data can degrade beyond a certain point. 
+Early stopping is a regularization technique designed to prevent overfitting by halting the training process when the model's performance on a validation set starts to deteriorate.
+The steps needed to use early stopping are: 
+\begin{enumerate}
+    \item \textit{Hold out a validation set}: reserve a portion of the data for validation, separate from the training set.
+    \item \textit{Train on the training set}: perform gradient descent iterations using the training set.
+    \item \textit{Cross-Validate on the hold-out set}: continuously evaluate the model on the validation set during training.
+    \item \textit{Stop training based on validation error}: when the validation error starts to increase (indicating the model is beginning to overfit the training data), halt the training process. 
+        This is where the model achieves its best generalization.
+\end{enumerate}
+Model selection and evaluation occur at multiple levels:
+\begin{itemize}
+    \item \textit{Parameter level}: this involves learning the model's parameters, such as the weights $\mathbf{w}$ of a neural network, through optimization during training.
+    \item \textit{Hyperparameter level}: yhis involves choosing the structural components of the model, such as the number of layers $L$ or the number of hidden neurons $J^{(l)}$ in each layer $l$. 
+        These hyperparameters significantly affect the model's capacity and generalization.
+\end{itemize}
+
+\subsection{Weight decay}
+Regularization aims to constrain the freedom"of the model based on prior assumptions, in order to reduce overfitting. 
+In the context of neural networks, weight decay is one of the most commonly used regularization techniques. 
+It helps control model complexity by discouraging large weights, which can lead to overfitting.
+
+Typically, we maximize the data likelihood when learning the model parameters:
+\[w_{\text{MLE}}=\argmax_{\mathbf{w}}\Pr(\mathcal{D}|\mathbf{w})\]
+However, to impose additional structure and reduce model complexity, we can introduce a Bayesian perspective by incorporating a prior over the weights $\mathbf{w}$. 
+This leads to maximum a posteriori (MAP) estimation:
+\begin{align*}
+    w_{\text{MAP}}  &=\argmax_{\mathbf{w}}\Pr(\mathbf{w}|\mathcal{D}) \\
+                    &=\argmax_{\mathbf{w}}\Pr(\mathcal{D}|\mathbf{w})\Pr(\mathbf{w})
+\end{align*}
+In practice, small weights tend to improve the generalization performance of neural networks, which can be reflected by assuming a Gaussian prior on the weights:
+\[\Pr(\mathbf{w})\sim\mathcal{N}(0,\sigma_{\mathbf{w}}^2)\]
+By incorporating this prior, we can expand the optimization problem as follows:
+\begin{align*}
+    \hat{\mathbf{w}}    &=\argmax_{\mathbf{w}}\Pr(\mathbf{w}|\mathcal{D}) \\
+                        &=\argmax_{\mathbf{w}}\Pr(\mathcal{D}|\mathbf{w})\Pr(\mathbf{w}) \\
+                        &=\argmax_{\mathbf{w}}\prod_{n=1}^N\dfrac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(t_n-g(x_n|\mathbf{w})^2)}{2\sigma^2}}\prod_{q=1}^Q\dfrac{1}{\sqrt{2\pi}\sigma_\mathbf{w}}e^{-\frac{(w_q)^2}{2\sigma_{\mathbf{w}^2}}}
+\end{align*}
+Simplifying this, we get the following objective function:
+\[\hat{\mathbf{w}}=\argmin_{\mathbf{w}}\sum_{n=1}^N\dfrac{(t_n-g(x_n|\mathbf{w})^2)}{2\sigma^2}+\sum_{q=1}^Q\dfrac{(w_q)^2}{2\sigma_{\mathbf{w}^2}}\]
+This can be rewritten as:
+\[\hat{\mathbf{w}}=\argmin_{\mathbf{w}}\sum_{n=1}^N(t_n-g(x_n|\mathbf{w})^2)+\gamma\sum_{q=1}^Q(w_q)^2\]
+Here, $\gamma$ is a regularization parameter that controls the strength of weight decay. 
+Larger values of $\gamma$ will penalize larger weights more strongly, encouraging smaller weights and thus reducing model complexity.
+
+\paragraph*{Gamma selection}
+To select the optimal value of $\gamma$, we can use cross-validation as follows:
+\begin{enumerate}
+    \item \textit{Split the data}: divide the dataset into training and validation sets.
+    \item \textit{Minimize for different $\gamma$ values}: for each candidate value of $\gamma$, minimize the following training error:
+        \[\text{E}_{\gamma}^{\text{train}}\sum_{n=1}^{N_{\text{train}}}(t_n-g(x_n|\mathbf{w})^2)+\gamma\sum_{q=1}^Q(w_q)^2\]
+    \item \textit{Evaluate the model}: compute the validation error for each candidate $\gamma$:
+        \[\text{E}_{\gamma}^{\text{validation}}\sum_{n=1}^{N_{\text{validation}}}(t_n-g(x_n|\mathbf{w})^2)\]
+    \item \textit{Choose the optimal $\gamma^\ast$}: select the value of $\gamma$ that results in the best validation error.
+    \item \textit{Final model training}: tecombine all data and minimize the objective with the selected $\gamma^\ast$ that results in the best validation error.
+        \[\text{E}_{\gamma^\ast}\sum_{n=1}^{N}(t_n-g(x_n|\mathbf{w})^2)+\gamma^\ast\sum_{q=1}^Q(w_q)^2\]
+\end{enumerate}
 
 \subsection{Dropout}
-In droput we limit overfitting using stochastic regularization.
-By turning off randmoly some neurons we force to learn an indipendent feature preventinng hidden units to rely on other units (co-adaptation). 
+Dropout is a stochastic regularization technique used to mitigate overfitting by randomly dropping out or deactivating certain neurons during training. 
+By doing this, the model is forced to learn more robust and independent feature representations, preventing hidden units from relying too heavily on one another (a phenomenon known as co-adaptation).
+For each training iteration:
+\begin{enumerate}
+    \item \textit{Neuron deactivation}: each hidden unit is set to zero with a probability $p^{(l)}_j$, where $l$ denotes the layer and $j$ the unit within that layer. 
+        This effectively turns off the neuron for that iteration.
+    \item \textit{Applying a mask}: a mask is applied to the layer to randomly drop out neurons, removing part of the signal. 
+        This generates a sub-network from the original neural network, on which the training continues.
+    \item \textit{Repeating with new masks}: at each training step, a new mask is applied, creating a different sub-network from the original. 
+        Training proceeds as if each sub-network is a distinct model.
+    \item \textit{Reactivating all neurons at test time}: once training is complete, all neurons are reactivated for the full network during testing. 
+        The behavior of the full network is approximately the averaged result of all the sub-networks trained during dropout. 
+        To compensate for the dropouts during training, weight scaling is applied at test time, effectively averaging the outputs of all possible sub-networks.
+\end{enumerate}
+\paragraph*{Benefits}
+One of the key advantages of dropout is that it helps prevent co-adaptation among neurons. 
+By randomly deactivating certain neurons during training, the network is forced to distribute the learning process more evenly across all neurons, making it less dependent on specific units. 
+This encourages the network to learn more robust and independent feature representations, improving generalization. 
+Additionally, dropout can be viewed as a form of implicit ensemble learning. 
+Each time a subset of neurons is dropped, the network effectively trains a different sub-network. 
+At inference time, the full network's output can be seen as the average prediction of all these sub-networks, leading to a more generalizable model.
 
-To do so, each hidden unit is set to zero with probability $p_j^{(l)}$ probability.
-Thus, we put a mask after the layer to remove some signal. 
-Wit this we obtain a sub-net of the original one on which we can perform the training. 
-Then, we apply a different mask, and redo the same operations. 
-
-Each step of the iteration a different network, that is a subset of the original network. 
-At the end, we activate all the neurons, and the behavior of the full network is the mean of all sub-networks created. 
-
-Dropout trains weaker classifiers, on different mini-batches and then at test time we implicitly average the responses of all ensemble members.
-At testing time we remove masks and average output (by weight scaling). 
-
-Dropout regularization can be applied also on a specific layer (the more thense usually), instead of all layers. 
-
-A good practive is to train a model that overfits (check if the problem is solvable).
-Then, reduce overfitting with a selected teqnique like restopping, dropout, or weight decay. 
+Dropout can be applied selectively to specific layers, typically to the more densely connected ones, rather than across every layer in the network. 
+This targeted regularization can be more effective in reducing overfitting while maintaining computational efficiency. 
+A good practice when training neural networks is to first train the model to the point of overfitting, which ensures that the problem is solvable and that the model has sufficient capacity to learn the task. 
+Once overfitting is observed, techniques such as early stopping, dropout, or weight decay can be introduced to reduce overfitting and improve generalization.

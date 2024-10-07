@@ -118,3 +118,34 @@ Stochastic gradient descent is applied iteratively for each misclassified point:
 \end{cases}\]
 In this context, $\eta$ represents the learning rate. 
 This iterative approach is akin to Hebbian learning and effectively implements stochastic gradient descent, allowing the perceptron to adjust its weights and bias based on the misclassified instances.
+
+\subsection{Adaptive learning}
+To effectively navigate the challenges of local minima in the optimization landscape, various techniques can be employed, one of which is momentum. 
+This method helps to accelerate gradient descent in the relevant direction and dampens oscillations. 
+The update rule with momentum is given by:
+\[\mathbf{w}^{k+1}=\mathbf{w}^k-\eta\dfrac{\partial E(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^k}-\alpha\dfrac{\partial E(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{k-1}}\]
+Here, $\mathbf{w}^k$ represents the weights at iteration $k$, $\eta$ is the learning rate, and $\alpha$ is the momentum term.
+
+\paragraph*{Nestorov accelerated gradient}
+An enhancement to the momentum method is the Nesterov accelerated gradient. 
+This approach first makes a momentum-based update and then adjusts the gradient based on the new position. 
+The two-step update process is defined as follows:
+\begin{enumerate}
+    \item First, a momentum-based prediction of the next position:
+        \[\mathbf{w}^{k+\frac{1}{2}}=\mathbf{w}^k-\alpha\dfrac{\partial E(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{k-1}}\]
+    \item Then, updating the weights using the gradient evaluated at the predicted position:
+        \[\mathbf{w}^{k+1}=\mathbf{w}^k-\eta\dfrac{\partial E(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{k+\frac{1}{2}}}\]
+\end{enumerate}
+
+\paragraph*{Layer-specific learning rates}
+In deep networks, different neurons in each layer may learn at varying rates due to differences in gradient magnitudes across layers. 
+Early layers are often prone to vanishing gradients, which can hinder learning. 
+To address this, it is beneficial to employ separate adaptive learning rates for different layers.
+Several algorithms have been proposed to achieve this:
+\begin{itemize}
+    \item \textit{Resilient propagation} (Rprop): introduced by Riedmiller and Braun in 1993, this algorithm adjusts the weight updates based on the sign of the gradient, ensuring that the step sizes remain appropriate.
+    \item \textit{Adaptive gradient} (AdaGrad): developed by Duchi et al. in 2010, AdaGrad adapts the learning rate for each parameter based on the historical gradients, allowing for a more tailored approach.
+    \item \textit{RMSprop}: a combination of Stochastic Gradient Descent and Rprop, proposed by Tieleman and Hinton in 2012. RMSprop utilizes an exponentially decaying average of squared gradients to normalize the learning rate.
+    \item \textit{AdaDelta}: introduced by Zeiler et al. in 2012, this method extends AdaGrad by not accumulating past squared gradients, thus overcoming its diminishing learning rates issue.
+    \item \textit{Adam} (Adaptive Moment Estimation): proposed by Kingma and Ba in 2012, Adam combines the benefits of both momentum and RMSprop, using estimates of both the first and second moments of the gradients to adaptively adjust learning rates.
+\end{itemize}
