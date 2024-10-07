@@ -1,0 +1,23 @@
+\section{Scaling}
+
+In ISPC, a task is defined as a program that executes asynchronously, with each task being executed by a gang of program instances. 
+The language provides two key keywords to manage the lifecycle of tasks:
+\begin{itemize}
+    \item \texttt{launch[<n>]}: this keyword is used to spawn the execution of $n$ tasks.
+    \item \texttt{sync}: this keyword is employed to wait for the completion of all spawned tasks.
+\end{itemize}
+To define a task, you use the \texttt{task} prefix in a function declaration, ensuring that the function returns \texttt{void}. 
+The syntax is as follows:
+\begin{verbatim} 
+    task void my_task_func( /* params / ) { / body */ }
+\end{verbatim}
+Within the function body, two built-in variables can be utilized:
+\begin{itemize}
+    \item \texttt{taskIndex}: represents the index of the current task.
+    \item \texttt{taskCount}: denotes the total number of tasks.
+\end{itemize}
+It is important to note that the mapping between system threads and tasks is determined by the user, allowing for flexibility in implementation.
+
+To effectively scale across different cores, tasks can be employed. 
+While the mapping between system threads and tasks is adaptable, it is also advisable to consider external frameworks for managing cross-core parallelism. 
+Solutions such as OpenMP, Intel Threading Building Blocks (TBB), or pthreads can complement ISPC's capabilities in handling parallel execution efficiently.
