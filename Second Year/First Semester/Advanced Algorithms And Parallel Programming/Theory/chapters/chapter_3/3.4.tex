@@ -1,8 +1,11 @@
-\section{PRAM analysis}
+\section{Model analysis}
 
+\begin{definition}[\textit{Computationally Stronger}]
+    A model $A$ is said to be computationally stronger than model $B$ ($A \geq B$) if any algorithm written for $B$ can run unchanged on $A$ with the same parallel time and basic properties.
+\end{definition}
 \begin{lemma}
     Assume $M^\prime < M$. 
-    Any problem that can be solved for a $P$-processor and $M$-cell PRAM in $T$ steps can be solved on a $(\max(P, M^\prime))$-processor $M^\prime$-cell PRAM in $O\left(\frac{TM}{M^\prime}\right)$ steps.
+    Any problem that can be solved for a $P$-processor and $M$-cell PRAM in $T$ steps can be solved on a $(\max(P, M^\prime))$-processor $M^\prime$-cell PRAM in $\mathcal{O}\left(\frac{TM}{M^\prime}\right)$ steps.
 \end{lemma}
 
 \begin{proof}
@@ -17,27 +20,16 @@
     The simulation of one original write operation is analogous to that of the read operation.
 \end{proof}
 
-\subsection{Implementation}
-PRAM serves as a powerful idealized model for designing and analyzing parallel algorithms. 
-However, its direct implementation on real hardware poses certain challenges due to its theoretical nature. 
+The direct implementation of a PRAM on real hardware poses certain challenges due to its theoretical nature. 
 Despite this, PRAM algorithms can be adapted for practical systems, allowing the abstract model to influence real-world designs.
-
 In some cases, PRAM can be implemented directly by translating its concepts to hardware. 
-Handling concurrent writes, however, is more complex.
-Different strategies are employed based on the specific type of concurrent write model. 
-
-PRAM's common CRCW (Concurrent Read, Concurrent Write) model can be implemented using detect-and-merge techniques, where write conflicts are resolved by merging results. 
+PRAM's CRCW model can be implemented using detect-and-merge techniques, where write conflicts are resolved by merging results. 
 Priority CRCW, on the other hand, resolves conflicts by detecting and prioritizing certain writes over others. 
-In the arbitrary CRCW model, where conflicts are resolved without a strict rule, the system handles multiple writes in an arbitrary manner.
 
-\subsection{Motivations}
 PRAM is an attractive model for parallel computing due to several key factors. 
 One major advantage is the large body of algorithms developed specifically for it, offering a rich resource for problem-solving. 
 Its simplicity makes it easy to conceptualize, as PRAM abstracts away the complexities of synchronization and communication, allowing a pure focus on algorithm design.
-
 The synchronized shared memory model in PRAM eliminates many of the challenges related to synchronization and communication that arise in practical implementations. 
 However, PRAM retains the flexibility to incorporate these issues when necessary, enabling exploration of more complex scenarios.
-
 A notable strength of PRAM is its adaptability. 
 Algorithms initially designed for this model can often be converted into asynchronous versions, which are better suited to real-world architectures. 
-With support for both synchronized and asynchronous shared memory models, PRAM algorithms can be effectively mapped to various other computational frameworks, providing a versatile foundation for both theoretical and practical advancements in parallel computing.

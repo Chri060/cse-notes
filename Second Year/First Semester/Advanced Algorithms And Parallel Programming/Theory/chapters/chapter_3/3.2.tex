@@ -1,79 +1,70 @@
 \section{Parallel Random Access Machine}
 
+A Parallel Random Access Machine (PRAM) is an abstract machine designed to model algorithms for parallel computing. 
 \begin{definition}[\textit{Parallel Random Access Machine}]
-    A PRAM is an abstract machine designed to model algorithms for parallel computing. 
-    Formally, a PRAM can be described as a system $M' = \langle M, X, Y, A \rangle$, where:
+    A Parallel Random Access Machine (PRAM) is defined as a system $M^\prime = \langle M, X, Y, A \rangle$, where:
 \end{definition}
 \begin{itemize}
-    \item $M_1, M_2, \dots$ represent an infinite collection of RAMs, where each $M_i$ is a processor. 
-        all processors are identical and can recognize their own index $i$.
-    \item \textit{Input cells}: $X(1), X(2), \dots$ serve as the system's input.
-    \item \textit{Output cells}: $Y(1), Y(2), \dots$ store the system's output.
-    \item \textit{Shared memory cells}: $A(1), A(2), \dots$ are shared between processors for communication.
+    \item $M$ represent an infinite collection of identical RAMs. 
+    \item $X$ represent the system's input.
+    \item $Y$ represent the system's output.
+    \item $A$ are shared memory cells between processors.
 \end{itemize}
-In this model:
-\begin{itemize}
-\item There exists an unbounded collection of processors $P_0, P_1, \dots$.
-\item Processors do not have tape-based memory but have unbounded registers for internal storage.
-\item The shared memory is unbounded, and all processors can access any memory cell in constant, unit time.
-\item all communication between processors occurs exclusively via shared memory.
-\end{itemize}
+The set of RAMs $M$ contains an unbounded collection of processors $P$, that have unbounded registers for internal storage. 
+The set of shared memory cells $A$ is unbounded and can be accessed in constant time.
+This set is used by the processors $P$ to communicate with each other. 
 
 \subsection{Computation}
-The computation in a PRAM consists of five phases, carried out in parallel by all processors. Each processor performs the following actions:
-\begin{itemize}
-    \item Reads a value from one of the input cells $X(1), \dots, X(N)$.
-    \item Reads from one of the shared memory cells $A(1), A(2), \dots$.
+The computation in a PRAM consists of five phases, carried out in parallel by all processors. 
+Each processor performs the following actions:
+\begin{enumerate}
+    \item Reads a value from one of the input cells $X_i$.
+    \item Reads from one of the shared memory cells $A_i$.
     \item Performs some internal computation.
-    \item May write to one of the output cells $Y(1), Y(2), \dots$.
-    \item May write to one of the shared memory cells $A(1), A(2), \dots$.
-\end{itemize}
+    \item May write to one of the output cells $Y_i$.
+    \item May write to one of the shared memory cells $A_i$.
+\end{enumerate}
+Some processors may remain idle during computation. 
 
 \paragraph*{Conflicts}
-Some processors may remain idle during computation. 
 Conflicts can arise in the following scenarios:
 \begin{itemize}
     \item \textit{Read conflicts}: two or more processors may simultaneously attempt to read from the same memory cell.
-    \item \textit{Write conflicts}: a write conflict occurs when two or more processors attempt to write simultaneously to the same memory cell.
+    \item \textit{Write conflicts}: two or more processors attempt to write simultaneously to the same memory cell.
 \end{itemize}
 PRAM models are classified based on their ability to handle read/write conflicts, offering both practical and realistic classifications:
-\begin{itemize}
-    \item \textit{Exclusive Read} (ER): all processors can simultaneously read from distinct memory locations.
-    \item \textit{Exclusive Write} (EW): all processors can simultaneously write to distinct memory locations.
-    \item \textit{Concurrent Read} (CR): all processors can simultaneously read from the same memory location.
-    \item \textit{Concurrent Write} (CW): all processors can write to the same memory location.
-\end{itemize}
-These classifications lead to the following PRAM models:
-\begin{itemize}
-    \item \textit{EREW}: Exclusive Read, Exclusive Write.
-    \item \textit{CREW}: Concurrent Read, Exclusive Write.
-    \item \textit{CRCW}: Concurrent Read, Concurrent Write.
-\end{itemize}
-When a write conflict occurs in a CRCW PRAM, the final value written depends on the conflict resolution strategy:
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{PRAM model}} & \multicolumn{1}{c|}{\textbf{Operation}} \\ \hline
+    Exclusive Read                            & Read from distinct memory locations     \\
+    Exclusive Write                           & Write to distinct memory locations      \\
+    Concurrent Read                           & Read from the same memory locations     \\
+    Concurrent Write                          & Write to the same memory locations      \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+When a write conflict occurs, the final value written depends on the conflict resolution strategy:
 \begin{itemize}
     \item \textit{Priority CW}: processors are assigned priorities, and the value from the processor with the highest priority is written.
     \item \textit{Common CW}: all processors are allowed to complete their write only if all values to be written are equal.
-    \item \textit{Arbitrary/random CW}: a randomly chosen processor is allowed to complete its write operation.
+    \item \textit{Arbitrary CW}: a randomly chosen processor is allowed to complete its write operation.
 \end{itemize}
 
-\subsection{Summary}
+\subsection{Conclusion}
 The PRAM model is both attractive and important for parallel algorithm designers for several reasons:
 \begin{itemize}
     \item \textit{Natural}: the number of operations executed per cycle on $P$ processors is at most $P$.
     \item \textit{Strong}: any processor can access and read/write any shared memory cell in constant time.
-    \item \textit{Simple}: it abstracts away communication or synchronization overhead, making the complexity and correctness of PRAM algorithms easier to analyze.
+    \item \textit{Simple}: it abstracts away communication or synchronization overhead.
     \item \textit{Benchmark}: if a problem does not have an efficient solution on a PRAM, it is unlikely to have an efficient solution on any other parallel machine.
 \end{itemize}
-
-\begin{definition}[\textit{Computationally Stronger}]
-    Model A is said to be computationally stronger than model $B$ ($A \geq B$) if any algorithm written for $B$ can run unchanged on $A$ with the same parallel time and basic properties.
-\end{definition}
-
-\subsection{PRAM variants}
 Some possible variants of the PRAM machine model are: 
 \begin{itemize}
-    \item \textit{Bounded Number of Shared Memory Cells} (Small memory PRAM): when the input data set exceeds the capacity of the shared memory, values can be distributed evenly among the processors.
-    \item \textit{Bounded Number of Processors} (Small PRAM): if the number of execution threads is higher than the number of processors, processors may interleave several threads to handle the workload.
-    \item \textit{Bounded Size of a Machine Word} (Word size PRAM):the word size in PRAM models is bounded, which imposes limitations on the size of data elements that can be processed in a single operation.
-    \item \textit{Handling Access Conflicts}: constraints on simultaneous access to shared memory cells must be considered, especially in models like CRCW (Concurrent Read, Concurrent Write), where multiple processors may attempt to access or write to the same memory location at the same time.
+    \item \textit{Bounded number of shared memory cells}: when the input data set exceeds the capacity of the shared memory, values can be distributed evenly among the processors.
+    \item \textit{Bounded number of processors}: if the number of execution threads is higher than the number of processors, processors may interleave several threads to handle the workload.
+    \item \textit{Bounded size of a machine word}: limits the size of data elements that can be processed in a single operation.
+    \item \textit{Handling access conflicts}: constraints on simultaneous access to shared memory cells must be considered.
 \end{itemize}

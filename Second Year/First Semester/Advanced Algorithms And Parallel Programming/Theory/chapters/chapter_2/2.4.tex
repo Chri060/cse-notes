@@ -7,11 +7,11 @@ The standard algorithm for matrix multiplication is outlined below:
 \begin{algorithm}[H]
     \caption{Standard matrix multiplication}
         \begin{algorithmic}[1]
-            \For{$i := 1$ \textbf{to} $n$} 
-                \For{$j := 1$ \textbf{to} $n$} 
-                    \State $c_{ij} := 0$
-                    \For{$k := 1$ \textbf{to} $n$} 
-                        \State $c_{ij} := c_{ij}+a_{ik}\cdot b_{kj}$
+            \For{$i = 1$ \textbf{to} $n$} 
+                \For{$j = 1$ \textbf{to} $n$} 
+                    \State $c_{ij} = 0$
+                    \For{$k = 1$ \textbf{to} $n$} 
+                        \State $c_{ij} = c_{ij}+a_{ik} b_{kj}$
                     \EndFor
                 \EndFor
             \EndFor
@@ -19,18 +19,19 @@ The standard algorithm for matrix multiplication is outlined below:
 \end{algorithm}
 The complexity of this algorithm, due to the three nested loops, is $\Theta(n^3)$.
 
+\paragraph*{Divide and conquer}
 For the divide and conquer approach, we divide the original $n\times n$ matrix into four $\frac{n}{2}\times\frac{n}{2}$ sumatrices: 
 \[\begin{bmatrix} r & s \\ t & u \end{bmatrix}=\begin{bmatrix} a & b \\ c & d \end{bmatrix} \cdot \begin{bmatrix} e & f \\ g & h \end{bmatrix}\]
 This requires solving the following system:
 \[\begin{cases} r = ae + bg \\ s = af + bh \\ t = ce + dg \\ u = cf + dh \end{cases}\]
 This results in a total of eight multiplications and four additions of the submatrices. 
 The recursive part of the algorithm involves the matrix multiplications. 
-The time complexity can be expressed as:
-\[T(n)=8T\left(\dfrac{n}{2}\right)+\Theta(n^2)\]
-Using the master method, we find that the total complexity remains $\Theta(n^3)$, the same as the standard algorithm.
+The time complexity can be expressed as $T(n)=8T\left(\frac{n}{2}\right)+\Theta(n^2)$.
+Using the master method, we find that the total complexity remains 
+\[\Theta(n^3)\]
 
-\subsection{Strassen algorithm}
-To improve efficiency, Strassen proposed a method that reduces the number of multiplications from eight to seven for $2 \times 2$ matrices.
+\paragraph*{Strassen}
+To improve efficiency, Strassen proposed a method that reduces the number of multiplications from eight to seven matrices.
 This is achieved using the following factors:
 \[\begin{cases} P_1=a\cdot(f-h) \\ P_2=(a+b)\cdot h \\ P_3=(c+d)\cdot e \\ P_4=d\cdot(g-e) \\ P_5=(a+d)\cdot(e+h) \\ P_6=(b-d)\cdot(g+h) \\ P_7=(a-c)\cdot(e+f) \end{cases}\]
 Using these products, we can compute the elements of the resulting matrix:
@@ -43,9 +44,9 @@ The divide and conquer steps are as follows:
     \item \textit{Conquer}: recursively perform seven multiplications of $\frac{n}{2}\times\frac{n}{2}$ submatrices.
     \item \textit{Combine}: construct matrix $C$ using additions and subtractions on the $\frac{n}{2}\times\frac{n}{2}$ sumbatrices. 
 \end{enumerate}
-The recurrence relation for the complexity is:
-\[T(n)=7T\left(\dfrac{n}{2}\right)+\Theta(n^2)\]
-By solving this recurrence with the master method, we obtain a complexity of $\Theta\left(n^{\log_27}\right)$, which is approximately $\Theta\left(n^{2.81}\right)$. 
+The recurrence relation for the complexity is: $T(n)=7T\left(\frac{n}{2}\right)+\Theta(n^2)$
+By solving this recurrence with the master method, we obtain a complexity of:
+\[\Theta\left(n^{\log_27}\right)\approx \Theta\left(n^{2.81}\right)\]
 
 Although $2.81$ may not seem significantly smaller than $3$, the impact of this reduction in the exponent is substantial in terms of running time.
 In practice, Strassen's algorithm outperforms the standard algorithm for $n \geq 32$.

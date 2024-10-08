@@ -1,122 +1,115 @@
-\section{Performance measures}
+\section{Performance}
 
 The main values used to evaluate the performance are: 
-
 \renewcommand*{\arraystretch}{2}
 \begin{table}[H]
     \centering
     \begin{tabular}{|c|c|}
     \hline
-    $T^\ast(n)$ & \makecell{Time to solve a problem of input size $n$ on one processor, \\ using the best sequential algorithm}                 \\ \hline
-    $T_p(n)$ & Time to solve a problem of input size $n$ on $p$ processors                \\ \hline
-    $\text{SU}_p = \frac{T^\ast(n)}{T_p(n)}$ & Speedup on $p$ processors           \\ \hline
-    $E_p = \frac{T_1}{p T_p(n)}$ & \makecell{Efficiency (work on $1$ processor divided by work that could be\\ done on $p$ processors)} \\ \hline
-    $T_{\infty}(n)$ & Shortest possible run time on an infinite number of processors             \\ \hline
-    $C(n) = P(n) \cdot T(n)$ & Cost (processors and time)        \\ \hline
-    $W(n)$ & Work, which is the total number of operations           \\ \hline
+    $T_1(n)$ & Time to solve a problem on one processor                  \\ \hline
+    $T_p(n)$ & Time to solve a problem on $p$ processors                    \\ \hline
+    $T_{\infty}(n)$ & Time to solve a problem on $\infty$ processors        \\ \hline
+    $\text{SU}_p = \dfrac{T_1(n)}{T_p(n)}$ & Speedup on $p$ processors    \\ \hline
+    $E_p = \dfrac{T_1}{p T_p(n)}$ & Efficiency                               \\ \hline
+    $C(n) = P(n) T(n)$ & Cost                                               \\ \hline
+    $W(n)$ & Work (total number of operations)                               \\ \hline
     \end{tabular}
 \end{table}
 \renewcommand*{\arraystretch}{1}
-\begin{example}
-    \begin{algorithm}[H]
-        \caption{Matrix-Vector Multiplication}
-        \begin{algorithmic}[1]
-            \State Global read $z \leftarrow x$ \Comment{Broadcast vector $x$ to all processors}
-            \State Global read $b \leftarrow a_i$ \Comment{Read corresponding rows of matrix $A$}
-            \State Compute $w = b \cdot z$ \Comment{Multiply matrix row with vector $x$}
-            \State Global write $w \rightarrow y_i$ \Comment{Write result to the output vector $y$}
-        \end{algorithmic}
-    \end{algorithm}  
-    The performance measures of this algorithm in the best-case scenario are shown in the following table:
-    \renewcommand*{\arraystretch}{2}
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{|c|c|}
-        \hline
-        \textit{Measure} & \textit{Complexity} \\ \hline
-        $T^\ast(n^2)$ & $O(n^2)$ \\ \hline
-        $T_p(n^2)$ & $O\left(\frac{n^2}{p}\right)$ \\ \hline
-        $E_p(n^2)$ & $\frac{T_1}{p T_p} = \frac{n^2}{p \cdot \frac{n^2}{p}} = 1$ \\ \hline
-        $C(n^2)$ & $O\left(p \cdot \frac{n^2}{p}\right) = O(n^2)$ \\ \hline
-        $W(n^2)$ & $\frac{W}{T_p} = p$ \\ \hline
 
-        \end{tabular}
-    \end{table}
-    \renewcommand*{\arraystretch}{1}
-\end{example}
-\begin{example}
-    \begin{algorithm}[H]
-        \caption{Single Program Multiple Data sum}
-        \begin{algorithmic}[1]
-            \State Global read $a \leftarrow a(i)$
-            \State Global write $a \rightarrow b(i)$
-            \For{$h = 1$ to $k$}
-                \If{$i \leq \frac{n}{2^h}$}
-                    \State \textbf{begin}
-                    \State Global read $x \leftarrow b(2i-1)$
-                    \State Global read $y \leftarrow b(2i)$
-                    \State Compute $z = x + y$
-                    \State Global write $z \rightarrow b(i)$
-                    \State \textbf{end}
-                \EndIf
-            \EndFor
-            \If{$i = 1$}
-                \State Global write $z \rightarrow s$
-            \EndIf
-        \end{algorithmic}
-    \end{algorithm}
-    The performance measures of this algorithm are shown in the following table:
-    \renewcommand*{\arraystretch}{2}
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{|c|c|c|}
-        \hline
-        \textit{Measure} & \textit{Complexity $p=n$} & \textit{Complexity $p\gg n$} \\ \hline
-        $T^\ast(n)$ & $O(n)$ & $O(n)$\\ \hline
-        $T_p(n)$ & $O\left(2+\log n\right)$ & $O\left(\frac{n}{p}+\log p\right)$\\ \hline
-        $\text{SU}_p(n)$ & $O\left(\frac{n}{2+\log n}\right)$ & $O\left(\frac{n}{\frac{n}{p}+\log p}\right)\approx O(p)$ \\ \hline
-        $E_p(n)$ & $\frac{T_1}{p T_p} = \frac{n}{n \log n} = \frac{1}{\log n}$ & $\frac{T_1}{p T_p} = \frac{n}{p\left(\frac{n}{p}+\log p\right)} \approx 1$ \\ \hline
-        $C(n)$ & $O\left(p \cdot (2+\log n)\right) = O(n\log n)$ & $O\left(p \cdot \left(\frac{n}{p}+\log p\right)\right) \approx O(n)$ \\ \hline
-        $W(n)$ & - & $O\left(n+p\right) \approx (n)$ \\ \hline
-        \end{tabular}
-    \end{table}
-    \renewcommand*{\arraystretch}{1}
-\end{example}
-\begin{example}
-    \begin{algorithm}[H]
-        \caption{Single Program Multiple Data sum}
-        \begin{algorithmic}[1]
-            \State Global read $a \leftarrow a(i)$
-            \State Global write $a \rightarrow b(i)$
-            \For{$h = 1$ to $k$}
-                \If{$i \leq \frac{n}{2^h}$}
-                    \State \textbf{begin}
-                    \State Global read $x \leftarrow b(2i-1)$
-                    \State Global read $y \leftarrow b(2i)$
-                    \State Compute $z = x + y$
-                    \State Global write $z \rightarrow b(i)$
-                    \State \textbf{end}
-                \EndIf
-            \EndFor
-            \If{$i = 1$}
-                \State Global write $z \rightarrow s$
-            \EndIf
-        \end{algorithmic}
-    \end{algorithm}
-    
-    The performance measures of this algorithm are shown in the following table:
-    \renewcommand*{\arraystretch}{2}
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{|c|c|}
-        \hline
-        \textit{Measure} & \textit{Complexity} \\ \hline
-        $T^\ast(n^3)$ & $O(n^3)$ \\ \hline
-        $T_p(n^3)$ & $O\left(\log n\right)$ \\ \hline
-        $\text{SU}_p(n^3)$ & $O\left(\frac{n^3}{\log n}\right)$ \\ \hline
-        $E_p(n^3)$ & $\frac{T_1}{p T_p} = \frac{1}{\log n}$ \\ \hline
-        $C(n^3)$ & $O\left(n^3\log n\right)$ \\ \hline
-        \end{tabular}
-    \end{table}
-    \renewcommand*{\arraystretch}{1}
-\end{example}
+\subsection{Matrix-vector multiplication}
+Matrix-vector multiplication involves multiplying a matrix by a vector.
+
+To perform the multiplication, each element of the resulting vector is computed by taking the dot product of the rows of the matrix with the vector. 
+Specifically, if you have a matrix $\mathbf{A}$ of size $n\times n$ and a vector $\mathbf{v}$ of size $n$, the resulting vector $\mathbf{u}$ will have size $n\times n$:
+\[\mathbf{u}=\mathbf{Av}\]
+The entry $u_i$ of the resulting vector is calculated as:
+\[u_i=\sum_{j=1}^na_{ij}v_j\]
+Here, $a_{ij}$ are the elements of the matrix $\mathbf{A}$. 
+The algorithm that computes the vector $\mathbf{u}$ is:
+\begin{algorithm}[H]
+    \caption{Matrix-vector multiplication}
+    \begin{algorithmic}[1]
+        \State Global read $x \leftarrow \mathbf{v}$ \Comment{Broadcast vector $\mathbf{v}$ to all processors}
+        \State Global read $y \leftarrow \mathbf{a}_{i}$ \Comment{Read corresponding rows of matrix $\mathbf{A}$}
+        \State Compute $w = x y$ \Comment{Multiply matrix row with vector $\mathbf{v}$}
+        \State Global write $w \rightarrow u_i$ \Comment{Write result to the output vector $\mathbf{u}$}
+    \end{algorithmic}
+\end{algorithm}  
+The performance measures of this algorithm in the best-case scenario are shown in the following table:
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|ccccc|}
+    \hline
+    \textbf{Measure} & $T_1$ & $T_p$ & $E_p$ & $C$ & $W$  \\ \hline
+    \textbf{Complexity} &$\mathcal{O}(n^2)$ & $\mathcal{O}\left(\dfrac{n^2}{p}\right)$ & $1$ & $\mathcal{O}(n^2)$ & $p$ \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+
+\subsection{Single program multiple data sum}
+In single program multiple data (SPMD), each processor operates independently on its subset of the data, typically using the same code but possibly with different input data. 
+This model is commonly used in high-performance computing, scientific simulations, and data analysis tasks, enabling significant performance improvements by leveraging parallelism. 
+
+In the context of SPMD, a sum refers to the process of aggregating data from multiple processors or cores that are executing the same program on different segments of data. 
+Here's how it typically works:
+\begin{enumerate}
+    \item  \textit{Data distribution}: the data is divided into chunks, with each CPU assigned a specific subset to work on.
+    \item \textit{Local computation}: each processor executes the same summation program on its assigned data.
+    \item \textit{Local results}: after computing their local sums, each processor has a partial sum.
+    \item \textit{Reduction}: the partial sums are then combined (reduced) to get the final sum. 
+    \item \textit{Final output}: the final result is the total sum of all the partial sums computed by the individual processors.
+\end{enumerate}
+
+\begin{algorithm}[H]
+    \caption{SPMD sum}
+    \begin{algorithmic}[1]
+        \State Global read $x \leftarrow \mathbf{b}$ \Comment{Broadcast array $\mathbf{b}$ to all processors}
+        \State Global write $y \rightarrow \mathbf{c}$ \Comment{Broadcast array $\mathbf{c}$ to all processors}
+        \State Compute $z=x+y$ \Comment{Sum all vectors elements}
+        \State Global write $z\rightarrow \mathbf{a}$ \Comment{Write result to the output array $\mathbf{a}$}
+    \end{algorithmic}
+\end{algorithm}
+The performance measures of this algorithm are shown in the following table:
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|cccccc|}
+    \hline
+    \textbf{Measure} & $T_1$ & $T_p$ & $\text{SU}_p$ & $E_p$ & $C$ & $W$  \\ \hline
+    \textbf{Complexity $p=n$} & $\mathcal{O}(n)$ & $\mathcal{O}\left(2+\log n\right)$ & $\mathcal{O}\left(\dfrac{n}{2+\log n}\right)$ & $\dfrac{1}{\log n}$ & $\mathcal{O}(n\log n)$ & - \\ \hline
+    \textbf{Complexity $p=n$} & $\mathcal{O}(n)$ & $\mathcal{O}\left(\frac{n}{p}+\log p\right)$ & $\mathcal{O}(p)$ & $1$ & $\mathcal{O}(n)$ & $\mathcal{O}(n)$ \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+
+\subsection{Matrix-matrix multiplication}
+Matrix-matrix multiplication involves multiplying a matrix by another matrix.
+
+To perform the multiplication, each element of the resulting matrix is computed by taking the dot product of the rows of the first matrix with the columns of the second matrix. 
+Specifically, if you have a matrix $\mathbf{A}$ of size $m\times n$ and a matrix $\mathbf{B}$ of size $n\times p$, the resulting matrix $\mathbf{C}$ will have size $m\times p$:
+\[\mathbf{C}=\mathbf{AB}\]
+The entry $c_{ij}$ of the resulting matrix is calculated as:
+\[c_{ij}=\sum_{k=1}^na_{ik}b_{kj}\]
+Here, $a_{ik}$ are the elements of matrix $\mathbf{A}$ and $b_{kj}$ are the elements of matrix $\mathbf{B}$.
+\begin{algorithm}[H]
+    \caption{Matrix-matrix multiplication}
+    \begin{algorithmic}[1]
+        \State Global read $x \leftarrow \mathbf{a}_i$ \Comment{Read corresponding rows of matrix $\mathbf{A}$}
+        \State Global read $y \leftarrow \mathbf{b}_i$ \Comment{Read corresponding columns of matrix $\mathbf{B}$}
+        \State Compute $w = x y$ \Comment{Multiply matrix $\mathbf{A}$ row with matrix $\mathbf{B}$ column}
+        \State Global write $w \rightarrow \mathbf{u}_i$ \Comment{Write result to corresponding row of output matrix $\mathbf{u}$}
+    \end{algorithmic}
+\end{algorithm}  
+The performance measures of this algorithm are shown in the following table:
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|ccccc|}
+    \hline
+    \textbf{Measure} & $T_1$ & $T_p$ & $\text{SU}_p$ & $E_p$ & $C$  \\ \hline
+    \textbf{Complexity} & $\mathcal{O}(n^3)$ & $\mathcal{O}\left(\log n\right)$ & $\mathcal{O}\left(\frac{n^3}{\log n}\right)$ & $\frac{1}{\log n}$ & $\mathcal{O}\left(n^3\log n\right)$ \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}

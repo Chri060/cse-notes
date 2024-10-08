@@ -1,8 +1,7 @@
 \section{Complexity analysis}
 
-The running time of an algorithm varies with the input; for instance, sorting an already sorted sequence is less complex. 
-Therefore, we often parameterize running time by the input size, as shorter sequences are typically easier to sort than longer ones. 
-Generally, we aim for upper bounds on running time, as guarantees are desirable.
+The running time of an algorithm varies with the input. 
+Therefore, we often parameterize running time by the input size.
 
 Running time analysis can be categorized into three main types:
 \begin{itemize}
@@ -13,17 +12,15 @@ Running time analysis can be categorized into three main types:
     \item \textit{Best-case} (often misleading): this scenario highlights a slow algorithm that performs well on specific inputs.
 \end{itemize}
 To establish a general measure of complexity, we focus on a machine-independent evaluation.
-This involves disregarding machine-dependent constants or analyzing the growth of $T(n)$ as $n$ approaches infinity.
 This framework is called asymptotic analysis. 
 
 As the input length $n$ increases, algorithms with lower complexity will outperform those with higher complexities. 
 However, asymptotically slower algorithms should not be dismissed, as real-world design often requires a careful balance of various engineering objectives. 
-Thus, asymptotic analysis serves as a valuable tool for crafting solutions to specific problems.
 
-\subsection{Theta notation}
-In mathematical terms, the theta notation is defined as:
+In mathematical terms, we define the complexitybound as:
 \[\Theta\left(g(n)\right)=f(n)\]
-Here, $f(n)$ satisfies the existence of positive constants $c_1$, $c_2$, and $n_0$ such that $0 \leq c_1 \cdot g(n) \leq f (n) \leq c_2 \cdot g(n)$ for all $n \geq n_0$. 
+Here, $f(n)$ satisfies the existence of positive constants $c_1$, $c_2$, and $n_0$ such that:
+\[0 \leq c_1 g(n) \leq f (n) \leq c_2  g(n) \qquad\forall n \geq n_0\]
 
 In engineering practice, we typically ignore lower-order terms and constants.
 \begin{example}
@@ -33,53 +30,87 @@ In engineering practice, we typically ignore lower-order terms and constants.
     \[\Theta(n^3)\]
 \end{example}
 
-From theta notation, we can also define:
-\begin{itemize}
-    \item \textit{Upper bound}:
-        \[O(g(n))=f(n)\]
-        Here, $f(n)$ meets the condition that there exist constants $c > 0$ and $ n_0 > 0$ such that $0 \leq f(n) \leq c \cdot g(n)$ for all $n \geq n_0$. 
-    \item \textit{Lower bound}:
-        \[\Omega(g(n))=f(n)\]
-        Here, $f(n)$ meets the condition that there exist constants $c > 0$ and $ n_0 > 0$ such that $0 \leq c \cdot g(n) \leq f(n)$ for all $n \geq n_0$. 
-    \item \textit{Strict upper bound}: the strict upper bound is defined as: 
-        \[o(g(n))=f(n)\]
-        Here, $f(n)$ meets the condition that there exist constants $c > 0$ and $ n_0 > 0$ such that $0 \leq f(n) < c \cdot g(n)$ for all $n \geq n_0$. 
-    \item \textit{Strict lower bound}: the strict lower bound is defined as: 
-        \[\omega(g(n))=f(n)\]
-        Here, $f(n)$ meets the condition that there exist constants $c > 0$ and $ n_0 > 0$ such that $0 \leq c \cdot g(n) < f(n)$ for all $n \geq n_0$. 
-\end{itemize}
+Given $c > 0$ and $n_0 > 0$, we can define other bounds notations:
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Bound type} & \textbf{Notation}         & \textbf{Condition}                                \\ \hline
+    Upper bound         & $\mathcal{O} (g(n))=f(n)$ & $0 \leq f(n) \leq c g(n)\quad \forall n \geq n_0$ \\
+    Lower bound         & $\Omega(g(n))=f(n)$       & $0 \leq c g(n) \leq f(n)\quad \forall n \geq n_0$ \\
+    Strict upper bound  & $o(g(n))=f(n)$            & $0 \leq f(n) < c g(n)\quad \forall n \geq n_0$    \\
+    Strict lower bound  & $\omega(g(n))=f(n)$       & $0 \leq c g(n) < f(n)\quad \forall n \geq n_0$    \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
 \begin{example}
     For the expression $2n^2$: 
     \[2n^2 \in O(n^3)\]
-    For the expressio $\sqrt{n}$: 
+    For the expression $\sqrt{n}$: 
     \[\sqrt{n} \in \Omega(\ln(n))\]
 \end{example}
-From this, we can redefine the strict bound as:
+From this, we can redefine the theta notation as:
 \[\Theta(g(n))=O(g(n))\cap\Omega(g(n))\]
 
 \subsection{Sorting problem}
-The sorting problem involves taking an array of numbers $\left\langle a_1,a_2,\dots,a_n \right\rangle$ and returning the permutation $\left\langle a_1^\prime,a_2^\prime,\dots,a_n^\prime \right\rangle$ such that $a_1^\prime\leq a_2^\prime \leq \dots \leq a_n^\prime$. 
+The sorting problem involves taking an array of numbers $\left\langle a_1,a_2,\dots,a_n \right\rangle$ and returning the permutation of the input $\left\langle a_1^\prime,a_2^\prime,\dots,a_n^\prime \right\rangle$ such that $a_1^\prime\leq a_2^\prime \leq \dots \leq a_n^\prime$. 
+\begin{example}
+    Given an array: 
+    \[\left\langle 8, 2, 4, 9, 3, 6 \right\rangle\]
+    The sorted version will be: 
+    \[\left\langle 2, 3, 4, 6, 8, 9 \right\rangle\]
+\end{example}
 
-\paragraph*{Insertion sort}
-One approach to solving this problem is the insertion sort algorithm, which takes an array $A[n]$ as input.
 \begin{algorithm}[H]
     \caption{Insertion sort}
         \begin{algorithmic}[1]
-            \For{$j := 2$ \textbf{to} $n$} 
-                \State $key := A[j]$
-                \State $i := j-1$
+            \For{$j = 2$ \textbf{to} $n$} 
+                \State $key = A[j]$
+                \State $i = j-1$
                 \While{$i > 0$ \textbf{and} $A[i]>key$}
-                    \State $A[i+1] := A[i]$
-                    \State $i := i - 1$
+                    \State $A[i+1] = A[i]$
+                    \State $i = i - 1$
                 \EndWhile
-                \State $A[i+1] := key$
+                \State $A[i+1] = key$
             \EndFor
         \end{algorithmic}
 \end{algorithm}
-For insertion sort, the worst-case scenario occurs when the input is sorted in reverse order, leading to a complexity of:
-\[T_{\text{worst}}(n)=\sum_{j=2}^n\Theta(j)=\Theta(n^2)\]
-For the average case, assuming all permutations are equally likely, the complexity is:
-\[T(n)_{\text{average}}=\sum_{j=2}^n\Theta\left(\dfrac{j}{2}\right)=\Theta(n^2)\]
-In the best-case scenario, where the list is already sorted, we only need to check each element:
-\[T(n)_{\text{best}}=\sum_{j=2}^n\Theta\left(1\right)=\Theta(n)\]
+The complexities for the insertion sort are: 
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Case} & \textbf{Complexity}                                            & \textbf{Notes}                  \\ \hline
+    Worst         & $T(n)=\Theta\left(\sum_{j=2}^nj\right)=\Theta(n^2)$                       & Input in reverse order          \\
+    Average       & $T(n)=\Theta\left(\sum_{j=2}^n\dfrac{j}{2}\right)=\Theta(n^2)$ & All permutations equally likely \\
+    Best          & $T(n)=\Theta\left(\sum_{j=2}^n1\right)=\Theta(n)$              & Already sorted                  \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
 In conclusion, while this algorithm performs well for small $n$, it becomes inefficient for larger input sizes.
+
+A recursive solution for the sorting problem could be implemented with the merge sort.
+\begin{algorithm}[H]
+    \caption{Merge sort}
+        \begin{algorithmic}[1]
+            \If {$n=1$}
+                \State\Return $A[n]$
+            \EndIf
+            \State Recursively sort the two half lists $A\left[1\ldots\left\lceil \frac{n}{2}\right\rceil \right]$ and $A\left[\left\lceil \frac{n}{2}\right\rceil + 1 \ldots n\right]$
+            \State Merge ($A\left[1\ldots\left\lceil \frac{n}{2}\right\rceil \right]$, $A\left[\left\lceil \frac{n}{2}\right\rceil + 1 \ldots n\right]$)
+        \end{algorithmic}
+\end{algorithm}
+The merge operation makes this algorithm recursive.
+To analyze its complexity, we consider the following components:
+\begin{itemize}
+    \item When the array has only one element, the complexity is constant: $\Theta(1)$. 
+    \item The recursive sorting of the two halves contributes a total cost of $2T\left(\frac{n}{2}\right)$. 
+    \item The merging of the two sorted lists requires linear time to check all elements, yielding a complexity of $\Theta(n)$. 
+\end{itemize}
+Thus, the overall complexity for merge sort can be expressed as:
+\[T(n)=\begin{cases} \Theta(1)\qquad\qquad\qquad\: \text{ if }n=1 \\ 2T\left(\frac{n}{2}\right) + \Theta(n)\qquad\:\text{if }n>1 \end{cases}\]
+For sufficiently small $n$, the base case $\Theta(1)$ can be omitted if it does not affect the asymptotic solution.
+The solution for the recurrence equation is: 
+\[T(n)=\Theta(n\log_2 n)\]
