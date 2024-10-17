@@ -1,4 +1,4 @@
-\subsection{Sorting problem}
+\section{Sorting problem}
 
 The sorting problem is a fundamental computational task that involves arranging a collection of elements in a specific order, typically ascending or descending. 
 The input is an unsorted list or array, and the goal is to rearrange the elements such that they follow a predefined sequence based on some criteria.
@@ -171,37 +171,6 @@ This proves that any comparison-based sorting algorithm must have a worst-case t
     Since heapsort and merg esort both achieve a worst-case time complexity of $\mathcal{O}(n\log n)$, they are asymptotically optimal comparison sorting algorithms.
 \end{corollary}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \subsection{Counting sort}
 Counting sort is a non-comparison-based sorting algorithm. 
 It leverages the range of possible values in the input to efficiently organize the elements.
@@ -245,3 +214,39 @@ If $k = \mathcal{O}(n)$, then counting sort runs in linear time, $\Theta(n)$.
 \paragraph*{Stability}
 Counting sort is a stable sort, meaning it preserves the relative order of equal elements from the input array. 
 This stability can be particularly important in scenarios where sorting must maintain additional orderings or properties of the data.
+
+\subsection{Radix sort}
+Radix sort is a classic algorithm with historical significance, dating back to Herman Hollerith's card-sorting machine developed for the 1890 U.S. Census. 
+The core concept of radix sort is to sort numbers digit by digit, which can be efficient for large inputs under certain conditions.
+
+The original method proposed by Hollerith was to sort starting with the most significant digit first, but this approach turned out to be inefficient. 
+Instead, the more effective strategy is to sort based on the least significant digit first, using an auxiliary stable sort like counting sort.
+
+\paragraph*{Correctness}
+To ensure correctness assume that the numbers have already been sorted by their least significant $t-1$ digits.
+Now sort the numbers by the $t$-th digit: 
+\begin{itemize}
+    \item Two numbers that differ in the $t$-th digit will be correctly ordered.
+    \item Two numbers that are identical in the $t$-th digit will retain their original relative order (thanks to the stability of the auxiliary sort).
+\end{itemize}
+This results in the numbers being in the correct final order.
+
+\paragraph*{Performance analysis}
+To analyze the efficiency of radix sort, assume we are using counting sort as the stable auxiliary sorting method. 
+Suppose we are sorting $n$ computer words, each consisting of $b$ bits. 
+Each word can be viewed as having $\frac{b}{r}$ digits, where each digit is based on $2^r$. 
+
+The time complexity of each pass of counting sort is $\Theta(n + 2^r)$, since we process $n$ numbers and there are $2^r$ possible values for each digit.
+The total number of passes is $\frac{b}{r}$, so the overall time complexity is given by:
+\[T(n,b)=\Theta\left(\dfrac{b}{r}(n+2^r)\right)\]
+To minimize the time complexity, we must choose an optimal $r$.
+Increasing $r$ reduces the number of passes (since $\frac{b}{r}$ becomes smaller), but it also increases $2^r$, which can inflate the running time.
+For efficiency, we should avoid letting $2^r$ become larger than $n$, as this leads to exponential growth in time.
+Thus, an optimal choice is to set $r=\log n$, which balances the number of passes and the cost of each pass. 
+With this choice, the time complexity becomes:
+\[T(n,b)=\Theta\left(\dfrac{bn}{\log n}\right)\]
+For numbers in the range from $0$ to $n^d-1$, where $b=d\log n$, the radix sort runs in $\Theta(dn)$ time. 
+
+In practice, radix sort is particularly fast for large datasets and is simple to implement. 
+However, it exhibits poor locality of reference compared to algorithms like quicksort, which can cause performance issues on modern processors with complex memory hierarchies. 
+As a result, a well-optimized quicksort may outperform radix sort in environments where memory access speed is crucial.

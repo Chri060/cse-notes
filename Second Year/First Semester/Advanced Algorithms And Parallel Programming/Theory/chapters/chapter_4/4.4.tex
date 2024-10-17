@@ -1,0 +1,191 @@
+\section{Selection problem}
+
+The selection problem involves finding the element of a specified rank in a set of  $n$ distinct numbers. 
+Given an integer $i$ where $1\leq i \leq n$, the task is to return the element that is larger than exactly $i-1$ other elements in the set.
+In other words, the goal is to find the element with rank $i$ in the sorted order of the set $A$.
+We may have three extreme cases: 
+\begin{itemize}
+    \item $i=1$: the minimum element in the set. 
+    \item $i=n$: the maximum element in the set. 
+    \item $i=\left\lfloor \frac{n+1}{2}\right\rfloor$ or $\left\lceil \frac{n+1}{2}\right\rceil$: the lower or upper median of the set.
+\end{itemize}
+
+A straightforward solution is to first sort the array and then return the $i$-th element.
+The steps are:
+\begin{enumerate}
+    \item Sort the array $A$ using a comparison-based sorting algorithm like merge sort or heapsort.
+    \item Return the $i$-th element from the sorted array.
+\end{enumerate}
+The worst-case running time for this approach is:
+\[T(n)=\Theta(n\log n)+\Theta(1)=\Theta(n\log n)\]
+Sorting takes $\Theta(n\log n)$ and selecting the $i$-th element is a constant-time operation.
+
+However, it is possible to solve the selection problem in linear time. 
+There are two main approaches:
+\begin{itemize}
+    \item \textit{Randomized algorithm}: this algorithm, based on quickselect, has an average-case time complexity of $\mathcal{O}(n)$. 
+        The idea is to use a partitioning method similar to quicksort, but only recurse on the side of the array that contains the desired element.
+    \item \textit{BFPTRT algorithm}: this approach uses a carefully chosen median of medians strategy to guarantee that each partition reduces the problem size by a constant fraction. 
+        This deterministic algorithm runs in $\mathcal{O}(n)$ in the worst case.
+\end{itemize}
+In both versions, we efficiently select the $i$-th smallest element without needing to fully sort the array, making them optimal for large inputs when sorting would be unnecessarily slow.
+The deterministic linear-time algorithm is particularly notable for its worst-case guarantee, which can be critical in scenarios requiring predictable performance.
+
+\subsection{Minimum and maximum algorithms}
+To determine the minimum (or maximum) of a set of $n$ elements, the number of comparisons required is $n-1$. 
+The following algorithm finds the minimum element:
+\begin{algorithm}[H]
+    \caption{Minimum and maximum}
+    \begin{algorithmic}[1]
+        \Function{minimum}{$A$}
+        \State $\min=A[1]$ 
+        \For{$i=2$ \textbf{to} $\text{length}(A)$}
+            \If{$\min>A[i]$}
+                \State $\min=A[i]$
+            \EndIf
+        \EndFor
+        \State \Return $\min$
+        \EndFunction
+        \Statex 
+        \Function{maximum}{$A$}
+        \State $\max=A[1]$ 
+        \For{$i=2$ \textbf{to} $\text{length}(A)$}
+            \If{$\max<A[i]$}
+                \State $\max=A[i]$
+            \EndIf
+        \EndFor
+        \State \Return $\max$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}  
+This algorithm performs exactly $n-1$ comparisons, making it optimal for finding the minimum.
+The same number of comparisons is required to find the maximum element. 
+
+\paragraph*{Maximum and minimum simultaneously}
+When trying to determine both the minimum and maximum of a set of $n$ elements, a simple approach would be to run two separate passes over the array, one for the minimum and one for the maximum, resulting in $2n-2$ comparisons. However, we can do better.
+\begin{algorithm}[H]
+    \caption{Minimum and maximum algorithm}
+    \begin{algorithmic}[1]
+            \If{$\text{length}(A) \text{ is odd}$}
+                \State $\max=\min=A[1]$ 
+                \State $i=2$ 
+            \ElsIf{$A[1]<A[2]$} 
+                \State $\min=A[1]$ 
+                \State $\max=A[2]$
+                \State $i=3$
+            \Else 
+                \State $\min=A[2]$ 
+                \State $\max=A[1]$
+                \State $i=3$
+            \EndIf
+            \While{$i\leq\text{length}(A)$}
+                \If{$A[i]<A[i+1]$} 
+                    \If{$\min>A[i]$} 
+                        \State $\min=A[i]$
+                    \EndIf 
+                    \If{$\max<A[i+1]$}
+                        \State $\max=A[i+1]$ 
+                    \EndIf
+                \Else 
+                    \If{$\min>A[i+1]$} 
+                        \State $\min=A[i+1]$
+                    \EndIf 
+                    \If{$\max<A[i]$}
+                        \State $\max=A[i]$ 
+                    \EndIf
+                \EndIf
+                \State $i=i+2$
+            \EndWhile
+    \end{algorithmic}
+\end{algorithm}  
+Thus, the total number of comparisons required to find both the minimum and maximum is always fewer than $3\left\lfloor \frac{n}{2} \right\rfloor$. 
+
+\subsection{Randomized algorithm}
+The randomized selection algorithm is an efficient divide-and-conquer algorithm that selects the $i$-th smallest element from an unsorted array in expected linear time. 
+It is based on the idea of using a random pivot to partition the array, similarly to randomized quicksort, but recursing only on the side of the partition that contains the desired element.
+\begin{algorithm}[H]
+    \caption{Randomized selection}
+    \begin{algorithmic}[1]
+            \Function{rand-select}{$A,p,q,i$}
+                \If{$p=q$}
+                    \State \Return $A[p]$ 
+                \EndIf 
+                \State $i= $ \Call{rand-partition}{$A,p,q$}
+                \State $k=r-p+1$ \Comment $k=\text{rank}(A[r])$ 
+                \If {$i=k$} 
+                    \State \Return $A[r]$   
+                \EndIf 
+                \If {$i<k$} 
+                    \State \Return \Call{rand-select}{$A, p, r - 1, i$}
+                \Else 
+                    \State \Return \Call{rand-select}{$A, r + 1, q, i - k$}
+                \EndIf 
+            \EndFunction
+    \end{algorithmic}
+\end{algorithm}  
+The running time of the algorithm depends on the random choices made during partitioning. 
+The time complexity can vary between the best-case and worst-case scenarios:
+\begin{itemize}
+    \item \textit{Best case}: if the partition always divides the array evenly, the recurrence relation is: 
+        \[T(n) = T(9n/10) + \Theta(n)= \Theta(n)\]
+        Solving this gives $T(n)=\Theta(n)$, indicating that in the best case, the algorithm runs in linear time.
+    \item \textit{Worst case}: if the partition always picks the smallest or largest element, the recurrence relation becomes:
+        \[T(n)=T(n-1)+\Theta(n)\]
+        This leads to a time complexity of $T(n)=\Theta(n^2)$, making the worst-case performance quadratic.
+\end{itemize}
+In practice, the algorithm performs well on average, and its expected time complexity can be shown to be linear. 
+The analysis follows a similar approach to the analysis of randomized quicksort but with subtle differences. 
+The key idea is that the random pivot choice results in a balanced partition with high probability.
+
+To analyze the expected time complexity, let $T(n)$ be the random variable representing the running time of RAND-SELECT on an input of size $n$. 
+Define an indicator random variable $X_k$ as: 
+\[X_k=\begin{cases}  1 \qquad \text{if PARTITION generates a } k : n-k-1\text{ split} \\ 0 \qquad\text{otherwise} \end{cases}\]
+The expected running time is then expressed as:
+\[T(n)=\sum_{k=0}^{n-1}X_k\left(T\left(\max\left\{k, n - k -1\right\}\right)+\Theta(n)\right)\]
+Taking expectations, we get:
+\[\mathbb{E}[T(n)]=\mathbb{E}\left[\sum_{k=0}^{n-1}X_k\left(T\left(\max\left\{k, n - k -1\right\}\right)+\Theta(n)\right)\right]\]
+By carefully bounding the expectation, we can show that: 
+\[\mathbb{E}[T(n)] \leq c n\]  
+For constant $c > 0$ leading to the conclusion that the expected running time is linear, $\Theta(n)$, when $c$ is chosen large enough.
+
+The algorithm is highly efficient in practice, often outperforming deterministic algorithms for selection due to its linear expected running time.
+The worst case occurs when the partition is unbalanced, leading to $\Theta(n^2)$ performance. 
+However, this is rare, and the average performance is much better.
+
+\subsection{BFPTRT algorithm}
+The BFPTRT algorithm, also known as the median of medians algorithm, is a deterministic selection algorithm that guarantees a worst-case linear time complexity $\Theta(n)$ for selecting the $i$-th smallest element from an unsorted array. 
+Unlike randomized algorithms, it provides a worst-case time guarantee and avoids the risk of quadratic behavior.
+\begin{algorithm}[H]
+    \caption{Blum, Floyd, Pratt, Rivest, and Tarjan}
+    \begin{algorithmic}[1]
+        \Function{select}($i,n$) 
+            \State Divide the $n$ elements into groups of $5$ and find the  median of each group \Comment Complexity of $\Theta(n)$
+            \State Recursively select the median $x$ of the $\left\lfloor \frac{n}{5} \right\rfloor$ group medians as pivot \Comment Complexity of $T\left(\frac{n}{5}\right)$
+            \State Partition around the pivot $x$, and let $k = \text{rank}(x)$ \Comment Complexity of $\Theta(n)$
+            \If{$i=k$} \Comment Complexity of $T\left(\frac{3n}{4}\right)$
+                \State \Return $x$ 
+            \ElsIf{$i<k$} 
+                \State \Call{select}{$i$-th smallest element in the lower part, $n$}
+            \Else 
+                \State \Call{select}{$(i-k)$-th smallest element in the upper part, $n$}
+            \EndIf
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}  
+To understand the efficiency of the algorithm, observe that at least half of the group medians are less than or equal to $x$, the selected median of medians.
+Since each group has $5$ elements, at least $\left\lfloor\frac{n}{10}\right\rfloor$ elements are less than or equal to $x$. 
+Similarly, at least $\left\lfloor\frac{n}{10}\right\rfloor$ elements are greater than or equal to $x$. 
+Thus, at least $\left\lfloor\frac{3n}{10}\right\rfloor$ elements are discarded after each partition.
+
+Therefore, in the worst case, the recursive call to SELECT operates on at most $\frac{3n}{4}$ elements, leading to the recurrence relation:
+\[T(n)=T\left(\dfrac{1}{5}n\right)+T\left(\dfrac{3}{4}n\right)+\Theta(n)\]
+This recurrence can be solved using the substitution method to show that $T(n)\leq cn$, meaning that the algorithm runs in linear time.
+
+While the BFPTRT algorithm has excellent theoretical performance, it is often not as fast in practice due to the large constant factors involved in partitioning and recursively finding the median of medians. Specifically:
+\begin{itemize}
+    \item \textit{Work per level}: the work done at each level of recursion is a constant fraction smaller than the previous level (roughly $\frac{19}{20}$ of the work at the root). 
+        This means that while the algorithm is linear, the constant factors are non-trivial.
+    \item \textit{Efficiency in practice}: the randomized selection algorithm tends to perform better in practice due to its smaller constant factors, despite its worst-case performance of $\Theta(n^2)$. 
+\end{itemize}
+The BFPTRT algorithm provides a strong worst-case guarantee of linear time for selection problems, making it valuable in scenarios where predictable performance is crucial. 
+However, for most practical purposes, especially with large datasets, the randomized selection algorithm is often preferred due to its faster performance in practice despite its potential for worst-case behavior.
