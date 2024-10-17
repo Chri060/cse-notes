@@ -1,27 +1,22 @@
 \section{Introduction}
 
-When we aim to recover a model of an unknown planar scene based on an image of the scene, which is a projective transformation denoted as $x_i^{'}=Hx_i$, we face a significant challenge.
-The key issue is that we know the values of $x_i$ (the scene points), but we don't have direct knowledge of the transformation matrix $H$, which complicates a straightforward inversion of the mapping.
+Recovering a model of an unknown planar scene from a single image, where the image is a projective transformation of the scene, presents a challenging problem.
+This transformation is represented by the equation $\mathbf{x}_i^\prime=\mathbf{Hx}_i$, where $\mathbf{x}_i$ denotes the scene points and $\mathbf{H}$ is the transformation matrix.
+The difficulty arises from the fact that while the scene points $\mathbf{x}_i$ are known, the transformation matrix $\mathbf{H}$ is unknown, making a direct inversion of the mapping impossible.
 
-The general problem is inherently unsolvable due to the excessive number of unknown variables. 
-To tackle this challenge, we can adopt two primary strategies:
+The complexity of this task stems from the large number of unknown variables in the transformation matrix $\mathbf{H}$. 
+In its general form, this problem is underdetermined, meaning that without additional constraints or simplifications, it cannot be uniquely solved. 
+To address this challenge, two primary strategies are typically employed:
 \begin{enumerate}
-    \item Reduce unknowns: in many cases, it is unnecessary to precisely recover the original scene configuration. 
-        Instead, the objective is to retrieve the overall shape of the scene, known as shape reconstruction. 
-        By doing so, we can reduce the number of unknowns from eight to four, and the matrix $H$ takes on the following form:
-        \[H=    
-        \begin{bmatrix}
-            s\cos \vartheta & -s\sin \vartheta & t_x \\
-            s\sin \vartheta & s\cos \vartheta & t_y \\
-            0 & 0 & 1
-        \end{bmatrix}\]
-        Additionally, it's possible to perform similarity reconstruction, which reduces the unknowns by two, or affine reconstruction, which reduces the unknowns by six.
-    \item Add constraints: this strategy involves utilizing extra information to recover a model of the scene. 
-        The valuable information typically pertains to parameters that remain invariant under the desired class of mappings but are not invariant under more general classes.
+    \item \textit{Reducing the number of unknowns}: in many practical cases, the goal is not to recover the exact original configuration of the scene but rather to retrieve its overall geometric structure, a process known as shape reconstruction.
+        By focusing on the shape rather than the full projective transformation, the number of unknowns can be reduced from eight to four. In this case, the transformation matrix $\mathbf{H}$ simplifies to:
+        \[\mathbf{H}= \begin{bmatrix} s\cos \vartheta & -s\sin \vartheta & t_x \\ s\sin \vartheta & s\cos \vartheta & t_y \\  0 & 0 & 1 \end{bmatrix}\]
+    \item \textit{Adding constraints}: another approach is to incorporate additional information to constrain the reconstruction.
+        This extra information often involves parameters that remain invariant under the specific type of transformation being sought, but vary under more general classes of transformations.
+        By leveraging these invariants, we can narrow down the possible solutions and recover a more accurate model of the scene.
 \end{enumerate}
-
-The reconstruction can fall into one of two categories:
+Reconstruction methods can be broadly classified into two categories:
 \begin{itemize}
-    \item Affine reconstruction: in this scenario, the reconstructed scene is an affine mapping of the original scene.
-    \item Shape reconstruction: in this case, the reconstructed scene follows a similarity mapping of the original scene, aiming to capture the overall shape while simplifying the problem.
+    \item \textit{Affine reconstruction}: in this approach, the reconstructed scene is related to the original through an affine transformation, preserving parallelism but not necessarily angles or distances.
+    \item \textit{Shape reconstruction}: this method seeks to recover the overall shape of the scene using a similarity transformation, which preserves both angles and relative distances, providing a more faithful representation of the scene's geometry while simplifying the problem.
 \end{itemize}
