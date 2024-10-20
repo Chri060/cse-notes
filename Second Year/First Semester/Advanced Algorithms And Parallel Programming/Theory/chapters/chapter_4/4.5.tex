@@ -1,1 +1,219 @@
 \section{Primality problem}
+
+\begin{definition}[\textit{Prime number}]
+    An integer $p\geq 2$ is called prime if and only if: 
+    \[(a|p\rightarrow a=1\text{ or }a=p) \qquad \forall a\in\mathbb{Z} \]
+\end{definition}
+
+A straightforward algorithm to check if a number $n$ is prime involves testing its divisibility by every integer up to $\sqrt{n}$.
+Here is the naive deterministic primality test:
+\begin{algorithm}[H]
+    \caption{Naive primality test}
+    \begin{algorithmic}[1]
+        \If{$n=2$} 
+            \State \Return true 
+        \EndIf 
+        \If{$n\text{ is even}$}
+            \State \Return false 
+        \EndIf 
+        \For{$i=1$ \textit{to} $\sqrt{\frac{n}{2}}$}
+            \If{$2i+i$ divides $n$}
+                \State \Return false 
+            \EndIf 
+        \EndFor 
+        \State \Return true 
+    \end{algorithmic}
+\end{algorithm} 
+The time complexity of this naive algorithm is $\mathcal{O}(\sqrt{n})$, which can be inefficient for very large numbers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Randomized primality tests}
+To achieve a more efficient solution, we can use a randomized primality test.
+These tests provide a faster answer but may return false positives with a small probability.
+However, we can make the probability of error arbitrarily small by repeating the test multiple times.
+The core idea behind these tests stems from Fermat's Little Theorem. 
+\begin{theorem}[Fermat]
+    For any prime number $p$ and integer $a$, $0<a<p$: 
+    \[a^{p-1}\mod p= 1\]
+\end{theorem}
+This forms the basis of a simple randomized primality test:
+\begin{algorithm}[H]
+    \caption{Fermat's primality test}
+    \begin{algorithmic}[1]
+        \State Calculate $z=2^{n-1}\mod n$
+        \If{$z=1$} 
+            \State $n$ is possibly prime 
+        \Else 
+            \State $n$ is composite
+        \EndIf
+    \end{algorithmic}
+\end{algorithm} 
+The advantage of this approach is that it runs in polynomial time, with the power computation being performed efficiently using modular exponentiation.
+
+Despite the efficiency, Fermat's test can incorrectly identify some composite numbers as prime. 
+These numbers are known as pseudoprimes.
+\begin{definition}[\textit{Pseudo-prime}]
+    A composite number $n$ is called a pseudoprime to base $a$ if: 
+    \[a^{n-1}\mod n = 1\]
+\end{definition}
+\begin{definition}[\textit{Base two pseudo-prime}]
+    A composite number $n\geq 2$ is a base-2 pseudoprime if:
+    \[2^{n-1}\mod n = 1\]
+\end{definition}
+Additionally, a more problematic class of numbers are the Carmichael numbers, which behave like primes under Fermat's test for all $a$ coprime with $n$. 
+\begin{definition}[\textit{Carmichael numbers}]
+    A composite number $n\geq 2$ is a Carmichael number if for every $a$  such that $\text{gdc}(a, n) = 1$, it holds that: 
+    \[a^{n-1} \mod n = 1\]
+\end{definition}
+\begin{algorithm}[H]
+    \caption{Randomized primality test}
+    \begin{algorithmic}[1]
+        \State Randomly choose $a\in[2,n-1]$
+        \State Calculate $a^{n-1}\mod n$
+        \If{$a^{n-1}\mod n=1$} 
+            \State $n$ is possibly prime 
+        \Else 
+            \State $n$ is composite
+        \EndIf
+    \end{algorithmic}
+\end{algorithm} 
+
+\paragraph*{Miller-Rabin primality test}
+The Miller-Rabin test improves upon Fermat's test by also checking for non-trivial square roots of $1$ modulo $n$. 
+This test significantly reduces the chances of false positives.
+\begin{definition}[\textit{Non-trivial square root}]
+    An integer $a$ is called non-trivial square root of $1 \mod n$ if: 
+    \[a^2 \mod n = 1 \qquad a \neq 1 \qquad a \neq n - 1\]
+\end{definition}
+Here is the Miller-Rabin randomized primality test:
+\begin{algorithm}[H]
+    \caption{Miller-Rabin randomized primality test}
+    \begin{algorithmic}[1]
+        \Function{power}{$a,p,n$} 
+            \If{$p=0$} \Comment Compute $a^p \mod n$
+                \State \Return 1; 
+            \EndIf 
+            \State $x=$ \Call{power}{$a, \frac{p}{2}, n$}
+            \State $res= (x \cdot x) \% n$
+            \If{$res=1$\textit{ and }$x\neq 1$\textit{ and }$x\neq n-1$} \Comment check $x^2 \mod n = 1$ and $x \neq 1, n-1$
+                \State $isProbablyPrime=\text{false}$
+            \EndIf
+            \If{$p\%2=1$}
+                \State $res=(a\cdot res)\%n$
+            \EndIf
+            \State \Return $res$
+        \EndFunction
+        \Statex 
+        \Function{primalitytest}{$n$}
+            \State $a = random(2, n-1)$
+            \State $isProbablyPrime = \text{true}$
+            \State $result = \Call{power}{a, n-1, n}$
+            \If{$res \neq 1$ \textit{or} $!isProbablyPrime$}
+                \State \Return false
+            \Else
+                \State \Return true
+            \EndIf
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+The time complexity of the Miller-Rabin test is $\mathcal{O}(\log^2n)$, with a small probability of error.
+Repeating the test $k$ times reduces the probability that a composite number is incorrectly classified as prime to $\left(\frac{1}{4}\right)^k$. 
+\begin{theorem}
+    If $p$ prime and $0 < a < p$, then the only solutions to the equation $a^2 \mod p = 1$ are $a = 1$ and $a = p - 1$.
+\end{theorem}
+\begin{theorem}
+    If $n$ is composite, the probability that the Miller-Rabin test mistakenly identifies $n$ as prime for a randomly chosen base $a$ is at most $\frac{n-9}{4}$.
+\end{theorem}
+
+\subsection{Applications to cryptosystems}
+Traditional encryption methods rely on secret keys shared between participants. 
+While this method provides efficient encryption and decryption, it has several notable drawbacks:
+\begin{itemize}
+    \item \textit{Key exchange}: the secret key $k$ must be exchanged between two parties (A and B) before any secure communication can take place.
+    \item \textit{Scalability issues}: for secure communication between $n$ participants, $\frac{n(n-1)}{2}$ distinct keys are required, which becomes cumbersome as the number of participants increases.
+\end{itemize}
+The advantage of this approach lies in the efficiency: both encryption and decryption operations can be computed very efficiently using secret key cryptosystems.
+
+Modern electronic communication requires additional guarantees to ensure security. 
+These include: confidentiality, integrity, authenticity, and non-repudiation. 
+
+\paragraph*{Diffie-Hellman key exchange}
+The Diffie-Hellman protocol introduced the idea of using public and private key pairs to resolve the scalability and key exchange issues in traditional encryption.
+Each participant, say A, has a pair of keys $P_A$ and $S_A$ which are public and private, respectively. 
+Let $D$ represent the set of all legal messages.
+The key pair $P_A$ and $S_A$ are functions from $D\rightarrow D$ with the following properties:
+\begin{itemize}
+    \item Both keys can be computed efficiently.
+    \item The keys are inverses. 
+    \item The private key cannot be feasibly computed from the public key with realistic computational effort.
+\end{itemize}
+The exchange of a message with the Diffie-Hellman protocol unfolds in the following steps: 
+\begin{enumerate}
+    \item \textit{Key access}: participant A retrieves B's public key $P_B$ (from a public directory or directly from B).
+    \item \textit{Encryption}: A encrypts a message $M$ using B's public key to obtain the ciphertext $C$:
+        \[C=P_B(M)\]
+        A then sends $c$ to B.
+    \item \textit{Decryption}: after receiving the encrypted message $C$, B decrypts it using their private key $S_B$ to retrieve the original message:
+        \[M=S_B(C)\]
+\end{enumerate}
+
+\paragraph*{Digital signatures}
+Digital signatures are used to authenticate the sender of a message. 
+To send a digitally signed message $M^\prime$ to B, participant A follows these steps: 
+\begin{enumerate}
+    \item \textit{Signature generation}: A computes the digital signature $\sigma$ for message $M^\prime$ using their private key: 
+        \[\sigma=S_A(M^\prime)\]
+    \item \textit{Message transmission}: A sends the pair $(M^\prime,\sigma)$ to B. 
+    \item \textit{Signature verification}: after receiving $(M^\prime,\sigma)$, B verifies the digital signature using A's public key:
+        \[P_A(\sigma)=M^\prime\]
+        Anyone with access to $P_A$ can check $\sigma$, ensuring the authenticity of the sender. 
+\end{enumerate}
+
+\paragraph*{RSA cryptosystem}
+The RSA algorithm, developed by R. Rivest, A. Shamir, and L. Adleman, is one of the most well-known public-key cryptosystems. 
+The key generation process in RSA is as follows:
+\begin{enumerate}
+    \item \textit{Prime selection}: randomly select two large prime numbers $p$ and $q$, each with at least $l+1$ bits (where $l \geq 500$).
+    \item \textit{Modulus calculation}: compute $n = p \cdot q$.
+    \item \textit{Public exponent}: choose an integer $e$ such that $e$ is relatively prime to $(p-1)(q-1)$, i.e., $\text{gdc}(e, (p-1)(q-1)) = 1$
+    \item \textit{Private exponent}: compute the multiplicative inverse of $e$ modulo $(p-1)(q-1)$, denoted by $d$, using the extended Euclidean algorithm. 
+        This satisfies:
+        \[d \cdot e \equiv 1  \mod  (p-1)(q-1)\]
+    \item \textit{Key publication}: the public key is $P = (e, n)$, while the private key is $S = (d, n)$.
+\end{enumerate}
+To encrypt a message $M$ using RSA, the message is divided into blocks, each represented as a binary number where $0 \leq M < 2^{2l}$. 
+The encryption and decryption processes are as follows:
+\begin{itemize}
+    \item \textit{Encryption}: the sender computes the ciphertext $C$ using the public key $P$ as:$C = M^e \mod n$. 
+    \item \textit{Decryption}: the receiver decrypts the ciphertext $C$ using the private key $S$ as: $M = C^d \mod n$.
+\end{itemize}
+To compute the multiplicative inverse in RSA, we use the extended Euclidean algorithm. 
+This algorithm finds integers $x$ and $y$ such that $ax + by = \gcd(a, b)$, where $a = (p-1)(q-1)$ and $b = e$. 
+The pseudocode for the extended Euclidean algorithm is as follows:
+\begin{algorithm}[H]
+    \caption{Extended Euclidean Algorithm}
+    \begin{algorithmic}[1]
+        \Function{extended-Euclid}{$a, b$}
+            \If{$b = 0$}
+                \State \Return $(a, 1, 0)$
+            \EndIf
+            \State $(d, x^\prime, y^\prime) = $ \Call{extended-Euclid}{$b, a \mod b$}
+            \State $x = y^\prime$
+            \State $y = x^\prime - \left\lfloor \frac{a}{b} \right\rfloor y^\prime$
+            \State \Return $(d, x, y)$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+This algorithm guarantees that $d$ and $e$ satisfy $d \cdot e \equiv 1 \mod  (p-1)(q-1)$. 
