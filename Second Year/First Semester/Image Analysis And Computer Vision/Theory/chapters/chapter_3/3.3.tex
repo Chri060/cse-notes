@@ -1,70 +1,89 @@
 \section{Shape reconstruction}
 
 \begin{theorem}
-    A projective transformation $H$ that maps the circular points $I$ and $J$ onto themselves implies that $H$ is a similarity transformation. 
+    A projective transformation $\mathbf{H}$ that maps the circular points $\mathbf{I}$ and $\mathbf{J}$ onto themselves implies that $\mathbf{H}$ is a similarity transformation.
 \end{theorem}
 \begin{proof}
-    When we multiply a similarity matrix $H_S$ by the circular point $I$, we obtain a multiple of $I$.
-    Similarly, the same result is obtained for the other circular point, $J$.
+    When a similarity transformation matrix $\mathbf{H}_\text{S}$ is applied to the circular point $\mathbf{I}$, it produces a scalar multiple of $\mathbf{I}$.
+    The same holds true for the other circular point, $\mathbf{J}$.
+    Since both $\mathbf{I}$ and $\mathbf{J}$ remain unchanged under this transformation, $\mathbf{H}_\text{S}$ is indeed a similarity transformation.
 \end{proof}
-The given image represents a general projective mapping of the original scene. 
-Consequently, the image of the circular points, denoted as $(I^{'},J^{'})$, differs from $I$ and $J$. 
-To utilize $I^{'},J^{'}$ as additional information, we apply a new projective mapping $H_{SR}$ to map $I^{'},J^{'}$ back to $I,J$. 
-This process generates a new modified image where the circular points $I,J$ are restored.
-As per the theorem, the obtained model (new image) is similar to the original scene, representing a shape reconstruction of the scene.
+In a general projective mapping of the original scene, the images of the circular points, denoted as $(\mathbf{I}^\prime,\mathbf{J}^\prime)$, do not coincide with the original circular points $\mathbf{I}$ and $\mathbf{J}$. 
+To perform shape reconstruction, we apply a corrective projective transformation $\mathbf{H}_\text{SR}$ that maps $\mathbf{I}^\prime$ and $\mathbf{J}^\prime$ back to $\mathbf{I}$ and $\mathbf{J}$, respectively. 
+This results in a modified image where the circular points are restored to their original positions.
+
+According to the theorem, this new transformation results in a similarity transformation of the original scene. 
+Hence, the reconstructed model is a shape reconstruction, maintaining the overall proportions and geometry of the original scene.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{images/HSR.png}
 \end{figure}
-The method comes with certain challenges:
+The main challenges in this approach are:
 \begin{itemize}
-    \item Finding a projective mapping $H_{SR}$ that restores $I^{'},J^{'}$ to $I,J$. 
-    \item Determining the vanishing line.
+    \item Finding the projective transformation $\mathbf{H}_\text{SR}$ that restores the points $\mathbf{I}^\prime$ and $\mathbf{J}^\prime$ to $\mathbf{I}$ and $\mathbf{J}$. 
+    \item Determining the vanishing line in the image to aid in finding the circular points.
 \end{itemize}
 
-\subsection{Identify a projective transformation}
-Discovering a projective transformation $H_{SR}$ that restores $I^{'}, J^{'}$ to $I, J$ is equivalent to finding one of the $\infty^{4}$ matrices that satisfy:
+\subsection{Projective transformation determination}
+Finding the projective transformation $\mathbf{H}_\text{SR}$ that maps $\mathbf{I}^\prime$ and $\mathbf{J}^\prime$ back to $\mathbf{I}$ and $\mathbf{J}$ is equivalent to solving for one of the infinitely many matrices that satisfy:
 \[\begin{cases}
-    H_{SR}I^{'}=I \\
-    H_{SR}J^{'}=J
+    \mathbf{H}_\text{SR}\mathbf{I}^\prime=\mathbf{I} \\
+    \mathbf{H}_\text{SR}\mathbf{J}^\prime=\mathbf{J}
 \end{cases}\]
-This task can be quite challenging.
+This task is non-trivial, but it can be simplified by leveraging additional geometric information, such as the degenerate conic dual to the circular points.
 
-Let's utilize alternative information: the degenerate conic dual to $I^{'},J^{'}$, represented as $C_{\infty}^{'*}=I^{'}J^{'T}+J^{'}I^{'T}$, which corresponds to the image of the original conic dual to the circular points $(I,J)$, expressed as: 
-\[C_{\infty}^{*}=IJ^{T}+JI^{T}\]
-Since $(I^{'},J^{'})$ is the image of $(I,J)$, then also $C_{\infty}^{'*}$ is the image of $C_{\infty}^{*}$. 
-As a result, any projective transformation $H_{SR}$ that restores $(I^{'},J^{'})$ to $(I,J)$ also restores $C_{\infty}^{'*}$ to $C_{\infty}^{*}$. 
-By applying the transformation rule for dual conics under projective mappings, we get:
-\[C^{*}_{\infty}=H_{SR}C^{'*}_{\infty}H_{SR}^T\]
-Reversing this relationship, we find:
-\[C_{\infty}^{'*}=H_{SR}^{-1} 
-\begin{bmatrix}
-    1 & 0 & 0 \\
-    0 & 1 & 0 \\
-    0 & 0 & 0
-\end{bmatrix}
-H_{SR}^{-T}\]
-Applying singular value decomposition (SVD) to this equation, we find that the matrices $H_{SR}^{-1}$ and $H_{SR}^{-T}$ are orthogonal. 
-Consequently, we have:
-\[\textnormal{SVD}(C_{\infty}^{'*})=U_\perp
-\begin{bmatrix}
-    1 & 0 & 0 \\
-    0 & 1 & 0 \\
-    0 & 0 & 0
-\end{bmatrix}
-U_{\perp}^T\]
-Which provides a unique solution: $H_{SR}=U_{\perp}^{-1}=U_{\perp}^T$. 
-To address the issues with image rectification, we need to modify the matrix $H_{SR}$ as follows:
-\[H_{SR}=
-\begin{bmatrix}
-    \frac{1}{\sqrt{a}} & 0 & 0 \\
-    0 & \frac{1}{\sqrt{b}} & 0 \\
-    0 & 0 & 1
-\end{bmatrix}
-U^T
-\]
+The degenerate conic dual to $\mathbf{I}^\prime,\mathbf{J}^\prime$ is given by:
+\[\mathbf{C}_{\infty}^{\prime\ast}=\mathbf{I}^\prime \mathbf{J}^{\prime T}+\mathbf{J}^\prime \mathbf{I}^{\prime T}\]
+This conic is the image of the original conic dual to the circular points $\mathbf{I}$ and $\mathbf{IJ}$, denoted by:
+\[\mathbf{C}_{\infty}^\ast=\mathbf{IJ}^{T}+\mathbf{JI}^{T}\]
+Since $\mathbf{C}_{\infty}^{\prime\ast}$ is the projective image of $\mathbf{C}_\infty^\ast$, any projective transformation $\mathbf{H}_\text{SR}$ that restores $\mathbf{I}^\prime$ and $\mathbf{J}^\prime$ to $\mathbf{I}$ and $\mathbf{J}$ will also restore $\mathbf{C}_{\infty}^{\prime\ast}$ to $\mathbf{C}_{\infty}^\ast$. 
+Using the transformation rule for dual conics, we have:
+\[\mathbf{C}^\ast_{\infty}=\mathbf{H}_\text{SR}\mathbf{C}^{\prime\ast}_{\infty}\mathbf{H}_\text{SR}^T\]
+Reversing this relationship gives:
+\[\mathbf{C}_{\infty}^{\prime\ast}=\mathbf{H}_\text{SR}^{-1} \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{bmatrix} \mathbf{H}_\text{SR}^{-T}\]
 
-\subsection{Determine the vanishing line}
+By applying singular value decomposition (SVD) to the equation above, we find that $\mathbf{H}_\text{SR}^{-1}$ and $\mathbf{H}_\text{SR}^{-T}$ are orthogonal matrices. 
+This leads to: 
+\[\text{SVD}\left(\mathbf{C}_{\infty}^{\prime\ast}\right)=\mathbf{U}_\perp \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{bmatrix} \mathbf{U}_{\perp}^T\]
+Thus, the solution for $\mathbf{H}_\text{SR}$ is:
+\[\mathbf{H}_\text{SR} = \mathbf{U}_{\perp}^{-1}=\mathbf{U}_{\perp}^T\]
+To ensure proper image rectification and scaling, the matrix $\mathbf{H}_\text{SR}$ can be adjusted to:
+\[\mathbf{H}_\text{SR} = \begin{bmatrix} \frac{1}{\sqrt{a}} & 0 & 0 \\ 0 & \frac{1}{\sqrt{b}} & 0 \\ 0 & 0 & 1 \end{bmatrix} \mathbf{U}^T\]
+This transformation not only maps the circular points back to their original positions but also ensures that the final image is a faithful similarity reconstruction of the scene.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Vanishing line identification}
 To determine the vanishing line, one can leverage additional information from the observed scene. 
 This information can be used to establish the following constraints:
 \begin{enumerate}
@@ -74,17 +93,17 @@ This information can be used to establish the following constraints:
         \[\cos\vartheta=\dfrac{a_1a_2+b_1b_2}{\sqrt{(a_1^2+b_1^2)(a_2^2+b_2^2)}}\]
         Here, $a_1$, $b_1$, $a_2$, and $b_2$ are coefficients of the normal vectors of the lines. 
         By rewriting the terms, this equation can be expressed as: 
-        \[\cos\vartheta=\dfrac{l^TC_{\infty}^{*}m}{\sqrt{(l^TC_{\infty}^{*}l)(m^TC_{\infty}^{*}m)}}\]
-        This equation can be further simplified by using the rules obtaining $C_{\infty}^{*}=H^{-1}C_{\infty}^{*'}H^{-T}$.  
-        Now, we can rewrite $l^TC_{\infty}^{*}m$ as $l^{'T}C_{\infty}^{*'}m^{'}$. 
+        \[\cos\vartheta=\dfrac{l^TC_{\infty}^\ast m}{\sqrt{(l^TC_{\infty}^\ast l)(m^TC_{\infty}^\ast m)}}\]
+        This equation can be further simplified by using the rules obtaining $C_{\infty}^\ast=H^{-1}C_{\infty}^{*'}H^{-T}$.  
+        Now, we can rewrite $l^TC_{\infty}^\ast m$ as $l^{\prime T}C_{\infty}^{*'}m^\prime$. 
         With these transformations, the equation becomes:
-        \[\cos\vartheta=\dfrac{l^{'T}C_{\infty}^{*'}m^{'}}{(l^{'T}C_{\infty}^{*'}l^{'})(m^{'T}C_{\infty}^{*'}m^{'})}\]
-        In this case, $m^{'}$ and $l^{'}$ are obtained from the image. 
+        \[\cos\vartheta=\dfrac{l^{\prime T}C_{\infty}^{*'}m^\prime}{(l^{\prime T}C_{\infty}^{*'}l^\prime)(m^{\prime T}C_{\infty}^{*'}m^\prime)}\]
+        In this case, $m^\prime$ and $l^\prime$ are obtained from the image. 
         Since the angle is known, this equation provides a linear constraint on $C_{\infty}^{*'}$, that is linear when the lines are perpendicular ($\cos\vartheta=0$).
-        The unknown matrix $C_{\infty}^{'}$ is symmetric, homogeneous, and singular, providing four independent constraints.
-    \item Known shape of objects: if the shape of objects in the scene is known, the reconstruction matrix $H_{SR}$ can be determined. 
+        The unknown matrix $C_{\infty}^\prime$ is symmetric, homogeneous, and singular, providing four independent constraints.
+    \item Known shape of objects: if the shape of objects in the scene is known, the reconstruction matrix $\mathbf{H}_\text{SR}$ can be determined. 
         The transformation matrix is defined as:
-        \[H_{SR}=
+        \[\mathbf{H}_\text{SR}=
         \begin{bmatrix}
             \frac{1}{\sqrt{a}} & 0 & 0 \\
             0 & \frac{1}{\sqrt{b}} & 0 \\
@@ -92,21 +111,21 @@ This information can be used to establish the following constraints:
         \end{bmatrix}
         U^T
         \]
-        The Euclidean reconstructed image is calculated as $M_S=H_{SR} \cdot \textnormal{image}$
+        The Euclidean reconstructed image is calculated as $M_S=\mathbf{H}_\text{SR} \cdot \textnormal{image}$
     \item Combinations of constraints: it is also possible to use a combination of known angles between lines and the shape of objects for additional constraints.
     \item Observation of rigid planar motion: when observing rigid planar motion, which is a similarity transformation, the circular points remain invariant.
         The object has three degrees of freedom, and the center of rotation and the rotation angle can be determined.
         Given a matrix $H$, the eigenvectors of $H$ correspond to fixed points, and the eigenvectors of $H^{-T}$ correspond to fixed lines of the transformation.
         The eigenvectors can be used to extract important information:
         \begin{itemize}
-            \item Eigenvectors $I^{'},J^{'}$ correspond to complex eigenvalues. 
+            \item Eigenvectors $\mathbf{I}^\prime,\mathbf{J}^\prime$ correspond to complex eigenvalues. 
             \item The phase of these eigenvectors is the rotation angle.
-            \item Eigenvector $O^{'}$ correspond to real eigenvalues. 
+            \item Eigenvector $O^\prime$ correspond to real eigenvalues. 
         \end{itemize}
         The three eigenvectors of $H$ are proportional to three distinct values: 1, $e^{i\theta}$, and $-e^{i\theta}$.
         The eigenvector corresponding to the eigenvalue 1 represents the image of the center of rotation, denoted as $O$, and the angle $\theta$ corresponds to the rotation angle. 
-        The eigenvectors associated with the complex eigenvalues represent the images of the circular points $I^{'},J^{'}$. 
-        Therefore, using the relationship $C_{\infty}^{'*}=I^{'}J^{'T}+J^{'}I^{'T}$, the singular value decomposition can be applied to obtain $\textnormal{SVD}(C_{\infty}^{'*})=UC_{\infty}^{*}U^T$, where $U^T$ is the rectification matrix. 
+        The eigenvectors associated with the complex eigenvalues represent the images of the circular points $\mathbf{I}^\prime,\mathbf{J}^\prime$. 
+        Therefore, using the relationship $C_{\infty}^{\prime\ast}=\mathbf{I}^\prime J^{\prime T}+\mathbf{J}^\prime I^{\prime T}$, the singular value decomposition can be applied to obtain $\text{SVD}(C_{\infty}^{\prime\ast})=UC_{\infty}^\ast U^T$, where $U^T$ is the rectification matrix. 
         Two methods can be used to address this:
         \begin{itemize}
             \item Direct method: 

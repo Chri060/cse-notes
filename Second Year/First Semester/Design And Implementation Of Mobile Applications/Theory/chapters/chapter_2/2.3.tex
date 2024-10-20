@@ -1,25 +1,27 @@
 \section{Dart applications}
 
-Creating a Flutter application can be done easily through the command line interface. 
-To initiate a new application, use the following command:
+Creating a Flutter application can be done efficiently using the command line interface.
+To start a new application, run the following command:
 \begin{verbatim}
     flutter create app_name
 \end{verbatim}
-This command generates a directory structure containing various subdirectories and files. 
-Some of these subdirectories contain auto-generated code for different platforms, while others are critical for development:
+This command generates a directory structure containing essential subdirectories and files, some of which are automatically created for different platforms, while others are critical for development. 
+The most important components include:
 \begin{itemize}
-    \item \texttt{lib} directory: this folder holds all the handwritten code for your application.
-    \item \texttt{pubspec.yaml} file: this file serves as the application's table of contents. 
-        It is used to import external libraries and declare dependencies.
+    \item \texttt{lib} contains all your handwritten code, including the main Dart files that define your app.
+    \item \texttt{pubspec.yaml} file: acts as the app's configuration file, managing external libraries and dependencies.
 \end{itemize}
-To run the application, execute the command:
+
+\paragraph*{Running the application}
+Once the app is created, you can run it using:
 \begin{verbatim}
     flutter run
 \end{verbatim}
-This command allows you to choose the platform on which you want to run the application. 
-If certain platforms are unavailable on your development device, Flutter will emulate the desired device. 
+This command allows you to select the platform on which to run the app. 
+If the required platforms are not available on your device, Flutter will emulate the target device for testing.
 
-Initially, the \texttt{lib} directory contains a file named \texttt{main.dart}, which includes the following code:
+\subsection{Application structure}
+The \texttt{lib} directory initially contains a \texttt{main.dart} file, which includes the following minimal code:
 \begin{verbatim}
 import 'package:flutter/material.dart';
     
@@ -27,80 +29,82 @@ void main() {
     runApp();
 }
 \end{verbatim}
-Depending on the desired look and feel, you can import either \texttt{material.dart} for Material Design or \texttt{cupertino.dart} for iOS-style components. 
-The \texttt{main} function contains the \texttt{runApp} method, which initializes the application.
-
-The \texttt{runApp} function takes a given Widget and sets it as the root of the widget tree. 
-This tree typically consists of two widgets: the Center widget and its child, the Text widget.
-The Flutter framework ensures that the root widget covers the entire screen.
+You can choose between two styles: \texttt{material.dart} for material design or \texttt{cupertino.dart} for iOS-styled components.
+The \texttt{runApp} function initializes the application, setting a widget as the root of the widget tree.
+This tree typically consists of widgets like \texttt{Center} and \texttt{Text}, and Flutter ensures the root widget covers the entire screen.
 
 \subsection{Functions}
-In Dart, a function can have any number of required positional parameters, which may be followed by either named parameters or optional positional parameters, but not both simultaneously. 
+n Dart, functions can have required positional parameters followed by optional named or optional positional parameters (but not both). 
 Named parameters are optional unless explicitly marked as required. 
-You can also define default values for both named and positional parameters using the equals sign (=). 
-These default values must be compile-time constants, and if no default value is provided, it defaults to null.
+You can assign default values to both named and positional parameters using the \texttt{=} operator, but these must be compile-time constants. 
+If no default value is specified, the default is \texttt{null}.
 
-\subsection{Commas}
-It is a best practice to always add a trailing comma at the end of a parameter list—this applies to functions, methods, and constructors where maintaining formatting is important. 
-Adding trailing commas helps the automatic formatter insert the appropriate amount of line breaks, ensuring your code adheres to Flutter's styling guidelines.
+\paragraph*{Commas}
+When writing Dart functions, methods, or constructors, always include a trailing comma in the parameter list. 
+This practice helps Flutter's code formatter add proper line breaks and maintain code consistency.
 
 \subsection{Widgets}
-The structure of a Flutter application is fundamentally composed of widgets, which are the building blocks of the user interface. 
-The following figure illustrates the material design structure used in Flutter applications:
+Flutter applications are composed entirely of widgets, which are the building blocks of the user interface. 
+Below is an example of Flutter's material design structure:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/material.png}
+    \includegraphics[width=0.25\linewidth]{images/material.png}
     \caption{Material structure}
 \end{figure}
-In Flutter, graphical user interfaces (GUIs) are created entirely through code, where nearly everything is represented as a widget. 
 Key characteristics of widgets include:
 \begin{itemize}
-    \item \textit{Immutability}: a widget is an immutable object, meaning that once it is created, its properties cannot be changed. 
-        Instead, to modify a widget's appearance or behavior, a new widget must be created.
-    \item \textit{Composability}: widgets are composable, allowing developers to combine existing widgets to build more complex interfaces. 
-        This enables the creation of new widgets by composing smaller, reusable ones.
-    \item \textit{Descriptive nature}: widgets describe what the GUI should look like. 
-        They provide a visual representation of the interface and its components.
+    \item \textit{Immutability}: widgets are immutable; once created, they cannot be changed. To modify their appearance or behavior, you must create a new widget.
+    \item \textit{Composability}: widgets are composable, allowing developers to combine simpler widgets to create more complex interfaces.
+    \item \textit{Descriptive nature}: widgets describe the UI, providing a visual representation of the interface components.
 \end{itemize}
-When the state of a widget changes, the Flutter framework responds by rebuilding the affected widget. 
-The framework performs the following steps:
-\begin{enumerate}
-    \item \textit{Diff computation}: it computes the difference between the current widget state and the previous rendering, determining what has changed.
-    \item \textit{Minimal changes}: the framework identifies the minimal set of changes needed to update the interface, optimizing performance.
-    \item \textit{Selective re-rendering}: only the parts of the UI that have changed are re-rendered, which enhances efficiency and responsiveness.
-\end{enumerate}
-This architecture of widgets allows for flexible and dynamic user interfaces that can easily adapt to user interactions and data changes.
 
-All widgets have a state, which can be categorized as either mutable or immutable.
-The state of a stateful widget is changeable; for example, it may represent the current position of a slider or whether a checkbox is checked. 
-This state is stored in a State object, allowing for a clear separation between appearance and content. 
-To update the appearance of the widget in response to changes, we need to call \texttt{setState}, which informs the framework to redraw the widget.
+\paragraph*{Widget states}
+Widgets can either be stateful or stateless:
+\begin{itemize}
+    \item \textit{Stateless widgets}: do not manage any internal state and are simple, static components of the UI.
+    \item \textit{Stateful widgets}: maintain state that can change during the app's lifetime (e.g., the position of a slider). 
+        Stateful widgets require two classes: one to extend \texttt{StatefulWidget} and another to manage the mutable state via the \texttt{State} object.
+\end{itemize}
+Stateful widgets use the \texttt{setState} method to notify Flutter that the state has changed, prompting the widget to be rebuilt and reflecting the updates in the UI.
+State management is crucial for dynamic user interfaces.
+When using the the \texttt{setState} method, Flutter knows that the state has changed and will re-render only the affected widgets, optimizing performance. 
+Failing to call the \texttt{setState} when modifying state will leave the UI unchanged.
 
-In contrast, a stateless widget does not manage any internal state. 
-Stateful widgets maintain state that can change, allowing them to alter their appearance based on user events or incoming data. 
-Implementing a stateful widget requires two classes: one that extends \texttt{StatefulWidget} and another that defines the mutable values and includes the \texttt{build} method to render the widget.
-
-\paragraph*{Const and final}
-In Dart, the keyword \texttt{const} is used for values known at compile time (e.g., \texttt{const a = 1}), while \texttt{final} is appropriate for values that are determined at runtime. 
-Anything not known at compile time should be declared as \texttt{final} instead of \texttt{const}.
-
-\paragraph*{State management}
-The \texttt{setState} method notifies Flutter of a state change, prompting the widget to be re-rendered. 
-This triggers the re-execution of the \texttt{build} method, ensuring the GUI reflects any updates. 
-If the state variable (e.g.,\texttt{\_counter}) is modified without invoking \texttt{setState}, the \texttt{build} method will not be called, and the GUI will remain unchanged.
-
-\paragraph*{Flexible}
-The \texttt{Flexible} widget allows for resizable elements within the layout.
-Unlike inflexible widgets, which are fixed in size, flexible widgets adjust according to their properties: \texttt{flex} and \texttt{fit}. 
-The \texttt{fit} property dictates whether the widget occupies extra space, with \texttt{FlexFit.loose} using the widget's preferred size by default, and \texttt{FlexFit.tight} enforcing the widget to fill all available space. 
-The \texttt{flex} property defines the resize ratio relative to other widgets.
-
-\paragraph*{Other options}
-The \texttt{Expanded} widget can wrap a widget, compelling it to fill any available extra space.
-Conversely, \texttt{SizedBox} can wrap a widget and resize it using specified height and width properties; it can also create empty space by setting these dimensions. 
-The \texttt{Spacer} widget generates space between widgets, utilizing the flex property, while \texttt{SizedBox} provides space based on a specific number of logical pixels.
+\paragraph*{Commond widgets}
+The most common widgets are:
+\begin{itemize}
+    \item \textit{Flexible}: resizable widgets that adjust their size according to their \texttt{flex} and \texttt{fit} properties.
+    \item \textit{Expanded}: forces a widget to take up all available space.
+    \item \textit{SizedBox}: specifies a widget's dimensions or adds empty space.
+    \item \textit{Spacer}: creates space between widgets using the \texttt{flex} property.
+\end{itemize}
 
 \subsection{Assets}
-To incorporate external assets, they must be explicitly declared in the project. 
-To include all assets within a directory, use the directory name followed by a slash (e.g., \texttt{assets/}). 
-If assets are located in subdirectories, each directory must have a separate entry in the asset declaration.
+To include external assets in your project, you must declare them in \texttt{pubspec.yaml}. 
+You can include all assets in a directory by specifying the directory name followed by a slash, e.g., \texttt{assets/}. 
+For subdirectories, each must be listed separately.
+
+Flutter's \texttt{AssetImage} class automatically selects the appropriate asset based on the device's pixel ratio, ensuring that the app displays optimally across different devices.
+
+\subsection{Navigation}
+Navigation in Flutter involves managing multiple screens (or routes). 
+Routes represent screens, and you can navigate between them using:
+\begin{itemize}
+    \item \texttt{Navigator.push}: adds a new route to the stack.
+    \item \texttt{Navigator.pop}: removes the current route from the stack, returning to the previous screen.
+\end{itemize}
+To pass data between routes, use \texttt{Navigator.pushNamed} and access arguments using \texttt{ModalRoute.of}.
+
+\paragraph*{Asynchronous programming}
+Dart uses \texttt{Future} objects to represent asynchronous operations. 
+To define an asynchronous function, use the \texttt{async} keyword, and you can pause execution using the \texttt{await} keyword. 
+This allows for handling asynchronous tasks such as network calls in a non-blocking manner.
+
+\paragraph*{Adaptive design}
+For responsive layouts, use widgets like \texttt{LayoutBuilder} and \texttt{MediaQuery}. 
+\texttt{LayoutBuilder} returns layout constraints from the parent widget, while \texttt{MediaQuery} gives the size of the app window. 
+This distinction helps in creating adaptive interfaces that work across various screen sizes.
+
+\paragraph*{Advanced navigation}
+For complex apps, especially web-based or multi-Navigator apps, using a \texttt{Router} allows for declarative navigation, integrating better with browser history and enabling advanced features like deep linking.
+This structure ensures efficient state management, adaptive design, and smooth navigation throughout the app development lifecycle in Flutter.

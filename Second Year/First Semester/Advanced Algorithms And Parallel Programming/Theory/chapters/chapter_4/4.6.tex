@@ -1,0 +1,133 @@
+\section{Dictionary problem}
+
+A dictionary is a collection of elements, each associated with a unique search key.
+The goal is to maintain the set efficiently while supporting operations such as insertions and deletions.
+This is analogous to maintaining a database where entries may be added, removed, or searched periodically.
+
+Given a universe $U$ of keys with a total order, the task is to manage a set $S \subseteq U$ and support the following operations:
+\begin{itemize}
+    \item \textit{Search}($x, S$): check if $x\in S$.
+    \item \textit{Insert}($x, S$): insert $x$ into $S$ if it is not already present.
+    \item \textit{Delete}($x, S$): remove $x$ from $S$ if it exists. 
+    \item \textit{Minimum}($S$): return the smallest key in $S$.
+    \item \textit{Maximum}($S$): return the largest key in $S$.
+    \item \textit{List}($S$): output the elements of $S$ in increasing order of keys.
+    \item \textit{Union}($S_1, S_2$): Merge two sets $S_1$ and $S_2$, maintaining the total order such that for every $x_1\in S_1$ and $x_2\in S_2$, $x_1<x_2$. 
+    \item \textit{Split}($S, x, S_1, S_2$): split $S$ into two sets $S_1$ and $S_2$, where all elements in $S_1$ are less or equal than $x$ and all elements in $S_2$ are greater than $x$.
+\end{itemize}
+Various data structures can be used to solve the dictionary problem, each with distinct trade-offs in performance and complexity.
+
+\subsection{Arrays}
+The array can be: 
+\begin{itemize} 
+    \item \textit{Unordered array}: searching and deleting an element take $\mathcal{O}(n)$ time, while inserting an element takes $\mathcal{O}(1)$. 
+        This is useful for scenarios like log files, where insertions are frequent, but searches and deletions are rare. 
+    \item \textit{Ordered array}: searching takes $\mathcal{O}(\log n)$ time using binary search, while inserting and deleting take $\mathcal{O}(n)$. 
+        This is applicable for lookup tables, where searches are frequent, but insertions and deletions are infrequent. 
+\end{itemize}
+
+\subsection{Binary search trees}
+A binary search tree (BST) is a binary tree where each internal node stores an item $(k, e)$ representing a key $k$ and associated element $e$. 
+The structure of the tree satisfies the property that: 
+\begin{itemize} 
+    \item Keys in the left subtree of any node $v$ are less or equal than $k$. 
+    \item Keys in the right subtree of $v$ are greater than $k$. 
+\end{itemize}
+The drawback of the standard BST is that an unbalanced sequence of insertions may degrade it into a linear structure, resulting in poor performance for searches, inserts, and deletes.
+
+\subsection{Balanced trees}
+To overcome the drawback of unbalanced BSTs, several balanced tree structures have been developed. 
+These ensure that the tree height remains $\mathcal{O}(\log n)$, providing efficient operations.
+
+\paragraph*{AVL trees}
+An AVL tree is a self-balancing binary search tree where the heights of the two child subtrees of any node differ by at most one. 
+Rebalancing operations (rotations) ensure that the height of the tree remains logarithmic. 
+While AVL trees guarantee fast lookups and updates, they can be more complex to implement due to the need for maintaining balance factors.
+
+\paragraph*{Splay trees}
+Splay trees are another type of self-adjusting binary search tree that guarantee an amortized time complexity of $\mathcal{O}(\log n)$ per operation. 
+The key idea is the splay operation, which moves a node accessed via a search or update to the root through rotations. 
+This ensures that frequently accessed nodes stay near the root, while infrequently accessed nodes do not contribute much to the overall cost.
+
+One of the primary benefits is that they offer amortized logarithmic time for all operations, making them efficient on average over a sequence of operations. 
+Additionally, splay trees are relatively simple to implement compared to other balanced trees because they do not require storing explicit balance information at each node. 
+Another notable advantage is their adaptability to arbitrary access patterns, ensuring that frequently accessed elements are kept near the root, which improves the performance of subsequent accesses.
+
+Each operation can involve multiple rotations, leading to a logarithmic number of rotations per operation, which can make individual operations slower in some cases. 
+Furthermore, splay trees are inefficient when used with higher-dimensional search trees. 
+This inefficiency arises because the secondary data structures associated with each node may need to be recomputed after every rotation, significantly increasing the cost from a constant to a super-linear function of the subtree size.
+Lastly, while splay trees provide good amortized performance, they do not guarantee that every individual operation will run quickly. 
+Instead, the performance guarantee applies only to the total cost of a sequence of operations.
+
+\subsection{Random treaps}
+Treaps provide efficient time bounds similar to other balanced search tree structures, without requiring explicit balance information to be maintained. 
+The expected number of rotations performed during each operation is small, making them simple to implement. 
+Like skip lists, treaps benefit from randomization, providing good performance for search and update operations.
+
+When $n$ elements are inserted in random order into a binary search tree, the expected depth is approximately $1.39 \log n$
+The goal of using treaps is to maintain a search tree structure that resembles the one produced if the elements were inserted in order of their randomly assigned priorities.
+
+\begin{definition}[\textit{Treap}]
+    A treap is a binary tree where each node contains an element $x$ with a unique key $\text{key}(x) \in U$ and a priority $\text{prio}(x) \in \mathbb{R}$. 
+\end{definition}
+The tree satisfies the following two properties:
+\begin{itemize}
+    \item \textit{Search tree property}: for any node $x$, all elements $y$ in the left subtree satisfy $\text{key}(y)<\text{key}(x)$, and all elements $y$ in the right subtree satisfy $\text{key}(y)>\text{key}(x)$.
+    \item \textit{Heap property}: for any pair of nodes $x$ and $y$, if $y$ is a child of $x$, then $\text{prio}(y)>\text{prio}(x)$.
+\end{itemize}
+
+\begin{lemma}
+    Given $n$ elements $x_1, x_2,\dots, x_n$ with keys $\text{key}(x_i)$ and priorities $\text{prio}(x_i)$, there exists a unique treap that satisfies both the search tree property and the heap property.
+\end{lemma}
+\begin{proof}
+    The base case where $n=1$ is trivial, as a single node satisfies both properties.
+    For $n>1$, the node with the smallest priority will be the root of the tree.
+    All elements $y$ with $\text{key}(y)<\text{key}(x_1)$ will be placed in the left subtree, and all elements $y$ with $\text{key}(y)>\text{key}(x_1)$ will be placed in the right subtree.
+    The process is recursively applied to both subtrees, leading to a unique treap structure.
+\end{proof}
+Thus, the structure of the treap is determined by the order of insertion based on the priorities of the elements.
+
+\paragraph*{Random treaps search algorithm}
+The search operation in a treap is straightforward, following the same logic as in binary search trees. 
+The search path is determined by comparing the search key with the keys of the nodes along the path from the root.
+\begin{algorithm}[H]
+    \caption{Random treaps search}
+    \begin{algorithmic}[1]
+        \State $v = root$
+        \While{$v \neq \text{null}$}
+            \If{$\text{key}(v) = k$}
+                \State \Return $v$ \Comment Element found
+            \EndIf
+            \If{$\text{key}(v) < k$}
+                \State $v = \Call{rightchild}{v}$
+            \EndIf
+            \If{$ \text{key}(v) > k$}
+                \State $v = \Call{leftchild}{v}$
+            \EndIf
+        \EndWhile
+        \State \Return $\text{null}$ \Comment Element not found
+    \end{algorithmic}
+\end{algorithm}
+The running time of this algorithm depends only on the number of elements along the search path.
+Let $x_1, x_2,\dots, x_n$ be elements with sorted keys such that $\text{key}(x_1)<\text{key}(x_2) < \text{key}(x_3)< \dots <\text{key}(x_n)$. 
+Let $M$ be a subset of the elements, and define $P_{\min}(M)$ as the element in $M$ with the lowest priority. 
+The following lemma describes the relationship between elements based on their priorities.
+\begin{lemma}
+    For elements $x_1,x_2,\dots,x_n$: 
+\end{lemma}
+\begin{itemize}
+    \item[\textit{a.}] \textit{If $i<m$, then $x_i$ is an ancestor of $x_m$ if and only if $P_{\min}(\{x_i,\dots,x_m\})=x_i$}. 
+    \item[\textit{b.}] \textit{If $i>m$, then $x_i$ is an ancestor of $x_m$ if and only if $P_{\min}(\{x_m,\dots,x_i\})=x_i$}. 
+\end{itemize}
+\begin{proof}
+    This follows directly from the heap property and the fact that elements are inserted in increasing order of priority. 
+    
+    In case of index increasing order, if $P_{\min}(\{x_i,\dots,x_m\})=x_i$, then $x_i$ is inserted first among the elements in this set. 
+    As a result, $x_i$ becomes the ancestor of $x_m$, as all subsequent insertions will be in the left or right subtrees depending on their keys. 
+
+    In case of index decreasing order, suppose $P_{\min}(\{x_i,\dots,x_m\})=x_j$ and assume $x_i\neq x_j$. 
+    By the search tree property, $x_j$ must be inserted as the ancestor of both $x_i$ and $x_m$, which contradicts the assumption. 
+    Therefore, $x_i=x_j$, proving the result.
+
+    The proof for the second statement follows analogously.
+\end{proof}
