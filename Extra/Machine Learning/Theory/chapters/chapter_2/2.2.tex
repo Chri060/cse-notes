@@ -1,17 +1,10 @@
 \section{Linear regression}
 
-The goal of regression is to approximate a function $f(x)$ that maps input $x$ to a continuous output $t$ from a dataset $\mathcal{D}$: 
-\[\mathcal{D}=\left\{ \left\langle x,t \right\rangle \right\} \implies t=f(x)\]
-Here, $x$ is a vector. 
+The goal of regression is to approximate a function $f(\mathbf{x})$ that maps input $\mathbf{x}$ to a continuous output $t$ from a dataset $\mathcal{D}$: 
+\[\mathcal{D}=\left\{ \left\langle \mathbf{x},t \right\rangle \right\} \implies t=f(\mathbf{x})\]
 To perform regression, we assume the existence of a function capable of performing this mapping.
-The key components of constructing a linear regression problem include:
-\begin{itemize}
-    \item The method used to model the function $f$ (the hypothesis space). 
-    \item The evaluation criteria for the approximation (the loss function).
-    \item The optimization process for optimizing the model.
-\end{itemize}
 
-In linear regression, the function $f$ is modeled using linear functions. 
+In linear regression, the function $f(\cdot)$ is modeled using linear functions. 
 This choice is motivated by several factors:
 \begin{itemize}
     \item Linear models are easily interpretable, making them suitable for explanation.
@@ -20,54 +13,42 @@ This choice is motivated by several factors:
     \item More sophisticated methods often build upon or incorporate elements of linear regression.
 \end{itemize}
 
-\paragraph*{Hypothesis space}
-In mathematical terms, the approximation $y$ can be defined as: 
-\[y(\textbf{x},\textbf{w})=w_0+\sum_{j=1}^{D-1}w_j x_j=\textbf{w}^T\textbf{x}\]
-Here, $\textbf{x} = \left( 1,x_1,\ldots,x_{D-1} \right)$ is a vector, and $w_0$ is called the bias parameter.
-It's important to note that the output $y$ is a scalar value. 
+The key components of constructing a linear regression problem include:
+\begin{itemize}
+    \item \textit{Hypothesis space}: the mapping function can be defined as: 
+        \[y(\mathbf{x},\mathbf{w})=w_0+\sum_{j=1}^{D-1}w_j x_j=w_01+\sum_{j=1}^{D-1}w_j x_j=\sum_{j=0}^{D-1}w_j x_j=\mathbf{w}^T\mathbf{x}\]
+        The parameter $w_0=-b$ is called bias parameter. 
+        In a two-dimensional space, our hypothesis space will be the set of all points in the plane $(w_0,w_1)$. 
+        The coordinates of each point will correspond to a line in the $\left( \mathbf{x}, y \right)$ space.
+    \item \textit{Loss function}: we usually employ the Sum of Squared Errors: 
+            \[\text{SSE}(\mathbf{w})=\dfrac{1}{2}\sum_{n=1}^{N}{\left( y(x_n, \mathbf{w})-t_n \right)}^2=\dfrac{1}{2}\sum_{n=1}^{N}{\left( \boldsymbol{\phi}(x_n)-t_n \right)}^2=\text{RSS}(\mathbf{w})=\sum_{i=1}^{N}\epsilon^2_i\]
+    \item \textit{Optimization}: a closed-form optimization of the RSS, known as least squares, begins with the matrix representation of the loss function:
+        \[\text{LS}(\mathbf{w})=\dfrac{1}{2}\text{RSS}(\mathbf{w})=\dfrac{1}{2}{\left( \boldsymbol{\Phi}_{\mathbf{w}}-\mathbf{t} \right)}^2\]
+        To find the optimal $\mathbf{w}$, we compute the first derivative of $\text{LS}(\mathbf{w})$ and set it to zero, obtaining: 
+        \[\hat{\mathbf{w}}_{\text{LS}}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi}\right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t}\]
+        The inversion of the matrix can be computationally expensive, especially for large datasets, assuming the matrix is non-singular (invertible). 
+        
+        To mitigate this, stochastic gradient descent can be employed.
+        The algorithm known as Least Mean Squares (LMS) uses the following update rule:
+        \[\mathbf{w}^{(n+1)}= \mathbf{w}^{(n)}-\alpha\left( \mathbf{w}^{(n)}\phi(\mathbf{x}_n)-t_n \right)\phi(\mathbf{x}_n)\]
 
-In a two-dimensional space, our hypothesis space will be the set of all points in the plane $(w_0,w_1)$. 
-The coordinates of each point will correspond to a line in the $\left( \textbf{x}, y \right)$ space.
+        The same update rule can be also applied for batches of size $K$: 
+        \[\mathbf{w}^{(n+1)}= \mathbf{w}^{(n)}-\dfrac{\alpha}{K}\left( \mathbf{w}^{(n)}\phi(\mathbf{x}_n)-t_n \right)\phi(\mathbf{x}_n)\]
+\end{itemize}
 
-\paragraph*{Loss function}
-A commonly used error loss function for the linear regression problem is the sum of squared errors (SSE), defined as:
-\[L(\textbf{w})=\dfrac{1}{2}\sum_{n=1}^{N}{\left( y(x_n, \textbf{w})-t_n \right)}^2\]
-This sum is also referred to as the residual sum of squares (RSS) and can be expressed as the sum of squared residual errors:
-\[RSS(\textbf{w})=\left\lVert \boldsymbol{\epsilon}^2_2 \right\rVert = \sum_{i=1}^{N}\epsilon^2_i \]
-This formulation of the loss function allows for obtaining a closed-form optimization solution.
-
-\paragraph*{Optimization}
-For linear models, a closed-form optimization of the RSS, known as least squares, begins with the matrix representation of the loss function:
-\[L(\textbf{w})=\dfrac{1}{2}RSS(\textbf{w})=\dfrac{1}{2}{\left( \textbf{t}-\boldsymbol{\Phi}_{\textbf{w}} \right)}^T\left( \textbf{t}-\boldsymbol{\Phi}_{\textbf{w}} \right)\]
-Here, $\boldsymbol{\Phi}=\begin{bmatrix} \phi(x_1) & \cdots & \phi(x_N)\end{bmatrix}^T$ and $\textbf{t}=\begin{bmatrix}t_1 & \cdots & t_n\end{bmatrix}^T$.
-To find the optimal $\textbf{w}$, we compute the first derivative of $L(\textbf{w})$ and set it to zero:
-\[\hat{\textbf{w}}_{OLS}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi}\right)}^{-1}\boldsymbol{\Phi}^T\textbf{t}\]
-However, the inversion of the matrix $\boldsymbol{\Phi}^T\boldsymbol{\Phi}^{-1}$ can be computationally expensive, especially for large datasets, with a complexity of $O(nm^2+m^3)$, assuming the matrix is non-singular (invertible). 
-
-To mitigate this, stochastic gradient descent (SGD) can be employed. 
-The algorithm known as least mean squares (LMS) uses the following update rule:
-\[L(\textbf{x})=\sum_n L(x_n)\]
-Expanding this, we get:
-\begin{align*}
-    \textbf{w}^{(n+1)}  &= \textbf{w}^{(n)}-\alpha^{(n)}\nabla L(x_n) \\
-                        &= \textbf{w}^{(n)}-\alpha^{(n)}\left( \textbf{w}^{{(n)}^T}\phi(\textbf{x}_n)-t_n \right)\phi(\textbf{x}_n)
-\end{align*}
-Here, $\alpha$ is the learning rate, and convergence is guaranteed if $\sum_{n=0}^{\infty}=+\infty$ and $\sum_{n=0}^{\infty}=\alpha^{{(n)}^2}<+\infty$.
-
-If the regression problem involves multiple outputs, meaning that $\textbf{t}$ is not a scalar, we can solve each regression problem independently.
-However, we can still use the same set of basis functions.
+\paragraph*{Multiple outputs}
+If the regression problem involves multiple outputs, meaning that $\mathbf{t}$ is not a scalar, we can solve each regression problem independently.
 The solution for the weight vectors for all outputs can be expressed as:
-\[\hat{\textbf{W}}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi}\right)}^{-1}\boldsymbol{\Phi}^T\textbf{T}\]
-Here, each column of matrix $\textbf{T}$ and $\hat{\textbf{W}}$ corresponds to the target vector and the weight vector for each output, respectively.
+\[\hat{\mathbf{W}}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi}\right)}^{-1}\boldsymbol{\Phi}^T\mathbf{T}\]
 This solution can be easily decoupled for each output $k$: 
-\[\hat{\textbf{w}}_k={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi}\right)}^{-1}\boldsymbol{\Phi}^T\textbf{t}_k\]
+\[\hat{\mathbf{w}}_k={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi}\right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t}_k\]
 An advantage of this approach is that ${\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi}\right)}^{-1}$ only needs to be computed once, regardless of the number of outputs.
 
-\subsection{Basis function}
+\subsection{Basis functions}
 While a linear combination of input variables may not always suffice to model data, we can still construct a regression model that is linear in its parameters. 
 This can be achieved by defining a model using non-linear basis functions, expressed as:
-\[y(\textbf{x},\textbf{w})=w_0+\sum_{j=1}^{M-1}w_j \phi_j(\textbf{x})=\textbf{w}^T\boldsymbol{\phi}(\textbf{x})\]
-Here, the components of the vector  $\boldsymbol{\phi}(\textbf{x})={\left( 1,\phi_1(\textbf{x}),\ldots,\phi_{M-1}(\textbf{x}) \right)}^T$  are referred to as features.
+\[y(\mathbf{x},\mathbf{w})=\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x})\]
+Here, the components of the vector $\boldsymbol{\phi}(\mathbf{x})$ are referred to as features.
 These features allow for a more flexible representation of the input data, enabling the model to capture non-linear relationships between the input variables and the output.
 \begin{example}
     Let's reconsider a set of data regarding individuals' weight and height, along with their completion times for a one-kilometer run:
@@ -95,147 +76,199 @@ These features allow for a more flexible representation of the input data, enabl
     Now, we have the option to retain or discard the weight and height variables, considering only the BMI values for analysis.
 \end{example}
 The most commonly used basis functions in regression are:
-\begin{itemize}
-    \item \textit{Polynomial}: 
-        \[\phi_j(x)=x^j\]
-    \item \textit{Gaussian}:
-        \[\phi_j(x)=\exp \left( -\dfrac{{\left( x-\mu_j \right)}^2}{2 \sigma^2} \right) \]
-    \item \textit{Sigmoidal}: 
-        \[\phi_j(x)=\dfrac{1}{1+\exp\left(\dfrac{\mu_j-x}{\sigma}\right)}\]
-\end{itemize}
-Here, the constant $\mu_j$ is referred to as a hyperparameter, as its value needs to be determined through experimentation and depends on the user's experience.
-
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Basis function}} & \textbf{Formula}                                                                \\ \hline
+    \textit{Polynomial}                           & $\phi_j(x)=x^j$                                                                 \\ \hline
+    \textit{Gaussian}                             & $\phi_j(x)=e^{-\frac{{\left( x-\mu_j \right)}^2}{2 \sigma^2}}$                  \\ \hline
+    \textit{Sigmoidal}                            & $\phi_j(x)=\dfrac{1}{1+e^{\frac{\mu_j-x}{\sigma}}}$                             \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{images/basis.png}
-    \caption{Some possible basis functions shapes}
+    \includegraphics[width=1.00\linewidth]{images/basis.png}
+    \caption{Polynomial, Gaussian, and sigmoidal basis functions}
 \end{figure}
-
 It's noteworthy that the Gaussian basis function allows for a local approximation by omitting values that are close to zero.
 This approach enables capturing the relationship between the input and output in a reduced input space area.
 As we move away from the mean, approaching zero, the values become negligible.
 
+\subsection{Normalization}
+Given a set of $N$ samples, $\{s_1,\dots,s_N\}$, normalization can be performed using two common methods:
+\begin{itemize}
+    \item \textit{Z-score} (normalization): scales the data based on the dataset's mean and standard deviation.. 
+        Given the mean $\bar{s}$ and the variance $S^2=\frac{1}{N-1}\sum_{n=1}^N(s_n-\bar{s})^2$, the normalized value of a sample $s$ is calculated as:
+        \[s_{\text{z-score}}=\dfrac{s-\bar{s}}{S}\]
+        This method transforms the data into a distribution with a mean of 0 and a standard deviation of 1, making it useful when working with data that needs to be compared across different scales or distributions.
+    \item \textit{Minmax} (feature scaling): rescales the data so that all values lie between a defined range, typically $\begin{bmatrix} 0 & 1 \end{bmatrix}$.
+        Given the minimum value $s_{\min}$ and maximum value $s_{\max}$ in the dataset, the normalized value of a sample $s$ is: 
+        \[s_{\text{Min-max}}=\dfrac{s-s_{\min}}{s_{\max}-s_{\min}}\]
+        This method is particularly useful when the data needs to be transformed to a bounded range.
+\end{itemize}
+Both methods have their applications, with z-score normalization being more effective for data with outliers or differing variances, and Min-Max scaling suited for data that needs to be normalized to a specific range.
+
 \subsection{Regularization}
 A function can achieve a better approximation by increasing the degree of the polynomial used in the regression.
-\begin{example}
-    Consider a function generating a set of points with some noise:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.25\linewidth]{images/reg.png}
-    \end{figure}
-    Using a second-order polynomial instead of a linear one provides a better approximation:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.25\linewidth]{images/reg1.png}
-    \end{figure}
-    Further improving the approximation can be achieved with a higher-degree polynomial (e.g., ninth grade):
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.25\linewidth]{images/reg1.png}
-    \end{figure}
-\end{example}
 However, increasing the polynomial degree also increases the complexity of the model parameters.
 To address this complexity, adjustments are needed in the loss function:
-\[L(\textbf{w})=L_D(\textbf{w})+\lambda L_W(\textbf{w})\]
-Here, $L_D(\textbf{w})$ represents the usual loss function, $L_W(\textbf{w})$ reflects model complexity (a hyperparameter), and $\lambda$ is the regularization coefficient.
-$L_W(\textbf{w})$ can be tailored using ridge regression or lasso methods.
+\[L(\mathbf{w})=L_D(\mathbf{w})+\lambda L_W(\mathbf{w})\]
+Here, $L_D(\mathbf{w})$ represents the usual loss function, $L_W(\mathbf{w})$ reflects model complexity (a hyperparameter), and $\lambda$ is the regularization coefficient.
+The model complexity loss function can be: 
+\begin{itemize}
+    \item \textit{Ridge}, in which the loss function becomes: 
+        \[\text{L}_{\text{ridge}}(\mathbf{w})=\dfrac{1}{2}\sum_{i=1}^N {\epsilon_i}^2 + \lambda\dfrac{1}{2}{\left\lVert \mathbf{w} \right\rVert}_2^2\]
+        This new loss function remains quadratic with respect to $\mathbf{w}$, allowing for closed-form optimization:
+        \[\hat{\mathbf{w}}_{\text{ridge}}={\left( \lambda\mathbf{I}+\boldsymbol{\Phi}^T \boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t}\]
+        The term $\lambda\mathbf{I}$ is crucial in solving the singularity problem, as it transforms a non-singular matrix into a singular one with an appropriate choice of $\lambda$.
+        In particular, the eigenvalues of the $\left( \lambda\mathbf{I}+\boldsymbol{\Phi}^T \boldsymbol{\Phi} \right)$ matrix must be greater or equal than $\lambda$ since $\boldsymbol{\Phi}^T \boldsymbol{\Phi}$ is positive semidefinite. 
+    \item \textit{Lasso}, in which the loss function becomes: 
+        \[\text{L}_{\text{lasso}}(\mathbf{w})=\dfrac{1}{2}\sum_{i=1}^N \epsilon_i^2 + \lambda\dfrac{1}{2}{\left\lVert \mathbf{w} \right\rVert}_1\]
+        In this case, closed-form optimization is not possible. 
+        However, lasso typically leads to sparse regression models: when the regularization coefficient $\lambda$ is large enough, some components of $\hat{\mathbf{w}}$ become equal to zero.
+\end{itemize}
 
-\paragraph*{Ridge regression}
-In ridge regression, the regularization term $L_W(\textbf{w})$ is defined as:
-\[L_W(\textbf{w})=\dfrac{1}{2}\textbf{w}^T\textbf{w}=\dfrac{1}{2}\left\lVert \textbf{w} \right\rVert_2^2 \]
-Thus, the overall loss function becomes:
-\[L(\textbf{w})=\dfrac{1}{2}\sum_{i=1}^N {\left( t_i-\textbf{w}^T\phi(x_i) \right)}^2 + \dfrac{\lambda}{2}\left\lVert \textbf{w} \right\rVert_2^2\]
-Despite the regularization term, the loss function remains quadratic with respect to $w$, allowing for closed-form optimization:
-\[\hat{\textbf{w}}_{ridge}={\left( \lambda\textbf{I}+\boldsymbol{\Phi}^T \boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\text{t}\]
-The term $\lambda\textbf{I}$ is crucial in solving the singularity problem, as it transforms a non-singular matrix into a singular one with an appropriate choice of $\lambda$. 
+\subsection{Model evaluation}
+The performance of the resulting model can be assessed through various metrics and statistical tests:
+\begin{itemize}
+    \item \textit{Residual Sum of Squares}: measures the discrepancy between the predicted and actual target values.
+        A lower RSS indicates a better fit of the model to the data.
+    \item \textit{Mean Square Error}: average of the squared differences between the predicted values and the actual values. 
+        It is calculated as:
+        \[\text{MSE}(\mathbf{w})=\dfrac{\text{RSS}(\textbf{w})}{N}\]
+        where $N$ is the number of samples. 
+        MSE penalizes larger errors more heavily due to the squaring of differences.
+    \item \textit{Root Mean Square Error}: square root of the MSE, giving an error metric in the same units as the target variable:
+        \[\text{RMSE}(\mathbf{w})=\sqrt{\dfrac{\text{RSS}(\textbf{w})}{N}}\]
+        RMSE is often easier to interpret as it provides an error measure on the same scale as the original data.
+    \item \textit{Coefficient of determination}: measures how well the model explains the variance in the target variable. 
+        It is calculated as:
+        \[R^2=1-\dfrac{\text{RSS}(\mathbf{w})}{\text{TSS}}\]
+        Here, $\text{TSS}=\sum_{n=1}^N(\bar{t}-t_n)^2$ is the Total Sum of Squares, and $\bar{t}$ is the mean of the target values.
+        An $R^2$ close to 1 indicates a good fit, while a value near 0 suggests the model performs poorly compared to a simple mean.
+    \item \textit{Degrees of freedom}: represent the difference between the number of samples and the number of model parameters:
+        \[\text{dfe}=N-M\]
+        Here, $M$ is the number of parameters in the model.
+    \item \textit{Adjusted coefficient of determination}: accounts for the number of predictors in the model and adjusts for the degrees of freedom:
+        \[R^2_{\text{adj}}=1-(1-R^2)\dfrac{N-1}{\text{dfe}}\]
+        This metric is useful when comparing models with different numbers of predictors, as it penalizes overfitting.
+\end{itemize}
 
-\paragraph*{Lasso}
-Another common regularization method is lasso, where the regularization term $L_W(\textbf{w})$ is defined as:
-\[L_W(\textbf{w})=\dfrac{1}{2}\left\lVert \textbf{w} \right\rVert_1=\dfrac{1}{2}\sum_{j=0}^{M-1}\left\lvert w_j \right\rvert\]
-Thus, the overall loss function becomes:
-\[L(\textbf{w})=\dfrac{1}{2}\sum_{i=1}^N {\left( t_i-\textbf{w}^T\phi(x_i) \right)}^2 + \dfrac{\lambda}{2}\left\lVert \textbf{w} \right\rVert_1\]
-In this case, closed-form optimization is not possible. 
-However, lasso typically leads to sparse regression models: when the regularization coefficient $\lambda$ is large enough, some components of $\hat{\textbf{w}}$ become equal to zero.
-Regularization can be seen as equivalent to minimizing  $L_D(\textbf{w})$ subject to the constraint:
-\[\sum_{j=0}^{M-1}\left\lvert w_j \right\rvert \leq \eta\] 
-
-\subsection{Linear regression with probability}
-We can approach regression in a probabilistic manner by defining a model that probabilistically maps inputs ($x$) to outputs ($t$).
-This model, denoted as $y(x, w)$, incorporates unknown parameters ($w$).
-We then model the likelihood, i.e., the probability that observed data $\mathcal{D}$ is generated by a given set of parameters ($w$), as: 
-\[\text{P}(\mathcal{D}|\textbf{w})\]
-Finally, we estimate the parameters ($w$) by maximizing the likelihood:
-\[\textbf{w}_{ML}=\argmax_{\textbf{w}}\text{P}(\mathcal{D}|\textbf{w})\]
-
-For linear regression, we define the model as:
-\[t=y(\textbf{x},\textbf{w})+\epsilon=\textbf{w}^T\boldsymbol{\Phi}(\textbf{x})+\epsilon\]
-Here, we assume a linear model for $y(\textbf{x},\textbf{w})$ and introduce noise  $\epsilon\sim\mathcal{N}(0,\sigma^2)$. 
-Consequently, given a dataset $\mathcal{D}$ of $N$ samples with inputs $\textbf{X}=\begin{bmatrix}\textbf{x}_1 & \cdots & \textbf{x}_n \end{bmatrix}$ and outputs $\textbf{t}=\begin{bmatrix}t_1 & \cdots & t_n \end{bmatrix}^T$, we have: 
-\[\text{P}(\mathcal{D}|\textbf{w})=\text{P}(\textbf{t}|\textbf{X},\textbf{w},\sigma^2)=\prod_{n=1}^{N}\mathcal{N}(t_n|\textbf{w}^T\boldsymbol{\Phi}(\textbf{x}_n),\sigma^2)\]
- 
-To find $\textbf{w}_{ML}$, it is convenient to maximize the log-likelihood, obtaining:
-\[\ell (\textbf{w})=\ln\text{P}(t_n|\textbf{x}_n, \textbf{w} ,\sigma^2)=-\dfrac{N}{2}\ln(2\pi\sigma^2)-\dfrac{1}{2\sigma^2}RSS(\textbf{w})\]
-Notice that the first part of the final formula is a constant independent of $\textbf{w}$, so it can be ignored in maximizing the likelihood.
-Solving the optimization problem by setting the gradient to zero $\ell (\textbf{w})=0$, yields the final formula:
-\[\textbf{w}_{ML}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\textbf{t}\]
-This result aligns with the ordinary least squares approach.
-
-This outcome allows us to interpret ordinary least squares from a probabilistic perspective, confirming that we are utilizing a normally distributed probabilistic function to generate the residuals in OLS.\@
-
-\paragraph*{Bayesian linear regression}
-Bayesian linear regression follows a structured approach:
+\paragraph*{Statistical tests on coeffients}
+To determine the statistical significance of the model's parameters, hypothesis tests can be performed:
 \begin{enumerate}
-    \item Formulation of probabilistic knowledge:
-        \begin{enumerate}
-            \item Qualitatively define the model expressing our knowledge.
-            \item Incorporate unknown parameters into the model.
-            \item Represent assumptions about these parameters with a prior distribution before observing any data.
-        \end{enumerate}
+    \item \textit{Test on single coefficients}: this test examines whether each estimated weight $\hat{w}_j$ is significantly different from zero.
+        The distribution for this test is given by:
+        \[t_{\text{dfe}}\sim\dfrac{\hat{w}_j-w_j}{\hat{\sigma\sqrt{v_j}}}\]
+        Here, $w_j$ is the true parameter, $\hat{w}_j$ is the estimated parameter, $v_j$ is the $j$-th diagonal element of $(\mathbf{x}^T\mathbf{x})^-1$, and $\hat{\sigma}^2$ is the unbiased estimate of the variance:
+        \[\hat{\sigma}^2=\dfrac{\text{RSS}(\hat{\mathbf{w}})}{\text{dfe}}\]
+        If the test shows that the coefficient is significantly different from zero, the null hypothesis (that the coefficient is zero) is rejected.
+    \item \textit{Test on overall model significance}: this test assesses the significance of the overall model by comparing it to a null model (a model with no predictors).
+        The test uses the Fisher-Snedecor distribution:
+        \[F_\text{stat}\sim\dfrac{\text{dfe}}{M-1}\dfrac{\text{TSS}-\text{RSS}\hat{\mathbf{w}}}{\text{RSS}\hat{\mathbf{w}}}\]  
+        If the F-statistic is large, the null hypothesis (that all model coefficients are zero) is rejected, indicating that the model significantly improves prediction compared to a constant (mean) model.
+\end{enumerate}
+
+\subsection{Maximum Likelihood}
+We can approach regression in a probabilistic framework by defining a model that maps inputs to target values probabilistically. This allows us to express uncertainty in the predictions.
+
+Given a regression model denoted by $y(x, \mathbf{w})$, where $\mathbf{w}$ represents the unknown parameters, we assume that the observed data $\mathcal{D}$ is generated with some inherent noise.
+The model provides the conditional probability of the target given the input, and we express the likelihood of the data $\mathcal{D}$ given the parameters $\mathbf{w}$ as $\Pr(\mathcal{D}|\mathbf{w})$. 
+
+To estimate the parameters, we seek to find the set of parameters $\mathbf{w}$ that maximizes this likelihood.
+This approach is known as Maximum Likelihood Estimation (ML), and the parameters are found by solving the following optimization problem:
+\[\mathbf{w}_{\text{ML}}=\argmax_{\mathbf{w}}\Pr(\mathcal{D}|\mathbf{w})\]
+
+Our probabilistic regression model can be written as:
+\[t=y(\mathbf{x},\mathbf{w})+\epsilon=\mathbf{w}^T\boldsymbol{\Phi}(\mathbf{x})+\epsilon\]
+Here, $y(\mathbf{x},\mathbf{w})$ is assumed to be a linear model in terms of a set of basis functions $\boldsymbol{\Phi}(\mathbf{x})$, with additive noise $\epsilon$ that follows a Gaussian distribution with zero mean and variance $\sigma^2$. 
+
+Given a dataset $\mathcal{D}$ of $N$ samples with inputs $\mathbf{x}_n$ and targets $\mathbf{t}_n$, we express the likelihood of the data $\mathcal{D}$ given the model parameters $\mathbf{w}$ as: 
+\[\Pr(\mathcal{D}|\mathbf{w})=\Pr(\mathbf{t}|\mathbf{x},\mathbf{w},\sigma^2)=\prod_{n=1}^{N}\mathcal{N}(t_n|\mathbf{w}^T\boldsymbol{\Phi}(\mathbf{x}_n),\sigma^2)\]
+Here, $\mathcal{N}(t_n|\mathbf{w}^T\boldsymbol{\Phi}(\mathbf{x}_n),\sigma^2)$ represents the Gaussian distribution for each target, with mean $\mathbf{w}^T\boldsymbol{\Phi}(\mathbf{x}_n)$ and variance $\sigma^2$. 
+
+To find the maximum likelihood estimate $\mathbf{w}_{\text{ML}}$, we maximize the log-likelihood, which simplifies the product into a sum:
+\[\ell (\mathbf{w})=\ln\Pr(t_n|\mathbf{x}_n, \mathbf{w} ,\sigma^2)=-\dfrac{N}{2}\ln(2\pi\sigma^2)-\dfrac{1}{2\sigma^2}\text{RSS}(\mathbf{w})\]
+Here, $RSS(\mathbf{w})$ is the Residual Sum of Squares.
+
+The first term, $-\frac{N}{2}\ln(2\pi\sigma^2)$, is independent of $\mathbf{w}$, so we can ignore it when maximizing the log-likelihood.
+This leaves us with the second term, which is proportional to the residual sum of squares. 
+Therefore, maximizing the log-likelihood is equivalent to minimizing $\text{RSS}(\mathbf{w})$. 
+
+To find $\mathbf{w}_{\text{ML}}$, we set the gradient of $\ell (\mathbf{w})$ with respect to $\mathbf{w}$ to zero: 
+\[\dfrac{\partial \ell (\mathbf{w})}{\partial\mathbf{w}}=0\]
+Solving this yields the closed-form solution for the maximum likelihood estimate of $\mathbf{w}$
+\[\mathbf{w}_{\text{ML}}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t}\]
+This result matches the solution for the Ordinary Least Squares (OLS) method, showing that the maximum likelihood estimate under the assumption of Gaussian noise is equivalent to minimizing the squared error.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Bayesian linear regression}
+The Bayesian approach to linear regression involves updating our beliefs about the parameters of a model based on observed data, rather than finding point estimates as in traditional approaches like Maximum Likelihood estimation.
+The process can be broken down into the following steps:
+\begin{enumerate}
+    \item We forumlate our knowledge about the world in a probabilistic way.
+        We define the model (with unknown parameters) that expresses our knowledge qualitatively.
+        We capture our assumptions about unknown parameters with the prior distribution over those parameters before essing the data.
     \item Data observation.
     \item Computation of posterior probability distribution for parameters:
-        \[\text{P}(parameters|data)=\dfrac{\text{P}(data|parameters)\text{P}(parameters)}{\text{P}(data)}\]
-    \item Utilization of Posterior Distribution to:
-        \begin{itemize}
-            \item Make predictions by averaging over the posterior distribution.
-            \item Assess or accommodate uncertainty in parameter values.
-            \item Make decisions by minimizing expected posterior loss.
-        \end{itemize}
+        \[\Pr(\text{params}|\text{data})=\dfrac{\Pr(\text{data}|\text{params})\Pr(\text{params})}{\Pr(\text{data})}\]
+    \item We use the posterior distribution to make prediction by averaging over the posterior distribution. examine for uncertainty in the parameters values, and make decisions by minimizing expected posteriori loss. 
 \end{enumerate}
 
 The posterior distribution for model parameters is derived by combining the prior with the likelihood for parameters given the data:
-\[\text{P}(\textbf{w}|\mathcal{D})=\dfrac{\text{P}(\mathcal{D}|\textbf{w})\text{P}(\textbf{w})}{\text{P}(\mathcal{D})}\]
-Here, $\text{P}(\textbf{w})$ represents the prior probability over parameters, $\text{P}(\mathcal{D}|\textbf{w})$ denotes the likelihood, and $\text{P}(\mathcal{D})$ is the marginal likelihood acting as a normalization constant: 
-\[\text{P}(\mathcal{D})=\int\text{P}(\mathcal{D}|\textbf{w})\text{P}(\textbf{w})d\textbf{w}\] 
+\[\Pr(\mathbf{w}|\mathcal{D})=\dfrac{\Pr(\mathcal{D}|\mathbf{w})\Pr(\mathbf{w})}{\Pr(\mathcal{D})}\]
+Here, $\Pr(\mathbf{w})$ represents the prior probability over parameters, $\Pr(\mathcal{D}|\mathbf{w})$ denotes the likelihood, and $\Pr(\mathcal{D})$ is the marginal likelihood acting as a normalization constant: 
+\[\Pr(\mathcal{D})=\int\Pr(\mathcal{D}|\mathbf{w})\Pr(\mathbf{w})d\mathbf{w}\] 
 
-The mode of the posterior, known as the Maximum A Posteriori (MAP) estimate, yields the most probable value of $\textbf{w}$ given the data.
+The mode of the posterior, known as the Maximum A Posteriori (MAP) estimate, yields the most probable value of $\mathbf{w}$ given the data.
 
 A Gaussian likelihood assumption allows the prior to be modeled conveniently as a conjugate prior:
-\[\text{P}(\textbf{w})=\mathcal{N}(\textbf{w}|\textbf{w}_0,\textbf{S}_0)\]
+\[\Pr(\mathbf{w})=\mathcal{N}(\mathbf{w}|\mathbf{w}_0,\mathbf{S}_0)\]
 Consequently, the posterior remains Gaussian:
-\[\text{P}(\textbf{w}|\textbf{t},\boldsymbol{\Phi},\sigma^2)\varpropto \mathcal{N}(\textbf{w}|\textbf{w}_0,\textbf{S}_0)\mathcal{N}(\textbf{t}|\boldsymbol{\Phi}\textbf{w},\sigma^2\textbf{I})\]
+\[\Pr(\mathbf{w}|\mathbf{t},\boldsymbol{\Phi},\sigma^2)\varpropto \mathcal{N}(\mathbf{w}|\mathbf{w}_0,\mathbf{S}_0)\mathcal{N}(\mathbf{t}|\boldsymbol{\Phi}\mathbf{w},\sigma^2\mathbf{I})\]
 Resulting in:
 \[\begin{cases}
-    \text{P}(\textbf{w}|\textbf{t},\boldsymbol{\Phi},\sigma^2)=\mathcal{N}(\textbf{w}|\textbf{w}_N,\textbf{S}_N) \\
-    \textbf{w}_N=\textbf{S}_N\left(\textbf{S}_0^{-1}\textbf{w}_0+\dfrac{\boldsymbol{\Phi}^T\textbf{t}}{\sigma^2}\right) \\
-    \textbf{S}_N^{-1}=\textbf{S}_0^{-1}+\dfrac{\boldsymbol{\Phi}^T\boldsymbol{\Phi}}{\sigma^2}
+    \Pr(\mathbf{w}|\mathbf{t},\boldsymbol{\Phi},\sigma^2)=\mathcal{N}(\mathbf{w}|\mathbf{w}_N,\mathbf{S}_N) \\
+    \mathbf{w}_N=\mathbf{S}_N\left(\mathbf{S}_0^{-1}\mathbf{w}_0+\dfrac{\boldsymbol{\Phi}^T\mathbf{t}}{\sigma^2}\right) \\
+    \mathbf{S}_N^{-1}=\mathbf{S}_0^{-1}+\dfrac{\boldsymbol{\Phi}^T\boldsymbol{\Phi}}{\sigma^2}
 \end{cases}\]
 
 \paragraph*{Prior infinitely broad}
 When the prior distribution is infinitely broad, the Maximum A Posteriori (MAP) estimate coincides with the Maximum Likelihood (ML) solution:
 \[\begin{cases}
-    \lim_{\textbf{S}_0\rightarrow\infty}\textbf{w}_N={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\textbf{t} \\
-    \lim_{\textbf{S}_0\rightarrow\infty}\textbf{S}_N^{-1}=\dfrac{\boldsymbol{\Phi}^T\boldsymbol{\Phi}}{\sigma^2}
+    \lim_{\mathbf{S}_0\rightarrow\infty}\mathbf{w}_N={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t} \\
+    \lim_{\mathbf{S}_0\rightarrow\infty}\mathbf{S}_N^{-1}=\dfrac{\boldsymbol{\Phi}^T\boldsymbol{\Phi}}{\sigma^2}
 \end{cases}\]
-This yields the ordinary least squares formula.
+This yields the Ordinary Least Squares formula.
 However, in this case, we also have the covariance matrix, providing information about the related uncertainty.
 The only missing parameter is $\sigma^2$, which can be computed as:
-\[\sigma^2=\dfrac{1}{N-M}\sum_{n=1}^{N}{\left( t_n-\hat{\textbf{w}}^T\boldsymbol(\phi)(\textbf{x}_n) \right)}^2\]
-The ML estimate $\textbf{w}_{ML}$ of $\textbf{w}$ has the smallest variance among linear unbiased estimates and the lowest Mean Squared Error (MSE) among linear unbiased estimates (Gauss-Markov).
+\[\sigma^2=\dfrac{1}{N-M}\sum_{n=1}^{N}{\left( t_n-\hat{\mathbf{w}}^T\boldsymbol(\phi)(\mathbf{x}_n) \right)}^2\]
+The ML estimate $\mathbf{w}_{ML}$ of $\mathbf{w}$ has the smallest variance among linear unbiased estimates and the lowest Mean Squared Error (MSE) among linear unbiased estimates (Gauss-Markov).
 
 \paragraph*{Prior not infinitely broad}
-When the prior distribution is not infinitely broad, such that $\textbf{w}_0=0$ and $\textbf{S}_0=\tau^2\textbf{I}$, we can express the logarithm of the posterior distribution $\text{P}(\textbf{w}|\textbf{t})$ as:
-\[\ln\text{P}(\textbf{w}|\textbf{t})=-\dfrac{1}{2\sigma^2}\sum_{i=1}^{N}{\left(t_i-\textbf{w}^T\boldsymbol{\phi}(\textbf{x}_i)\right)}^2-\dfrac{1}{2\tau^2}\left\lVert \textbf{w}\right\rVert_2^2 \]
-In this scenario, the Maximum A Posteriori estimate, MAP ($\textbf{w}N$), coincides with the solution of ridge regression $\hat{\textbf{w}}{ridge}$ with a regularization parameter $\lambda$ set to $\lambda=\frac{\sigma^2}{\tau^2}$.
+When the prior distribution is not infinitely broad, such that $\mathbf{w}_0=0$ and $\mathbf{S}_0=\tau^2\mathbf{I}$, we can express the logarithm of the posterior distribution $\Pr(\mathbf{w}|\mathbf{t})$ as:
+\[\ln\Pr(\mathbf{w}|\mathbf{t})=-\dfrac{1}{2\sigma^2}\sum_{i=1}^{N}{\left(t_i-\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_i)\right)}^2-\dfrac{1}{2\tau^2}{\left\lVert \mathbf{w}\right\rVert}_2^2 \]
+In this scenario, the Maximum A Posteriori estimate, MAP ($\mathbf{w}N$), coincides with the solution of ridge regression $\hat{\mathbf{w}}{ridge}$ with a regularization parameter $\lambda$ set to $\lambda=\frac{\sigma^2}{\tau^2}$.
 
 \paragraph*{Sequential learning}
 How to leverage the Bayesian approach for sequential learning:
@@ -245,19 +278,41 @@ How to leverage the Bayesian approach for sequential learning:
 \end{enumerate}
 
 \paragraph*{Predictive distribution}
-In a Bayesian framework, one can determine the probability distribution of the target variable for a new sample $\textbf{x}^\ast$ (given the training data $\mathcal{D}$) by integrating over the posterior distribution:
-\[\text{P}(t^\ast|\textbf{x}^\ast,\mathcal{D})=\mathbb{E}\left[ t^\ast|\textbf{x}^\ast,\textbf{w},\mathcal{D} \right] = \int\text{P}(t^\ast|\textbf{x}^\ast,\textbf{w},\mathcal{D})\text{P}(\textbf{w}|\mathcal{D})d\textbf{w}\]
+In a Bayesian framework, one can determine the probability distribution of the target variable for a new sample $\mathbf{x}^\ast$ (given the training data $\mathcal{D}$) by integrating over the posterior distribution:
+\[\Pr(t^\ast|\mathbf{x}^\ast,\mathcal{D})=\mathbb{E}\left[ t^\ast|\mathbf{x}^\ast,\mathbf{w},\mathcal{D} \right] = \int\Pr(t^\ast|\mathbf{x}^\ast,\mathbf{w},\mathcal{D})\Pr(\mathbf{w}|\mathcal{D})d\mathbf{w}\]
 This is commonly referred to as the predictive distribution.
 However, computing this predictive distribution typically involves the intractable task of determining the posterior distribution.
 Nevertheless, under certain assumptions, it is possible to compute the predictive distribution as follows: 
-\[\sigma_N^2(\textbf{x})=\sigma^2+\boldsymbol{\phi}{(\textbf{x})}^T\textbf{S}_N\boldsymbol{\phi}(\textbf{x})\]
+\[\sigma_N^2(\mathbf{x})=\sigma^2+\boldsymbol{\phi}{(\mathbf{x})}^T\mathbf{S}_N\boldsymbol{\phi}(\mathbf{x})\]
 Here, as the number of data points $N$ approaches infinity, the uncertainty associated with the parameters (second term) diminishes, and the variance of the predictive distribution depends solely on the variance of the data ($\sigma^2$). 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \subsection{Challenges and limitations}
 Modeling presents challenges in ensuring our model effectively represents a wide range of plausible functions while maintaining informative priors without overly spreading out probabilities or assigning negligible values.
 
 On the computational side, limitations arise with analytical integration, particularly in cases involving non-conjugate priors and complex models. 
-Approaches like Gaussian (Laplace) approximation, Monte Carlo integration, and variational approximation become necessary for addressing these complexities and achieving accurate results.
+Approaches like Gaussian approximation, Monte Carlo integration, and variational approximation become necessary for addressing these complexities and achieving accurate results.
 
 Linear models with fixed basis functions offer several benefits:
 \begin{itemize}
