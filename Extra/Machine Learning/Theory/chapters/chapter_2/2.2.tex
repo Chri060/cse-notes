@@ -203,110 +203,56 @@ To find $\mathbf{w}_{\text{ML}}$, we set the gradient of $\ell (\mathbf{w})$ wit
 Solving this yields the closed-form solution for the maximum likelihood estimate of $\mathbf{w}$
 \[\mathbf{w}_{\text{ML}}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t}\]
 This result matches the solution for the Ordinary Least Squares (OLS) method, showing that the maximum likelihood estimate under the assumption of Gaussian noise is equivalent to minimizing the squared error.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+The Maximum Likelihood estimate $\mathbf{w}_{\text{ML}}$ has the smallest variance among unbiased linear estimators, according to the Gauss-Markov theorem.
 
 \subsection{Bayesian linear regression}
-The Bayesian approach to linear regression involves updating our beliefs about the parameters of a model based on observed data, rather than finding point estimates as in traditional approaches like Maximum Likelihood estimation.
-The process can be broken down into the following steps:
+Bayesian linear regression offers a probabilistic framework for modeling linear relationships by incorporating uncertainty about the model parameters, unlike traditional methods that provide only point estimates. 
+In this approach, we treat the model parameters as random variables and update our beliefs about them as more data becomes available.
+The process is outlined in the following steps:
 \begin{enumerate}
-    \item We forumlate our knowledge about the world in a probabilistic way.
-        We define the model (with unknown parameters) that expresses our knowledge qualitatively.
-        We capture our assumptions about unknown parameters with the prior distribution over those parameters before essing the data.
-    \item Data observation.
-    \item Computation of posterior probability distribution for parameters:
+    \item \textit{Formulation of a probabilistic model}: initially, we express our prior knowledge about the model parameters probabilistically, defining a prior distribution that encapsulates assumptions about these parameters before observing any data. 
+        This prior reflects what we know or assume about the parameter values based on domain expertise or past experience.
+    \item \textit{Data observation}: as we collect data, we obtain a likelihood function that measures the probability of observing the data given particular values of the model parameters.
+    \item \textit{Posterior distribution calculation}: after observing the data, we use Bayes' theorem to compute the posterior distribution, which combines the prior distribution with the likelihood of the data:
         \[\Pr(\text{params}|\text{data})=\dfrac{\Pr(\text{data}|\text{params})\Pr(\text{params})}{\Pr(\text{data})}\]
-    \item We use the posterior distribution to make prediction by averaging over the posterior distribution. examine for uncertainty in the parameters values, and make decisions by minimizing expected posteriori loss. 
+        The posterior distribution provides a refined belief about the model parameters after seeing the data.
+    \item \textit{Prediction and decision making}: to make predictions, we use the posterior distribution by averaging over all possible parameter values weighted by their posterior probabilities. 
+        This allows for uncertainty in the predictions and enables decisions that minimize expected loss.
 \end{enumerate}
-
-The posterior distribution for model parameters is derived by combining the prior with the likelihood for parameters given the data:
+In Bayesian linear regression, the posterior distribution is computed by combining the prior with the likelihood of the parameters given the observed data:
 \[\Pr(\mathbf{w}|\mathcal{D})=\dfrac{\Pr(\mathcal{D}|\mathbf{w})\Pr(\mathbf{w})}{\Pr(\mathcal{D})}\]
-Here, $\Pr(\mathbf{w})$ represents the prior probability over parameters, $\Pr(\mathcal{D}|\mathbf{w})$ denotes the likelihood, and $\Pr(\mathcal{D})$ is the marginal likelihood acting as a normalization constant: 
+Here, $\Pr(\mathbf{w})$ is the prior distribution over the parameters $\mathbf{w}$, $\Pr(\mathcal{D}|\mathbf{w})$ is the likelihood of the data given the parameters, and $\Pr(\mathcal{D})$ is the marginal likelihood, ensuring normalization:
 \[\Pr(\mathcal{D})=\int\Pr(\mathcal{D}|\mathbf{w})\Pr(\mathbf{w})d\mathbf{w}\] 
+The mode of the posterior distribution is known as the Maximum A Posteriori (MAP) estimate, which gives the most probable parameter values given the data.
 
-The mode of the posterior, known as the Maximum A Posteriori (MAP) estimate, yields the most probable value of $\mathbf{w}$ given the data.
-
-A Gaussian likelihood assumption allows the prior to be modeled conveniently as a conjugate prior:
+Assuming a Gaussian likelihood function allows the use of a conjugate Gaussian prior, which simplifies the Bayesian updating process. The prior is typically modeled as:
 \[\Pr(\mathbf{w})=\mathcal{N}(\mathbf{w}|\mathbf{w}_0,\mathbf{S}_0)\]
-Consequently, the posterior remains Gaussian:
-\[\Pr(\mathbf{w}|\mathbf{t},\boldsymbol{\Phi},\sigma^2)\varpropto \mathcal{N}(\mathbf{w}|\mathbf{w}_0,\mathbf{S}_0)\mathcal{N}(\mathbf{t}|\boldsymbol{\Phi}\mathbf{w},\sigma^2\mathbf{I})\]
-Resulting in:
+Here, $\mathbf{w}_0$ is the prior mean, and $\mathbf{S}_0$ is the prior covariance matrix.
+After observing the data, the posterior remains Gaussian:
 \[\begin{cases}
     \Pr(\mathbf{w}|\mathbf{t},\boldsymbol{\Phi},\sigma^2)=\mathcal{N}(\mathbf{w}|\mathbf{w}_N,\mathbf{S}_N) \\
     \mathbf{w}_N=\mathbf{S}_N\left(\mathbf{S}_0^{-1}\mathbf{w}_0+\dfrac{\boldsymbol{\Phi}^T\mathbf{t}}{\sigma^2}\right) \\
     \mathbf{S}_N^{-1}=\mathbf{S}_0^{-1}+\dfrac{\boldsymbol{\Phi}^T\boldsymbol{\Phi}}{\sigma^2}
 \end{cases}\]
+Here, $\mathbf{w}_N$ is the posterior mean, and $\mathbf{S}_N$ is the posterior covariance matrix.
 
-\paragraph*{Prior infinitely broad}
-When the prior distribution is infinitely broad, the Maximum A Posteriori (MAP) estimate coincides with the Maximum Likelihood (ML) solution:
-\[\begin{cases}
-    \lim_{\mathbf{S}_0\rightarrow\infty}\mathbf{w}_N={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t} \\
-    \lim_{\mathbf{S}_0\rightarrow\infty}\mathbf{S}_N^{-1}=\dfrac{\boldsymbol{\Phi}^T\boldsymbol{\Phi}}{\sigma^2}
-\end{cases}\]
-This yields the Ordinary Least Squares formula.
-However, in this case, we also have the covariance matrix, providing information about the related uncertainty.
-The only missing parameter is $\sigma^2$, which can be computed as:
-\[\sigma^2=\dfrac{1}{N-M}\sum_{n=1}^{N}{\left( t_n-\hat{\mathbf{w}}^T\boldsymbol(\phi)(\mathbf{x}_n) \right)}^2\]
-The ML estimate $\mathbf{w}_{ML}$ of $\mathbf{w}$ has the smallest variance among linear unbiased estimates and the lowest Mean Squared Error (MSE) among linear unbiased estimates (Gauss-Markov).
+The prior mean could be: 
+\begin{itemize}
+    \item \textit{Infinitely broad}: if the prior is uninformative, the covariance matrix $\mathbf{S}_0$ ends to infinity, leading to:
+        \[\lim_{\mathbf{S}_0\rightarrow\infty}\mathbf{w}_N={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t} \qquad \lim_{\mathbf{S}_0\rightarrow\infty}\mathbf{S}_N^{-1}=\dfrac{\boldsymbol{\Phi}^T\boldsymbol{\Phi}}{\sigma^2}\]
+        This reduces the Bayesian solution to the ordinary least squares (OLS) solution, and the MAP estimate becomes equivalent to the Maximum Likelihood estimate. 
+        The variance $\sigma^2$ can be estimated as:
+        \[\sigma^2=\dfrac{1}{N-M}\sum_{n=1}^{N}{\left( t_n-\hat{\mathbf{w}}^T\boldsymbol(\phi)(\mathbf{x}_n) \right)}^2\]
+    \item \textit{Not infinitely broad}: in cases where the prior is informative (e,g,$\mathbf{w}_0=0,\mathbf{S}_0=\tau^2\mathbf{I}$), the posterior can be expressed as:
+        \[\ln\Pr(\mathbf{w}|\mathbf{t})=-\dfrac{1}{2}\sum_{i=1}^{N}{\left(t_i-\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_i)\right)}^2-\dfrac{\sigma^2}{2\tau^2}{\left\lVert \mathbf{w}\right\rVert}_2^2 \]
+        The MAP estimate coincides with the solution to ridge regression, where the regularization parameter $\lambda$ is related to the prior by $\lambda=\frac{\sigma^2}{\tau^2}$.
+\end{itemize}
 
-\paragraph*{Prior not infinitely broad}
-When the prior distribution is not infinitely broad, such that $\mathbf{w}_0=0$ and $\mathbf{S}_0=\tau^2\mathbf{I}$, we can express the logarithm of the posterior distribution $\Pr(\mathbf{w}|\mathbf{t})$ as:
-\[\ln\Pr(\mathbf{w}|\mathbf{t})=-\dfrac{1}{2\sigma^2}\sum_{i=1}^{N}{\left(t_i-\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_i)\right)}^2-\dfrac{1}{2\tau^2}{\left\lVert \mathbf{w}\right\rVert}_2^2 \]
-In this scenario, the Maximum A Posteriori estimate, MAP ($\mathbf{w}N$), coincides with the solution of ridge regression $\hat{\mathbf{w}}{ridge}$ with a regularization parameter $\lambda$ set to $\lambda=\frac{\sigma^2}{\tau^2}$.
-
-\paragraph*{Sequential learning}
-How to leverage the Bayesian approach for sequential learning:
-\begin{enumerate}
-    \item Begin by computing the posterior with the initial data.
-    \item As additional data becomes available, update the prior with this new information to obtain the updated posterior.
-\end{enumerate}
-
-\paragraph*{Predictive distribution}
-In a Bayesian framework, one can determine the probability distribution of the target variable for a new sample $\mathbf{x}^\ast$ (given the training data $\mathcal{D}$) by integrating over the posterior distribution:
-\[\Pr(t^\ast|\mathbf{x}^\ast,\mathcal{D})=\mathbb{E}\left[ t^\ast|\mathbf{x}^\ast,\mathbf{w},\mathcal{D} \right] = \int\Pr(t^\ast|\mathbf{x}^\ast,\mathbf{w},\mathcal{D})\Pr(\mathbf{w}|\mathcal{D})d\mathbf{w}\]
-This is commonly referred to as the predictive distribution.
-However, computing this predictive distribution typically involves the intractable task of determining the posterior distribution.
-Nevertheless, under certain assumptions, it is possible to compute the predictive distribution as follows: 
-\[\sigma_N^2(\mathbf{x})=\sigma^2+\boldsymbol{\phi}{(\mathbf{x})}^T\mathbf{S}_N\boldsymbol{\phi}(\mathbf{x})\]
-Here, as the number of data points $N$ approaches infinity, the uncertainty associated with the parameters (second term) diminishes, and the variance of the predictive distribution depends solely on the variance of the data ($\sigma^2$). 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+In Bayesian linear regression, the predictive distribution for a new data point $\mathbf{x}^\ast$ is given by:
+\[\Pr(t|\mathbf{x},\mathcal{D})=\mathbb{E}\left[ t^\ast|\mathbf{x}^\ast,\mathbf{w},\mathcal{D} \right] = \int\Pr(t^\ast|\mathbf{x}^\ast,\mathbf{w},\mathcal{D})\Pr(\mathbf{w}|\mathcal{D})\,d\mathbf{w}\]
+Under Gaussian assumptions, the predictive distribution remains Gaussian with mean and variance:
+\[\mu_N(\mathbf{x})=\boldsymbol{\phi}(\mathbf{x})^T\mathbf{W}_N \qquad\sigma_N^2(\mathbf{x})=\sigma^2+\boldsymbol{\phi}{(\mathbf{x})}^T\mathbf{S}_N\boldsymbol{\phi}(\mathbf{x})\]
+As the number of data points $N$ increases, the uncertainty in the parameters (captured by the second term) diminishes, leaving only the variance of the noise $\sigma^2$. 
 
 \subsection{Challenges and limitations}
 Modeling presents challenges in ensuring our model effectively represents a wide range of plausible functions while maintaining informative priors without overly spreading out probabilities or assigning negligible values.
