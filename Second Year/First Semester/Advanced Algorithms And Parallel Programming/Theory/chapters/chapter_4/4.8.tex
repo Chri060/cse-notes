@@ -1,0 +1,61 @@
+\section{Skip lists}
+
+Skip lists are a simple, randomized dynamic search structure invented by William Pugh in 1989. 
+They are easy to implement and maintain a dynamic set of $n$ elements with expected $\mathcal{O}(\log n)$ time complexity for operations like search, insertion, and deletion.
+Skip lists offer strong probabilistic guarantees, ensuring efficient performance in both expectation and with high probability.
+
+Skip lists improve upon the basic (sorted) linked list, where searches take $\Theta(n)$ time in the worst case. 
+By introducing multiple layers of linked lists, similar to express and local subway lines, searches can be made more efficient.
+The local line connects all elements, like a standard linked list, while the express line connects a subset of elements, allowing faster traversal over the local line.
+The express line acts like a shortcut, speeding up searches by reducing the number of elements to check.
+
+\subsection{Search}
+The search process in a skip list involves: 
+\begin{enumerate} 
+    \item Walking right in the top linked list until proceeding further would overshoot the target. 
+    \item Dropping down to the next level and continuing the search. 
+    \item Repeat this process until reaching the bottom linked list, where the target element is either found or not.
+\end{enumerate} 
+Higher-levels lists represent popular stations in the subway analogy. 
+Even spacing of these nodes provides the best worst-case performance.
+For simplicity, evenly distributing nodes across levels results in optimal performance.
+
+\paragraph*{Analysis}
+For two levels of linked lists, the search cost is approximately:
+\[|L_1|+\dfrac{|L_2|}{|L_1|}\]
+This is minimized when:
+\[|L_1|^2=|L_2|=n\implies |L_1|=\sqrt{n}\]
+Thus, the search cost becomes:
+\[|L_1|+\dfrac{|L_2|}{|L_1|}=\sqrt{n}+\dfrac{n}{\sqrt{n}}=2\sqrt{n}\]
+Extending this idea to $k$ levels of linked lists results in:
+\[k\sqrt[k]{n}\]
+Finally, for $\log n$ levels, the cost becomes:
+\[2\log n\]
+This structure of $\log n$ linked lists is analogous to a binary tree, making skip lists an efficient and well-balanced data structure that supports fast search, insertion, and deletion.
+
+\subsection{Insertion}
+To insert an element $x$ into a skip list:
+\begin{enumerate}
+    \item Perform a search to determine where $x$ belongs in the bottom-most list.
+    \item Insert $x$ into the bottom list, ensuring that the bottom list contains all elements.
+    \item Randomly promote $x$ to higher levels using coin flips. 
+        Thet is, for each level, with probability $\frac{1}{2}$, promote $x$ to the next higher level.
+        On average, half of the elements are promoted 0 levels, a quarter of the elements are promoted 1 level, and an eighth are promoted 2 levels, and so on.
+\end{enumerate}
+The insertion process results in a skip list with a logarithmic number of levels, where the promotion of elements ensures balance across the structure.
+
+\subsection{Skip lists in pratice}
+Skip lists are highly efficient in practice, with searches taking $\mathcal{O}(logn)$ time on average.
+\begin{theorem}
+    With high probability, every search in an $n$-element skip list takes $\mathcal{O}(\log n)$ time. 
+\end{theorem}
+The term with high probability refers to events that occur with probability at least $1-\mathcal{O}\left(\frac{1}{n^\alpha}\right)$, where $\alpha\geq 1$. 
+By setting $\alpha$ large enough, the probability of search time exceeding $\mathcal{O}(logn)$ becomes negligibly small.
+\begin{lemma}
+    With high probability, an $n$-element skip list has $\mathcal{O}(\log n)$ levels.
+\end{lemma}
+
+\paragraph*{Backward analysis}
+Analyzing the search process from the leaf to the root provides further insight.
+Each up move in the search corresponds to the node being promoted during insertion.
+The total number of up moves is bounded by the number of levels, which is $\mathcal{O}(\log n)$ with high probability. 

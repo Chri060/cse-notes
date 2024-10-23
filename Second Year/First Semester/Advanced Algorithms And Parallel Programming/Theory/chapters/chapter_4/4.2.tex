@@ -58,27 +58,7 @@ Focus on a particular minimum cut $\delta(S)$ where $|\delta(S)|=k$
     The probability that Karger's algorithm outputs the cut $\delta(S)$ is at least:
     \[\Pr(\text{Karger's algorithm ends with the cut }\delta(S))\geq\dfrac{1}{\binom{n}{2}}\]
 \end{lemma}
-\begin{proof}
-    Let the contracted edges be $\left\{e_1,e_2,\dots,e_{n-2}\right\}$. 
-    The algorithm succeeds if none of the contracted edges are part of the minimum cut $\delta(S)$.
 
-    Initially, the input graph $G$ has at least $\frac{nk}{2}$ edges, since the minimum degree in $G$ is at least $k$. 
-    Otherwise, we could disconnect a vertex with fewer than $k$ edges, forming a smaller cut, which contradicts the assumption that $\delta(S)$ is a minimum cut.
-
-    After $j$ contractions, the multigraph $G_j$ contains $n - j$ vertices, and its minimum degree is still at least $k$. 
-    Thus, $G_j$ has at least $\frac{(n - j)k}{2}$ edges.
-
-    The probability that the algorithm successfully finds the minimum cut $\delta(S)$ is the probability that none of the contracted edges belong to $\delta(S)$. 
-    This probability is bounded below by:
-    \begin{align*}
-        \Pr(\text{final graph} = \delta(S)) &= \Pr(e_1, e_2, \dots, e_{n-2} \notin \delta(S)) \\
-                                            &= \Pr(e_1 \notin \delta(S)) \prod_{j=1}^{n-3} \Pr(e_{j+1} \notin \delta(S) \mid e_1, \dots, e_j \notin \delta(S)) \\
-                                            &\geq \prod_{j=0}^{n-3} \left( 1 - \frac{k}{(n-j)k/2} \right) \\
-                                            &= \frac{n-2}{n} \times \frac{n-3}{n-1} \times \cdots \times \frac{2}{4} \times \frac{1}{3} \\
-                                            &= \frac{2}{n(n-1)} \\
-                                            &= \frac{1}{\binom{n}{2}}
-    \end{align*}
-\end{proof}
 To increase the probability of success, we run the algorithm $l\cdot \binom{n}{2}$ times. 
 The probability that at least one run succeeds is:
 \[\Pr(\text{one success})=1-\left(1-\dfrac{1}{\binom{n}{2}}\right)^{l\cdot\binom{n}{2}}\geq 1-e^l\]
