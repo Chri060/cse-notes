@@ -10,9 +10,11 @@ In ISPC, each local variable is associated with one of two qualifiers:
 \subsection{Loops}
 ISPC introduces specific statements to facilitate parallelization. 
 For example, loops can be specified over potentially multi-dimensional domains of integer ranges using the following syntax:
-\begin{verbatim}
-    foreach(identifier = start ... end) { /* body */ }
-\end{verbatim}
+\begin{lstlisting}[style=ISPC]
+foreach(identifier = start; identifer = end; identifier++) {
+    /* body */ 
+}
+\end{lstlisting}
 
 \subsection{Communication}
 The ISPC language provides two sets of functions for inter-instance communication:
@@ -26,15 +28,14 @@ The ISPC compiler implicitly defines two essential variables:
     \item \texttt{programIndex}: identifies each instance within a gang.
     \item \texttt{programCount}: represents the size of the gang.
 \end{itemize}
-
 To exchange values between instances, ISPC relies on the shuffle function, defined as follows:
-\begin{verbatim}
-    int32 shuffle(int32 value, int permutation)
-\end{verbatim}
+\begin{lstlisting}[style=ISPC]
+int32 shuffle(int32 value, int permutation)
+\end{lstlisting}
 To retrieve a value from a specific ISPC process, the extract function is used:
-\begin{verbatim}
-    uniform int32 extract(int32 value, uniform int index)
-\end{verbatim}
+\begin{lstlisting}[style=ISPC]
+uniform int32 extract(int32 value, uniform int index)
+\end{lstlisting}
 
 Additionally, the ISPC compiler can utilize the PRAM model to enhance performance. 
 It is recommended to use reductions whenever available; if not, the low-level communication interface should be employed.
