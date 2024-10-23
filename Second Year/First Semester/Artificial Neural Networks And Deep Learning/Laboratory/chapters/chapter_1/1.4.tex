@@ -1,0 +1,49 @@
+\section{Model definition}
+
+We need to find the number of features and the number of classis for our Neural Network. 
+\begin{lstlisting}[style=Python]
+input_shape = X_train.shape[1:]
+output_shape = y_train.shape[1]
+\end{lstlisting}
+We set also the other parametes such as: batch size (number of samples processed in each training iteration), number of epochs (times the entire dataset is passed through the network during training), and learning rate (step size for updating the model's weights). 
+\begin{lstlisting}[style=Python]
+batch_size = 16
+epochs = 500
+learning_rate = 0.001
+\end{lstlisting}
+We can finally build the model.
+\begin{lstlisting}[style=Python]
+def build_model(input_shape=input_shape, output_shape=output_shape, learning_rate=learning_rate, seed=seed):
+
+# Fix randomness
+tf.random.set_seed(seed)
+
+# Build the neural network layer by layer
+inputs = tfkl.Input(shape=input_shape, name='Input')
+
+# Add hidden layer with ReLU activation
+x = tfkl.Dense(units=16, name='Hidden')(inputs)
+x = tfkl.Activation('relu', name='HiddenActivation')(x)
+
+# Add output layer with softmax activation
+x = tfkl.Dense(units=output_shape, name='Output')(x)
+outputs = tfkl.Activation('softmax', name='Softmax')(x)
+
+# Connect input and output through the Model class
+model = tfk.Model(inputs=inputs, outputs=outputs, name='FeedforwardNeuralNetwork')
+
+# Compile the model with loss, optimizer, and metrics
+loss = tfk.losses.CategoricalCrossentropy()
+optimizer = tfk.optimizers.Adam(learning_rate)
+metrics = ['accuracy']
+model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
+
+# Return the model
+return model
+\end{lstlisting}
+Now we can finally display the data about the new model we have created. 
+\begin{lstlisting}[style=Python]
+model = build_model()
+model.summary(expand_nested=True, show_trainable=True)
+tfk.utils.plot_model(model, expand_nested=True, show_trainable=True, show_shapes=True, dpi=70)
+\end{lstlisting}

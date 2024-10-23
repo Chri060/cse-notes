@@ -1,0 +1,55 @@
+\section{Notebook setup}
+
+We start by setting a standard sees in order to have a replicable execution.
+We also set some environmental variables to disable warnings and adjust other modules settings.  
+\begin{lstlisting}[style=Python]
+seed = 42
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=Warning)
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['PYTHONHASHSEED'] = str(seed)
+os.environ['MPLCONFIGDIR'] = os.getcwd() + '/configs/'
+\end{lstlisting}
+Import the necessary modules used to handle data and numbers.
+\begin{lstlisting}[style=Python]
+import logging
+import random
+import numpy as np
+
+np.random.seed(seed)
+random.seed(seed)
+%matplotlib inline
+\end{lstlisting}
+Import tensorflow and keras to manage Neural Networks
+\begin{lstlisting}[style=Python]
+import tensorflow as tf
+from tensorflow import keras as tfk
+from tensorflow.keras import layers as tfkl
+
+tf.random.set_seed(seed)
+tf.compat.v1.set_random_seed(seed)
+
+tf.autograph.set_verbosity(0)
+tf.get_logger().setLevel(logging.ERROR)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+print(tf.__version__)
+\end{lstlisting}
+Lastly, import pandas (for tabular data), seaborn, and matplotlib (for data visualization).
+\begin{lstlisting}[style=Python]
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.model_selection import train_test_split
+
+sns.set(font_scale=1.4)
+sns.set_style('white')
+plt.rc('font', size=14)
+%matplotlib inline
+\end{lstlisting}

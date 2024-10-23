@@ -1,0 +1,54 @@
+\section{Data processing}
+
+Since we have only the data from the given dataser, but after the training we have to test the genrated model to test the correctness, we need to split the dataset in multiple parts:. 
+Also, we need a validation set to validate the given model. 
+\begin{lstlisting}[style=Python]
+# Split the dataset into a combined training and validation set, and a separate 
+# test set
+X_train_val, X_test, y_train_val, y_test = train_test_split(
+    iris_dataset,
+    target,
+    test_size=20,
+    random_state=seed,
+    stratify=target
+)
+
+# Further split the combined training and validation set into a training set and 
+# a validation set
+X_train, X_val, y_train, y_val = train_test_split(
+    X_train_val,
+    y_train_val,
+    test_size=20,
+    random_state=seed,
+    stratify=y_train_val
+)
+
+# Print the shapes of the resulting sets
+print('Training set shape:\t', X_train.shape, y_train.shape)
+print('Validation set shape:\t', X_val.shape, y_val.shape)
+print('Test set shape:\t\t', X_test.shape, y_test.shape)
+\end{lstlisting}
+After dividing the dataset in training, validation, and test sets we need now to normalize them.
+To do so we use the entire dataset to find maximum and minimum, and then we normalize all other samples with respect to these values. 
+The normalization is mainly used to speed up the training process. 
+With the minmax applied in this case we have all values constrained between zero and one. 
+\begin{lstlisting}[style=Python]
+max_df = X_train.max()
+min_df = X_train.min()
+
+X_train = (X_train - min_df) / (max_df - min_df)
+X_val = (X_val - min_df) / (max_df - min_df)
+X_test = (X_test - min_df) / (max_df - min_df)
+
+X_train.describe()
+\end{lstlisting}
+Then, since we are dealing with a classification task in which we want to know the exact class of each element, we may use perceptron with one hot encoding.
+\begin{lstlisting}[style=Python]
+y_train = tfk.utils.to_categorical(y_train, num_classes=len(unique))
+y_val = tfk.utils.to_categorical(y_val, num_classes=len(unique))
+y_test = tfk.utils.to_categorical(y_test, num_classes=len(unique))
+
+print('Training set target shape:\t', y_train.shape)
+print('Validation set target shape:\t', y_val.shape)
+print('Test set target shape:\t\t', y_test.shape)
+\end{lstlisting}

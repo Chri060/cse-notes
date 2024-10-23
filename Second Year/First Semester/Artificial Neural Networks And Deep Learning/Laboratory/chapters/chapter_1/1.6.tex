@@ -1,0 +1,51 @@
+\section{Model prediction}
+
+To make prediction with a model we start by loading it into memory. 
+\begin{lstlisting}[style=Python]
+# Load the saved model
+model = tfk.models.load_model('Iris_Feedforward_95.0.keras')
+
+# Display a summary of the model architecture
+model.summary(expand_nested=True, show_trainable=True)
+
+# Plot the model architecture
+tfk.utils.plot_model(model, expand_nested=True, show_trainable=True, show_shapes=True, dpi=70)
+\end{lstlisting}
+The, we can finally make prediction and plot the confusion matrix.
+\begin{lstlisting}[style=Python]
+# Predict class probabilities and get predicted classes
+train_predictions = model.predict(X_train, verbose=0)
+train_predictions = np.argmax(train_predictions, axis=-1)
+
+# Extract ground truth classes
+train_gt = np.argmax(y_train, axis=-1)
+
+# Calculate and display training set accuracy
+train_accuracy = accuracy_score(train_gt, train_predictions)
+print(f'Accuracy score over the train set: {round(train_accuracy, 4)}')
+
+# Calculate and display training set precision
+train_precision = precision_score(train_gt, train_predictions, average='weighted')
+print(f'Precision score over the train set: {round(train_precision, 4)}')
+
+# Calculate and display training set recall
+train_recall = recall_score(train_gt, train_predictions, average='weighted')
+print(f'Recall score over the train set: {round(train_recall, 4)}')
+
+# Calculate and display training set F1 score
+train_f1 = f1_score(train_gt, train_predictions, average='weighted')
+print(f'F1 score over the train set: {round(train_f1, 4)}')
+
+# Compute the confusion matrix
+cm = confusion_matrix(train_gt, train_predictions)
+
+# Create labels combining confusion matrix values
+labels = np.array([f"{num}" for num in cm.flatten()]).reshape(cm.shape)
+
+# Plot the confusion matrix with class labels
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=labels, fmt='', xticklabels=['Setosa', 'Versicolor', 'Virginica'], yticklabels=['Setosa', 'Versicolor', 'Virginica'], cmap='Blues')
+plt.xlabel('True labels')
+plt.ylabel('Predicted labels')
+plt.show()
+\end{lstlisting}
