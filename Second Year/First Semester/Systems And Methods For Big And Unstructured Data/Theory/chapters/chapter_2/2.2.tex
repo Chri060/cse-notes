@@ -1,13 +1,13 @@
 \section{Documental database}
 
-n traditional relational databases, data is distributed across multiple tables. 
+In traditional relational databases, data is distributed across multiple tables. 
 However, in business applications, it is often beneficial to structure the data into a single, cohesive document that pulls together relevant information from various sources. 
 This approach provides a more intuitive representation of the data, simplifying query processes by avoiding the need to join multiple tables. 
 Additionally, document-oriented databases are highly flexible, allowing for the easy addition of attributes, which makes handling schema changes much more straightforward. 
 The document model also closely aligns with object-oriented programming paradigms, effectively resolving the impedance mismatch problem that arises when trying to map objects to relational tables.
 
 \subsection{MongoDB}
-AMongoDB is a widely-used, open-source, document-oriented database. 
+MongoDB is a widely-used, open-source, document-oriented database. 
 It stores data in flexible, JSON-like documents, offering developers agility and scalability. With MongoDB, the schema is dynamic, allowing for flexible and evolving data models. 
 Furthermore, it supports automatic data sharding, enabling seamless horizontal scaling.
 Key advantages of MongoDB include: 
@@ -22,6 +22,57 @@ Key advantages of MongoDB include:
 \paragraph*{Security features} 
 SSL encryption between client and server, and intra-cluster communication. 
 Fine-grained authorization controls at the database level, supporting read-only, read and write, and administrative roles.
+
+\paragraph*{MongoDB processes}
+MongoDB operates with three core processes:
+\begin{itemize}
+    \item \textit{Mongod}: this is the primary process that runs the MongoDB database instance. 
+        It handles all the database operations, data storage, and query processing.
+    \item \item \textit{Mongos}: Responsible for managing the sharding architecture, mongos acts as a query router. 
+    It directs client requests to the appropriate mongod instances based on the sharding configuration. 
+        You can deploy either a single mongos for the entire system or multiple mongos instances (e.g., one per client) to reduce network latency and improve performance.
+    \item \textit{Mongo}: this is an interactive command-line shell used by clients to interact with MongoDB, perform queries, administrative tasks, and more.
+\end{itemize}
+
+\paragraph*{Sharding}
+Sharding is MongoDB's method for partitioning large datasets across multiple servers to achieve horizontal scaling, optimize performance, and provide resilience.
+Key features of MongoDB sharding are:
+\begin{itemize} 
+    \item \textit{Scale}: Designed to handle the massive workloads of modern applications, ensuring scalability as data volume grows. 
+    \item \textit{Geo-locality}: Allows geographically distributed deployments, optimizing user experience across different regions. 
+    \item \textit{Hardware optimization}: Enables fine-tuning performance versus cost by distributing data intelligently across available resources. 
+    \item \textit{Lower recovery times}: Facilitates faster recovery during failures, supporting stringent Recovery Time Objectives (RTO). 
+\end{itemize}
+A shard key is defined by the data modeler and determines how MongoDB partitions data across shards. 
+The data is divided into chunks based on this key, which are then evenly distributed across the available shards on different physical servers.
+The sharding unfolds in the following steps:
+\begin{itemize} 
+    \item Initially, the system starts with a single chunk, but as the dataset grows, MongoDB automatically splits and migrates chunks to ensure balanced distribution across shards. 
+        The default maximum chunk size is 64MB. 
+    \item MongoDB routes queries directly to the appropriate shard(s), reducing query overhead. 
+    \item A config server stores information about the shard ranges and their locations. 
+        In production environments, it is recommended to have three config servers to ensure high availability. 
+\end{itemize}
+The sharding can be: 
+\begin{itemize}
+    \item \textit{Range}: data is partitioned based on a continuous range of shard keys (e.g., \{deviceId\}). Composite keys are also supported (e.g., \{deviceId, timestamp\}).
+    \item \textit{Hash}: MongoDB applies an MD5 hash to the shard key, ensuring that data is randomly distributed across the available shards. 
+        This technique minimizes hotspots and ensures even distribution.
+    \item \textit{Tag}: this method allows specific shards to be tagged with labels, ensuring that certain data subsets (e.g., users from a specific region) are stored on a designated group of shards. 
+        This is particularly useful for optimizing geo-locality.
+\end{itemize}
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Usage} & \textbf{Required strategy} \\ \hline
+        Scale & Range or hash \\ \hline
+        Geo-locality & Tag-aware \\ \hline
+        Hardware optimization & Tag-aware \\ \hline
+        Lower recovery times & Range or hash \\ \hline
+    \end{tabular}
+\end{table}
+MongoDB focuses on consistency and partition tolerance. 
 
 \subsection{Data model}
 MongoDB stores data in JSON format, which is ideal for web applications due to its readability and flexibility. 
@@ -41,17 +92,47 @@ BSON supports more data types than JSON, including date and byte array types, wh
 Each document must have a unique identifier, which MongoDB can automatically generate if not provided.
 MongoDB also allows for embedding multiple documents within a single document, which simplifies data retrieval and reduces the need for complex joins.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 \subsection{Query language}
+MongoDB allow to perform the CRUD operations: 
+\begin{itemize}
+    \item \textit{Create}: we can create an entire database: 
+        \begin{verbatim}
+use database_name
+        \end{verbatim}
+        We may create a collection: 
+        \begin{verbatim}
+db.createCollection(name, options)
+        \end{verbatim}
+        And also inser a new document: 
+        \begin{verbatim}
+db.<collection_name>.insert()
+        \end{verbatim}
+    \item \textit{Read}: we can query for all elements: 
+        \begin{verbatim}
+db.<collection_name>.find().pretty()
+        \end{verbatim}
+        With the \texttt{find} function we can insert some filters. 
+
+        We can also aggregate documens, by pipelining documents from a collection through an aggregation pipeline. 
+        Expressions produce output documents based on calculations performed on input documents: 
+        \begin{verbatim}
+db.parts.aggregate()
+        \end{verbatim}
+    \item \textit{Update}: the general command to update documents is: 
+        \begin{verbatim}
+db.<collection_name>.update(<select_criteria>,<updated_data>)
+        \end{verbatim}
+        We can also use the save method to replace an already existsing document: 
+        \begin{verbatim}
+db.students.save()
+        \end{verbatim}
+    \item \textit{Delete}: we can drop a database: 
+        \begin{verbatim}
+db.dropDatabase()
+        \end{verbatim}
+        We can drop a collection or a document: 
+        \begin{verbatim}
+db.<collection_name>.drop()
+db.<collection_name>.remove(options)
+        \end{verbatim}
+\end{itemize}
