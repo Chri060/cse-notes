@@ -51,93 +51,48 @@ To ensure proper image rectification and scaling, the matrix $\mathbf{H}_\text{S
 \[\mathbf{H}_\text{SR} = \begin{bmatrix} \frac{1}{\sqrt{a}} & 0 & 0 \\ 0 & \frac{1}{\sqrt{b}} & 0 \\ 0 & 0 & 1 \end{bmatrix} \mathbf{U}^T\]
 This transformation not only maps the circular points back to their original positions but also ensures that the final image is a faithful similarity reconstruction of the scene.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \subsection{Vanishing line identification}
 To determine the vanishing line, one can leverage additional information from the observed scene. 
-This information can be used to establish the following constraints:
+This information helps establish several key constraints:
 \begin{enumerate}
-    \item Known angles between lines: when the angles between lines in the scene are known, these angles can be used to constrain the vanishing line. 
-        The angle between two lines is related to the angle between their normal directions and is independent of parameters $c_1$ and $c_2$. 
-        Mathematically, this relationship is expressed as:
+    \item \textit{Known angles between lines}: when the angles between lines in the scene are known, they provide useful constraints on the vanishing line. 
+        The angle between two lines depends on the angle between their normal vectors and is independent of parameters $c_1$ and $c_2$. 
+        This relationship can be expressed mathematically as:
         \[\cos\vartheta=\dfrac{a_1a_2+b_1b_2}{\sqrt{(a_1^2+b_1^2)(a_2^2+b_2^2)}}\]
         Here, $a_1$, $b_1$, $a_2$, and $b_2$ are coefficients of the normal vectors of the lines. 
-        By rewriting the terms, this equation can be expressed as: 
-        \[\cos\vartheta=\dfrac{l^TC_{\infty}^\ast m}{\sqrt{(l^TC_{\infty}^\ast l)(m^TC_{\infty}^\ast m)}}\]
-        This equation can be further simplified by using the rules obtaining $C_{\infty}^\ast=H^{-1}C_{\infty}^{*'}H^{-T}$.  
-        Now, we can rewrite $l^TC_{\infty}^\ast m$ as $l^{\prime T}C_{\infty}^{*'}m^\prime$. 
-        With these transformations, the equation becomes:
-        \[\cos\vartheta=\dfrac{l^{\prime T}C_{\infty}^{*'}m^\prime}{(l^{\prime T}C_{\infty}^{*'}l^\prime)(m^{\prime T}C_{\infty}^{*'}m^\prime)}\]
-        In this case, $m^\prime$ and $l^\prime$ are obtained from the image. 
-        Since the angle is known, this equation provides a linear constraint on $C_{\infty}^{*'}$, that is linear when the lines are perpendicular ($\cos\vartheta=0$).
-        The unknown matrix $C_{\infty}^\prime$ is symmetric, homogeneous, and singular, providing four independent constraints.
-    \item Known shape of objects: if the shape of objects in the scene is known, the reconstruction matrix $\mathbf{H}_\text{SR}$ can be determined. 
-        The transformation matrix is defined as:
-        \[\mathbf{H}_\text{SR}=
-        \begin{bmatrix}
-            \frac{1}{\sqrt{a}} & 0 & 0 \\
-            0 & \frac{1}{\sqrt{b}} & 0 \\
-            0 & 0 & 1
-        \end{bmatrix}
-        U^T
-        \]
-        The Euclidean reconstructed image is calculated as $M_S=\mathbf{H}_\text{SR} \cdot \textnormal{image}$
-    \item Combinations of constraints: it is also possible to use a combination of known angles between lines and the shape of objects for additional constraints.
-    \item Observation of rigid planar motion: when observing rigid planar motion, which is a similarity transformation, the circular points remain invariant.
-        The object has three degrees of freedom, and the center of rotation and the rotation angle can be determined.
-        Given a matrix $H$, the eigenvectors of $H$ correspond to fixed points, and the eigenvectors of $H^{-T}$ correspond to fixed lines of the transformation.
-        The eigenvectors can be used to extract important information:
+        This expression can be rewritten as:
+        \[\cos\vartheta=\dfrac{\mathbf{l}^T\mathbf{C}_{\infty}^\ast \mathbf{m}}{\sqrt{(\mathbf{l}^T\mathbf{C}_{\infty}^\ast \mathbf{l})(\mathbf{m}^T\mathbf{C}_{\infty}^\ast \mathbf{m})}}\]
+        The equation can be further simplified using the relationship $\mathbf{C}_{\infty}^\ast=\mathbf{H}^{-1}\mathbf{C}_{\infty}^{\ast\prime}\mathbf{H}^{-T}$, allowing us to express $\mathbf{l}^T\mathbf{C}_{\infty}^\ast \mathbf{m}$ as $\mathbf{l}^{\prime T}\mathbf{C}_{\infty}^{\ast\prime}\mathbf{m}^\prime$. 
+        Thus, the equation becomes:
+        \[\cos\vartheta=\dfrac{\mathbf{l}^{\prime T}\mathbf{C}_{\infty}^{\ast\prime}\mathbf{m}^\prime}{(\mathbf{l}^{\prime T}\mathbf{C}_{\infty}^{\ast\prime}\mathbf{l}^\prime)(\mathbf{m}^{\prime T}\mathbf{C}_{\infty}^{\ast\prime}\mathbf{m}^\prime)}\]
+        In this case, $\mathbf{m}^\prime$ and $\mathbf{l}^\prime$ are derived from the image. 
+        Since the angle $\vartheta$ is known, this equation provides a linear constraint on $\mathbf{C}_{\infty}^{\ast\prime}$. 
+        When the lines are perpendicular ($\cos\vartheta=0$), this constraint is particularly useful.
+        The unknown matrix $\mathbf{C}_{\infty}^\prime$ is symmetric, homogeneous, and singular, providing four independent constraints.
+    \item \textit{Known objects shapes}: f the shape of objects in the scene is known, the reconstruction matrix $\mathbf{H}_\text{SR}$ can be determined. 
+        This transformation matrix is defined as:
+        \[\mathbf{H}_\text{SR} = \begin{bmatrix} \frac{1}{\sqrt{a}} & 0 & 0 \\ 0 & \frac{1}{\sqrt{b}} & 0 \\ 0 & 0 & 1 \end{bmatrix}\mathbf{U}^T\]
+        The Euclidean-reconstructed image can then be calculated as $\mathbf{M}_S=\mathbf{H}_\text{SR} \cdot \textnormal{image}$. 
+    \item \textit{Combinations of constraints}: it is also possible to combine known angles between lines and object shapes to derive additional constraints on the vanishing line. 
+    \item \textit{Observation of rigid planar motion}: when observing rigid planar motion, which follows a similarity transformation, circular points remain invariant.
+        The object in motion has three degrees of freedom, and both the center of rotation and the rotation angle can be derived.
+        Given a transformation matrix $\mathbf{H}$, its eigenvectors provide important insights:
         \begin{itemize}
-            \item Eigenvectors $\mathbf{I}^\prime,\mathbf{J}^\prime$ correspond to complex eigenvalues. 
-            \item The phase of these eigenvectors is the rotation angle.
-            \item Eigenvector $O^\prime$ correspond to real eigenvalues. 
+            \item Eigenvectors of $\mathbf{H}$ correspond to fixed points.
+            \item Eigenvectors of $\mathbf{H}^{-1}$ correspond to fixed lines.
         \end{itemize}
-        The three eigenvectors of $H$ are proportional to three distinct values: 1, $e^{i\theta}$, and $-e^{i\theta}$.
-        The eigenvector corresponding to the eigenvalue 1 represents the image of the center of rotation, denoted as $O$, and the angle $\theta$ corresponds to the rotation angle. 
-        The eigenvectors associated with the complex eigenvalues represent the images of the circular points $\mathbf{I}^\prime,\mathbf{J}^\prime$. 
-        Therefore, using the relationship $C_{\infty}^{\prime\ast}=\mathbf{I}^\prime J^{\prime T}+\mathbf{J}^\prime I^{\prime T}$, the singular value decomposition can be applied to obtain $\text{SVD}(C_{\infty}^{\prime\ast})=UC_{\infty}^\ast U^T$, where $U^T$ is the rectification matrix. 
-        Two methods can be used to address this:
+        Specifically:
         \begin{itemize}
-            \item Direct method: 
-                \begin{enumerate}
-                    \item Find $C_{\infty}^{*'}$. 
-                    \item Compute $H_{rect}$ for rectification. 
-                \end{enumerate}
-            \item Stratified method: 
-                \begin{enumerate}
-                    \item Perform affine reconstruction from projective to affine.
-                    \item Perform shape reconstruction from affine to metric.
-                \end{enumerate}
+            \item Complex eigenvalues correspond to eigenvectors $\mathbf{I}^\prime$ and $\mathbf{J}^\prime$, where the phase represents the rotation angle.
+            \item Real eigenvalues correspond to the eigenvector $\mathbf{O}^\prime$, representing the center of rotation.
         \end{itemize}
-        In some cases, the stratified method reduces numerical errors, providing a more accurate result.
+        The eigenvectors associated with the complex eigenvalues $e^{i\theta}$, and $-e^{i\theta}$ represent the images of the circular points.
+        The eigenvector corresponding to the eigenvalue 1 gives the image of the center of rotation, $O$, while $\theta$ corresponds to the rotation angle.
+        Using the relationship $\mathbf{C}_{\infty}^{\prime\ast}=\mathbf{I}^\prime \mathbf{J}^{\prime T}+\mathbf{J}^\prime \mathbf{I}^{\prime T}$, the singular value decomposition (SVD) can be applied to obtain $\text{SVD}(\mathbf{C}_{\infty}^{\prime\ast})=\mathbf{UC}_{\infty}^\ast \mathbf{U}^T$, where $\mathbf{U}^T$ is the rectification matrix. 
+        There are two primary methods to address this:
+        \begin{itemize}
+            \item \textit{Direct method}: first compute $\mathbf{C}_{\infty}^{\ast\prime}$, and then derive the rectification matrix $\mathbf{H}_{\text{rect}}$.
+            \item \textit{Stratified method}: first perform an affine reconstruction from projective to affine geometry, and then perform shape reconstruction from affine to metric geometry.
+        \end{itemize}
+        The stratified method can sometimes reduce numerical errors, providing more accurate results.
 \end{enumerate}
