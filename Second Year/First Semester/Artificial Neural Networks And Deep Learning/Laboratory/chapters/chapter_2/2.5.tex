@@ -1,0 +1,147 @@
+\section{Auxiliary functions}
+
+We define some auxiliary function usefule for our analysis: 
+\begin{lstlisting}[style=Python]
+# Define a function for plotting training and validation Mean Squared Error (MSE) histories.
+def plot_histories(metadata, training=False, baseline=False, show_all=False):
+
+    print('VALIDATION MSE')
+    plt.figure(figsize=(21, 9))
+
+    # Iterate through different models stored in metadata.
+    for model in list(metadata.keys()):
+
+        # Skip the baseline model if baseline flag is False.
+        if model == 'Baseline' and not baseline:
+            continue
+
+        # Retrieve relevant information from the metadata dictionary.
+        history = metadata[model]['history']
+        patience = metadata[model]['patience']
+        color = metadata[model]['color']
+        val_score = metadata[model]['val_score']
+        print('%s: %.4f' % (model, val_score))
+
+        # Plot training and validation MSE histories with or without patience handling.
+        if patience != 0:
+            if training:
+                plt.plot(
+                    history['mse'][:-patience],
+                    alpha=0.5,
+                    color=color
+                )
+                if show_all:
+                    plt.plot(
+                        np.arange(len(history['mse']) - patience - 1, len(history['mse'])),
+                        history['mse'][-patience - 1:],
+                        alpha=0.2,
+                        color=color
+                    )
+
+            plt.plot(
+                history['val_mse'][:-patience],
+                label=model,
+                alpha=0.9,
+                color=color
+            )
+            if show_all:
+                plt.plot(
+                    np.arange(len(history['val_mse']) - patience - 1, len(history['val_mse'])),
+                    history['val_mse'][-patience - 1:],
+                    alpha=0.2,
+                    color=color
+                )
+
+        else:
+            if training:
+                plt.plot(
+                    history['mse'],
+                    alpha=0.5,
+                    color=color
+                )
+            plt.plot(
+                history['val_mse'],
+                label=model,
+                alpha=0.9,
+                color=color
+            )
+
+        # Set y-axis limits and add labels, legends, and grid.
+        if training:
+            plt.ylim(0.004, 0.0225)
+        else:
+            plt.ylim(0.01, 0.025)
+        plt.title('Mean Squared Error')
+        plt.legend(loc='upper right')
+        plt.grid(alpha=0.3)
+
+    # Display the plot.
+    plt.show()
+
+
+# Define a function for plotting residuals and model predictions
+def plot_residuals(model, data, labels):
+    # Sort the data and labels based on the 'labels' column
+    data['sort'] = labels
+    data = data.sort_values(by=['sort'])
+    labels = np.expand_dims(data['sort'], 1)
+    data.drop(['sort'], axis=1, inplace=True)
+
+    # Make predictions using the model
+    y_pred = model.predict(data, verbose=0)
+
+    # Calculate squared errors and mean squared error (MSE)
+    squared_errors = (labels - y_pred)**2
+    mse = np.mean(squared_errors).astype('float32')
+    print('MSE: %.4f' % mse)
+
+    # Set up plotting styles and create a scatter plot
+    mpl.rcParams.update(mpl.rcParamsDefault)
+    sns.set(font_scale=1.1, style=None, palette='Set1')
+    plt.figure(figsize=(21, 5))
+
+    # Plot true labels in red and model predictions in blue
+    plt.scatter(np.arange(len(labels)), labels, label='True', color='#d62728', alpha=0.7, s=8)
+
+    # Add vertical lines to represent residuals
+    for i in range(len(labels)):
+        if labels[i] >= y_pred[i]:
+            plt.vlines(i, y_pred[i], labels[i], alpha=0.2, linewidth=0.5)
+        else:
+            plt.vlines(i, labels[i], y_pred[i], alpha=0.2, linewidth=0.5)
+
+    plt.scatter(np.arange(len(y_pred)), y_pred, label='Prediction', color='#1f77b4', s=8)
+
+    # Add legends, grid, and set y-axis limits
+    plt.legend()
+    plt.grid(alpha=0.3)
+    plt.ylim((-0.1, 1.1))
+    plt.show()
+
+
+def evaluate_and_plot_model(model, X_val, y_val, X_test, y_test, metadata, history, patience, model_name, color, plot_baseline=False):
+    # Calculate validation Mean Squared Error (MSE) for the model
+    val_predictions = np.squeeze(model.predict(X_val, verbose=0))
+    val_squared_errors = (y_val - val_predictions)**2
+    val_mse = np.mean(val_squared_errors).astype('float32')
+
+    # Calculate test Mean Squared Error (MSE) for the model
+    test_predictions = np.squeeze(model.predict(X_test, verbose=0))
+    test_squared_errors = (y_test - test_predictions)**2
+    test_mse = np.mean(test_squared_errors).astype('float32')
+
+    # Add model metadata to the dictionary
+    metadata[model_name] = {
+        'model': model,
+        'history': history,
+        'color': color,
+        'patience': patience,
+        'val_score': val_mse,
+        'test_score': test_mse
+    }
+
+    # Plot histories
+    plot_histories(metadata, baseline=plot_baseline)
+
+    return metadata
+\end{lstlisting}
