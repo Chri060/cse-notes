@@ -153,3 +153,54 @@ This includes applying operations such as ReLU (thresholding) and max pooling (d
 
 The architecture typically involves stacking many convolutional, activation, and pooling layers to learn meaningful representations from the data. 
 This depth allows the network to capture low-level features in the initial layers, and more complex patterns (e.g., shapes, objects) in the deeper layers.
+
+\subsection{Convolutional and dense layers}
+Convolution is fundamentally a linear operation. 
+When an input image is unrolled into a vector, the convolutional weights can be conceptualized as the weights of a dense layer.
+Both convolutional and dense layers can be represented as linear operators, expressed mathematically as:
+\[\mathbf{a}=\mathbf{Wx}+\mathbf{b}\]
+
+\paragraph*{Dense layers}
+In dense layers, the weight matrix is fully populated, meaning each input neuron is connected to every output neuron through distinct weights. 
+This results in a comprehensive interaction among neurons.
+
+\paragraph*{Convolutional layers}
+Conversely, convolutional layers exhibit sparse connectivity. 
+Here, each output neuron is influenced only by a subset of input neurons, reflecting the localized nature of convolution.
+As a result, most entries in the weight matrix are zero. 
+The convolutional operation spans all channels of the input, leading to a circular structure within the weight matrix.
+
+In convolutional layers, weights are shared across the entire output channel. 
+The same filter is applied to compute the output for multiple positions, effectively shifting the filter across the input. 
+This mechanism results in several output neurons sharing the same weights and bias values, which are constant across blocks corresponding to the filters.
+
+\paragraph*{Spatial invariance}
+A defining characteristic of Convolutional Neural Networks (CNNs) is spatial invariance. 
+All neurons within the same slice of a feature map utilize the same weights and biases, significantly reducing the total number of parameters in the network. 
+The underlying assumption here is that if a feature is useful for computation at one spatial position, it should also be useful at different positions.
+
+Every convolutional layer can be mathematically implemented as a fully connected layer that performs equivalent computations.
+The weight matrix for a convolutional layer would be large, with the number of rows equal to the number of output neurons and the number of columns equal to the number of input neurons. 
+This matrix is predominantly sparse, filled mostly with zeros, except for specific blocks where local connectivity is established. 
+Moreover, many weights within these blocks are identical due to parameter sharing.
+Interestingly, the converse interpretation is also valid and offers insightful perspectives on their functional equivalence.
+
+\subsection{Receptive field}
+The concept of the receptive field is fundamental in deep Convolutional Neural Networks. 
+Unlike fully connected networks, where each output is influenced by the entire input, each output in a CNN is determined by a specific localized region of the input. 
+This localized region is referred to as the receptive field for that output.
+
+As the network depth increases, the receptive field expands. 
+This expansion occurs through various mechanisms, including convolutions, strides, and max pooling, which collectively contribute to the widening of the receptive field. 
+Typically, the receptive field is defined concerning the final output unit of the network relative to the input; however, this definition is equally applicable to intermediate feature maps.
+
+In deeper layers, neurons are influenced by larger patches of the input. 
+Notably, convolutions alone are sufficient to increase the receptive field, eliminating the necessity for max pooling.
+
+As we progress deeper into the network:
+\begin{itemize}
+    \item The spatial resolution of the feature maps diminishes.
+    \item The number of feature maps generally increases.
+\end{itemize}
+At these deeper layers, the focus shifts to detecting higher-level patterns, allowing for a degree of insensitivity to their exact spatial location. 
+This is essential, as higher-level patterns are often more abundant and informative than low-level details.
