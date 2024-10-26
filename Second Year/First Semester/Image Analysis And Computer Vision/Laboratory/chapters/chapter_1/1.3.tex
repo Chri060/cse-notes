@@ -1,0 +1,101 @@
+\section{Homogeneous coordinates in MATLAB}
+
+To illustrate homogeneous coordinates, we begin by analyzing a 5x5 checkerboard image and selecting points manually. 
+Let's start by loading the image:
+\begin{lstlisting}[style=MATLAB] 
+% Load the checkerboard image
+I = imread('E1_data/checkerboard.png');
+figure(1), imshow(I);
+hold on;
+[x, y] = getpts();
+\end{lstlisting}
+After selecting four points on the checkerboard, we store them as homogeneous coordinates by setting the third component to 1:
+\begin{lstlisting}[style=MATLAB] 
+% Define points in homogeneous coordinates
+a = [x(1); y(1); 1];
+b = [x(2); y(2); 1];
+c = [x(3); y(3); 1];
+d = [x(4); y(4); 1];
+\end{lstlisting}
+To visualize the selected points, we add labels with different colors at each point's location:
+\begin{lstlisting}[style=MATLAB] 
+% Display points on the image
+text(a(1), a(2), 'a', 'FontSize', 12, 'Color', 'r');
+text(b(1), b(2), 'b', 'FontSize', 12, 'Color', 'b');
+text(c(1), c(2), 'c', 'FontSize', 12, 'Color', 'g');
+text(d(1), d(2), 'd', 'FontSize', 12, 'Color', 'c');
+\end{lstlisting}
+Lines in homogeneous coordinates are represented by 3D vectors, where each vector contains the coefficients of the line equation. 
+Using the cross product, we compute several lines based on the selected points:
+\begin{lstlisting}[style=MATLAB] 
+% Compute lines from pairs of points
+lab = cross(a, b); % Line through points a and b (reference line)
+lad = cross(a, d); % Line orthogonal to lab
+lac = cross(a, c); % Line at 45 degrees with lab
+lcd = cross(c, d); % Line parallel to lab
+\end{lstlisting}
+To verify that points lie on certain lines, we can compute the incidence relations. For instance, checking if a point a lies on the line lab:
+\begin{lstlisting}[style=MATLAB] 
+% Check incidence relations
+a' * lab; % Should be close to zero if a in lab
+c' * lcd; % Should also be zero if c in lcd
+\end{lstlisting}
+We define the borders of the image as lines in homogeneous coordinates and find intersections with our computed lines.
+\begin{lstlisting}[style=MATLAB] 
+% Define the image border lines
+c1 = [1; 0; -1];     % Left-most column
+c500 = [1; 0; -500];  % Right-most column
+r1 = [0; 1; -1];      % Top-most row
+r500 = [0; 1; -500];  % Bottom-most row
+
+% Compute the intersection between lab and the left-most column
+x1 = cross(c1, lab);
+x1 = x1 / x1(3); % Convert to Cartesian coordinates for plotting
+text(x1(1), x1(2), 'x1', 'FontSize', 12, 'Color', 'b');
+
+% Similarly, for the right-most column
+x500 = cross(c500, lab);
+x500 = x500 / x500(3);
+text(x500(1), x500(2), 'x500', 'FontSize', 12, 'Color', 'b');
+
+% Plot line segment between the intersections
+plot([x1(1), x500(1)], [x1(2), x500(2)], 'LineWidth', 3);
+\end{lstlisting}
+To find the angle between two lines, we use the dot product and calculate the angle $\vartheta$:
+\begin{lstlisting}[style=MATLAB] 
+% Calculate the angle between lab and lac
+l = lab;
+m = lac;
+cosTheta = (l(1) * m(1) + l(2) * m(2)) / sqrt(sum(l(1:2).^2) * sum(m(1:2).^2));
+theta = acosd(cosTheta);
+\end{lstlisting}
+We verify that any linear combination of points a and b lies on lab:
+\begin{lstlisting}[style=MATLAB] 
+% Linear combination of points
+lambda = rand(1);
+mu = 1 - lambda;
+p = lambda * a + mu * b;
+p' * lab; % Should be zero if p in lab
+p = p / p(3); % Convert to Cartesian coordinates
+text(p(1), p(2), 'p', 'FontSize', 12, 'Color', 'b');
+\end{lstlisting}
+Similarly, any linear combination of two lines passes through their intersection:
+\begin{lstlisting}[style=MATLAB] 
+% Intersection of lines lab and lad
+x0 = cross(lab, lad);
+lambda = rand(1);
+mu = 1 - lambda;
+l = lambda * lab + mu * lad;
+x0' * l; % Should be zero if x0 in l
+\end{lstlisting}
+When intersecting parallel lines, the result is a point at infinity.
+Here, we check intersections of lines that are theoretically parallel in homogeneous coordinates:
+\begin{lstlisting}[style=MATLAB] 
+% Intersections of parallel lines lab and lcd
+vac = cross(lab, lcd);
+vac = vac / vac(3); % Point at infinity
+
+% Intersections of top and bottom borders
+vab = cross(r1, r500);
+vad = cross(c1, c500);
+\end{lstlisting}

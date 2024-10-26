@@ -1,0 +1,107 @@
+\section{MATLAB basics}
+
+To begin working in MATLAB, it's helpful to clear the workspace, close all figures, and clear the command window. 
+This ensures a clean environment for running code.
+\begin{lstlisting}[style=MATLAB] 
+close all % Close all figures 
+clear % Clear all variables from the workspace 
+clc % Clear the command window 
+\end{lstlisting}
+
+\subsection{Variables}
+In MATLAB, all variables are stored in matrix form, regardless of their type or dimensionality. 
+Scalars are represented as $1\times 1$ matrices. 
+Variables are created through assignments, and their size reflects the dimensions of the matrix.
+\begin{lstlisting}[style=MATLAB] 
+v = 12; % Define a scalar 
+c = 'c'; % Define a character 
+size(v) % Check the size of a variable 
+whos v % Display detailed information about a variable 
+\end{lstlisting}
+The most commonly used variable types in MATLAB include:
+\begin{itemize}
+    \item \texttt{double} (double-precision floating point),
+    \item \texttt{uint8} (8-bit unsigned integer, ranges from 0 to 255),
+    \item \texttt{logical} (boolean type, for true/false values).
+\end{itemize}
+
+\subsection{Arrays and matrices}
+Arrays and matrices in MATLAB can be defined as either row or column vectors. 
+MATLAB indices start at 1 (not 0 as in many other programming languages).
+\begin{lstlisting}[style=MATLAB] 
+    r = [1 2 3 4]; % Row vector 
+    c = [1; 2; 3; 4]; % Column vector 
+\end{lstlisting}
+Vectors can be defined with specific increments:
+\begin{lstlisting}[style=MATLAB] 
+a = [1 : 2 : 10]; % Vector from 1 to 10 with a step of 2 
+\end{lstlisting}
+Matrices can also be created directly: 
+\begin{lstlisting}[style=MATLAB] 
+v = [1 2; 3 4]; 
+\end{lstlisting}
+You can concatenate matrices or vectors, as long as their dimensions align. 
+The apostrophe \texttt{'} symbol is used for matrix transposition.
+\begin{lstlisting}[style=MATLAB] 
+B = [v', v']; % Concatenate the transpose of v 
+num_rows = size(B,1); % Number of rows in B 
+num_cols = size(B,2); % Number of columns in B 
+\end{lstlisting}
+To concatenate arrays along a specified dimension, use the \texttt{cat} function: 
+\begin{lstlisting}[style=MATLAB] 
+my_matrix = cat(1, my_vec1, my_vec2); % Concatenate along rows 
+\end{lstlisting}
+o access elements in a matrix: 
+\begin{lstlisting}[style=MATLAB] 
+my_matrix(2,3); % Element in the 2nd row, 3rd column 
+my_matrix(:,2); % All elements in the 2nd column 
+my_matrix(1,:); % All elements in the 1st row 
+B = my_matrix(:, [1, 3]); % Elements in 1st and 3rd columns 
+\end{lstlisting}
+MATLAB allows expanding matrices by assigning values outside the current bounds: 
+\begin{lstlisting}[style=MATLAB]
+my_matrix(:,5) = 1; % Adds a 5th column with all values set to 1 
+\end{lstlisting}
+The \texttt{end} keyword can be used to reference the last row or column: 
+\begin{lstlisting}[style=MATLAB] 
+my_matrix(1, [2 4]); % All rows and columns 2 and 4 
+my_matrix(:, end-1); % All rows, second-to-last column 
+\end{lstlisting}
+Flatten a matrix into a single column vector: 
+\begin{lstlisting}[style=MATLAB]
+my_vector = my_matrix(:); 
+\end{lstlisting}
+
+\subsection{Operations}
+MATLAB supports a variety of linear algebra operations on vectors and matrices. 
+Note the difference between matrix and element-wise operations.
+Matrix operations: 
+\begin{lstlisting}[style=MATLAB] 
+v = [1 2 3]; 
+v * v'; % Matrix multiplication 
+v' * v; 
+\end{lstlisting}
+Element-wise operations:
+\begin{lstlisting}[style=MATLAB] 
+[1 2 3] .* [4 5 6]; % Element-wise multiplication 
+[1 2 3] + 5; % Add 5 to each element 
+[1 2 3] ./ 2; % Divide each element by 2 
+[1 2 3] .^ 2; % Square each element
+\end{lstlisting}
+Common rounding functions: 
+\begin{lstlisting}[style=MATLAB] 
+    ceil(10.56); % Round up 
+    floor(10.56); % Round down 
+    round(10.56); % Round to nearest integer 
+\end{lstlisting}
+Basic arithmetic functions: 
+\begin{lstlisting}[style=MATLAB] 
+sum([1 2 3 4]); % Sum of vector elements 
+my_matrix = [1:4; 5:8]; 
+sum(sum(my_matrix)); % Sum of all elements in a matrix 
+sum(my_matrix(:)); % Sum all elements after flattening 
+\end{lstlisting}
+Using logical operators, you can create vectors of logical values: 
+\begin{lstlisting}[style=MATLAB] 
+b = v > 2; % Logical vector where each element of v > 2
+\end{lstlisting}
