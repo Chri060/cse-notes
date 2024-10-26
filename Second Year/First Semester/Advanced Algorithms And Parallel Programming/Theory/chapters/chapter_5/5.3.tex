@@ -1,0 +1,31 @@
+\section{Binary Decision Diagram}
+
+The core idea behind ROBDDs is to avoid the inefficiencies of sequential sub-case exploration by instead storing sub-cases in memory, allowing for faster retrieval and processing.
+This approach relies on two crucial hashing mechanisms: a unique table and a computed table. 
+The unique table identifies and consolidates identical sub-cases to prevent redundancy, while the computed table stores the results of previously computed sub-cases to reduce redundant calculations.
+
+ROBDDs represent logic functions as Directed Acyclic Graphs (DAGs), which often provide a more compact form than traditional Sum of Products (SOP) expressions. 
+With careful structuring, ROBDDs can be made canonical, meaning they provide a unique representation of a function. 
+This can shift the focus in Boolean reasoning from solving SAT problems to efficiently managing function representation.
+
+Another significant advantage is the efficiency of Boolean operations on BDDs. 
+Many operations, such as checking for tautology or computing complements, can be performed quickly—often in linear time relative to the result's size or even in constant time. 
+However, the size of a BDD is critically influenced by variable ordering, with the right orderings resulting in significantly smaller, more manageable diagrams.
+
+\paragraph*{Directed Acyclic Graph representation}
+In an ROBDD, the logic function is represented by a Directed Acyclic Graph (DAG) with a structure rooted in a single root node and terminating in two terminal nodes, labeled 0 and 1. 
+Each internal node in the graph is associated with a variable and has exactly two children. 
+The DAG's structure is based on a Shannon co-factoring tree, modified to be both reduced and ordered, creating the canonical form known as ROBDD: 
+\begin{itemize}
+    \item \textit{Reduction}: this process simplifies the graph by eliminating redundancy: if a node has two identical children, it is removed, else if two nodes have identical subgraphs, they are merged into a single node.
+    \item \textit{Ordering}: co-factoring (splitting) variables are processed in a consistent, predefined order across all paths, ensuring that each path from the root to any terminal visits variables in ascending order, typically denoted $x_1<\dots<x_n$.
+\end{itemize}
+
+An Ordered Binary Decision Diagram (OBDD) applies only the ordering rule, while a Reduced Ordered Binary Decision Diagram (ROBDD) applies both ordering and reduction. 
+The ROBDD's reduction rules are:
+\begin{enumerate}
+    \item If a node's two children are identical, the node is removed, effectively reducing the function to $f = vf + \bar{v}f$. 
+    \item If two nodes have isomorphic graphs, they are replaced by a single instance, so each node uniquely represents a distinct logic function.
+\end{enumerate} 
+The onset of the function represented by an ROBDD can be identified by tracing all paths leading to the 1-terminal node. 
+This set of paths corresponds to a cover of pairwise disjoint cubes, providing an efficient and compact representation of the function without needing to explicitly enumerate every path.
