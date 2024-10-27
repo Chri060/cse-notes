@@ -6,7 +6,7 @@ Timestamps are identifiers that establish a total ordering of a system's events.
 Each transaction is assigned a timestamp representing its initiation time, enabling transactions to be ordered based on their timestamps. 
 A schedule is accepted only if it aligns with the serial ordering of transactions induced by their timestamps. 
 Timestamps, given by a system's function upon request, have the syntax:
-\[\left\langle \textnormal{event-id}.\textnormal{node-id} \right\rangle \]
+\[\left\langle \text{event-id}.\text{node-id} \right\rangle \]
 The synchronization algorithm, known as the Lamport method, relies on the send-receive of messages. 
 It ensures that a message from the future cannot be received. 
 If this occurs, the bumping rule is employed to adjust the timestamp of the receiving event beyond that of the sending event.  
@@ -23,15 +23,15 @@ The scheduler uses two counters: one for writes (WTM($x$)) and another for reads
 Read and write requests are tagged with the timestamp of the requesting transaction.
 
 A read is accepted if its timestamp is higher than the last write timestamp.
-In this case, $\textnormal{RTM}(x)=\max(\textnormal{RTM}(x),\textnormal{ts})$. 
+In this case, $\text{RTM}(x)=\max(\text{RTM}(x),\text{ts})$. 
 
 A write is accepted if its timestamp is higher than the last write and last read timestamps. 
-In this case $\textnormal{WTM}(x)=\textnormal{ts}$. 
+In this case $\text{WTM}(x)=\text{ts}$. 
 
 In case a read or a write is not accepted, the transaction is killed.
 However, these rules may lead to excessive transaction killings.
 \begin{example}
-    Assuming $\textnormal{RTM}(x)=7$ and $\textnormal{WTM}(x)=4$, consider the following schedule:
+    Assuming $\text{RTM}(x)=7$ and $\text{WTM}(x)=4$, consider the following schedule:
     \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x)\]
     Using timestamps, we obtain:
     \begin{table}[H]
@@ -39,10 +39,10 @@ However, these rules may lead to excessive transaction killings.
         \begin{tabular}{ccc}
         \textbf{Request} & \textbf{Response} & \textbf{New value} \\ \hline
         $r_6(x)$         & $\checkmark$      & -                  \\
-        $r_8(x)$         & $\checkmark$      & $\textnormal{RTM}(x)=8$         \\
-        $r_9(x)$         & $\checkmark$      & $\textnormal{RTM}(x)=9$         \\
+        $r_8(x)$         & $\checkmark$      & $\text{RTM}(x)=8$         \\
+        $r_9(x)$         & $\checkmark$      & $\text{RTM}(x)=9$         \\
         $w_8(x)$         & $\tikzxmark$      & $T_8$ killed       \\
-        $w_{11}(x)$      & $\checkmark$      & $\textnormal{WTM}(x)=11$        \\
+        $w_{11}(x)$      & $\checkmark$      & $\text{WTM}(x)=11$        \\
         $r_{10}(x)$      & $\tikzxmark$      & $T_{10}$ killed   
         \end{tabular}
     \end{table}
@@ -62,7 +62,7 @@ However, TS implies CSR.
 Basic TS-based control considers only committed transactions, ignoring aborted transactions. 
 If aborts occur, dirty reads may happen. 
 To handle dirty reads, a variant of basic TS must be used. 
-A transaction $T_i$ issuing $r_{\textnormal{ts}}(x)$ or $w_{\textnormal{ts}}(x)$ such that $\textnormal{ts}>\textnormal{WTM}(x)$ delays its read or write operation until the transaction $T^{'}$ that wrote the value of $x$ has committed or aborted. 
+A transaction $T_i$ issuing $r_{\text{ts}}(x)$ or $w_{\text{ts}}(x)$ such that $\text{ts}>\text{WTM}(x)$ delays its read or write operation until the transaction $T^\prime$ that wrote the value of $x$ has committed or aborted. 
 This is similar to long-duration write locks.
 \begin{table}[H]
     \centering
@@ -90,13 +90,13 @@ A unique global read timestamp (RTM($x$)) is maintained, and old versions are di
 
 The reads are always accepted and a copy $x_k$ is selected for reading, where:
 \begin{itemize}
-    \item If $\textnormal{ts} \geq \textnormal{WTM}_N(x)$, then $k=N$.
-    \item Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq \textnormal{ts} < \textnormal{WTM}_{k+1}(x)$. 
+    \item If $\text{ts} \geq \text{WTM}_N(x)$, then $k=N$.
+    \item Otherwise, $k$ is chosen such that $\text{WTM}_k(x) \leq \text{ts} < \text{WTM}_{k+1}(x)$. 
 \end{itemize}
 The write is accepted if its timestamp is higher than the last read timestamp, and the write timestamp is updated. 
 
 \begin{example}
-    Assuming  $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$, consider the schedule:
+    Assuming  $\text{RTM}(x)=7$, $N=1$ and $\text{WTM}_1(x)=4$, consider the schedule:
     \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x) r_{12}(x) w_{14}(x) w_{13}(x)\]
     Using multi-versioning, the results are:
     \begin{table}[H]
@@ -104,14 +104,14 @@ The write is accepted if its timestamp is higher than the last read timestamp, a
         \begin{tabular}{ccc}
         \textbf{Request} & \textbf{Response}         & \textbf{New value}  \\ \hline
         $r_6(x)$         & $\checkmark$              & -                   \\
-        $r_8(x)$         & $\checkmark$              & $\textnormal{RTM}(x)=8$          \\
-        $r_9(x)$         & $\checkmark$              & $\textnormal{RTM}(x)=9$          \\
+        $r_8(x)$         & $\checkmark$              & $\text{RTM}(x)=8$          \\
+        $r_9(x)$         & $\checkmark$              & $\text{RTM}(x)=9$          \\
         $w_8(x)$         & $\tikzxmark$              & $T_8$ killed        \\
-        $w_{11}(x)$      & $\checkmark$              & $\textnormal{WTM}_2(x)=11,\:N=2$ \\
-        $r_{10}(x)$      & $\checkmark$ on $x_{(1)}$ & $\textnormal{RTM}(x)=10$         \\
-        $r_{12}(x)$      & $\checkmark$ on $x_{(2)}$ & $\textnormal{RTM}(x)=12$         \\
-        $w_{14}(x)$      & $\checkmark$              & $\textnormal{WTM}_3(x)=14,\:N=3$ \\
-        $w_{13}(x)$      & $\checkmark$              & $\textnormal{WTM}_4(x)=14,\:N=4$
+        $w_{11}(x)$      & $\checkmark$              & $\text{WTM}_2(x)=11,\:N=2$ \\
+        $r_{10}(x)$      & $\checkmark$ on $x_{(1)}$ & $\text{RTM}(x)=10$         \\
+        $r_{12}(x)$      & $\checkmark$ on $x_{(2)}$ & $\text{RTM}(x)=12$         \\
+        $w_{14}(x)$      & $\checkmark$              & $\text{WTM}_3(x)=14,\:N=3$ \\
+        $w_{13}(x)$      & $\checkmark$              & $\text{WTM}_4(x)=14,\:N=4$
         \end{tabular}
     \end{table}
 \end{example}
@@ -120,13 +120,13 @@ The write is accepted if its timestamp is higher than the last read timestamp, a
 In practice, the rule set is modified slightly.
 The reads are always accepted and a copy $x_k$ is selected for reading, where:
 \begin{itemize}
-    \item If $\textnormal{ts} \geq \textnormal{WTM}_N(x)$, then $k=N$. 
-    \item Otherwise, $k$ is chosen such that $\textnormal{WTM}_k(x) \leq \textnormal{ts} < \textnormal{WTM}_{k+1}(x)$. 
+    \item If $\text{ts} \geq \text{WTM}_N(x)$, then $k=N$. 
+    \item Otherwise, $k$ is chosen such that $\text{WTM}_k(x) \leq \text{ts} < \text{WTM}_{k+1}(x)$. 
 \end{itemize}
 The write is accepted if its timestamp is higher than the last read and last write timestamps, and the write timestamp is updated. 
 
 \begin{example}
-    Assuming $\textnormal{RTM}(x)=7$, $N=1$ and $\textnormal{WTM}_1(x)=4$, consider the schedule:
+    Assuming $\text{RTM}(x)=7$, $N=1$ and $\text{WTM}_1(x)=4$, consider the schedule:
     \[S=r_6(x) r_8(x) r_9(x) w_8(x) w_{11}(x) r_{10}(x) r_{12}(x) w_{14}(x) w_{13}(x)\]
     Using multi-versioning, the results are:
     \begin{table}[H]
@@ -134,13 +134,13 @@ The write is accepted if its timestamp is higher than the last read and last wri
         \begin{tabular}{ccc}
         \textbf{Request} & \textbf{Response}         & \textbf{New value}  \\ \hline
         $r_6(x)$         & $\checkmark$              & -                   \\
-        $r_8(x)$         & $\checkmark$              & $\textnormal{RTM}(x)=8$          \\
-        $r_9(x)$         & $\checkmark$              & $\textnormal{RTM}(x)=9$          \\
+        $r_8(x)$         & $\checkmark$              & $\text{RTM}(x)=8$          \\
+        $r_9(x)$         & $\checkmark$              & $\text{RTM}(x)=9$          \\
         $w_8(x)$         & $\tikzxmark$              & $T_8$ killed        \\
-        $w_{11}(x)$      & $\checkmark$              & $\textnormal{WTM}_2(x)=11,\:N=2$ \\
-        $r_{10}(x)$      & $\checkmark$ on $x_{(1)}$ & $\textnormal{RTM}(x)=10$         \\
-        $r_{12}(x)$      & $\checkmark$ on $x_{(2)}$ & $\textnormal{RTM}(x)=12$         \\
-        $w_{14}(x)$      & $\checkmark$              & $\textnormal{WTM}_3(x)=14,\:N=3$ \\
+        $w_{11}(x)$      & $\checkmark$              & $\text{WTM}_2(x)=11,\:N=2$ \\
+        $r_{10}(x)$      & $\checkmark$ on $x_{(1)}$ & $\text{RTM}(x)=10$         \\
+        $r_{12}(x)$      & $\checkmark$ on $x_{(2)}$ & $\text{RTM}(x)=12$         \\
+        $w_{14}(x)$      & $\checkmark$              & $\text{WTM}_3(x)=14,\:N=3$ \\
         $w_{13}(x)$      & $\tikzxmark$              & $T_{13}$ killed
         \end{tabular}
     \end{table}
