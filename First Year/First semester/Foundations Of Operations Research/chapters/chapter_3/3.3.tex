@@ -1,122 +1,132 @@
-\section{Minimum spanning tree problem}
+\section{Basic feasible solutions}
 
-Given an undirected graph $G=(N,E)$ and a cost function, find a spanning tree $G_T=(N,T)$ of minimum total cost: 
-\[\min_{T \in X} \sum_{e \in T}c_e\]
-Here, $X$ is the set of all spanning trees of $G$. 
-\begin{theorem}
-    A complete graph with $n$ nodes $(n \geq 1)$ has $n^{(n-2)}$ spanning trees. 
-\end{theorem}
-To determine the spanning tree with the lowest total cost, we can employ an algorithm that incrementally constructs the spanning tree. 
-The algorithm's fundamental concept is:
-\begin{enumerate}
-    \item Start by choosing any node arbitrarily and establish a connection to the nearest distinct node.
-    \item Locate an unconnected node that is nearest to a connected node, and proceed to connect these two nodes. 
-        Continue this process until all nodes are connected.
-\end{enumerate}
+Thanks to the fundamental theorem of linear programming, solving any linear program involves examining the vertices of the polyhedron $P$ containing feasible solutions.
+However, because the geometric definition of a vertex isn't suitable for algorithmic use, we require an algebraic characterization.
 \begin{example}
-    Let's apply Prim's algorithm to the following graph:
+    Consider the following linear program:
+    \begin{align*}
+        \min                      \:&\: -x_1-3x_2          \\
+        \text{such that }     &\: x_1+x_2 \leq 6  \\
+                                    &\: 2x_1+x_2 \leq 8  \\
+                                    &\: x_1,x_2 \geq 0
+    \end{align*}
+    Its graphical representation is shown below:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.3\linewidth]{images/sgraph.png}
+        \includegraphics[width=0.25\linewidth]{images/lp.png}
     \end{figure}
-    We start by selecting node 3 as our initial node. 
-    Therefore, we have two sets: $S=\{3\}$ and $T=\{\varnothing\}$.
-    Next, we follow these steps:
-    \begin{itemize}
-        \item The edge with the minimum cost connects nodes 3 and 4. 
-            Now we have: 
-            \begin{itemize}
-                \item $S=\{3,4\}$.
-                \item $T=\{\{3,4\}\}$.
-            \end{itemize}
-        \item The edge with the minimum cost connects nodes 1 and 4. 
-            Now we have:
-            \begin{itemize}
-                \item $S=\{1,3,4\}$. 
-                \item $T=\{\{3,4\},\{1,4\}\}$.
-            \end{itemize}
-        \item The edge with the minimum cost connects nodes 4 and 5. 
-        Now we have: 
-        \begin{itemize}
-            \item $S=\{1,3,4,5\}$.
-            \item $T=\{\{3,4\},\{1,4\},\{4,5\}\}$.
-        \end{itemize}
-        \item The edge with the minimum cost connects nodes 4 and 5. 
-        Now we have:
-        \begin{itemize}
-            \item $S=N$.
-            \item $T=\{\{3,4\},\{1,4\},\{4,5\},\{2,4\}\}$.
-        \end{itemize}
-    \end{itemize}
-    In this case, the total cost is equal to $c(T)=6$. 
-    Graphically, the resulting minimum spanning tree is as shown below:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.8\linewidth]{images/MST.png}
-    \end{figure}
+    From the graph, it's evident that a vertex corresponds to the intersection of the hyperplanes associated with $n$ inequalities. 
+    In this example, the vertex $\overline{x}$ represents the intersection of the first two inequalities, which is the solution to the following system:
+    \[
+    \begin{cases}
+        x_1+x_2=6 \\
+        2x_1+x_2=8
+    \end{cases}
+    \]
+    To convert this problem into standard form, we formulate it as:
+    \begin{align*}
+        \min                      \:&\: -x_1-3x_2          \\
+        \text{such that }     &\: x_1+x_2+s_1 = 6  \\
+                                    &\: 2x_1+x_2+s_2 = 8  \\
+                                    &\: x_1,x_2,s_1,s_2 \geq 0
+    \end{align*}
+    To solve it, we set $s_1=s_2=0$ and solve the system found before.
+    Using this formulation, we can compute all the intersections with the axes:
+    \begin{enumerate}
+        \item $x_1=0,x_2=0 \rightarrow s_1=6,s_2=8$
+        \item $x_1=0,s_1=0 \rightarrow x_2=6,s_2=2$
+        \item $x_1=0,s_2=0 \rightarrow x_2=8,s_1=-2$
+        \item $x_2=0,s_1=0 \rightarrow x_1=6,s_2=-4$
+        \item $x_2=0,s_2=0 \rightarrow x_1=4,s_1=2$
+        \item $s_1=0,s_2=0 \rightarrow x_1=2,x_2=4$
+    \end{enumerate}
+    Note that solutions three and four are infeasible since the values of $s_1$ and $s_2$ are negative. 
 \end{example}
-\begin{algorithm}[H]
-    \caption{Prim's algorithm for the minimum cost spanning tree problem}
-        \begin{algorithmic}[1]
-            \State $S \leftarrow \{u\}$
-            \State $T \leftarrow \{\varnothing\}$
-            \While {$\left\lvert T \right\rvert < n-1$}
-                \State $\{u,v\}\leftarrow \textnormal{edge in } \delta(S) \textnormal{ of minimum cost}$
-                \State $S \leftarrow S \cup \{v\}$
-                \State $T \leftarrow T \cup \{u,v\}$
-            \EndWhile
-        \end{algorithmic}
-\end{algorithm}
-Where $u \in S$ and $v \in N-S$. 
-The worst-case complexity is $O(n^2)$. 
-\newpage
-\begin{proposition}
-    Prim's algorithm is exact. 
-\end{proposition}        
-The exactness does not depend on the choice of the first node nor on the selected edge of minimum cost in $\delta(S)$. 
 \begin{property}
-    Let $F$ be a partial tree contained in an optimal tree of $G$. 
-    Consider $e\{u,v\}\in \delta(S)$ of minimum cost, then there exists a minimum cost spanning tree of $G$ containing $e$. 
+    For any polyhedron $P = \{x \in \mathbb{R}^n\mid Ax = b,x \geq 0\}$ the facets (equivalent to edges in $\mathbb{R}^2$) are determined by setting one variable to 0. 
 \end{property}
-\begin{proof}
-    By contradiction, assume $T^{} \subseteq E$ is a minimum cost spanning tree with $F \subseteq T^{}$ and $e \notin T^{}$. 
-    Adding edge $e$ to $T^{}$ creates the cycle $C$. 
-    Let $f \in \delta(S) \cap C$.
-    If $c_e=c_f$, then $T^{}\cup\{e\}-\{f\}$ is also optimal since it has same cost of $T^{}$.
-    If $c_e<c_f$, then $c\left(T^{}\cup\{e\}-\{f\}\right)<C(T^{})$, hence $T^{*}$ is not optimal.
-\end{proof}
-\begin{proposition}
-    Prim's algorithm is greedy. 
-\end{proposition}     
-At each step a minimum cost edge is selected among those in the cut $\delta (S)$ induced by the current set of nodes $S$. 
-\begin{definition}[\textit{Cost decreasing edge}]
-    Given a spanning tree $T$, an edge $e \notin T$ is cost decreasing if when $e$ is added to $T$ it creates a cycle $C$ with $C \subseteq T \cup \{e\}$ and $\exists f \in C-\{e\}$ such that $c_e<c_f$. 
-\end{definition}
-\begin{example}
-    In the context of the given graph:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.4\linewidth]{images/costdecreasing.png}
-    \end{figure}
-    Since we have the equation:
-    \[c(T \cup \{e\}-\{f\})=c(T)+c_e-c_f\]
-    If edge $e$ is cost decreasing, it implies that:
-    \[c(T \cup \{e\}-\{f\})<c(T)\]
-\end{example}
-\begin{theorem}
-    A tree $T$ is of minimum total cost if and only if no cost decreasing edge exists. 
-\end{theorem}
+\begin{property}   
+    For any polyhedron $P = \{x \in \mathbb{R}^n\mid Ax = b,x \geq 0\}$ the vertices are determined by setting $n-m$ variables to 0. 
+\end{property}
 
-\begin{proof}
-    We prove that if the tree is of minimum total cost if no cost decreasing edge exists.
-    If a cost-decreasing edge exists, then $T$ is not of minimum total cost.
-\end{proof}
-\begin{proof}
-    We prove that if no cost decreasing edge exists the tree is of minimum total cost.
-    When there are no cost-decreasing edges, it implies that the spanning tree $T$ has the minimum total cost.
-    Consider a minimum-cost spanning tree denoted as $T^{*}$, which is obtained through Prim's algorithm.
-    It is possible to confirm that, by gradually exchanging one edge at a time, $T^{*}$ can be transformed step by step into $T$ without altering the overall cost.
-    Consequently, we can conclude that $T$ is also an optimal solution.
-\end{proof}
-The optimality condition provides a means to confirm the optimality of a spanning tree $T$. 
-To determine if $T$ is optimal, it is sufficient to examine whether each edge $e$ in the set $E-T$ is not a cost-decreasing edge.
+When dealing with a matrix  $A \in \mathbb{R}^{m \times n}$ where $m \leq n$, we can make the following observations:
+\begin{itemize}
+    \item If $m=n$, there is a unique solution of $Ax = b$.
+    \item If $m<n$, there are infinitely many solutions to $Ax = b$. 
+        In this case the system has $n-m$ degrees of freedom. 
+        As a result $n-m$ variables can be set arbitrarily. 
+\end{itemize}
+\begin{definition}[\textit{Basis of a matrix}]
+    A basis of a matrix $A \in \mathbb{R}^{m \times n}$ containing $n$ variables and $m$ coefficients consists of a subset of $m$ columns from $A$. 
+    These columns are linearly independent and collectively form an $m \times m$ non-singular matrix denoted as $B$. 
+\end{definition}
+Using the earlier definition, we can rearrange the columns of matrix $A$ and then split it to identify the basis as follows:
+\[A=\left[ B\mid N \right]\]
+In this partition, $B$ represents an $m \times m$ matrix, and $N$ is a $(n-m) \times m$ matrix.
+
+Let $x^T=\left[x_B^T \mid  x_N^T\right]$, where $x_B^T$ contains  $m$ components and $x_N^T$ contains  $m-n$ components. 
+Then, any system $Ax = b$ can be expressed as:
+\[Bx_B+Nx_N=b\]
+For any given set of values for $x_N$, if matrix  $B$ is non-singular, we can compute $x_B$ as:
+\[x_B=B^{-1}b-B^{-1}Nx_N\]
+\begin{definition}[\textit{Basic solution}]
+    A basic solution is a solution obtained by setting $x_N=0$ and, consequently, letting $x_B=B^{-1}b$.
+\end{definition}
+\begin{definition}[\textit{Basic feasible solution}]
+    A basic solution with $x_B \geq 0$ is a basic feasible solution.
+\end{definition}
+\begin{definition}[\textit{Basic variables}]
+    The variables in $x_B$ are the basic variables.
+\end{definition}
+\begin{definition}[\textit{Non-basic variables}]
+    The variables in $x_N$ are the non-basic variables.
+\end{definition}
+\begin{theorem}
+    An $x \in \mathbb{R}^n$ is a basic feasible solution if and only if $x$ is a vertex of the polyhedron:
+    \[P=\{x \in \mathbb{R}^n\mid Ax=b,x \geq 0\}\]
+\end{theorem}
+\begin{example}
+    In the given linear program:
+    \begin{align*}
+        \min                      \:&\: 2x_1+x_2+5x_3          \\
+        \text{such that }     &\: x_1+x_2+x_3+x_4=4  \\
+                                    &\: x_1+x_5=2  \\
+                                    &\: x_3+x_6=3 \\
+                                    &\: 3x_2+x_3+x_7=6  \\
+                                    &\: x_1,x_2,x_3,x_4,x_5,x_6,x_7 \geq 0
+    \end{align*}
+    The matrices associated with the given constraints are:
+    \[
+    A=
+    \begin{bmatrix}
+        1 & 1 & 1 & 1 & 0 & 0 & 0 \\
+        1 & 0 & 0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 1 & 0 \\
+        0 & 3 & 1 & 0 & 0 & 0 & 1
+    \end{bmatrix}
+    \:\:\:\:\:\:
+    b=
+    \begin{bmatrix}
+        4 \\
+        2 \\
+        3 \\
+        6
+    \end{bmatrix}
+    \]
+    It can be observed that columns 4, 5, 6, and 7 are linearly independent. 
+    By selecting these columns, we obtain:
+    \[
+    B= 
+    \begin{bmatrix}
+        1 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 \\
+        0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 1
+    \end{bmatrix}
+    =I=B^{-1}
+    \]
+    The solution in this case is $x_B=B^{-1}b=b$, which is a feasible solution.
+    However, if we choose columns 2, 5, 6, and 7, the solution is $x_B=\begin{bmatrix} 4 & 2 & 3 & -6 \end{bmatrix}^T$, which is an infeasible solution.
+\end{example}
+The total number of feasible solutions can be calculated as:
+\[\text{number of feasible solutions}=\binom{n}{m}\]

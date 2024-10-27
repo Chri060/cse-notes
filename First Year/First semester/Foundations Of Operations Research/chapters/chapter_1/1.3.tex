@@ -1,6 +1,36 @@
-\section{History}
+\section{Graph reachability problem}
 
-During World War II, groups of scientists were tasked with conducting research to determine the most effective methods for conducting military operations. 
-In the years following the war, these techniques were declassified and began to be adopted on a broader scale, addressing various challenges in the realms of business, industry, and society. 
-The post-war industrial expansion led to the growth of companies and organizations, which, in turn, gave rise to increasingly intricate decision-making dilemmas. 
-This transformation was facilitated by the rapid advancements in Operations Research, numerical analysis methodologies, and the widespread adoption of computer technology.
+In a directed graph $G=(N,A)$, given a specific node $s$, find all the nodes that can be reached starting from node $s$.
+\begin{algorithm}[H]
+    \caption{Graph reachability problem}
+        \begin{algorithmic}[1]
+            \State $Q = \{s\}$
+            \State $M = \{\varnothing\}$
+            \While {$Q \neq 0$}
+                \State $u = \text{node in } Q$
+                \State $Q = Q-\{u\}$
+                \State $M = M \cup \{u\}$
+                \For {$(u,v) \in \delta^{+}(u)$}
+                    \If {$v \notin M$ and $v \notin Q$}
+                        \State $Q = Q \cup \{v\}$
+                    \EndIf
+                \EndFor
+            \EndWhile
+        \end{algorithmic}
+\end{algorithm}
+The algorithm's worst-case time complexity is $\mathcal{O}(n^2)$. 
+\begin{example}
+    Given the graph and the starting node $s=2$, the algorithm proceeds through the following steps:
+    \begin{enumerate}
+        \item $Q=\{2\} \qquad\qquad M=\varnothing$
+        \item $Q=\{3\} \qquad\qquad M=\{2\}$
+        \item $Q=\{4,5\} \qquad\quad  M=\{2,3\}$
+        \item $Q=\{5\} \qquad\qquad M=\{2,3,4\}$
+        \item $Q=\varnothing \qquad\qquad\:\:\: M=\{2,3,4,5\}$
+    \end{enumerate}
+    As a result, nodes $\{2,3,4,5\}$ are determined to be reachable from node two.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.3\linewidth]{images/graphs.png}
+    \end{figure}
+\end{example}

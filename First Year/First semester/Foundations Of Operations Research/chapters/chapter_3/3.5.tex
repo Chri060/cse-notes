@@ -1,169 +1,136 @@
-\section{Minimum network flow problem}
+\section{Linear programming duality}
 
-The network flow problem involves efficiently distributing a particular product from a set of sources to a set of users in order to optimize a predefined objective function.
-\begin{definition}[\textit{Network}]
-    A network is a directed and connected graph $G = (V,A)$ with a source $s \in V$ and a sink $t \in V$, with $s \neq t$, and a capacity $k_{ij} \geq 0$ for each arc 
-    $(i,j) \in A$. 
-\end{definition}
-\begin{definition}[\textit{Feasible flow}]
-    A feasible flow $x$ from $s$ to $t$ is a vector $x \in \mathbb{R}^m$ with a component $x_{ij}$ for each arc $(i,j) \in A$ satisfying the capacity constraints:
-    \[0 \leq x_{ij} \leq k_{ij} \:\:\:\:\:\: \forall (i,j) \in A\]
-    and the flow balance constraints at each intermediate node $u \in V (u \neq s,t)$: 
-    \[\sum_{(i,u)\in \delta^{-}(u)}x_{iu}=\sum_{(u,j)\in \delta^{+}(u)}x_{uj} \:\:\:\:\:\: \forall u \in N-\{s,t\}\]
-\end{definition}
-\begin{definition}[\textit{Value of flow}]
-    The value of flow $x$ is:
-    \[\varphi = \sum_{(s,j) \in \delta^{+}(s)} x_{sj}\]
-\end{definition}
-\begin{definition}[\textit{Saturated arc}]
-    Given a network and a feasible flow $x$, an arc $(i,j) \in A$ is saturated if $x_{ij} = k_{ij}$. 
-\end{definition}
-\begin{definition}[\textit{Empty arc}]
-    Given a network and a feasible flow $x$, an arc $(i,j) \in A$ is empty if $x_{ij} = 0$. 
-\end{definition}
-In the network flow problem, we are given a network $G = (V,A)$ with integer capacities $k_{ij}$ for each arc $(i,j) \in A$, and two designated nodes $s,t \in V$. 
-The goal is to determine a feasible flow from $s$ to $t$ with the maximum value.
+A closely related maximization (minimization) linear program can be associated with any minimization (maximization) linear program, sharing the same parameters.
+Despite differing spaces and objective functions, the optimal values of the objective functions generally coincide. 
+This duality is valuable because determining the best lower bound (maximum) is challenging, while finding the best upper bound is relatively simpler.
 
-In cases where there are multiple sources and sinks with a single type of product, dummy nodes $s^{*}$ and $t^{*}$ can be introduced. 
-The linear programming model for this problem aims to maximize $\max \varphi$, subject to the following constraints:
-\[\sum_{(u,j)\in \delta^{+}(u)}x_{uj}-\sum_{(i,u)\in \delta^{-}(u)}x_{iu}=
-\begin{cases}
-    \varphi \:\:\:\:\:\:\:\:\: u=s    \\
-    -\varphi \:\:\:\:\:\: u=t   \\
-    0 \:\:\:\:\:\:\:\:\:\: \textnormal{otherwise}
-\end{cases}\]
-Here, $\varphi$ represents the value of the feasible flow $x$, $0 \leq x_{ij} \leq k_{ij}$ with $\varphi,x_{ij} \in \mathbb{R}$, and $(i,j) \in A$.
-\begin{definition}[\textit{Cut}]
-    A cut separating $s$ from $t$ is $\delta(S)$ of $G$ with $s \in S \subset V$ and $t \in V-S$. There are $2^{n-2}$ cuts separating $s$ from $t$, where 
-    $n=\left\lvert V \right\rvert$.
-\end{definition}
-\begin{definition}[\textit{Capacity of the cut}]
-    The capacity of the cut $\delta(S)$ induced by $S$ is equal to: 
-    \[k(S)=\sum_{(i,j)\in \delta^{+}(S)}k_{ij}\]
-\end{definition}
-\begin{definition}[\textit{Value of the feasible flow}]
-    Given a feasible flow $x$ from $s$ to $t$ and a cut $\delta(S)$ separating $s$ from $t$, the value of the feasible flow x through the cut $\delta(S)$ is: 
-    \[\varphi(S)=\sum_{(i,j)\in \delta^{+}(S)}x_{ij} - \sum_{(i,j)\in \delta^{-}(S)}x_{ij}\]
-\end{definition}
-With this notation, the value of the flow $x$ is represented as $\varphi = \varphi(\{s\})$. 
-\begin{property}
-    Given a feasible flow $x$ from $s$ to $t$, for each cut $\delta(S)$ separating $s$ from $t$, we have $\varphi(S)=\varphi(\{s\})$.
-\end{property}
-\begin{property}
-    For every feasible flow $x$ from $s$ to $t$ and every cut $\delta(S)$, with $S \subseteq V$, separating $s$ from $t$, we have $\varphi(S) \leq k(S)$:
-    \[\varphi(S) \leq k(S)\]
-    This expression signifies that the flow's value is either less than or equal to the capacity of the cut.
-\end{property}
-\begin{proof}
-    According to the definition of the flow value through the cut $\delta(S)$, we express it as:
-    \[\varphi(S)=\sum_{(i,j) \in \delta^{+}(S)}x_{ij}-\sum_{(i,j) \in \delta^{-}(S)}x_{ij}\]
-    Furthermore, considering that $0 \leq x_{ij } \leq k_{ij}$ for any edge $(i, j) \in A$, we can establish:
-    \[\sum_{(i,j) \in \delta^{+}(S)}x_{ij}-\sum_{(i,j) \in \delta^{-}(S)}x_{ij} \leq \sum_{(i,j) \in \delta^{+}(S)}k_{ij}=k(S)\]
-    Hence, it follows that $\varphi(S) \leq k(S)$.
-\end{proof}
+The general strategy involves linearly combining the constraints with non-negative multiplicative factors.
 \begin{example}
-    The value of the feasible flow $x$ passing through the cut $\delta(S)$  in the graph is illustrated below:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.4\linewidth]{images/flow.png}
-    \end{figure}
-    \[\varphi(\{s,1\})=2+0+2-1=3\]
-    The remaining values are as follows: 
-    \[\delta(\{s,1\})=\{(s, 2),(1,2),(1, t)\}\]
-    \[k(S)=7\]
+    Consider the following original problem:
+    \begin{align*}
+        \max                      \:&\: 4x_1+x_2+5x_3+3x_4          \\
+        \text{such that }     &\: x_1-x_2-x_3+3x_4 \leq 1     \\
+                                    &\: 5x_1+x_2+3x_3+8x_4 \leq 55  \\
+                                    &\: -x_1+2x_2+3x_3-5x_4 \leq 3  \\
+                                    &\: x_1,x_2,x_3,x_4 \geq 0      
+    \end{align*}
+    The dual problem can be constructed for easier solving:
+    \begin{align*}
+        \min                      \:&\: y_1+55y_2+3y_3              \\
+        \text{such that }     &\: y_1+5y_2-y_3 \geq 4         \\
+                                    &\: -y_1+y_2+2y_3 \geq 1        \\
+                                    &\: -y_1+3y_2+3y_3 \geq 5       \\
+                                    &\: 3y_1+8y_2-5y_3 \geq 3       \\   
+                                    &\: y_1,y_2,y_3 \geq 3          \\
+    \end{align*}
 \end{example}
-If $\varphi(S) = k(S)$ for a subset $S \subseteq V$ containing the source $s \in S$ and excluding the destination $t \notin S$, then the flow $x$ attains its maximum value, and the cut $\delta(S)$ represents the minimum capacity. 
-The property $\varphi(S) \leq k(S)$ for any feasible flow $x$ and any cut $\delta(S)$ that separates $s$ from $t$ signifies a weak duality connection between two problems:
-\begin{itemize}
-    \item Determining a feasible flow of maximum value in a graph $G = (V, A)$ with integer capacities on the arcs and source-destination pair $s, t \in V$.
-    \item Identifying a cut (one that separates $s$ from $t$) of minimum capacity in a graph $G = (V, A)$ with integer arc capacities and source-destination pair $s, t \in V$.
-\end{itemize} 
-The idea of the Ford-Fulkerson's algorithm to find network flows is as follows: start from a feasible flow $x$ and try to iteratively increase its value $\varphi$ by sending, at each iteration, an additional amount of product along an undirected path from $s$ to $t$ with a strictly positive residual capacity. 
-If the arc $(i,j)$ is not saturated, we can increase $x_{ij}$. 
-If $(i,j)$ is not empty, we can decrease $x_{ij}$ while respecting $0 \leq x_{ij} \leq k_{ij}$. 
-\begin{definition}[\textit{Augmenting path}]
-    A path $P$ from $s$ to $t$ is an augmenting path with respect to the current feasible flow $x$ if $x_{ij}<k_{ij}$ for any forward arc $x_{ij}>0$ for any backward arc. 
-\end{definition}
-Given a feasible flow $x$ for $G=(V,A)$, we create the residual network denoted as $\overline{G}=(V,\overline{A})$ associated to $x$. 
-This residual network encompasses all conceivable adjustments to the flow $x$: 
-\begin{itemize}
-    \item If $(i,j) \in A$ is empty $(i,j) \in \overline{A}$ with $\overline{k}_{ij}=x_{ij}>0$.
-    \item If $(i,j) \in A$ is not empty $(i,j) \in \overline{A}$ with $\overline{k}_{ij}=k_{ij}-x_{ij}>0$
-\end{itemize}
-Here, $\overline{k}_{ij}$ is termed residual capacity. 
-\begin{example}
-    To determine the residual capacity of the graph depicted below, we follow this procedure:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.75\linewidth]{images/residual1.png}
-    \end{figure}
-    Afterward, we update the flow and once more compute the residual capacity:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.75\linewidth]{images/residual2.png}
-    \end{figure}
-    This process is repeated. 
-    However, since we are unable to identify additional paths, we conclude that the flow is now $\phi=5$.
-\end{example}
-\begin{proposition}
-    Ford-Fulkerson's algorithm is exact. 
-\end{proposition}
+\begin{property}
+    The dual of the dual problem coincides with the primal problem.
+\end{property}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c|c}
+        \textbf{Primal} & \textit{min} & \textit{max} & \textbf{Dual} \\ \hline
+                    & $\geq b_j$    & $\geq b_j$            & \\ 
+        Constraints & $\leq b_j$    & $\leq b_j$            & Variables\\ 
+                    & $= b_j$       & $b_j$ free            & \\ \hline
+                    & $\geq b_j$    & $\leq b_j$            & \\ 
+        Variables   & $\leq b_j$    & $\geq b_j$            & Constraints \\ 
+                    & $= b_j$       & $b_j$ free            & \\ 
+    \end{tabular}
+    \caption{Rules to transform a problem into its dual}
+\end{table}
+
+\subsection{Weak duality theorem}
+\begin{theorem}[Weak duality theorem]
+    Given the primal problem: 
+    \begin{align*}
+        \min                      \:&\: z=c^T            \\
+        \text{such that }     &\: Ax\geq b         \\
+                                    &\: x \geq 0
+    \end{align*}
+    And its dual: 
+    \begin{align*}
+        \max                      \:&\: w=b^Ty              \\
+        \text{such that }     &\: A^ty\leq c          \\
+                                    &\: y \geq 0
+    \end{align*}
+    With $X=\{x\mid Ax \geq b, x \geq 0\} \neq \varnothing$ and $Y=\{y\mid A^Ty \leq c, y \geq 0\} \neq \varnothing$.
+    For every feasible solution $x \in X$ of the primal problem and every feasible solution $y \in Y$ of the dual problem, we have: 
+    \[b^Ty \leq c^Tx\]
+\end{theorem}
 \begin{proof}
-    A feasible flow denoted as $x$  achieves its maximum value if and only if the destination node $t$ cannot be reached from the source node $s$ in the residual network associated with flow $x$. 
-    If an augmenting path exists, then flow $x$ is not optimal for achieving the maximum value.
-    When $t$ is not reachable from $s$, it implies the presence of a cut in the residual network $\overline{G}$ such that $\delta^{+}_{\overline{G}}(S^{*})=\varnothing$. 
-    By the definition of $\overline{G}$  every edge $(i,j) \in \delta^{+}_{G}(S^{*})$ is saturated, and every edge in $\delta^{-}_{G}(S^{*})$ is empty. 
-    Consequently,
-    \[\phi(S^{*})=\sum_{(i,j) \in \delta^{+}_{G}(S^{*})}{x_{ij}}-\sum_{(i,j) \in \delta^{-}_{G}(S^{*})}{x_{ij}}= \sum_{(i,j) \in \delta^{+}_{G}(S^{*})}{k_{ij}}=k(S^{*})\]
-    According to weak duality, it follows that $\phi(S) < k(S)$ for all feasible flows $x$ and $\forall S \subset V$ with $s \in S$, $t \notin S$. 
-    Therefore, the flow $x$ has maximum value and the cut induced by $S^{*}$ represents the minimum capacity.
+    For every pair $x \in X$ and $y \in Y$, we have $Ax \geq b$, $x \geq O$ and $A^Ty \leq c$, $y \geq 0$, which imply that: 
+    \[b^Ty \leq x^TA^Ty \leq x^Tc=c^Tx\]
 \end{proof}
-\begin{theorem}
-    The value of a feasible flow of maximum value is equal to the capacity of a cut of minimum capacity.
+As a result, if $x$ is a feasible solution of $(P)$ $(x \in X)$, $y$ is a feasible solution of $(D)$ $(y \in Y)$, and the values of the respective objective functions coincide, $c^Tx=b^Ty$, then $x$ is optimal for $(P)$ and $y$ is optimal for $(D)$.
+The optimal solutions are denoted by $x^{\ast}$ and $y^{\ast}$. 
+
+\subsection{Strong duality theorem}
+\begin{theorem}[Strong duality theorem]
+    If $X=\{x\mid Ax \geq b, b,x \geq 0\}$ and $\min\{c^Tx\mid x \in X\}$ is finite, there exist $x^{\ast} \in X$ and $y^{\ast} \in Y$ such that $c^Tx^{\ast}=b^Ty^{\ast}$. 
+\end{theorem}
+This is equivalent to saying:
+\[\min\{c^Tx\mid x \in X\}=\max\{b^Ty\mid y \in Y\}\]
+\begin{proof}
+    Derive an optimal solution of $(D)$ from one of $(P)$.
+    Given the primal problem: 
+    \begin{align*}
+        \min                      \:&\: z=c^T            \\
+        \text{such that }     &\: Ax = b         \\
+                                    &\: x \geq 0
+    \end{align*}
+    And its dual: 
+    \begin{align*}
+        \max                      \:&\: w=b^Ty              \\
+        \text{such that }     &\: y^tA \leq c^T       \\
+                                    &\: y \in \mathbb{R}^m
+    \end{align*}
+    And: 
+    \[x^{\ast}=\begin{bmatrix}
+        x^{\ast}_B \\ 
+        x^{\ast}_N
+    \end{bmatrix}\]
+    Here, $x^{\ast}_B=B^{-1}b$ and $x^{\ast}_N=0$ an optimal feasible solution of $(P)$. 
+    This solution is obtained after a finite number of iterations using the Simplex algorithm with Bland's rule.  
+
+    Consider $\overline{y}^T=c_B^TB^{-1}$.
+    Verify that $\overline{y}$ is a feasible solution of $(D)$. 
+    For the non-basic variables: 
+    \[\overline{c}_N^T=c_N^T-(c_B^TB^{-1})N=c_N^T-\overline{y}^TN \geq 0^T \implies \overline{y}^TN \geq c_N^T\]
+    For the basic variables: 
+    \[\overline{c}_B^T=c_B^T-(c_B^TB^{-1})B=c_B^T-\overline{y}^TB \geq 0^T \implies \overline{y}^TB \geq c_B^T\]
+    
+    According to weak duality, $\overline{y}$ is an optimal solution for $(D)$: 
+    \[\overline{y}^Tb?(c_B^TB^{-1})b=c_B^T(B^{-1}b)=c_B^Tx_B^{\ast}=c^Tx^{\ast}\]
+    Thus, $\overline{y}=y^{\ast}$
+\end{proof}
+
+\paragraph*{Consequences}
+In linear programming problems, only one of the three cases can occur:
+\begin{enumerate}
+    \item There exists an optimal solution. 
+    \item The problem is unbounded: the optimal cost is $+\infty$ for maximization problems and $-\infty$ for minimization problems. 
+    \item The problem is infeasible. 
+\end{enumerate}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ccccc}
+                                                     &                         & \multicolumn{3}{c}{\textbf{Dual}}                                  \\
+                                                     &                         & \textit{Finite optimum} & \textit{Unbounded} & \textit{Infeasible} \\
+    \multirow{3}{*}{\rotatebox{90}{\textbf{Primal}}} & \textit{Finite optimum} & \checkmark              & \tikzxmark         & \tikzxmark          \\
+                                                     & \textit{Unbounded}      & \tikzxmark              & \tikzxmark         & \checkmark          \\
+                                                     & \textit{Infeasible}     & \tikzxmark              & \checkmark         & \checkmark                   
+    \end{tabular}
+\end{table}
+
+\subsection{Complementary slackness}
+\begin{theorem}[Complementary slackness]
+    Let $x \in X^{\ast}$ and $y \in Y^{\ast}$ be feasible solutions to the primal and dual problem, respectively.
+    Then $x$ and $p$ are optimal for their respective problems if and only if:
+    \[y_i^{\ast} \left( a^T_i x - b_i \right) = 0 \quad  \forall, i \in \left\{ i = 1, \ldots, m \right\}\]
+    \[\left( c_j - y^T A_j \right) x_j^{\ast} = 0 \quad  \forall, j \in \left\{ j = 1, \ldots, n \right\}\]
+    Where $a_i$ denotes the $i$-th row of $A$ and $A_j$ the $j$-th column of $A$.
 \end{theorem}
 
-The algorithm takes as its inputs a graph denoted as $G=(V,A)$ with non-zero capacities $k_{ij}>0$ for all edges $(i,j) \in A$, where $t \in N$. 
-\begin{algorithm}[H]
-    \caption{Ford-Fulkerson's algorithm}
-        \begin{algorithmic}[1]
-            \State $x \leftarrow 0$
-            \State $\phi \leftarrow 0$
-            \State $\textnormal{optimum} \leftarrow \textnormal{false}$
-            \While {optimum = true}
-                \State Build residual network $\overline{G}$ associated to $x$
-                \State $P \leftarrow$ path from $s$ to $t$ in $\overline{G}$
-                \If {$P$ is not defined}
-                    \State optimum $\leftarrow$ true
-                \Else
-                    \State $\delta \leftarrow \min\{\overline{k}_{ij}|(i,j) \in P\}$
-                    \State $\phi \leftarrow \phi + \delta$
-                    \For {$(i,j) \in P$}
-                        \If {$(i,j)$ is a forward arc}
-                            \State $x_{ij} \leftarrow x_{ij}+\delta$
-                        \Else 
-                            \State $x_{ij} \leftarrow x_{ij}-\delta$
-                        \EndIf
-                    \EndFor
-                \EndIf
-            \EndWhile
-        \end{algorithmic}
-\end{algorithm}
-The algorithm's total complexity is $O(m^2k_{max})$. 
-The space complexity of the algorithm is $O(m\log{k_{max}})$. 
-To render the algorithm polynomial, one can seek an augmenting path with the minimal number of arcs.
-
-\subsection{Minimum cost flow problem}
-In the context of a network with unit costs denoted as $c_{ij}$ or each arc  $(i,j)$ and a specified value $\phi > 0$ the objective is to find a feasible flow from source $s$ to destination $t$ with a value of $\phi$ while minimizing the total cost.
-To address this problem, the approach involves initiating from a feasible flow $x$ with a value of $\phi$ and dispatching an additional quantity of goods within the residual network through cycles characterized by negative costs.
-
-\subsection{Assignment problem}
-\begin{definition}[\textit{Matching}]
-    Given an undirected bipartite graph $G=(V,E)$, a matching $M \subseteq E$ is a subset of non-adjacent edges. 
-\end{definition}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.2\linewidth]{images/matching.png}
-\end{figure}
-Given a bipartite graph $G=(V,E)$, determine a matching with a maximum number of edges. 
-This problem can be reduced to the problem of finding a feasible flow of maximum value from $s$ to $t$ in the following network. 
-There is a correspondence between the feasible flow of value $\varphi$ and the matching containing $\varphi$ edges. 
+At optimality, the product of each variable with the corresponding slack variable in the constraint of the dual problem must be zero.

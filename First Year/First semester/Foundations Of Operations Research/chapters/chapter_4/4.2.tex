@@ -1,103 +1,125 @@
-\section{Geometry of linear programming}
+\section{Branch and bound method}
+The Branch and Bound method employs a divide and conquer strategy to address ILP problems by systematically exploring the set of feasible solutions.
+Let $F$ represent the set of feasible solutions for the problem:
+\begin{align*}
+    \min                    \:&\: c^T     \\
+    \text{such that }   &   x \in F \\
+\end{align*}
+The method unfolds in two main phases:
+\begin{enumerate}
+    \item \textit{Branch}: the problem is partitioned into simpler subproblems.
+    \item \textit{Bound}: the subproblems are solved, and the optimal solution is determined.
+\end{enumerate}
+These two phases are applied recursively until a solution is discovered. 
+If a problem remains unsolved during the bound phase, it is branched again until it becomes simple enough to find a solution. 
+It's worth noting that this technique is applicable to a broad spectrum of problems, not exclusively limited to ILP problems.
 
-\begin{definition}[\textit{Level curve}]
-    A level curve for a value $z$ of a function $f$ is the collection of points in $\mathbb{R}^n$  where the function $f$ remains constant and equals $z$.
-\end{definition}
-\begin{definition}[\textit{Hyperplane}]
-    A hyperplane is described as $H=\{x \in \mathbb{R}^n|a^Tx=b\}$. 
-\end{definition}
-\begin{definition}[\textit{Affine half-space}]    
-    An affine half-space is represented as $H=\{x \in \mathbb{R}^n|a^Tx \leq b\}$. 
-\end{definition}
-Every inequality constraint defines an affine half-space within the variable space.
-\begin{definition}[\textit{Polyhedron}]
-    The feasible region $x$  in any linear programming problem forms a polyhedron, denoted as $P$. 
-\end{definition}
-\begin{definition}[\textit{Convex}]
-    A subset $S \subseteq \mathbb{R}^n$ is considered convex if, for any pair $y^1,y^2 \in S$, the entire line segment connecting $y^1$ and $y^2$ is contained within $S$. 
-\end{definition}
-\begin{definition}[\textit{Convex combinations}]
-    The line segment defined by $y^1$ and $y^2 $ in $ S$, encompassing all convex combinations of $y^1$ and $y^2$, is denoted as:
-    \[[y^1,y^2]=\{x \in \mathbb{R}^n|x=\alpha y^1+(1-\alpha)y^2 \land \alpha \in [0,1]\} \]
-\end{definition}
-\begin{property}
-    A polyhedron $P$ is a convex set of $\mathbb{R}^n$. 
-\end{property}
-This occurs because each half-space is inherently convex, and the intersection of a finite number of convex sets likewise forms a convex set.
+\paragraph*{Branching}
+The set of solutions $F$ is divided into $k$ disjoint subsets:
+\[ F = F_1 \cup,  \ldots,  \cup F_k \quad F_i \cap F_j = \emptyset \: \forall,  i \neq j \]
+Let $z_i$ be defined as:
+\[ z_i = \min\left\{ c(x), \middle\vert, x \in F_i \right\} \quad i = 1,,  \ldots,  , k \]
+The solution $z$ is then determined as:
+\[ z = \min\left\{ c(x), \middle\vert, c \in F \right\} = \min\left\{ z_i,,  \ldots, , z_k \right\} \]
 
-\begin{definition}[\textit{Vertex}]
-    A vertex of $P$ is a point $P$ that cannot be represented as a convex combination of two other distinct points of $P$. 
-\end{definition}
-In terms of algebraic expression, a vertex is defined as:
-\[x= \alpha y^1+(1-\alpha)y^2, \alpha \in [0,1], y^1,y^2 \in P \implies x=y^1 \lor x=y^2\]
-\begin{property}
-    A non-empty polyhedron $P=\{x \in \mathbb{R}^n|Ax=b,x \geq 0\}$ (in standard form) or $P=\{x \in \mathbb{R}^n|Ax\geq b,x \geq 0\}$ (in canonical form) possesses a finite number ($n \geq 1$) of vertices. 
-\end{property}
-\begin{definition}[\textit{Unbounded feasible direction of P}]
-    In the context of a problem $P$, a vector $d \in \mathbb{R}^n$ where $d \neq 0$ is considered an unbounded feasible direction of $P$ if, for any  point $x_0 \in P$, the ray defined as $\{x \in \mathbb{R}^n|x=x_0+\lambda d,\lambda \geq 0\}$ remains entirely within $P$.
-\end{definition}
-\begin{theorem}[Weyl-Minkoswki]
-    Each point $x$ within a polyhedron $P$ can be represented as a convex combination of its vertices $x^1,\dots,x^k$ and, if necessary, an unbounded feasible direction $d$ of $P$: 
-    \[x=\alpha_1x^1+\dots+\alpha_kx^k+d\]
-    Here, the coefficients $\alpha_i \geq 0$ fulfill the condition $\alpha_1+\dots+\alpha_k=1$. 
-\end{theorem}
-\begin{definition}[\textit{Polytope}]
-    A polytope is a type of bounded polyhedron, which means it possesses only one unbounded feasible direction, and that direction is $d=0$. 
-\end{definition}
-Each point $x$ within a polytope $P$ can be represented as a convex combination of its vertices.
-\begin{example}
-    The point $x=\alpha_1x^1+\alpha_2x^2+\alpha_3x^3$ can also be expressed in the form $\alpha_1+\alpha_2+\alpha_3=1$ $(d=0)$. 
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.2\linewidth]{images/polytope.png}
-    \end{figure}
-\end{example}
-\begin{theorem}[Fundamental theorem of linear programming]
-    Consider a linear programming problem $\min\{c^Tx|x \in P\}$, where $P \subseteq \mathbb{R}^n$ represents a non-empty polyhedron of feasible solutions, one of the following scenarios must hold true.
-    There exists at least one optimal vertex within $P$.
-    The value of the objective function is unbounded from below over $P$.
-\end{theorem}
-\begin{proof}
-    We prove that there exists at least one optimal vertex within $P$.
-    If $P$ contains an unbounded feasible direction $d$ such that $c^Td < 0$, it signifies that $P$ is unbounded, and the objective function values $z=c^Tx$ decrease indefinitely along the direction $d$. 
-\end{proof}
-\begin{proof}
-    We prove that the  value of the objective function is unbounded from below over $P$.
-    If $P$ does not possess any unbounded feasible direction $d$ such that $c^Td < 0$, meaning that for all directions $d$, we have $c^Td \geq 0$, then any point within $P$ can be expressed as: 
-    \[x=\sum_{i=1}^k{\alpha_ix^i + d}\]
-    Here, $x^1,\dots,x^k$ are the vertices of $P$, $\alpha_i > 0$ with $\alpha_1+\dots+\alpha_k=1$, and $d = 0$, or $d$ represents an unbounded feasible direction.
-    For any point $x \in P$, either $d = 0$ or $c^Td > 0$, which leads to the following inequality:
-    \[c^Tx=c^T\left(\sum_{i=1}^{k}{\alpha_ix^i+d}\right)=\sum_{i=1}^{k}{\alpha_ic^Tx^i+c^Td}\geq\min_{i=1,\dots,n}{c^Tx^i}\]
-    This is due to the fact that $\alpha_i > 0$ for any $i$, and $\alpha_1+\dots+\alpha_k=1$. 
-\end{proof}
-From this theorem, we can deduce that an interior point $x \in P$ cannot be an optimal solution. 
-Furthermore, in an optimal vertex, all feasible directions lead to worse objective function values.
-This theorem suggests that even though the variables can take fractional values, linear programming can be approached as a combinatorial problem.
-Consequently, it is essential to investigate the vertices of the polyhedron of feasible solutions.
-However, the number of vertices is finite but can often grow exponentially, making graphical methods practical only when $n \leq 3$. 
-\begin{figure}[H] 
-    \begin{minipage}[b]{0.5\linewidth}
-      \centering
-      \includegraphics[width=.5\linewidth]{images/un.png} 
-      \caption*{Unique optimal solution} 
-      \vspace{4ex}
-    \end{minipage}%%
-    \begin{minipage}[b]{0.5\linewidth}
-      \centering
-      \includegraphics[width=.5\linewidth]{images/mul.png} 
-      \caption*{Multiple optimal solutions} 
-      \vspace{4ex}
-    \end{minipage} 
-    \begin{minipage}[b]{0.5\linewidth}
-      \centering
-      \includegraphics[width=.5\linewidth]{images/unb.png} 
-      \caption*{Unbounded linear program} 
-      \vspace{4ex}
-    \end{minipage}%% 
-    \begin{minipage}[b]{0.5\linewidth}
-      \centering
-      \includegraphics[width=.5\linewidth]{images/in.png} 
-      \caption*{Infeasible linear program} 
-      \vspace{4ex}
-    \end{minipage} 
+\paragraph*{Bounding}
+For each subproblem $\min\left\{ c(x), \middle\vert, x \in F_i \right\}$, whose solution is found in the partition of $F$, the optimal solution $z_i$ is determined by either:
+\begin{enumerate}
+    \item Finding an optimal solution for $\min\left\{ c(x), \middle\vert, x \in F_i \right\}$.
+    \item Proving that $F_i = \emptyset$.
+    \item Proving that $z_i \geq z$, where $z$ is the optimal solution of the original problem found so far.
+\end{enumerate}
+If the subproblem is not resolved, it is necessary to generate a new subproblem by branching it again.
+
+\paragraph*{Generic branch and bound method}
+If the lower bound $b(F_i)$ of the optimal solution for the subproblem $\min\left\{ c(x), \middle\vert, x \in F_i \right\}$ is greater than the optimal solution $z$ found so far, the subproblem is discarded, as it cannot contain a better solution than the one found so far.
+At any point, the algorithm keeps in memory a set of active subproblems and the cost $U$ of the best feasible solution found so far.
+Initially, $U$ is either $\infty$ or the cost of the best feasible solution found by the heuristic method (if any).
+A typical step of the algorithm is:
+\begin{enumerate}
+    \item Select an active subproblem $F_i$ to be solved. 
+    \item If the subproblem is infeasible, delete it; otherwise, compute $b(F_i)$ for the corresponding subproblem.
+    \item If $b(F_i) \geq U$, delete $F_i$.
+    \item If $F_i$ is feasible and $b(F_i) < U$, either:
+        \begin{itemize}
+            \item Obtain an optimal solution to the subproblem.
+            \item Break the corresponding subproblem into further subproblems, which are added to the set of active subproblems.
+        \end{itemize}
+\end{enumerate}
+There are several parameters that can be arbitrarily chosen. 
+There is no fixed rule for many of them, as the best choice depends on the problem to be solved:
+\begin{enumerate}
+    \item There are multiple ways of choosing an active subproblem.
+    \item There are multiple ways of breaking a subproblem into further subproblems.
+    \item There are multiple ways of computing the lower bound $b(F_i)$.
+\end{enumerate}
+
+\subsection{Branching tree}
+The branching tree serves as a visual depiction of the branching progression within the Integer Linear Programming (ILP) problem. 
+Each node in this tree corresponds to a subproblem derived from the larger ILP problem, and the edges symbolize the steps taken in the branching process.
+Notably, a branching tree may not encompass all conceivable nodes or all potential leaves, which amount to $2^d$. 
+A node in the tree is considered "fathomed" (having no child) under the following conditions:
+\begin{enumerate}
+    \item The initial constraint, along with those on the arcs from the root to the node, renders the subproblem infeasible.
+    \item The optimal solution of the linear relaxation is an integer.
+    \item The value $C^T \overline{x}_{\text{LP}}$ of the optimal solution $\overline{x}_{\text{LP}}$ from the linear relaxation is inferior to the best feasible solution $z$ discovered thus far.
+\end{enumerate}
+This set of criteria, termed the branching criterion, enables the exclusion of numerous nodes (representing subproblems) that would not contribute to a valid solution, thereby curtailing the size of the tree.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/ilp3.png}
+    \caption{Branching tree}
 \end{figure}
+
+\subsection{Branch and bound for the ILP problem}
+In the context of an Integer Linear Programming (ILP) problem given by:
+\[ \min\left\{ c^T x, \mid, Ax = b, \ x \in \mathbb{N} \right\} \]
+the Branch and Bound method proves to be an effective strategy for determining the optimal solution $z$.
+
+\paragraph*{Branching}
+The first step involves partitioning the feasible region $F$. 
+Let $\overline{x}$ represent an optimal solution of the linear relaxation of the ILP:
+\[ \min\left\{ c^T x, \mid, Ax = b, \ x \geq 0, \ x \in \mathbb{R} \right\} \quad z_{\text{LP}} = c^T \overline{x} \]
+If $\overline{x}$ is an integer, it serves as the optimal solution for the ILP problem. 
+However, if $\overline{x}$ is non-integer, the ILP is divided into two subproblems:
+\[\min\left\{ c^T x, \middle\vert, Ax = b, x \leq \left\lfloor \overline{x} \right\rfloor \right\} \label{eq:branch1}\]
+\[\min\left\{ c^T x, \middle\vert, Ax = b, x \geq \left\lceil \overline{x} \right\rceil \right\} \label{eq:branch2}\]
+Here, $ \left\lfloor \overline{x} \right\rfloor $ and $ \left\lceil \overline{x} \right\rceil $ represent the floor and ceiling of the vector $\overline{x}$.
+While choosing the variable $x_h$ closest to $0.5$ for branching can be a common approach, it may not always yield the best results.
+An alternative and more effective strategy is strong branching, wherein candidate variables (specifically, fractional basic ones) are considered. 
+Evaluation of the corresponding objective function values helps determine the variable that, upon branching, produces the most substantial improvement in the objective function value.
+
+\paragraph*{Bounding}
+The process of bounding involves determining a lower or upper bound on the optimal value $z_i$ of a subproblem within the Integer Linear Programming (ILP). 
+The nature of the bound depends on whether the ILP is a minimization or maximization problem. 
+This is achieved by solving the linear relaxation of the subproblem.
+To decide which node (subproblem) to address next, the following criteria can be considered:
+\begin{itemize}
+    \item \textit{Deeper nodes first} (depth-first search strategy): this strategy selects the node with the greatest depth in the tree of subproblems. 
+        While simple to implement and optimize, it may result in a large tree of subproblems if the branching variable is chosen incorrectly.
+    \item \textit{More promising nodes first} (best-bound first strategy): this approach prioritizes the node with the best linear relaxation value $b(F_i)$. 
+        Although it generates a smaller tree of subproblems, the subproblems are less constrained, leading to longer times to find a feasible solution and improve it.
+\end{itemize}
+
+\subsection{Remarks on the branch and bound method}
+Branch and Bound extends its utility to mixed Integer Linear Programming (ILP) problems. During the branching step, treating fractional variables as integers and vice versa facilitates its application.
+
+Initiating the method with a well-crafted initial feasible solution from a heuristic algorithm can enhance performance. 
+This contributes to obtaining more accurate lower or upper bounds in the context of maximization or minimization problems, respectively.
+
+As a versatile approach, Branch and Bound can serve as a heuristic method for ILP problem resolution, halting when the best feasible solution discovered surpasses the best integer solution identified thus far.
+
+\paragraph*{Efficient solution of the linear relaxation}
+Iteratively solving the linear relaxations of ILP subproblems from scratch at each branching step is unnecessary. 
+The solution of the linear relaxation at the parent node can be utilized as a starting point for solving the linear relaxation at the child node.
+
+Employing a single iteration of the Dual Simplex method (the simplex method applied to the dual problem) efficiently yields an optimal solution to the linear relaxation with an additional constraint. 
+This optimization builds upon the optimal Branch and Bound outcome of the preceding node (linear relaxation of the parent subproblem).
+
+\paragraph*{Applicability of branch and bound approach}
+The applicability of the Branch and Bound method extends beyond discrete optimization problems to encompass numerous non-linear optimization challenges. 
+However, adaptations are required in two key procedures:
+\begin{itemize}
+    \item The division of the feasible region into subregions (branching).
+    \item The determination of a bound on the optimal value of the subproblem (bounding).
+\end{itemize}
