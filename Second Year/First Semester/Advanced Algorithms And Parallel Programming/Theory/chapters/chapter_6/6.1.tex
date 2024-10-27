@@ -1,0 +1,23 @@
+\section{Dynamic hash table}
+
+A hash table should be as compact as possible while remaining large enough to avoid overflow and prevent inefficient operation.
+However, in many cases, the ideal size is not known in advance.
+To address this, we use a dynamic table that expands as needed. 
+When the table reaches capacity, a larger table is allocated, all existing entries are rehashed into it, and the old table's memory is released.
+
+\paragraph*{Complexity analysis}
+In a sequence of $n$ insertions, a single insertion might appear to have a worst-case time complexity of $\mathcal{O}(n)$, making $n$ insertions seem to cost $n\cdot\mathcal{O}(n)=\mathcal{O}(n^2)$.
+However, this is an overestimate; in reality, the total cost for $n$ insertions is closer to $\mathcal{O}(n)$, which is far more efficient.
+
+To see why, consider the cost $c_i$ of each insertion $i$:
+\[c_i=\begin{cases}
+    i \qquad\text{if }i - 1 \text{ is an exact power of }2 \\
+    1 \qquad\text{otherwise}
+\end{cases}\]
+When an exact power of 2 is reached, the table doubles in size, requiring all entries to be reinserted. 
+For all other insertions, the cost is only 1.
+
+The total cost for $n$ insertions is calculated as follows:
+\[\sum_{i=1}^nc_i\leq n+\sum_{j=0}^{\left\lfloor \log(n-1)\right\rfloor}2^j\leq 3n=\Theta(n)\]
+Thus, the amortized cost per insertion for a dynamically resizing table is $\mathcal{O}(1)$, making each insertion on average constant time. 
+This efficiency allows dynamic hash tables to handle an unknown number of entries while maintaining good performance.
