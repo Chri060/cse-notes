@@ -1,0 +1,64 @@
+\section{Erroneous grammars}
+
+\paragraph*{Clean grammar}
+A grammar $G$ is deemed clean  if, and only if, for every nonterminal $A$:
+\begin{itemize}
+    \item $A$ is reachable from the axiom $S$, and thus contributes to the generation of the language. 
+        In other words, there exists a derivation:
+        \[S \overset{\ast}{\implies} \alpha A \beta\]
+    \item  $A$ is defined, meaning it generates a non-empty language:
+        \[L_A(G) \neq \varnothing\]
+\end{itemize}
+Note that the rule $L_A(G) \neq \varnothing$ also includes the case where no derivation from $A$ terminates with a terminal string $s$.
+
+The process of cleaning a grammar involves a two-step algorithm:
+\begin{enumerate}
+    \item Establish the set UNDEF, comprising undefined nonterminals.
+    \item Identify the set of unreachable nonterminals.
+\end{enumerate}
+
+\subsection{Phase one}
+We define the set DEF as follows:
+\[\textnormal{DEF}=\{A\mid( A \rightarrow u ) \in P,\textnormal{with } u \in \Sigma^{\ast}\}\]
+We initiate the process by examining the terminal rules. 
+Then, we apply the following update iteratively until a fixed point is reached:
+\[\textnormal{DEF}=\textnormal{DEF} \cup \{B\mid( B \rightarrow D_1D_2\dots D_n)\in P \land \forall i(D_i \in\textnormal{DEF} \cup \Sigma)\}\]
+During each iteration, two cases may occur:
+\begin{enumerate}
+    \item New nonterminals are discovered, and they all have their right-hand side symbols defined as nonterminals or terminals.
+    \item No new nonterminals are found, and the algorithm terminates.
+\end{enumerate}
+At this stage, the nonterminals in UNDEF are removed.
+
+\subsection{Phase two}
+The produce relation, denoted as $A$ produce $B$, is valid only when there is a production rule $(A \rightarrow \alpha B \beta) \in P$, where $A \neq B$ and $\alpha,\beta$ can be any strings.
+Subsequently, it can be asserted that a nonterminal $C$ is reachable from the initial symbol $S$ if and only if there exists a path in the produce relation graph from $S$ to $C$. 
+Nonterminals that lack reachability from the initial symbol can be eliminated. 
+
+\subsection{Additional requirement}
+In addition to the aforementioned criteria for cleanliness, a third condition is frequently imposed:
+\begin{enumerate}
+    \item [3.] $G$ must avoid circular deviations, as they are non-essential and may introduce ambiguity.
+\end{enumerate} 
+Circular derivation occurs when, given $A \overset{+}{\implies} A$, the derivations $A \overset{+}{\implies} x$ and $A \overset{+}{\implies} A \overset{+}{\implies} x$ are possible.
+It's important to note that even if a grammar is clean, it might still contain redundant rules that lead to ambiguity.
+\begin{example}
+    Instances of unclean grammars are illustrated below:
+    \[\begin{cases}
+        S \rightarrow aASb \\
+        A \rightarrow b
+    \end{cases} 
+    \qquad
+    \begin{cases}
+        S \rightarrow a \\
+        A \rightarrow b
+    \end{cases} 
+    \qquad
+    \begin{cases}
+        S \rightarrow aASb \\
+        A \rightarrow S\mid b
+    \end{cases} \]
+    In the first case, the axiomatic rule fails to generate any phrase. 
+    In the second case, $A$ is unreachable. 
+    In the third case, the grammar exhibits circularity involving both $S$ and $A$.
+\end{example}
