@@ -9,14 +9,20 @@ As we carry out these innermost summations, we generate fresh terms in the proce
         \includegraphics[width=0.25\linewidth]{images/bn.png}
     \end{figure}
     We can compute the probability distribution for $X_5$ as follows:
+    \begin{multline*} 
+        \Pr(X_5)=\sum_{X_1}\sum_{X_2}\sum_{X_3}\sum_{X_4}\sum_{X_6}\Pr(X_1)\Pr(X_2\mid X_1)\Pr(X_3\mid X_1)\Pr(X_4\mid X_2)\Pr(X_5\mid X_3) \\ \Pr(X_6\mid X_5,X_2)
+    \end{multline*}
+    We can start by marginzalizing $X_4$ as follows: 
+    \begin{multline*} 
+        \Pr(X_5)=\sum_{X_1}\sum_{X_2}\sum_{X_3}\sum_{X_6}\Pr(X_1)\Pr(X_2\mid X_1)\Pr(X_3\mid X_1)\Pr(X_5\mid X_3)\Pr(X_6\mid X_5,X_2) \\ \sum_{X_4} \Pr(X_4\mid X_2)   
+    \end{multline*}
+    Then. proceeding in the same way for all the other variables, we obtain: 
     \begin{align*}
-        \textnormal{P}(X_5)     =& \sum_{X_1}\sum_{X_2}\sum_{X_3}\sum_{X_4}\sum_{X_6}\textnormal{P}(X_1)\textnormal{P}(X_2|X_1)\textnormal{P}(X_3|X_1)\textnormal{P}(X_4|X_2)\textnormal{P}(X_5|X_3)\textnormal{P}(X_6|X_5,X_2)          \\
-                                =& \sum_{X_1}\sum_{X_2}\sum_{X_3}\sum_{X_6}\textnormal{P}(X_1)\textnormal{P}(X_2|X_1)\textnormal{P}(X_3|X_1)\textnormal{P}(X_5|X_3)\textnormal{P}(X_6|X_5,X_2)\sum_{X_4}\textnormal{P}(X_4|X_2)          \\ 
-                                =& \sum_{X_1}\sum_{X_2}\sum_{X_3}\textnormal{P}(X_1)\textnormal{P}(X_2|X_1)\textnormal{P}(X_3|X_1)\textnormal{P}(X_5|X_3)\mu_1(X_2)\sum_{X_6}\textnormal{P}(X_6|X_5,X_2)\\
-                                =& \sum_{X_2}\sum_{X_3}\textnormal{P}(X_5|X_3)\mu_1(X_2)\mu_2(X_5,X_2)\sum_{X_1}\textnormal{P}(X_1)\textnormal{P}(X_2|X_1)\textnormal{P}(X_3|X_1)     \\
-                                =& \sum_{X_3}\textnormal{P}(X_5|X_3)\sum_{X_2}\mu_1(X_2)\mu_2(X_5,X_2)\mu_3(X_2,X_3)\\
-                                =& \sum_{X_3}\textnormal{P}(X_5|X_3)\mu_4(X_3,X_5)\\
-                                =& \mu_5(X_5)
+        \Pr(X_5)    =& \sum_{X_1}\sum_{X_2}\sum_{X_3}\Pr(X_1)\Pr(X_2\mid X_1)\Pr(X_3\mid X_1)\Pr(X_5\mid X_3)\mu_1(X_2)\sum_{X_6}\Pr(X_6\mid X_5,X_2)\\
+                    =& \sum_{X_2}\sum_{X_3}\Pr(X_5\mid X_3)\mu_1(X_2)\mu_2(X_5,X_2)\sum_{X_1}\Pr(X_1)\Pr(X_2\mid X_1)\Pr(X_3\mid X_1)     \\
+                    =& \sum_{X_3}\Pr(X_5\mid X_3)\sum_{X_2}\mu_1(X_2)\mu_2(X_5,X_2)\mu_3(X_2,X_3)\\
+                    =& \sum_{X_3}\Pr(X_5\mid X_3)\mu_4(X_3,X_5)\\
+                    =& \mu_5(X_5)
     \end{align*}
 \end{example}
 
@@ -36,7 +42,7 @@ The key characteristics of this graph include:
     \item Each circular node represents a random variable, denoted as $X_i$.
     \item Each boxed node represents a factor, labeled as $f_k$, which can be expressed as a function $f_k(X_{C_k})$. 
     \item The joint probability distribution is expressed as:
-        \[\textnormal{P}(X_1,X_2,\dots,X_N)=\prod_{k=1}^K{f_k(X_{C_k})}\]
+        \[\Pr(X_1,X_2,\dots,X_N)=\prod_{k=1}^K{f_k(X_{C_k})}\]
 \end{itemize}
 In this representation, the factor graph serves as a powerful tool for modeling and automating probabilistic calculations, offering a clear visual depiction of variable dependencies and factor relationships.
 
@@ -77,12 +83,12 @@ Please be aware of the following:
         \includegraphics[width=0.3\linewidth]{images/bnf.png}
     \end{figure}
     \begin{itemize}
-        \item $f_1(X_1)=P(X_1)$
-        \item $f_2(X_1,X_2)=\textnormal{P}(X_1|X_2)$
-        \item $f_3(X_2,X_3)=\textnormal{P}(X_3|X_2)$
-        \item $f_4(X_3,X_4)=\textnormal{P}(X_4|X_3)$
-        \item $f_5(X_4,X_5)=\textnormal{P}(X_5|X_4)$
-        \item $f_5(X_5,X_6)=\textnormal{P}(X_6|X_5)$
+        \item $f_1(X_1)=\Pr(X_1)$
+        \item $f_2(X_1,X_2)=\Pr(X_1\mid X_2)$
+        \item $f_3(X_2,X_3)=\Pr(X_3\mid X_2)$
+        \item $f_4(X_3,X_4)=\Pr(X_4\mid X_3)$
+        \item $f_5(X_4,X_5)=\Pr(X_5\mid X_4)$
+        \item $f_5(X_5,X_6)=\Pr(X_6\mid X_5)$
     \end{itemize}
 \end{example}
 It's important to note that factor graphs are not unique; there are various ways to represent any given Bayesian network.
@@ -91,30 +97,30 @@ It's important to note that factor graphs are not unique; there are various ways
 The variable elimination algorithm takes two inputs: a list denoted as $F$ containing factors and a tuple labeled as $C_0$ representing the output variables to retain. 
 The result of the algorithm is a single factor $m$ that encompasses the variables in $X_{C_0}$.
 \begin{algorithm}[H]
-    \caption{Variable elimination algorithm}
+    \caption{Variable elimination}
         \begin{algorithmic}[1]
-            \State define all variables present in $F$ as $V\leftarrow\textnormal{vars}(F)$
-            \State define all variables to be eliminated as $E\leftarrow V-C_0$
-            \For {all $i \in E$}
-                \State call eliminate$\_$single$\_$variable$(F,i)$
-            \EndFor
-            \For {all remaining factors}
-                \State $m \leftarrow \prod_{f \in F}f$
-            \EndFor
+            \Procedure{VariableElimination}{$F,C_0$}
+                \State Define all variables present in $F$ as $V=\textnormal{vars}(F)$
+                \State Define all variables to be eliminated as $E= V-C_0$
+                \For{all $i \in E$}
+                    \State \Call{EliminateSingleVariable}{$F,i$}
+                \EndFor
+                \For {all remaining factors}
+                    \State $m = \prod_{f \in F}f$
+                \EndFor
+            \EndProcedure 
+            \Statex 
+            \Function{EliminateSingleVariable}{$F,i$}
+                \State Find relevant subset $f \subset F$ of factors over $i$ as $f =\{C\mid i\in C\}$
+                \State Define the remaining clique as $C_t = \textnormal{vars}(f)-\{i\}$
+                \State Compute the temporary factor as $\mu(X_{C_t})=\sum_{X_i}\prod_{f \in F}f$
+                \State Remove old factors $f$ and append new temporary factor $t$ to $F$
+                \State \Return $F$
+            \EndFunction
         \end{algorithmic}
 \end{algorithm}
-The function eliminate$\_$single$\_$variable$(F,i)$ in the prior algorithm accepts as inputs the list of factors denoted as $F$ and the variable identified by $i$. 
-It returns the updated list of factors, which remains labeled as $F$.
-\begin{algorithm}[H]
-    \caption{eliminate$\_$single$\_$variable$(F,i)$}
-        \begin{algorithmic}[1]
-            \State find relevant subset $f \subset F$ of factors over $i$ as $f \leftarrow\{C|i\in C\}$
-            \State define the remaining clique as $C_t \leftarrow \textnormal{vars}(f)-\{i\}$
-            \State compute the temporary factor as $\mu(X_{C_t})=\sum_{X_i}\prod_{f \in F}f$
-            \State remove old factors $f$ and append new temporary factor $t$ to $F$
-            \State \Return $F$
-        \end{algorithmic}
-\end{algorithm}
+The function to eliminate a variable accepts as inputs the list of factors denoted as $F$ and the variable identified by $i$. 
+It returns the updated list of factors.
 \begin{example}
     Consider the Bayesian network illustrated below:
     \begin{figure}[H]
@@ -126,7 +132,7 @@ It returns the updated list of factors, which remains labeled as $F$.
         \centering
         \includegraphics[width=0.25\linewidth]{images/bnf1.png}
     \end{figure}
-    Now, let's compute the marginal probability $\textnormal{P}(X_1,X_6)=\mu(X_1,X_6)$. To do this, we'll utilize the variable elimination algorithm with the following inputs:
+    Now, let's compute the marginal probability $\Pr(X_1,X_6)=\mu(X_1,X_6)$. To do this, we'll utilize the variable elimination algorithm with the following inputs:
     \begin{itemize}
         \item $F=\{f_1,f_2,f_3,f_4,f_5,f_6\}$
         \item $C_0=\{X_1,X_6\}$
@@ -138,13 +144,14 @@ It returns the updated list of factors, which remains labeled as $F$.
         \item Calculate the set of variables to be eliminated:
             \[E=V-C_0=\{X_1,X_2,X_3,X_4,X_5,X_6\}-\{X_1,X_6\}=\{X_2,X_3,X_4,X_5\}\]
     \end{enumerate}
-    Now, we need to eliminate the single variables contained in set $E$ using the  eliminate$\_$single$\_$variable function. Here's the step-by-step process for each variable:
+    Now, we need to eliminate the single variables contained in set $E$ using the variable elimination function.
+    Here's the step-by-step process for each variable:
     \begin{itemize}
         \item Eliminate $X_4$: 
             \begin{itemize}
                 \item Check the connected functions: $f=\{f_4\}$. 
                 \item The clique containing $X_4$ (excluding itself) is: $C_t=\{X_2\}$. 
-                \item Calculate the temporary factor: $\mu_1(X_2)=\sum_{X_4}P(X_4|X_2)$. 
+                \item Calculate the temporary factor: $\mu_1(X_2)=\sum_{X_4}\Pr(X_4\mid X_2)$. 
                 \item Update $F$ to: $F=\{f_1,f_2,f_3,f_5,f_6,\mu_1\}$. 
                 \item Remove $f$ from $E$, resulting in $E=\{X_2,X_3,X_5\}$
             \end{itemize}
@@ -152,7 +159,7 @@ It returns the updated list of factors, which remains labeled as $F$.
             \begin{itemize}
                 \item Check the connected functions: $f=\{f_3,f_5\}$. 
                 \item The clique containing $X_3$ (excluding itself) is: $C_t=\{X_1,X_5\}$. 
-                \item Calculate the temporary factor: $\mu_2(X_1,X_5)=\sum_{X_3}P(X_3|X_1)P(X_5|X_3)$. 
+                \item Calculate the temporary factor: $\mu_2(X_1,X_5)=\sum_{X_3}\Pr(X_3\mid X_1)\Pr(X_5\mid X_3)$. 
                 \item Update $F$ to: $F=\{f_1,f_2,f_6,\mu_1,\mu_2\}$. 
                 \item Remove $f$ from $E$, resulting in $E=\{X_2,X_5\}$
             \end{itemize}
@@ -160,7 +167,8 @@ It returns the updated list of factors, which remains labeled as $F$.
             \begin{itemize}
                 \item Check the connected functions: $f=\{f_6,\mu_2\}$. 
                 \item The clique containing $X_5$ (excluding itself) is: $C_t=\{X_1,X_2,X_6\}$. 
-                \item Calculate the temporary factor: $\mu_3(X_1,X_2,X_6)=\sum_{X_5}\mu_2(X_1,X_5)P(X_6|X_2,X_5)$. 
+                \item Calculate the temporary factor: 
+                \[\mu_3(X_1,X_2,X_6)=\sum_{X_5}\mu_2(X_1,X_5)\Pr(X_6\mid X_2,X_5)\]
                 \item Update $F$ to: $F=\{f_1,f_2,\mu_1,\mu_3\}$. 
                 \item Remove $f$ from $E$, resulting in $E=\{X_2\}$
             \end{itemize}
@@ -168,7 +176,8 @@ It returns the updated list of factors, which remains labeled as $F$.
             \begin{itemize}
                 \item Check the connected functions: $f=\{f_2,\mu_1,\mu_3\}$. 
                 \item The clique containing $X_2$ (excluding itself) is: $C_t=\{X_1,X_6\}$. 
-                \item Calculate the temporary factor: $\mu_4(X_1,X_6)=\sum_{X_2}\mu_1(X_2)P(X_2|X_1)\mu_3(X_1,X_2,X_6)$. 
+                \item Calculate the temporary factor: 
+                \[\mu_4(X_1,X_6)=\sum_{X_2}\mu_1(X_2)\Pr(X_2\mid X_1)\mu_3(X_1,X_2,X_6)\]
                 \item Update $F$ to: $F=\{f_1,\mu_4\}$. 
                 \item Remove $f$ from $E$, resulting in $E=\varnothing$
             \end{itemize}
@@ -179,8 +188,8 @@ It returns the updated list of factors, which remains labeled as $F$.
         \item $C_0=\{X_1,X_6\}$
     \end{itemize}
     The final steps involve multiplying all the elements in $f$: 
-    \[\textnormal{P}(X_1,X_6)=\mu_4 \cdot f_1=P(X_1)\mu_4(X_1,X_6)\]
-    This yields the marginal probability $\textnormal{P}(X_1,X_6)$ using the variable elimination algorithm.
+    \[\Pr(X_1,X_6)=\mu_4 \cdot f_1=\Pr(X_1)\mu_4(X_1,X_6)\]
+    This yields the marginal probability $\Pr(X_1,X_6)$ using the variable elimination algorithm.
 \end{example}
 It's worth mentioning that the order in which variables are selected as input for the function can be determined using a heuristic function. 
 One common approach is to order the nodes based on the ascending number of connections they have in the factor graph.
@@ -190,12 +199,12 @@ One common approach is to order the nodes based on the ascending number of conne
         \centering
         \includegraphics[width=0.3\linewidth]{images/sprinkler.png}
     \end{figure}
-    We want to compute $\textnormal{P}(W)$. To do this, we start by transforming the Bayesian network into a factor graph, where we define the factors as follows:
+    We want to compute $\Pr(W)$. To do this, we start by transforming the Bayesian network into a factor graph, where we define the factors as follows:
     \begin{itemize}
-        \item $f_1(C)=\textnormal{P}(C)$.
-        \item $f_2(S,C)=\textnormal{P}(S|C)$.
-        \item $f_3(R,C)=\textnormal{P}(R|C)$.
-        \item $f_4(W,S,R)=\textnormal{P}(W|S,R)$.
+        \item $f_1(C)=\Pr(C)$.
+        \item $f_2(S,C)=\Pr(S\mid C)$.
+        \item $f_3(R,C)=\Pr(R\mid C)$.
+        \item $f_4(W,S,R)=\Pr(W\mid S,R)$.
     \end{itemize}
     The resulting factor graph looks like this:
     \begin{figure}[H]

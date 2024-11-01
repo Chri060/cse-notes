@@ -20,7 +20,7 @@ Learning approaches can be categorized based on both structure and observability
 
 \subsection{Known structure with full observability}
 In this scenario, our objective is to determine the values of parameters in the conditional probability distributions that maximize the likelihood of the observed data, denoted as $d \in D$: 
-\[L=\sum_i^N\sum_d^D \log \text{P}(X_i|\text{parents}(X_i),d)\]
+\[L=\sum_i^N\sum_d^D \log \Pr(X_i\mid \text{parents}(X_i),d)\]
 To simplify computation, we utilize the log-likelihood. 
 The log-likelihood decomposes based on the graph structure, enabling the maximization of each node's contribution independently. 
 Sparse data challenges are addressed by incorporating Dirichlet priors.
@@ -28,9 +28,9 @@ For Gaussian nodes, we compute the sample mean and variance, employing linear re
 \begin{example}
     Let's consider the sprinkler example with Wet being true.
     For the Wet node, given a set of training data, we count the occurrences of Wet when it is Raining and the Sprinkler is on (for all combinations):
-    \[\text{P}(W=1|R=1,S=1)=\dfrac{\#(W,S,R)}{\#(S,R)}\]
+    \[\Pr(W=1\mid R=1,S=1)=\dfrac{\#(W,S,R)}{\#(S,R)}\]
     However, since this specific combination might never occur, we adjust the denominator to prevent it from being null:
-    \[\text{P}(W=1|R=1,S=1)=\dfrac{\#(W,S,R)}{\#(\overline{W},S,R)+\#(W,S,R)}\]
+    \[\Pr(W=1\mid R=1,S=1)=\dfrac{\#(W,S,R)}{\#(\overline{W},S,R)+\#(W,S,R)}\]
     To account for the possibility of some combinations never occurring, we introduce Dirichlet priors. 
     This rule ensures that each combination occurs at least once by adding one to the total number of observed evidence instances.
 \end{example}
@@ -47,7 +47,7 @@ The Expectation Maximization algorithm converges to a local maximum likelihood.
 \begin{example}
     Let's consider the sprinkler example with Wet being true. 
     For the Wet node, observed counts are replaced with the expected occurrences of each event:
-    \[\text{P}(W=1|R=1,S=1)=\dfrac{E\left[\#(W,S,R)\right]}{E\left[\#(S,R)\right]}=\dfrac{\sum_d^D\text{P}(W,S,R|d)}{\sum_d^D\text{P}(S,R|d)}\]
+    \[\Pr(W=1\mid R=1,S=1)=\dfrac{\mathbb{E}\left[\#(W,S,R)\right]}{\mathbb{E}\left[\#(S,R)\right]}=\dfrac{\sum_d^D\Pr(W,S,R\mid d)}{\sum_d^D\Pr(S,R\mid d)}\]
 \end{example}
 However, it's worth noting that this algorithm becomes slow for large networks due to the necessity of applying inference for each data point at each iteration.
 
@@ -73,17 +73,17 @@ However, being a joint distribution, it tends to overfit.
 \paragraph*{Maximum a posteriori model}
 To address overfitting, the maximum a posteriori model is considered. 
 It involves the probability of the graph given the data:
-\[\text{P}(G|D)=\dfrac{\text{P}(G|D)\text{P}(G)}{\text{P}(D)}\]
+\[\Pr(G\mid D)=\dfrac{\Pr(G\mid D)\Pr(G)}{\Pr(D)}\]
 For computational simplicity, the formula is often expressed in logarithmic terms:
-\[\text{P}(G|D)=\log\text{P}(G|D)+\log\text{P}(G)-\log\text{P}(D)\]
-While $\text{P}(G)$ could be used to penalize complex models, it's not always necessary, as the term:
-\[\text{P}(D|G)=\int_{\theta} \text{P}(D|G,\theta)\]
+\[\Pr(G\mid D)=\log\Pr(G\mid D)+\log\Pr(G)-\log\Pr(D)\]
+While $\Pr(G)$ could be used to penalize complex models, it's not always necessary, as the term:
+\[\Pr(D\mid G)=\int_{\theta} \Pr(D\mid G,\theta)\]
 already has a similar effect.
 
 \subsection{Unknown structure with partial observability}
 This situation is typically challenging due to the unknown structure and the presence of hidden variables and/or missing data. 
 To address this, learning employs posterior approximation using the Bayesian information criterion:
-\[\log\text{P}(G|D) \approx \log\text{P}(D|G,\widehat{\Theta}_G)-\dfrac{N\log R}{2}\]
+\[\log\Pr(G\mid D) \approx \log\Pr(D\mid G,\widehat{\Theta}_G)-\dfrac{N\log R}{2}\]
 Here, $R$ represents the number of samples, $\widehat{\Theta}_G$ denotes the model parameters, and $N$ is the number of variables.
 
 In cases of full observability, the model's dimension is determined by the number of free parameters.

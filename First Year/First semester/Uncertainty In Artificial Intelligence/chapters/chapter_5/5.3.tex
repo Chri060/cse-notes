@@ -1,9 +1,9 @@
 \section{Density estimation}
 
 For calculating the probability of a logical expression, we can employ the following summation formula:
-\[\textnormal{P}(E)=\sum_{row \backsim E}\textnormal{P}(row)\]
+\[\Pr(E)=\sum_{row \backsim E}\Pr(row)\]
 To compute inference, we can use the formula:
-\[\textnormal{P}(E_1|E_2)=\dfrac{\textnormal{P}(E_1 \land E_2)}{E_2}=\dfrac{\sum_{row \backsim E_1 \land E_2}\textnormal{P}(row)}{\sum_{row \backsim E_2}\textnormal{P}(row)}\]
+\[\Pr(E_1\mid E_2)=\dfrac{\Pr(E_1 \land E_2)}{E_2}=\dfrac{\sum_{row \backsim E_1 \land E_2}\Pr(row)}{\sum_{row \backsim E_2}\Pr(row)}\]
 \begin{example}
     Given the following truth table: 
     \begin{table}[H]
@@ -21,18 +21,18 @@ To compute inference, we can use the formula:
         1   & 1   & 1   & 0.10       \\ \hline
         \end{tabular}
     \end{table}
-    $\textnormal{P}(A)$ can be found by summing all the probability where $A=1$, that is: 
-    \[\textnormal{P}(A) = 0.05 + 0.10 + 0.25 + 0.10 = 0.5\]
-    $\textnormal{P}(A \land B)$ can be found by summing all the probability where $A=1$ and $B=1$, that is: 
-    \[P(A \land B) = 0.25 + 0.10 = 0.35\]
-    $\textnormal{P}(\overline{A} \lor B)$ can be found by summing all the probability where $A=0$ or $B=1$, that is: 
-    \[\textnormal{P}(\overline{A} \lor B) = 0.30 + 0.05 + 0.10 + 0.05 + 0.25 + 0.10 = 0.85\]
-    $P(A | B)$ can be found by dividing the probability of $A=1$ and $B=1$ by the probability where $B=1$, that is: 
-    \[\textnormal{P}(A | B) = \dfrac{(0.25+0.10)}{(0.10+0.05+0.25+0.10)}=0.7\]
-    $\textnormal{P}(C | A \land B)$ can be found by dividing the probability of $A=1$ and $B=1$ and $C=1$ by the probability where $A=1$ and $B=1$, that is: 
-    \[\textnormal{P}(C | A \land B) = \dfrac{(0.10)}{(0.25+0.10)}=0.285\]
-    $\textnormal{P}(\overline{A} | C)$ can be found by dividing the probability of $A=0$ and $C=1$ by the probability where $C=1$, that is: 
-    \[\textnormal{P}(\overline{A} | C) = \dfrac{(0.05+0.05)}{(0.05+0.05+0.10+0.10)}=0.333\]
+    $\Pr(A)$ can be found by summing all the probability where $A=1$, that is: 
+    \[\Pr(A) = 0.05 + 0.10 + 0.25 + 0.10 = 0.5\]
+    $\Pr(A \land B)$ can be found by summing all the probability where $A=1$ and $B=1$, that is: 
+    \[\Pr(A \land B) = 0.25 + 0.10 = 0.35\]
+    $\Pr(\overline{A} \lor B)$ can be found by summing all the probability where $A=0$ or $B=1$, that is: 
+    \[\Pr(\overline{A} \lor B) = 0.30 + 0.05 + 0.10 + 0.05 + 0.25 + 0.10 = 0.85\]
+    $\Pr(A \mid  B)$ can be found by dividing the probability of $A=1$ and $B=1$ by the probability where $B=1$, that is: 
+    \[\Pr(A \mid  B) = \dfrac{(0.25+0.10)}{(0.10+0.05+0.25+0.10)}=0.7\]
+    $\Pr(C \mid  A \land B)$ can be found by dividing the probability of $A=1$ and $B=1$ and $C=1$ by the probability where $A=1$ and $B=1$, that is: 
+    \[\Pr(C \mid  A \land B) = \dfrac{(0.10)}{(0.25+0.10)}=0.285\]
+    $\Pr(\overline{A} \mid  C)$ can be found by dividing the probability of $A=0$ and $C=1$ by the probability where $C=1$, that is: 
+    \[\Pr(\overline{A} \mid  C) = \dfrac{(0.05+0.05)}{(0.05+0.05+0.10+0.10)}=0.333\]
 \end{example}
 \begin{definition}[\textit{Density estimator}]
     A density estimator is designed to acquire knowledge in the form of a mapping from a set of attributes to a probability distribution within the attribute space, defined as:
@@ -41,11 +41,11 @@ To compute inference, we can use the formula:
 
 \paragraph*{Likelihood density estimators}
 We can employ likelihood to assess density estimation. 
-When presented with a record $x$, a density estimator $M$ provides an estimate of how probable it is, denoted as $\widehat{\textnormal{P}}(x|M)$. 
+When presented with a record $x$, a density estimator $M$ provides an estimate of how probable it is, denoted as $\widehat{\Pr}(x\mid M)$. 
 When dealing with a dataset containing $N$ records, a density estimator can inform us about the likelihood of the data, assuming that all records were generated independently from it:
-\[\widehat{\textnormal{P}}(\textnormal{dataset})=\widehat{\textnormal{P}}(x_1,x_2,\dots,x_N)=\prod_{n=1}^{N}\widehat{\textnormal{P}}(x|M)\]
+\[\widehat{\Pr}(\textnormal{dataset})=\widehat{\Pr}(x_1,x_2,\dots,x_N)=\prod_{n=1}^{N}\widehat{\Pr}(x\mid M)\]
 Due to the potential issue of likelihood values becoming extremely small, it's common practice to work with log-likelihood instead:
-\[\log{\widehat{\textnormal{P}}(\textnormal{dataset})}=\log{\prod_{n=1}^{N}{\widehat{\textnormal{P}}(x_n|M)}}=\sum_{n=1}^{N}{\log{\widehat{\textnormal{P}}(x_n|M)}}\]
+\[\log{\widehat{\Pr}(\textnormal{dataset})}=\log{\prod_{n=1}^{N}{\widehat{\Pr}(x_n\mid M)}}=\sum_{n=1}^{N}{\log{\widehat{\Pr}(x_n\mid M)}}\]
 
 Density estimators offer a range of valuable capabilities, including the ability to order records by their probability, which can help identify outliers or anomalies. 
 They are also instrumental in inference tasks and can serve as a foundation for Bayes classifiers. 
@@ -59,12 +59,12 @@ It's crucial to acknowledge that in the naïve Bayes estimator model, all attrib
 While this final assumption is rarely accurate in real-world scenarios, it often yields effective results when applied in practice.
 \begin{example}
     In the context of the naïve Bayes estimator model, given four variables $A,B,C$, and $D$, they are all considered independent due to the model's assumptions. Consequently, this implies that:
-    \[\textnormal{P}(A,\overline{B},C,\overline{D}) = \textnormal{P}(A)\textnormal{P}(\overline{B})P(C)\textnormal{P}(\overline{D})\]
+    \[\Pr(A,\overline{B},C,\overline{D}) = \Pr(A)\Pr(\overline{B})\Pr(C)\Pr(\overline{D})\]
 \end{example}
 
 In order to train a naïve Bayes estimator, we must make the assumption that $x[1],\dots,x[n]$ are independently distributed. 
 Under this hypothesis, it becomes feasible to construct any row of the resulting joint distribution as needed:
-\[\widehat{\textnormal{P}}(x[1]=u_1,x[2]=u_2,\dots,x[I]=u_I) = \prod_{k=1}^{I} \widehat{\textnormal{P}}(x[k]=u_k)\]
+\[\widehat{\Pr}(x[1]=u_1,x[2]=u_2,\dots,x[I]=u_I) = \prod_{k=1}^{I} \widehat{\Pr}(x[k]=u_k)\]
 \begin{table}[H]
     \centering
     \begin{tabular}{c|c|c|}

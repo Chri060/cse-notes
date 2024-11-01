@@ -5,7 +5,7 @@ A Hidden Markov model is described by a quintuple $\left\langle S,E,P,A,B \right
 \begin{itemize}
     \item $S=\{S_1,\dots,S_N\}$: represents the values for the hidden states.
     \item $E=\{e_1,\dots,e_T\}$: represents the values for the observations. 
-    \item $P$: the probability distribution of the initial state.
+    \item $\Pr$: the probability distribution of the initial state.
     \item $A$: the transition probability matrix.
     \item $B$: the emission probability matrix.
 \end{itemize}
@@ -28,10 +28,11 @@ A Hidden Markov model is described by a quintuple $\left\langle S,E,P,A,B \right
 
     Suppose we have the series: sunny, rainy, rainy, rainy, snowy, snowy. 
     The probability of this series is calculated as follows:
-    \begin{align*}
-        P(S)    &= \text{P} (S_{\text{sunny}})  \text{P} (S_{\text{rainy}}|S_{\text{sunny}})  \text{P} (S_{\text{rainy}}|S_{\text{rainy}})  \text{P} (S_{\text{rainy}}|S_{\text{rainy}})\text{P} (S_{\text{snowy}}|S_{\text{rainy}})  \text{P} (S_{\text{snowy}}|S_{\text{snowy}}) \\
-                &= 0.7 \cdot 0.15 \cdot 0.6 \cdot 0.6 \cdot 0.02 \cdot 0.2 = 0.0001512
-    \end{align*} 
+    \begin{multline*}
+        \Pr(S) = \Pr (S_{\text{sunny}})  \Pr (S_{\text{rainy}}\mid S_{\text{sunny}})  \Pr (S_{\text{rainy}}\mid S_{\text{rainy}})  \Pr (S_{\text{rainy}}\mid S_{\text{rainy}}) \\ \Pr (S_{\text{snowy}}\mid S_{\text{rainy}})  \Pr (S_{\text{snowy}}\mid S_{\text{snowy}}) 
+    \end{multline*}
+    That is equal to: 
+    \[\Pr(S) = 0.7 \cdot 0.15 \cdot 0.6 \cdot 0.6 \cdot 0.02 \cdot 0.2 = 0.0001512\]
 
     Now, we introduce three observations for each state $\{O_{\text{shorts}},O_{\text{coat}},O_{\text{umbrella}}\}$. 
     In this case, in addition to the transition matrix $A$, we have an observation matrix $B$: 
@@ -47,20 +48,20 @@ A Hidden Markov model is described by a quintuple $\left\langle S,E,P,A,B \right
 
 \paragraph*{Forward probability}
 The forward probability represents the joint probability of actual states and observations and is computed as follows:
-\[\text{P}(X_t=s_i,e_{1:t})=\sum_j A_{ij}B_{je_t}\text{P}(X_{t-1}=s_j,e_{1:t-1})\]
+\[\Pr(X_t=s_i,e_{1:t})=\sum_j A_{ij}B_{je_t}\Pr(X_{t-1}=s_j,e_{1:t-1})\]
 This forward probability serves multiple purposes:
 \begin{itemize}
     \item It can be utilized to calculate the probability of the observations:
-        \[P(e_{1:t})\]
+        \[\Pr(e_{1:t})\]
     \item It can be employed for making predictions about the next state:
-        \[P(X_{t+1}=s_i|e_{1:t})\]
+        \[\Pr(X_{t+1}=s_i\mid e_{1:t})\]
 \end{itemize}
 
 \paragraph*{Viterbi algorithm}
 From the given observations, it is feasible to compute the most likely hidden state sequence:
-\[\argmax\left[\text{P}(X_{1:t}|e_{1:t})\right]=\argmax\left[\dfrac{\text{P}(X_{1:t},e_{1:t})}{\text{P}(e_{1:t})}\right]=\argmax\left[\text{P}(X_{1:t},e_{1:t})\right]\]
+\[\argmax\left[\Pr(X_{1:t}\mid e_{1:t})\right]=\argmax\left[\dfrac{\Pr(X_{1:t},e_{1:t})}{\Pr(e_{1:t})}\right]=\argmax\left[\Pr(X_{1:t},e_{1:t})\right]\]
 Applying Bayesian network factorization, we obtain:
-\[\text{P}(X_{1:t},e_{1:t})=\text{P}(X_0)\prod_{i=1:t}\text{P}(X_i|X_{i-1})\text{P}(e_i|X_i)\]
+\[\Pr(X_{1:t},e_{1:t})=\Pr(X_0)\prod_{i=1:t}\Pr(X_i\mid X_{i-1})\Pr(e_i\mid X_i)\]
 The solution we seek minimizes:
-\[-\log\text{P}(X_{1:t},e_{1:t})=-\log\text{P}(X_0)+\sum_{i=1:t}\left(-\log\text{P}(X_i|X_{i-1})-\log\text{P}(e_i|X_i)\right)\]
+\[-\log\Pr(X_{1:t},e_{1:t})=-\log\Pr(X_0)+\sum_{i=1:t}\left(-\log\Pr(X_i\mid X_{i-1})-\log\Pr(e_i\mid X_i)\right)\]
 To represent this problem graphically, construct a graph with $1 + tN$ nodes: one initial node and $N$ nodes at each time $i$, where the $j$-th node represents $X_i=s_j$.
