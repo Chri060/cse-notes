@@ -1,33 +1,91 @@
 \section{Graph theory}
 
-A graph is a mathematical structure consisting of nodes (or vertices) connected by edges (or lines).
-\begin{definition}
-    Let $G$ be defined as the ordered triple $G=(V, E, f)$, where:
+In mathematics, a graph is a structure composed of nodes (or vertices) connected by edges (or lines). Graph theory studies these structures and their properties.
+\begin{definition}[\textit{Graph}]
+    A graph $G$ is an ordered triple $G = (V, E, f)$, where:
 \end{definition}
 \begin{itemize}
-    \item $V$ represents a set of nodes, points, or vertices. 
-    \item $E$ is a set of edges, which are the connections between the nodes.
-    \item $f$ is a function that associates each edge in $E$ with an unordered pair of vertices in $V$. 
+    \item $V$ is a set of vertices (or nodes),
+    \item $E$ is a set of edges, each representing a connection between two vertices,
+    \item $f$ is a function that maps each edge in $E$ to an unordered pair of vertices in $V$.
 \end{itemize}
+\begin{definition}[\textit{Vertex}]
+    A vertex is a fundamental element in a graph, represented visually as a point or dot. 
+    The vertex set of a graph $G$ is usually denoted $V(G)$ or $V$.
+\end{definition}
+\begin{definition}[\textit{Edge}]
+    An edge is a set of two vertices, often depicted as a line connecting them. 
+    The set of all edges in $G$ is denoted $E(G)$ or $E$.
+\end{definition}
+\begin{definition}[\textit{Simple graph}]
+    A simple graph is a graph without multiple edges (no repeated edges) and without loops (edges that connect a vertex to itself).
+\end{definition}
 \begin{definition}[\textit{Path}]
-    A path is defined as a sequence of vertices such that there exists an edge leading from each vertex to its successor. 
+    A path in a graph is a sequence of vertices in which each adjacent pair is connected by an edge.
 \end{definition}
-A path is considered simple if all vertices are distinct. 
-A path that starts and ends at the same vertex is known as a cycle.
+\begin{definition}[\textit{Simple path}]
+    A path is considered simple if all vertices in the path are distinct.
+\end{definition}
+\begin{definition}[\textit{Cycle}]
+    A cycle is a path that starts and ends at the same vertex.
+\end{definition}
 \begin{definition}[\textit{Cyclic graph}]
-    A graph is termed cyclic if it contains at least one cycle.
+    A graph is cyclic if it contains at least one cycle.
 \end{definition}
-\begin{definition}[\textit{Connected}]
-    A graph is connected if there exists a path between any pair of vertices, allowing traversal from one node to any other. 
+\begin{definition}[\textit{Connected graph}]
+    A graph is connected if there exists a path between any pair of vertices, allowing traversal between any two vertices in the graph.
+\end{definition}
+\begin{definition}[\textit{Strongly connected graph}]
+    A directed graph is strongly connected if there is a directed path from any vertex to every other vertex.
+\end{definition}
+\begin{definition}[\textit{Sparse graph}]
+    A sparse graph is one in which the number of edges is close to the number of vertices:
+    \[\left\lvert E\right\rvert\approx\left\lvert V\right\rvert \]
+\end{definition}
+\begin{definition}[\textit{Dense graph}]
+    A dense graph is one in which the number of edges is close to the square of the number of vertices:
+    \[\left\lvert E\right\rvert\approx{\left\lvert V\right\rvert}^2 \]
+\end{definition}
+\begin{definition}[\textit{Weighted graph}]
+    A weighted graph assigns a weight to each edge, typically represented by a weight function $w: E \rightarrow \mathbb{R}$.
 \end{definition}
 \begin{definition}[\textit{Directed graph}]
-    A directed graph, or digraph, is characterized by edges that have a direction.
+    A directed graph, or digraph, is a graph in which each edge has a direction, meaning edges are ordered pairs of vertices.
 \end{definition}
-\begin{definition}[\textit{Strongly connected}]
-    A directed graph is strongly connected if there is a directed path from any node to any other node.
+\begin{definition}[\textit{Bipartite graph}]
+    A graph is bipartite if its vertex set $V$ can be partitioned into two disjoint sets $V_1$ and $V_2$ such that every edge connects a vertex in $V_1$ to a vertex in $V_2$.
+\end{definition}
+\begin{definition}[\textit{Complete graph}]
+    A complete graph, denoted $K_n$, is a graph in which every pair of vertices is connected by an edge. 
+    A complete graph with $n$ vertices has $\frac{n(n-1)}{2}$ edges.
+\end{definition}
+\begin{definition}[\textit{Planar graph}]
+    A planar graph can be drawn on a plane without any edges crossing.
+    The complete graph $K_4$ is the largest complete planar graph.
 \end{definition}
 \begin{definition}[\textit{Tree}]
-    A tree is a special type of graph that is connected and acyclic, where there is exactly one path between any two nodes.
+    A tree is a connected, acyclic graph. 
+    In a tree, there is exactly one path between any pair of vertices.
+\end{definition}
+\begin{definition}[\textit{Hypergraph}]
+    A hypergraph generalizes a graph by allowing edges (called hyperedges) to connect any number of vertices. 
+    Formally, a hypergraph is a pair $(X, E)$, where $X$ is a set of vertices and $E$ is a set of subsets of $X$, each subset representing a hyperedge.
+\end{definition}
+\begin{definition}[\textit{Degree}]
+    The degree of a vertex is the number of edges incident to it.
+\end{definition}
+For directed graphs:
+\begin{itemize}
+    \item \textit{In-degree}: the number of edges directed toward the vertex.
+    \item \textit{Out-degree}: the number of edges directed away from the vertex.
+    \item \textit{Degree}: sum of out-degree and in-degree
+\end{itemize}
+\begin{definition}[\textit{Subgraph}]
+    A subgraph of $G$ is a graph whose vertex set and edge set are subsets of those of $G$. 
+    Conversely, $G$ is called a supergraph of this subgraph.
+\end{definition}
+\begin{definition}[\textit{Spanning subgraph}]
+    A spanning subgraph $H$ of $G$ has the same vertex set as $G$ but possibly fewer edges.
 \end{definition}
 
 \subsection{Graph data structure}
@@ -35,6 +93,6 @@ In computer science, a graph is defined as an abstract data type composed of a s
 These elements establish relationships between the nodes, reflecting the mathematical concept of graphs.
 Graphs can be represented in several ways, including:
 \begin{itemize}
-    \item \textit{Matrix representation}: incidence matrix (edge data in relation to vertices, size $|E|\times|V|$) or adjacency matrix (adjacency or edge weights, size $|V|\times|V|$). 
+    \item \textit{Matrix representation}: incidence matrix (edge data in relation to vertices, size $\left\lvert E\right\rvert \times\left\lvert V\right\rvert $) or adjacency matrix (adjacency or edge weights, size $\left\lvert V\right\rvert\times\left\lvert V\right\rvert$). 
     \item \textit{List representation}: edge list (pairs of vertices with optional weights and additional data), and adjacency list (collection of lists or arrays where each list corresponds to a vertex and contains its adjacent vertices).
 \end{itemize}
