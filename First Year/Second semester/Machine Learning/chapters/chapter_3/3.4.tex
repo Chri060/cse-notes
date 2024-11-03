@@ -1,52 +1,62 @@
 \section{Ensemble}
 
-We've explored methods to decrease variance while balancing increased bias.
-However, we want to reduce variance without amplifying bias or mitigate bias altogether. 
-
-These objectives can indeed be achieved through the utilization of two ensemble methods involving the learning of multiple models and their combination:
+Ensemble methods aim to reduce variance or bias (or both) by combining multiple models to improve overall predictive performance. 
+These objectives are typically achieved through two main techniques:
 \begin{itemize}
-    \item \textit{Bagging}: involves training multiple models independently on different subsets of the data and then combining their predictions.
-    \item \textit{Boosting}: utilizes an iterative approach where models are sequentially trained, each aiming to correct the errors of its predecessors, leading to the creation of a strong ensemble model.
+    \item \textit{Bagging}: reduces variance without increasing bias by training multiple models on different subsets of the data.
+    \item \textit{Boosting}: reduces bias by sequentially combining weak learners to create a strong model.
 \end{itemize}
 
 \subsection{Bagging}
-Let assume to have $N$ datasets and to learn from them $N$ models, $y_1,y_2,\dots,y_N$. 
-Now let us compute an aggregate model as: 
-\[y_{AGG}=\dfrac{1}{N}\sum_{i=1}^{N}y_i\]
-If the datasets are independent, the model variance of $y_{AGG}$ will be $\frac{1}{N}$ of the model variance of the single model $y_i$.
-However, we generally do not have $N$ datasets. 
-
-Bagging, short for Bootstrap Aggregation, involves the following steps:
+Bagging is an ensemble technique designed to reduce model variance, making it particularly useful for high-variance, low-bias models. 
+The steps for bagging are as follows:
 \begin{enumerate}
-    \item Generate $N$ datasets by applying random sampling with replacement.
-    \item Train a model (classification or regression) using each dataset generated.
-    \item To predict new samples, apply all the trained models and combine their outputs using majority voting (for classification) or averaging (for regression).
+    \item Generate $N$ different datasets by applying random sampling with replacement (bootstrapping) from the original training data.
+    \item Train a separate model (learner) on each of these datasets in parallel.
 \end{enumerate}
-Bagging is generally beneficial as it reduces variance, although the sampled datasets are not independent. 
-It proves particularly useful with unstable learners, characterized by significant changes with small dataset variations (low bias and high variance), and in scenarios with a high degree of overfitting (low bias and high variance). 
-However, it does not offer much help with robust learners, which are insensitive to data changes (typically higher bias but lower variance).
+For prediction, each model is applied to a new sample, and the outputs are combined: 
+\begin{itemize} 
+    \item In classification, a majority vote across the models is used. 
+    \item In regression, predictions are averaged. 
+\end{itemize}
+Bagging reduces variance by averaging out the noise associated with individual models. 
+It is particularly effective for unstable learners (models highly sensitive to small changes in the data).
+For such learners, bagging can improve stability and performance.
+However, bagging is less effective for robust learners with inherently low variance, like linear models.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+    \hline
+    & \textbf{Bagging} \\ \hline
+    \textbf{Primary Goal} & Reduces variance \\ \hline
+    \textbf{Works Best With} & Unstable learners (sensitive to data changes) \\ \hline
+    \textbf{Noise Handling} & Can be applied with noisy data \\ \hline
+    \textbf{Effectiveness} & Usually helps, but the difference might be small \\ \hline
+    \textbf{Execution} & Parallel \\ \hline
+    \end{tabular}
+\end{table}
 
 \subsection{Boosting}
-Boosting aims to minimize bias by employing a series of simple (weak) learners.
-
-The core concept of boosting involves iteratively training a sequence of weak learners, with each iteration concentrating on the samples misclassified in the preceding iteration.
-
-Ultimately, an ensemble model is constructed by combining the outputs of all the weak learners trained.
-
-\subsection{Summary}
-The characteristics of bagging are: 
-\begin{itemize}
-    \item Decreases variance.
-    \item Less effective for stable learners.
-    \item Applicable with noisy data.
-    \item Generally beneficial, though the improvement might be modest.
-    \item Naturally suited for parallelization.
-\end{itemize}
-The characteristics of boosting are: 
-\begin{itemize}
-    \item Reduces bias (typically without overfitting).
-    \item Compatible with stable learners.
-    \item May encounter challenges with noisy data.
-    \item Not always effective, but can yield significant improvements.
-    \item Sequential in nature.
-\end{itemize}
+Boosting is an iterative ensemble technique that combines weak learners sequentially to build a strong model, focusing on reducing bias. 
+The steps in boosting are as follows:
+\begin{enumerate} 
+    \item Assign equal weights to all samples in the training set initially. 
+    \item Train a weak learner (often a simple model with high bias) on the weighted dataset. 
+    \item Calculate the error of this model on the training set. 
+    \item Increase the weights of the misclassified samples so that the next model focuses more on these difficult cases. 
+    \item Repeat from step 2 until a stopping criterion is met (e.g., a maximum number of learners or a desired level of accuracy). 
+\end{enumerate}
+Once all learners are trained, they are combined by weighting each model's predictions according to its accuracy. 
+For new samples, the ensemble prediction is a weighted sum (or weighted vote) of the predictions from all the weak learners, with more accurate learners contributing more heavily.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+    \hline
+    & \textbf{Boosting} \\ \hline
+    \textbf{Primary Goal} & Reduces bias (generally without overfitting) \\ \hline
+    \textbf{Works Best With} & Stable learners (less sensitive to data changes) \\ \hline
+    \textbf{Noise Handling} & Might have problems with noisy data \\ \hline
+    \textbf{Effectiveness} & Not always helpful, but can make a significant difference \\ \hline
+    \textbf{Execution} & Sequential \\ \hline
+    \end{tabular}
+\end{table}

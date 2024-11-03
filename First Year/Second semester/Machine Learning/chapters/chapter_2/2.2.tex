@@ -25,7 +25,7 @@ The key components of constructing a linear regression problem include:
     \item \textit{Optimization}: a closed-form optimization of the RSS, known as least squares, begins with the matrix representation of the loss function:
         \[\text{LS}(\mathbf{w})=\dfrac{1}{2}\text{RSS}(\mathbf{w})=\dfrac{1}{2}{\left( \boldsymbol{\Phi}_{\mathbf{w}}-\mathbf{t} \right)}^2\]
         To find the optimal $\mathbf{w}$, we compute the first derivative of $\text{LS}(\mathbf{w})$ and set it to zero, obtaining: 
-        \[\hat{\mathbf{w}}_{\text{LS}}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi}\right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t}\]
+        \[\hat{\mathbf{w}}_{\text{LS}}={( \boldsymbol{\Phi}^T\boldsymbol{\Phi})}^{-1}\boldsymbol{\Phi}^T\mathbf{t}\]
         The inversion of the matrix can be computationally expensive, especially for large datasets, assuming the matrix is non-singular (invertible). 
         
         To mitigate this, stochastic gradient descent can be employed.
@@ -115,18 +115,18 @@ Both methods have their applications, with z-score normalization being more effe
 A function can achieve a better approximation by increasing the degree of the polynomial used in the regression.
 However, increasing the polynomial degree also increases the complexity of the model parameters.
 To address this complexity, adjustments are needed in the loss function:
-\[L(\mathbf{w})=L_D(\mathbf{w})+\lambda L_W(\mathbf{w})\]
-Here, $L_D(\mathbf{w})$ represents the usual loss function, $L_W(\mathbf{w})$ reflects model complexity (a hyperparameter), and $\lambda$ is the regularization coefficient.
+\[\mathcal{L}(\mathbf{w})=\mathcal{L}_D(\mathbf{w})+\lambda \mathcal{L}_W(\mathbf{w})\]
+Here, $\mathcal{L}_D(\mathbf{w})$ represents the usual loss function, $\mathcal{L}_W(\mathbf{w})$ reflects model complexity (a hyperparameter), and $\lambda$ is the regularization coefficient.
 The model complexity loss function can be: 
 \begin{itemize}
     \item \textit{Ridge}, in which the loss function becomes: 
-        \[\text{L}_{\text{ridge}}(\mathbf{w})=\dfrac{1}{2}\sum_{i=1}^N {\epsilon_i}^2 + \lambda\dfrac{1}{2}{\left\lVert \mathbf{w} \right\rVert}_2^2\]
+        \[\mathcal{L}_{\text{ridge}}(\mathbf{w})=\dfrac{1}{2}\sum_{i=1}^N {\epsilon_i}^2 + \lambda\dfrac{1}{2}{\left\lVert \mathbf{w} \right\rVert}_2^2\]
         This new loss function remains quadratic with respect to $\mathbf{w}$, allowing for closed-form optimization:
         \[\hat{\mathbf{w}}_{\text{ridge}}={\left( \lambda\mathbf{I}+\boldsymbol{\Phi}^T \boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t}\]
         The term $\lambda\mathbf{I}$ is crucial in solving the singularity problem, as it transforms a non-singular matrix into a singular one with an appropriate choice of $\lambda$.
         In particular, the eigenvalues of the $\left( \lambda\mathbf{I}+\boldsymbol{\Phi}^T \boldsymbol{\Phi} \right)$ matrix must be greater or equal than $\lambda$ since $\boldsymbol{\Phi}^T \boldsymbol{\Phi}$ is positive semidefinite. 
     \item \textit{Lasso}, in which the loss function becomes: 
-        \[\text{L}_{\text{lasso}}(\mathbf{w})=\dfrac{1}{2}\sum_{i=1}^N \epsilon_i^2 + \lambda\dfrac{1}{2}{\left\lVert \mathbf{w} \right\rVert}_1\]
+        \[\mathcal{L}_{\text{lasso}}(\mathbf{w})=\dfrac{1}{2}\sum_{i=1}^N \epsilon_i^2 + \lambda\dfrac{1}{2}{\left\lVert \mathbf{w} \right\rVert}_1\]
         In this case, closed-form optimization is not possible. 
         However, lasso typically leads to sparse regression models: when the regularization coefficient $\lambda$ is large enough, some components of $\hat{\mathbf{w}}$ become equal to zero.
 \end{itemize}
@@ -168,7 +168,7 @@ To determine the statistical significance of the model's parameters, hypothesis 
         If the test shows that the coefficient is significantly different from zero, the null hypothesis (that the coefficient is zero) is rejected.
     \item \textit{Test on overall model significance}: this test assesses the significance of the overall model by comparing it to a null model (a model with no predictors).
         The test uses the Fisher-Snedecor distribution:
-        \[F_\text{stat}\sim\dfrac{\text{dfe}}{M-1}\dfrac{\text{TSS}-\text{RSS}\hat{\mathbf{w}}}{\text{RSS}\hat{\mathbf{w}}}\]  
+        \[F_\text{stat}\sim\dfrac{\text{dfe}}{M-1}\dfrac{\text{TSS}-\text{RSS}(\hat{\mathbf{w}})}{\text{RSS}(\hat{\mathbf{w}})}\]  
         If the F-statistic is large, the null hypothesis (that all model coefficients are zero) is rejected, indicating that the model significantly improves prediction compared to a constant (mean) model.
 \end{enumerate}
 
@@ -191,15 +191,15 @@ Given a dataset $\mathcal{D}$ of $N$ samples with inputs $\mathbf{x}_n$ and targ
 Here, $\mathcal{N}(t_n|\mathbf{w}^T\boldsymbol{\Phi}(\mathbf{x}_n),\sigma^2)$ represents the Gaussian distribution for each target, with mean $\mathbf{w}^T\boldsymbol{\Phi}(\mathbf{x}_n)$ and variance $\sigma^2$. 
 
 To find the maximum likelihood estimate $\mathbf{w}_{\text{ML}}$, we maximize the log-likelihood, which simplifies the product into a sum:
-\[\ell (\mathbf{w})=\ln\Pr(t_n|\mathbf{x}_n, \mathbf{w} ,\sigma^2)=-\dfrac{N}{2}\ln(2\pi\sigma^2)-\dfrac{1}{2\sigma^2}\text{RSS}(\mathbf{w})\]
+\[\mathcal{L}(\mathbf{w})=\ln\Pr(t_n|\mathbf{x}_n, \mathbf{w} ,\sigma^2)=-\dfrac{N}{2}\ln(2\pi\sigma^2)-\dfrac{1}{2\sigma^2}\text{RSS}(\mathbf{w})\]
 Here, $RSS(\mathbf{w})$ is the Residual Sum of Squares.
 
 The first term, $-\frac{N}{2}\ln(2\pi\sigma^2)$, is independent of $\mathbf{w}$, so we can ignore it when maximizing the log-likelihood.
 This leaves us with the second term, which is proportional to the residual sum of squares. 
 Therefore, maximizing the log-likelihood is equivalent to minimizing $\text{RSS}(\mathbf{w})$. 
 
-To find $\mathbf{w}_{\text{ML}}$, we set the gradient of $\ell (\mathbf{w})$ with respect to $\mathbf{w}$ to zero: 
-\[\dfrac{\partial \ell (\mathbf{w})}{\partial\mathbf{w}}=0\]
+To find $\mathbf{w}_{\text{ML}}$, we set the gradient of $\mathcal{L}(\mathbf{w})$ with respect to $\mathbf{w}$ to zero: 
+\[\dfrac{\partial \mathcal{L}(\mathbf{w})}{\partial\mathbf{w}}=0\]
 Solving this yields the closed-form solution for the maximum likelihood estimate of $\mathbf{w}$
 \[\mathbf{w}_{\text{ML}}={\left( \boldsymbol{\Phi}^T\boldsymbol{\Phi} \right)}^{-1}\boldsymbol{\Phi}^T\mathbf{t}\]
 This result matches the solution for the Ordinary Least Squares (OLS) method, showing that the maximum likelihood estimate under the assumption of Gaussian noise is equivalent to minimizing the squared error.

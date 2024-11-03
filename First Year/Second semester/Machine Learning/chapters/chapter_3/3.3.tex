@@ -1,49 +1,82 @@
-\section{Model complexity}
+\section{Model selection}
 
-Introducing an additional feature leads to an exponential growth in the volume of the input space.
-This growth leads to the following problems: 
+Adding additional features increases the dimensionality of the input space exponentially. 
+This growth not only increases computational cost but also requires more data and may introduce high variance in the model.
+Our objective is to select a model that minimizes prediction error by reducing variance. 
+Achieving this requires methods that balance complexity with performance, such as:
 \begin{itemize}
-    \item \textit{Computational cost}: the computational resources required to process and analyze the expanded input space increase significantly.
-    \item \textit{Data quantity}: the amount of data needed to effectively explore and train models in the expanded input space may be substantial.
-    \item \textit{Large model variance} (overfitting): with the increased complexity of the input space, there is a higher risk of models capturing noise or irrelevant patterns, leading to overfitting and decreased generalization performance.
+    \item \textit{Feature selection}: selecting a subset of the most relevant features to avoid unnecessary complexity.
+    \item \textit{Dimensionality reduction}: transforming features into a lower-dimensional space while retaining essential information.
+    \item \textit{Regularization}: adding penalty terms to the loss function to discourage complex models, helping to prevent overfitting.
 \end{itemize}
-
-Our goal is to choose the model with the minimal prediction error, which can be attained by decreasing the variance of the model:
-\begin{itemize}
-    \item \textit{Feature selection}: by carefully designing the feature space, we can choose the most impactful subset from all available features.
-    \item \textit{Dimensionality reduction}: mapping the input space to a lower-dimensional representation can effectively reduce complexity and variance.
-    \item \textit{Regularization}: shrinkage of parameter values towards zero helps control model complexity and mitigate overfitting.
-\end{itemize}
-These approaches are not mutually exclusive and can be combined to enhance model performance.
+These approaches can be combined to improve model performance, as they address complementary aspects of the model selection process.
 
 \subsection{Feature selection}
-The most straightforward approach appears to be comparing all possible combinations of features.
-Given $M$ features, for each $k=1,\dots,M$, we would need to train all $\binom{M}{k}=\frac{M!}{k!(M-k)!}$ models with exactly $k$ features and select the optimal one. 
-However, this procedure quickly becomes computationally impractical.
+The simplest approach to feature selection is to evaluate all possible combinations of features. 
+However, given $M$ features, the number of models with exactly $k$ features to evaluate is $\binom{M}{k}$ for each subset. 
+This exhaustive search quickly becomes computationally infeasible as $M$ grows.
 
-In practical scenarios, feature selection is often carried out based on the specific model being utilized:
-\begin{itemize}
-    \item \textit{Filter}: features are assessed individually using certain evaluation metrics (e.g., correlation, variance, information gain), and the top $k$ features are selected. 
-        While this method is very fast, it fails to capture any subset of mutually dependent features.
-    \item \textit{Embedded}: feature selection is integrated into the Machine Learning approach itself (e.g., lasso, decision trees).
-        Although this method is not computationally expensive, the features identified are specific to the chosen learning approach.
-    \item \textit{Wrapper}: a search algorithm is employed to identify a subset of features by iteratively training a model with different feature subsets and evaluating their performance. 
-        This method utilizes either a simpler model or a basic Machine Learning approach to evaluate the features. 
-        Greedy algorithms are typically employed to search for the best feature subset.
-\end{itemize}
+In practice, feature selection is often adapted to the type of model being used, and there are three main methods to perform feature selection: filter, embedded, and wrapper methods.
+
+\paragraph*{Filter methods}
+Filter methods evaluate each feature independently, using statistical measures to assess its relevance to the target variable. 
+The most relevant $k$ features are then selected based on these metrics. 
+While filter methods are computationally efficient, they may overlook interactions between features because they assess each feature individually, independent of the model.
+
+One example of a filter method is the Pearson correlation coefficient, which measures the linear association between each feature $x_j$ and a target $y$: 
+\[\hat{\rho}(x_j,y)=\dfrac{\sum_{n=1}^{N}(x_{j,n}-\bar{x}_j)(y_n-\bar{y})}{\sqrt{\sum_{n=1}^{N}(x_{j,n}-\bar{x}_j)^2}\sqrt{\sum_{n=1}^{N}(y_n-\bar{y})^2}}\]
+Here, $\bar{x}_j$ and $\bar{y}$ are the mean of all the $x_j$ and $y$ respectively.
+Features with higher correlation coefficients are prioritized. 
+Filter methods typically capture only linear relationships, though there are also extensions to detect nonlinear associations.
+
+\paragraph*{Embedded methods}
+Embedded methods incorporate feature selection within the model training process itself. 
+This approach is often used with regularized models, such as Lasso regression, which automatically drives irrelevant feature weights toward zero, effectively eliminating them.
+Although embedded methods are computationally efficient, they are specific to the chosen model and may not generalize to other algorithms.
+
+\paragraph*{Wrapper methods}
+Wrapper methods utilize a search algorithm to find optimal feature subsets by iteratively training models on different subsets and evaluating their performance.
+Unlike filter methods, wrapper methods consider interactions between features.
+Common strategies for searching subsets include greedy algorithms such as forward selection (starting with no features and adding one at a time) and backward elimination (starting with all features and removing one at a time). 
+Though potentially more accurate than filter methods, wrapper methods are often computationally intensive.
 
 \subsection{Dimensionality reduction}
-Dimensionality reduction aims to decrease the dimensions of the input space, but it differs from feature selection in two significant ways:
-\begin{itemize}
-    \item It utilizes all features and transforms them into a lower-dimensional space.
-    \item It is an unsupervised approach, meaning it doesn't rely on labeled data for training.
+Dimensionality reduction seeks to reduce the number of features in the input space, but it differs from feature selection in two important ways: it utilizes all available features and projects them into a lower-dimensional space, rather than selecting a subset of the original features. 
+Additionally, dimensionality reduction is generally an unsupervised approach, as it does not rely on labeled data.
+
+Several popular methods for dimensionality reduction, each with distinct strengths and use cases, include Principal Component Analysis (PCA), Independent Component Analysis (ICA), self-organizing maps, autoencoders, ISOMAP, and t-SNE.
+
+\paragraph*{Principal Component Analysis}
+PCA is an unsupervised dimensionality reduction technique that performs a linear transformation on the original data to extract lower-dimensional features.
+The core idea of PCA is to find a set of orthogonal directions, or principal components, that capture the maximum variance in the data. 
+The principal components are ranked so that the first component accounts for the highest variance, the second component for the next highest, and so on.
+
+The steps for performing PCA are as follows:
+\begin{enumerate}
+    \item Translate the original data $\mathbf{x}$ to $\tilde{\mathbf{x}}$ to ensure it has zero mean.
+    \item Compute the covariance matrix of $\tilde{\mathbf{x}}$: 
+        \[\mathbf{C}=\tilde{\mathbf{x}}^T\tilde{\mathbf{x}}\]
+    \item The eigenvectors of $\mathbf{C}$, which correspond to the principal components of the data.
+    \item The eigenvectors can be computed using Singular Value Decomposition. 
+\end{enumerate}
+There are various methods for determining the number of principal components to retain:
+\begin{itemize} 
+    \item Retain components until the cumulative variance reaches 90\%-95\%. 
+        Cumulative variance is calculated as the fraction of each eigenvalue $\lambda_i$ relative to the sum of all eigenvalues. 
+    \item Retain components that individually explain more than a specified percentage (e.g., 5\%) of the variance, discarding only those with very low variance. 
+    \item Identify the elbow in the cumulative variance plot, where the marginal gain in explained variance begins to diminish significantly. 
 \end{itemize}
-There are numerous methods for performing dimensionality reduction, including:
-\begin{itemize}
-    \item Principal Component Analysis (PCA).
-    \item Independent Component Analysis (ICA).
-    \item Self-Organizing Maps.
-    \item Autoencoders.
-    \item ISOMAP.\@
-    \item t-SNE.\@
+PCA is commonly used for feature extraction, data compression, and visualization in lower dimensions.
+
+\subsection{Regularization}
+Regularization is another key method for model selection, primarily aimed at reducing model complexity and preventing overfitting by penalizing larger model coefficients. 
+Regularization techniques such as Lasso, Ridge, and Elastic Net are typically applied to linear regression models, but they can also be adapted to other types of models: 
+\begin{itemize} 
+    \item \textit{Lasso} (L1 regularization): Adds a penalty equal to the absolute value of the coefficients. 
+        Lasso performs feature selection by forcing some coefficients to zero, effectively removing certain features from the model. 
+    \item \textit{Ridge} (L2 regularization): adds a penalty equal to the square of the coefficients, which helps to shrink all coefficients but does not eliminate any entirely. 
+        This method is particularly useful for multicollinearity. 
+    \item \textit{Elastic Net}: combines L1 and L2 regularization, balancing feature selection and coefficient shrinkage. 
+        Elastic Net is effective in scenarios where there are many correlated features. 
 \end{itemize}
+Regularization not only aids in model selection by balancing model complexity and predictive accuracy but also improves generalization, particularly in high-dimensional datasets where overfitting is a concern.
