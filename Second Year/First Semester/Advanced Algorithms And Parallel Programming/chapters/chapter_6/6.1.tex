@@ -1,23 +1,17 @@
-\section{Dynamic hash table}
+\section{Introduction}
 
-A hash table should be as compact as possible while remaining large enough to avoid overflow and prevent inefficient operation.
-However, in many cases, the ideal size is not known in advance.
-To address this, we use a dynamic table that expands as needed. 
-When the table reaches capacity, a larger table is allocated, all existing entries are rehashed into it, and the old table's memory is released.
+Amortized analysis is a technique used to evaluate the average cost per operation over a sequence, ensuring that the overall performance remains efficient even if individual operations can be costly. 
+Unlike probabilistic analyses, amortized analysis provides a guarantee on the average cost of each operation, even in the worst case.
 
-\paragraph*{Complexity analysis}
-In a sequence of $n$ insertions, a single insertion might appear to have a worst-case time complexity of $\mathcal{O}(n)$, making $n$ insertions seem to cost $n\cdot\mathcal{O}(n)=\mathcal{O}(n^2)$.
-However, this is an overestimate; in reality, the total cost for $n$ insertions is closer to $\mathcal{O}(n)$, which is far more efficient.
+The three primary methods of amortized analysis are:
+\begin{itemize}
+    \item \textit{Aggregate method}: provides a simple overall average but lacks precision.
+    \item \textit{Accounting method}: uses a banking approach with amortized costs per operation.
+    \item \textit{Potential method}: relies on a potential function to manage the amortized cost.
+\end{itemize}
 
-To see why, consider the cost $c_i$ of each insertion $i$:
-\[c_i=\begin{cases}
-    i \qquad\text{if }i - 1 \text{ is an exact power of }2 \\
-    1 \qquad\text{otherwise}
-\end{cases}\]
-When an exact power of 2 is reached, the table doubles in size, requiring all entries to be reinserted. 
-For all other insertions, the cost is only 1.
-
-The total cost for $n$ insertions is calculated as follows:
-\[\sum_{i=1}^nc_i\leq n+\sum_{j=0}^{\left\lfloor \log(n-1)\right\rfloor}2^j\leq 3n=\Theta(n)\]
-Thus, the amortized cost per insertion for a dynamically resizing table is $\mathcal{O}(1)$, making each insertion on average constant time. 
-This efficiency allows dynamic hash tables to handle an unknown number of entries while maintaining good performance.
+\paragraph*{Hash table resizing}
+A well-designed hash table should balance compactness with sufficient size to minimize overflow and ensure efficient performance. 
+However, determining the optimal size in advance is often impractical. 
+To address this, we use a dynamic table that expands as needed. When the table reaches its capacity, a larger table is allocated, all entries are rehashed into the new table, and the memory from the old table is released. 
+This dynamic resizing allows the hash table to grow as entries are added, maintaining efficiency without predefined size constraints.

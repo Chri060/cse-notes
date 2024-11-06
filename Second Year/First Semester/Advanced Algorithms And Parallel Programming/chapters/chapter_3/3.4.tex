@@ -1,23 +1,12 @@
-\section{Model analysis}
+\section{Prefix sum}
 
-\begin{definition}[\textit{Computationally Stronger}]
-    A model $A$ is said to be computationally stronger than model $B$ ($A \geq B$) if any algorithm written for $B$ can run unchanged on $A$ with the same parallel time and basic properties.
-\end{definition}
-\begin{lemma}
-    Assume $M^\prime < M$. 
-    Any problem that can be solved for a $P$-processor and $M$-cell PRAM in $T$ steps can be solved on a $(\max(P, M^\prime))$-processor $M^\prime$-cell PRAM in $\mathcal{O}\left(\frac{TM}{M^\prime}\right)$ steps.
-\end{lemma}
+Given a sequence of values $\{a_1,\dots,a_n\}$, the prefix sum $S_i$ up to position $i$ is defined as:
+\[S_i=\sum_{j=1}^ia_j\]
+In the case of prefix sums, the total computational work required by a parallel algorithm exceeds that of a serial algorithm.
 
-The direct implementation of a PRAM on real hardware poses certain challenges due to its theoretical nature. 
-Despite this, PRAM algorithms can be adapted for practical systems, allowing the abstract model to influence real-world designs.
-In some cases, PRAM can be implemented directly by translating its concepts to hardware. 
-PRAM's CRCW model can be implemented using detect-and-merge techniques, where write conflicts are resolved by merging results. 
-Priority CRCW, on the other hand, resolves conflicts by detecting and prioritizing certain writes over others. 
+For a serial algorithm, computing each prefix sum is straightforward: each element in the prefix sum can be computed in sequence, where $S_i$ simply depends on $S_{i-1}$ and $a_i$. 
+This approach only requires $\mathcal{O}(n)$ operations, with each element added once.
 
-PRAM is an attractive model for parallel computing due to several key factors. 
-One major advantage is the large body of algorithms developed specifically for it, offering a rich resource for problem-solving. 
-Its simplicity makes it easy to conceptualize, as PRAM abstracts away the complexities of synchronization and communication, allowing a pure focus on algorithm design.
-The synchronized shared memory model in PRAM eliminates many of the challenges related to synchronization and communication that arise in practical implementations. 
-However, PRAM retains the flexibility to incorporate these issues when necessary, enabling exploration of more complex scenarios.
-A notable strength of PRAM is its adaptability. 
-Algorithms initially designed for this model can often be converted into asynchronous versions, which are better suited to real-world architectures. 
+In contrast, a parallel algorithm introduces additional overhead. 
+To achieve parallelism, the algorithm needs to divide the work among processors, requiring intermediate calculations and combining steps.
+Thus, the parallel prefix sum algorithm typically involves $\mathcal{O}(n\log n)$ operations, as it requires multiple rounds to propagate intermediate results across processors.

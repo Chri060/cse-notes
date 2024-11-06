@@ -1,37 +1,19 @@
-\section{Amortized analysis}
+\section{Aggregate method}
 
-Amortized analysis is a technique used to evaluate the average cost per operation over a sequence, ensuring that the overall performance remains efficient even if individual operations can be costly. 
-Unlike probabilistic analyses, amortized analysis provides a guarantee on the average cost of each operation, even in the worst case.
+The amortized cost analysis in the aggregate method provides an average cost per operation over a sequence of operations, even if individual operations can sometimes be costly. 
+This approach is particularly useful for data structures that undergo periodic costly operations because it spreads the cost of these occasional expensive operations across many cheaper ones.
 
-The three primary methods of amortized analysis are:
-\begin{itemize}
-    \item \textit{Aggregate method}: provides a simple overall average but lacks precision.
-    \item \textit{Accounting method}: uses a "banking" approach with amortized costs per operation.
-    \item \textit{Potential method}: relies on a potential function to manage the amortized cost.
-\end{itemize}
+\paragraph*{Hash table resizing}
+Although a single insertion might seem costly in the worst-case scenario, with a time complexity of $\mathcal{O}(n)$, this does not mean that $n$ insertions would collectively cost $\mathcal{O}(n^2)$. 
+In practice, the total cost for $n$ insertions remains close to $\mathcal{O}(n)$, resulting in far greater efficiency.
 
-\subsection{Accounting method}
-n the accounting method, each operation is assigned a fictitious "amortized" cost, denoted as $\hat{c}_i$. Here, each dollar (or unit) represents one unit of work:
-\begin{itemize}
-    \item \textit{Immediate cost}: the fee covers the immediate operation.
-    \item \textit{Banked cost}: any excess units not used immediately are saved to fund future operations.
-\end{itemize}
-To ensure consistency, the bank balance must never be negative, i.e.,
-\[\sum_{i=1}^nc_i\leq\sum_{i=1}^n\hat{c}_i \qquad\forall n\]
-Thus, the total amortized cost provides an upper bound on the true total cost of the operations.
+To illustrate this, let the insertion cost of the $i$-th entry be represented as $c_i$:
+\[c_i=\begin{cases}
+    i \qquad\text{if }i - 1 \text{ is an exact power of }2 \\
+    1 \qquad\text{otherwise}
+\end{cases}\]
+When $i - 1$ is an exact power of 2, the table size doubles, requiring all existing entries to be reinserted. 
+For all other insertions, the cost remains 1.
 
-\paragraph*{Accounting for dynamic tables}
-For a dynamic hash table with expanding capacity, each insertion is charged an amortized cost of $\hat{c}_i=3$:
-\begin{itemize}
-    \item \textit{Immediate cost}: \$1 to perform the insertion.
-    \item \textit{Banked cost}: \$2 banked for future table expansions.
-\end{itemize}
-When the table doubles in size, the accumulated bank covers the costs: \$1 pays to reinsert each newly added item, and \$1 covers the cost of moving older items to the new table.
-This setup ensures the bank balance never falls below zero, establishing an upper bound on the total actual costs through the sum of the amortized costs. 
-Thus, the dynamic table remains efficient with guaranteed average performance across all operations.
-
-\subsection{Potential method}
-
-
-
-
+Thus, the amortized cost per insertion is $\mathcal{O}(1)$, meaning that each insertion, on average, is a constant-time operation. 
+This amortized efficiency allows dynamic hash tables to effectively manage an unpredictable number of entries while ensuring consistent performance.

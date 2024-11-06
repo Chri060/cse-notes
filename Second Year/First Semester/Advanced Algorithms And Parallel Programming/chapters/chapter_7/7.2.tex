@@ -1,0 +1,153 @@
+\section{Parallelization}
+
+\paragraph*{Automatic parallelization}
+Write sequential
+algorithm
+Implement with
+sequential code
+Leave all the
+parallelization work to
+automatic tools
+
+Complete automatic
+parallelization is (at the
+moment?) not feasible
+Tools are not able to
+extract all the available
+parallelism from a
+specification designed
+to be executed in
+sequential way
+
+
+\paragraph*{Manual parallelization}
+The programmer needs
+to give hints to the
+tools
+Write parallel
+algorithms
+Implement with high
+level parallel code
+Leave only code
+compilation to the tools
+There are three critical aspects:
+Which type of parallelism has to be considered
+How to design the parallel algorithm
+• Trying to parallelize existing sequential
+algorithms
+• From scratch
+How to provide information about the
+parallelism to the tools
+
+
+\subsection{Taxonomy}
+There is not a single kind of parallelism:
+Instruction Parallelism
+Data Parallelism
+❑ They can be combined: Flynn’s Taxonomy
+❑ Proposed in 1966 to classify computer
+architectures, but it can describe types of
+parallelism in general
+1. Single Instruction Single Data
+❑ This is the sequential case:
+❑ Single instruction:
+CPU processes single instruction stream
+❑ Single data:
+A single data input stream
+❑ Deterministic execution
+❑ Examples:
+All the single core architectures
+2. Single Instruction Multiple Data
+❑ Single instruction:
+All the cores execute the same instruction in the
+same clock cycles
+❑ Multiple data:
+Each core elaborate different data
+❑ Synchronous and deterministic execution
+❑ Examples:
+most of the
+modern GPUs
+3. Multiple Instruction Single Data 
+Multiple Instruction
+Each core process the data with different
+instructions
+❑ Single Data
+A single data stream is fed into multiple
+processing units
+❑ Examples:
+Experimental
+architectures
+Any multicore
+architecture if
+we relax
+synchronization
+4. Multiple Instruction Multiple Data 19
+❑ Multiple Instruction
+Each core executes different instructions
+❑ Multiple data
+Each core processes different data
+❑ Execution can be synchronous or asynchronous,
+deterministic or not
+❑ Examples:
+multicores
+
+\paragraph*{PArallelism level}
+Level of Parallelism
+1 Bits: Bits composing words represent different data
+A single instruction can manipulate different data
+at a time
+It is very relevant in Hardware Implementation of
+algorithm
+It can become significant also in software
+implementation (e.g., representing set of elements
+as strings of bits)
+2 Instructions: Different instructions executed at the same time
+on the same core
+Supported by multiple execution units, pipeline,
+vector, SIMD units etc.
+This type of parallelism can be easily extracted by
+compilers
+3 Tasks :  a logically discrete section of computational
+work
+Typically a program or program-like set of
+instructions that is executed by a processor
+Parallel program
+Multiple tasks running on multiple processors
+Supported by shared memory, cache coherence
+mechanisms
+ Usually difficult to be automatically extracted
+
+\subsection{Task level parallelism}
+- Parallel Task Graph
+❑Vertices correspond
+to tasks
+❑Edges represent
+precedencies or
+data
+communications
+❑Each task is
+executed once (in
+principle)
+ - Pipeline
+ ❑Like processor pipeline
+ ❑Edges represent data
+ passing
+ ❑Suitable to parallelize
+ streaming elaboration such
+ as audio and video
+ encoding
+ ❑Each task is executed at
+ each stage
+
+ Communication
+❑ Two main models for communication
+❑ Shared memory:
+All the processors, so all the tasks, share a
+global memory with the same address space
+Modifications in a memory location performed
+by a processor are seen by all the other
+processors
+❑ Message Passing:
+Each task has its private memory
+Tasks communicate by explicitly sending and
+receiving messages
