@@ -1,150 +1,113 @@
-\section{Support Vector Machines}
+\section{Computational learning theory}
 
-Kernel methods face a notable limitation: the need to compute the kernel function for every sample in the training set. 
-Unfortunately, this computation can be computationally infeasible in practice. 
-To address this challenge, sparse kernel methods seek solutions that rely only on a subset of the training samples.
-Two well-known sparse kernel methods are:
-\begin{enumerate}
-    \item Support Vector Machines (SVMs).
-    \item Relevance Vector Machines.
-\end{enumerate}
+Computational learning theory is a field of study that aims to understand the general principles of inductive learning. 
+It models the complexity of the hypothesis space, the bound on the training samples, the bound on accuracy, and the probability of successful learning.
 
-\subsection{Separable problems}
-The separation between data points can also be achieved using the perceptron algorithm. 
-However, in this case, the final result is highly dependent on the initialization.
+A learner ($L$) aims to grasp a concept ($C$) that effectively relates data in the input space ($X$) to a target ($t$). 
+Let's suppose $L$ has identified a hypothesis $h^\ast$ that perfectly fits the training data.
+We need to find how many training samples from $X$ are required to ensure that $L$ has genuinely acquired the true concept, meaning $h^\ast$ accurately represents $C$. 
 
-When choosing the best solution, consider the line that separates the points. 
-Opt for the solution with fewer points close to that separating line.
-To address this, we can utilize the maximum margin classifier, which computes the margin as follows:
-\[\text{margin}=\min_n{\dfrac{t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right)}{\left\lVert \mathbf{w}\right\rVert }}\]
-The goal is to find the optimal hyperplane by maximizing the expression:
-\[\argmax_{\mathbf{w},b}\left\{\min_n\left[\dfrac{t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right)}{\left\lVert \mathbf{w}\right\rVert }\right]\right\}\]
-However, solving this optimization problem can be very complex due to its computational demands and potential non-convexity.
+Let $Acc(L)$ represent the generalization accuracy of learner $L$, indicating $L$'s performance on samples not included in the training set.
+Let $\mathcal{F}$ be the collection of all potential concepts where $y = f(\mathbf{x})$.
+For any learner $L$ and any possible training set:
+\[\dfrac{1}{\left\lvert \mathcal{F} \right\rvert}\sum_{\mathcal{F}}Acc_G(L)=\dfrac{1}{2}\]
+\begin{corollary}
+    For any two learners, $L_1$ and $L_2$, if exists $f(\cdot)$ where $Acc_G(L_1)>Acc_G(L_2)$ then exists $f^\prime(\cdot)$ where $Acc_G(L_2)>Acc_G(L_1)$. 
+\end{corollary}
+This means that in Machine Learning we always operate under some assumptions. 
 
-To simplify the optimization problem, we first establish a canonical hyperplane across the separating variables. 
-It's essential to acknowledge the existence of an infinite set of equivalent solutions represented by:
-\[\kappa \textbf{w}^T\boldsymbol{\phi}(\textbf{x})+\kappa b \quad \forall\kappa>0\]
-However, we will focus solely on solutions that adhere to the condition:
-\[t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right)=1\quad \forall\textbf{x}_n\in\mathcal{S}\]
-Consequently, we transform the problem into an equivalent quadratic programming task aimed at minimizing:
-\[\dfrac{1}{2}\left\lVert \textbf{w}\right\rVert_2^2 \]
-subject to the constraint $t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right)\geq 1$, for all $n$. 
+\subsection{Approximately correct hypothesis}
+Let $X$ be the instance space.
+Let $H =\{ h:X \rightarrow \{0,1\}\}$ represent the hypothesis space of learner $L$. 
+Let $C =\{ c:X \rightarrow \{0,1\}\}$ denote the set of all possible target functions (concepts) we aim to learn.
+Let be $\mathcal{D}$ be the training data drawn from a stationary distribution $P(X)$ and labeled (without noise) according to a concept $c$ we intend to learn.
+A learner $L$ produces a hypothesis $h \in H$ such that: 
+\[h^\ast=\argmin_{h\in H}error_{train}(h)\]
 
-\paragraph*{Dual problem}
-We can obtain the dual problem by utilizing Lagrange multipliers, resulting in the following Lagrangian:
-\[\mathcal{L}(\textbf{w},b,\boldsymbol{\alpha})=\dfrac{1}{2}\left\lVert \textbf{w}\right\rVert^2-\sum_{i=1}^n{\alpha_i(t_i(\textbf{w}^T\boldsymbol{\phi}(\textbf{x}_i))-1)} \]
-To maximize $\mathcal{L}$ with respect to $\boldsymbol{\alpha}$ and minimize it with respect to $\mathbf{w}$ and $b$, we compute the gradients with respect to $\mathbf{w}$ and $b$ and derive the dual representation:
-\[\begin{cases}
-    \frac{\partial}{\partial\textbf{w}}\mathcal{L}=0 \\
-    \frac{\partial}{\partial b}\mathcal{L}=0
-\end{cases} \rightarrow \begin{cases}
-    \textbf{w}=\sum_{i=1}^{n}{\alpha_i t_i\boldsymbol{\phi(\textbf{x}_i)}}\\
-    \sum_{i=1}^{n}{\alpha_i t_i}=0
-\end{cases}\]
-This allows us to reformulate the optimization problem as the maximization of:
-\[\tilde{\mathcal{L}}(\boldsymbol{\alpha})=\sum_{n=1}^N \alpha_n-\dfrac{1}{2}\sum_{n=1}^N\sum_{m=1}^N \alpha_n\alpha_m t_n t_m k(\textbf{x}_n,\textbf{x}_m)\]
-subject to the constraints: 
-\[\begin{cases}
-    \alpha_n\geq 0 \\
-    \sum_{n=1}^{N}{\alpha_n t_n = 0} \qquad \forall n=1,\dots,N
-\end{cases}\]
-where the explicit feature mapping no longer appears explicitly.
+\paragraph*{Error}
+We determine the error of a hypothesis as the probability of misclassifying a sample:
+\[error_{\mathcal{D}}(h)=\Pr_{x\in\mathcal{D}}\left[h(x)\neq c(x)\right]=\dfrac{1}{\left\lvert \mathcal{D}\right\rvert}\sum_{x\in\mathcal{D}}I(h(x)\neq c(x))\]
+This represents the training error. 
+However, our interest lies in the true error of $h$:
+\[error_{true}(h)=\Pr_{x \sim P(X)}\left[h(x)\neq c(x)\right]\]
 
-\paragraph*{Discriminant function}
-The resulting discriminant function can be expressed as:
-\[y(\textbf{x})=\sum_{n=1}^{N}\alpha_n t_n k(\textbf{x},\textbf{x}_n)+b\]
-Here, only samples on the margin contribute, indicated by $\alpha_i > 0$. 
-These crucial samples are known as the Support Vectors.
-The bias term, denoted as $b$, is computed as:
-\[b=\dfrac{1}{\left\lvert \mathcal{S}\right\rvert }\sum_{\textbf{x}_n\in\mathcal{S}} \left(t_n-\sum_{\textbf{x}_m\in\mathcal{S}}\alpha_m t_m k(\textbf{x}_n,\textbf{x}_m)\right)\]
-This formulation ensures that the decision boundary is determined by the support vectors, reflecting the critical points in the data that define the separation between classes.
+Assuming $error_{true}$ as the probability of making a mistake on a sample, we can compute $error_{\mathcal{D}}$, which is the average error probability on $\mathcal{D}$.
+Assuming a Bernoulli distribution for the error probability, the 95\% confidence interval is given by:
+\[error_{true}(h)=error_{\mathcal{D}}(h)\pm 1.96\sqrt{\dfrac{error_{\mathcal{D}}(h)(1-error_{\mathcal{D}}(h))}{n}}\]
+This calculation is inaccurate because $\mathcal{D}$ represents the training data and is not independent of $h$. 
+Therefore, we require a stricter bounding of the error under additional assumptions.
 
-\subsection{Non-separable problems}
-In our prior discussions, we've proceeded on the premise that samples are linearly separable within the feature space. 
-Yet, this isn't universally applicable, especially in scenarios with noisy data or other complexities. 
-To address these challenges, we introduce the concept of error (represented by $\xi_i$) into our classification methodology.
+\subsection{Version space and bound}
+A hypothesis $h$ is deemed consistent with a training dataset $\mathcal{D}$ of the concept $c$ if and only if $h(x) = c(x)$ for each training sample in $\mathcal{D}$: 
+\[\text{Consistent}(h,\mathcal{D})\overset{\text{def}}{=}\forall\left\langle x,c(x) \right\rangle\in\mathcal{D},h(x)=c(x)\]
+The version space, $VS_{H,\mathcal{D}}$, with respect to the hypothesis space $H$ and the labeled dataset $\mathcal{D}$, is the subset of hypotheses in $H$ consistent with $\mathcal{D}$: 
+\[VS_{H,\mathcal{D}}\overset{\text{def}}{=}\left\{h\in H|\text{Consistent}(h,\mathcal{D})\right\}\]
+From now on, we consider only consistent learners, which always output a consistent hypothesis, i.e., a hypothesis in $VS_{H,\mathcal{D}}$, assuming it is not empty.
 
-With this definition, we can introduce the soft-margin optimization problem, which aims to minimize:
-\[\dfrac{1}{2}\left\lVert \textbf{w} \right\rVert_2^2+C\sum_{n=1}^{N}\xi_n \]
-subject to the constraints:
-\[t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right) \geq 1-\xi_n \quad \forall n\]
-where $\xi_n \geq 0$ are slack variables representing penalties for margin violations.
-The parameter $C$ serves as a tradeoff between error and margin: it allows adjustment of the bias-variance tradeoff, and tuning may be necessary to find the optimal value for $C$.
+If we aim to bound the $error_{true}$ of a consistent learner, we need to find a bound for all the hypotheses in $VS_{H,\mathcal{D}}$. 
+\begin{theorem}
+    If the hypothesis space $H$ is finite and $\mathcal{D}$ is a sequence of $N\geq 1$ independent random examples of some target concept $c$, then for any $0\leq\varepsilon\leq 1$, the probability that $VS_{H,\mathcal{D}}$ contains a hypothesis error greater than $\varepsilon$ is less than $\left\lvert H\right\rvert e^{\varepsilon N}$: 
+    \[\Pr(\exists h \in H:error_{\mathcal{D}}(h)=0\land error_{true}(h)\geq\varepsilon)\leq \left\lvert H\right\rvert e^{\varepsilon N}\]
+\end{theorem}
+\begin{proof}
+    We have that: 
+    \begin{align*}
+        \Pr&\left(\left(error_{\mathcal{D}}(h_1)=0\land error_{true}(h_1)\geq\varepsilon\right)\lor\ldots\lor\left(error_{\mathcal{D}}(h_{\left\lvert VS_{ H,\mathcal{D}}\right\rvert})=0\land error_{true}(h_{\left\lvert VS_{ H,\mathcal{D}}\right\rvert})\geq\varepsilon\right)\right) \\
+        &\leq\sum_{h\in VS_{H,\mathcal{D}}}\Pr(error_{\mathcal{D}}(h)=0\land error_{true}(h)\geq\varepsilon) \\
+        &\leq\sum_{h\in VS_{H,\mathcal{D}}}\Pr(error_{\mathcal{D}}(h)=0| error_{true}(h)\geq\varepsilon) \\
+        &\leq\sum_{h\in VS_{H,\mathcal{D}}}(1-\varepsilon)^N \\
+        &\leq\left\lvert H\right\rvert (1-\varepsilon)^N \\
+        &\leq\left\lvert H\right\rvert e^{-\varepsilon N}
+    \end{align*}
+\end{proof}
 
-\paragraph*{Dual problem}
-By obtaining the dual problem, we aim to maximize:
-\[\tilde{\mathcal{L}}(\boldsymbol{\alpha})=\sum_{n=1}^{N}\alpha_n-\dfrac{1}{2}\sum_{n=1}^{N}\sum_{m=1}^N{\alpha_n \alpha_m t_n t_m k(\mathbf{x}_n, \mathbf{x}_m)}\]
-subject to the constraints:
-\[\begin{cases}
-    0 \leq \alpha_n \leq C \\
-    \sum_{n=1}^{N}\alpha_n t_n = 0 \qquad n=1,\dots,N
-\end{cases}\]
-As usual, support vectors are the samples for which $\alpha_n > 0$.
-If $\alpha_n < C$, then $\xi_n = 0$, indicating that the sample is on the margin.
-If $\alpha_n = C$, the sample can be within the margin and either correctly classified ($\xi_n \leq 1$) or misclassified ($\xi_n > 1$).
+\paragraph*{Bound in practice}
+Let's denote $\delta$ as the probability of having $error_{true}>\varepsilon$ for a consistent hypothesis:
+\[\left\lvert H\right\rvert e^{-\varepsilon N} \leq \delta\]
+We can then bound $N$ after setting $\varepsilon$ and $\delta$:
+\[N\geq\dfrac{1}{\varepsilon}\left(\ln\left\lvert H\right\rvert+\ln\left(\dfrac{1}{\delta}\right) \right)\]
+Similarly, we can bound $\varepsilon$ after setting $N$ and $\delta$:
+\[\varepsilon \geq \dfrac{1}{N}\left(\ln\left\lvert H\right\rvert+\ln\left(\dfrac{1}{\delta}\right) \right)\]
 
-\paragraph*{Alternative formulation}
-The same problem can be also formulated as the maximization of: 
-\[\tilde{\mathcal{L}}(\boldsymbol{\alpha})=-\dfrac{1}{2}\sum_{n=1}^{N}\sum_{m=1}^N{\alpha_n \alpha_m t_n t_m k(\mathbf{x}_n, \mathbf{x}_m)}\]
-\[\begin{cases}
-    0 \leq \alpha_n \leq \frac{1}{N} \\
-    \sum_{n=1}^{N}\alpha_n t_n = 0  \\
-    \sum_{n=1}^{N}\alpha_n\geq \nu \qquad n=1,\dots,N
-\end{cases}\]
-Where $0\leq\nu<1$ is a user-defined parameter that enables control over both the margin errors and the number of support vectors, ensuring that the fraction of margin errors is less than or equal to $\nu$ and the fraction of support vectors is also less than or equal to $\nu$.
+\paragraph*{PAC-learning}
+Considering a class $C$ of possible target concepts defined over an instance space $X$ with an encoding length $M$, and a learner $L$ using an hypothesis space $H$ we define: $C$ is PAC-learnable by $L$ using $H$ if for all $c\in C$, for any distribution $\Pr(X)$, $\varepsilon$ (such that $0 < \varepsilon < 1/2$), and $\delta$ (such that $0 < \delta < 1/2$), learner $L$ will with a probability at least ($1 - \delta$) output a hypothesis $h \in H$ such that $error_{true}(h) \leq \varepsilon$, in time that is polynomial in $1/\varepsilon$, $1/\delta$, $M$, and $sixe(c)$.
+A sufficient condition to prove PAC-learnability is proving that a learner $L$ requires only a polynomial number of training examples, and processing per example is polynomial.
 
-\subsection{Support vector machines training}
-To solve the optimization problem and find $\alpha_i$ and $b$, several methods exist. 
-However, the direct solution is computationally expensive, typically $O(n^3)$ where $n$ is the size of the training set.
+\subsection{Agnostic learning}
+Up to this point, we've operated under the assumption that $c \in H$, or at the very least, that $VS_{H,\mathcal{D}}$ is not empty, and that the learner $L$ will consistently output a hypothesis $h$ such that $error_{\mathcal{D}}(h) = 0$. 
+However, in a more general scenario, an agnostic learner might output a hypothesis $h$ with $error_{\mathcal{D}}(h) > 0$.
+\begin{theorem}
+    If the hypothesis space $H$ is finite and $\mathcal{D}$ is a sequence of $N\geq 1$ independent and identically distributed random variables examples of some target concept $c$, then for any $0 \leq \varepsilon \leq 1$, and for any learned hypothesis $h$, the probability that $error_{true}(h) - error_{\mathcal{D}}(h) > \varepsilon$ is less than $\left\lvert H\right\rvert e^{-2N\varepsilon^2}$:
+    \[\Pr(\exists h\in H|error_{true}(k)>error_{\mathcal{D}}(h)+\varepsilon)\leq \left\lvert H\right\rvert e^{-2N\varepsilon^2}\]
+\end{theorem}
+\begin{proof}
+    Utilizing the additive Hoeffding bound: let $\hat{\theta}$ be the empirical mean of $N$ independent and identically distributed Bernoulli random variables with mean $\theta$:
+    \[\Pr(\theta>\hat{\theta}+\varepsilon)\leq e^{-2N\varepsilon^2}\]
+    Consequently, for any single hypothesis $h$:
+    \[\Pr(error_{true}(h)>error_{\mathcal{D}}(h)+\varepsilon)\leq e^{-2N\varepsilon^2}\]
+    As we require this to hold true for all hypotheses in $H$:
+    \[\Pr(\exists h\in H|error_{true}(h)>error_{\mathcal{D}}(h)+\varepsilon)\leq\left\lvert H\right\rvert e^{-2N\varepsilon^2}\]
+\end{proof}
 
-To mitigate this computational burden, faster approaches have been developed, including:
-\begin{enumerate}
-    \item Chunking: Breaking the problem into smaller chunks to solve separately.
-    \item Osuna's methods: Variants of chunking methods specifically tailored for SVM optimization.
-    \item Sequential Minimal Optimization (SMO): A method that optimizes the dual problem iteratively by selecting pairs of variables to update.
-\end{enumerate}
-Additionally, for scenarios where online learning is preferred, methods such as chunking-based approaches and incremental methods can be employed. 
-These methods update the model gradually as new data becomes available, thus avoiding the need to retrain the entire model from scratch.
+\paragraph*{Agnostic learning bounds}
+Similar to previous derivations, we can establish a bound on the sample complexity:
+\[N\geq\dfrac{1}{2\varepsilon^2}\left(\ln\left\lvert H\right\rvert+\ln\left(\dfrac{1}{\delta}\right)\right)\]
+Furthermore, we can also constrain the true error of the hypothesis as follows:
+\[error_{true}(h)\leq error_{\mathcal{D}}(h)+\sqrt{\dfrac{\ln\left\lvert H \right\rvert+\ln\frac{1}{\delta}}{2N}}\]
 
-\paragraph*{Chunking}
-Chunking solves iteratively by addressing a sub-problem known as the working set. 
-The working set is constructed using the current support vectors and the $M$ samples with the largest errors (known as the worst set). 
-It's important to note that the size of the working set may dynamically increase during the iterations. 
-Despite this, chunking converges to the optimal solution.
+\paragraph*{VC dimension}
+The VC dimension represents the size of the subset of $X$ for which $\left\lvert H\right\rvert$ can ensure a zero training error, regardless of the target function $c$.
+\begin{definition}[\textit{Dichotomy}]
+    A dichotomy of a set $S$ of instances is defined as a partition of $S$ into two disjoint subsets, i.e., labeling each instance in $S$ as positive or negative.
+\end{definition}
+\begin{definition}[\textit{Shattered}]
+    A set of instances $S$ is said to be shattered by hypothesis space $H$ if and only if for every dichotomy of $S$, there exists some hypothesis in $H$ consistent with this dichotomy.
+\end{definition}
+The Vapnik-Chervonenkis dimension, $VC(H)$, of hypothesis space $H$ over instance space $X$, is the largest finite subset of $X$ shattered by $H$.
+If an arbitrarily large set of $X$ can be shattered by $H$, then $VC(H)=\infty$.
 
-\paragraph*{Osuna's Method}
-Osuna's method also solves iteratively by focusing on a sub-problem, the working set. 
-However, unlike chunking, it maintains a fixed size for the working set. 
-This method replaces some samples in the working set with misclassified samples from the dataset. 
-Despite its fixed-size working set, Osuna's method still converges to the optimal solution.
-
-\paragraph*{Sequential Minimal Optimization}
-SMO operates iteratively, but uniquely, it only works on two samples at a time. 
-By doing so, it keeps the size of the working set minimal. 
-Moreover, the multipliers are found analytically during each iteration. Like the other methods, SMO converges to the optimal solution.
-
-\subsection{Multi-class Support vector machines}
-\paragraph*{One against all}
-In the one against all approach, a $k$-class problem is decomposed into $k$ binary (2-class) problems. 
-Training involves $k$ SVM classifiers on the entire dataset. 
-During testing, the class selected with the highest margin among the $k$ SVM classifiers is chosen.
-
-\paragraph*{One against one}
-In one against one, a $k$-class problem is decomposed into $\frac{k(k-1)}{2}$ binary problems. 
-Here, $\frac{k(k-1)}{2}$ SVM classifiers are trained on subsets of the dataset. 
-During testing, all $\frac{k(k-1)}{2}$ classifiers are applied to the new sample, and the most voted label is chosen.
-
-\paragraph*{DAGSVM}
-DAGSVM also decomposes the $k$-class problem into $\frac{k(k-1)}{2}$ binary problems like one-against-one. 
-However, it employs a Direct Acyclic Graph during testing to reduce the number of SVM classifiers to apply.
-This leads to only $k$-1 binary SVM classifiers being involved in the test process instead of $\frac{k(k-1)}{2}$ as in one-against-one.
-
-\paragraph*{Summary}
-The methods are: 
-\begin{itemize}
-    \item One-against-all: requires less memory but has expensive training and cheap testing.
-    \item One-against-one: requires more memory but has slightly cheaper training and expensive testing.
-    \item DAGSVM:\@ moderately expensive in terms of memory requirements, with slightly cheaper training and testing.
-\end{itemize}
-One-against-one is considered the best performing approach due to its effective decomposition. 
-DAGSVM provides a faster approximation of one-against-one.
+If $\left\lvert H\right\rvert < \infty$, then $VC(H) \leq \log_2(\left\lvert H\right\rvert)$.
+When $VC(H)=d$, it implies that there are at least $2^d$ hypotheses in $H$ to label $d$ instances. 
+Consequently, $\left\lvert H\right\rvert \geq 2^d$.
+With a probability of at least $(1-\delta)$, every $h\in H$ satisfies the following inequality:
+\[error_{true}(h)\leq error_{\mathcal{D}}(h)+\sqrt{\dfrac{VC(H)\left(\ln\frac{2N}{VC(H)}+1\right)+\ln\frac{4}{\delta}}{N}}\]

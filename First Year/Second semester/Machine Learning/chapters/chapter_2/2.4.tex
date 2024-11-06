@@ -1,192 +1,247 @@
 \section{Kernel methods}
 
-Frequently, we seek to detect nonlinear patterns within our datasets. 
-In nonlinear regression, the connection between input and output may deviate from linearity, while in nonlinear classification, class boundaries might not be linearly separable. 
-Linear models often prove insufficient in capturing such complexities. 
-However, kernel methods offer a solution by transforming data into higher-dimensional spaces where linear relationships become apparent, thereby enabling linear models to effectively operate in nonlinear scenarios.
+Kernel methods are powerful tools for capturing nonlinear relationships in data. 
+In nonlinear regression, the relationship between input and output variables deviates from a straightforward linear association. 
+Similarly, in classification tasks, the class boundaries may not be linearly separable. 
+When standard linear models fail to capture these complexities, kernel methods transform data into higher-dimensional spaces, allowing linear models to perform effectively even in nonlinear scenarios.
 
-The process of transforming the original input space into a feature space is termed feature mapping, denoted as:
+The transformation of data into this higher-dimensional feature space is known as feature mapping, typically represented as:
 \[\Phi:x\rightarrow\phi(x)\]
+However, feature mapping often encounters the curse of dimensionality, where the number of features increases exponentially with the number of input variables, making computation infeasible.
+Kernel methods address this by sidestepping explicit computation of the feature mapping, thus keeping the computations manageable while preserving the power of the transformation.
 
-\begin{example}
-    Consider a binary classification problem where no linear separator exists:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.5\linewidth]{images/ker1.png}
-    \end{figure}
-    Now, let's map the input space (a single variable $x$) to a feature space with two features: $x\rightarrow\left\{ x,x^2 \right\}$
-    As a result, the data becomes linearly separable:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.5\linewidth]{images/ker2.png}
-    \end{figure}
-\end{example}
-This concept extends naturally to higher dimensions and more intricate problem domains.
+\subsection{Kernel function design}
+The kernel function measures the similarity between two data samples and is defined as the inner product of their feature vectors:
+\[k(\mathbf{x},\mathbf{x}^\prime)=\boldsymbol{\phi}{(\mathbf{x})}^T\boldsymbol{\phi}(\mathbf{x})\]
+This function allows us to assess similarity without explicitly calculating the high-dimensional feature vectors. 
+Large feature vectors can make the kernel function computationally practical, as kernel methods only require pairwise similarities, avoiding direct computation in the higher-dimensional space.
 
-However, a significant drawback arises known as the curse of dimensionality. 
-This occurs due to the exponential growth in the number of features as the input variables increase, rendering the mapping computationally infeasible.
-Kernel methods offer a solution to this challenge by bypassing the need for explicit computation of the feature mapping.
-While they are computationally intensive, they remain feasible for practical implementation.
-
-\subsection{Kernel function}
-The kernel function is defined as the scalar product between the feature vectors of two data samples:
-\[k(\textbf{x},\textbf{x}^\prime)=\phi{(\textbf{x})}^T\phi(\textbf{x})\]
-The kernel function exhibits symmetry: $k(\textbf{x},\textbf{x}^\prime)=k(\textbf{x}^\prime,\textbf{x})$.
-It can be interpreted as a measure of similarity between $\textbf{x}$ and $\textbf{x}^\prime$.
-
-Interestingly, very large feature vectors, even infinite ones, can result in a kernel function that is computationally tractable.
-
-Certain special classes of kernel functions exist:
+Two main strategies exist for designing kernel functions:
 \begin{itemize}
-    \item \textit{Stationary kernels}: $k(\textbf{x},\textbf{x}^\prime)=k(\textbf{x}-\textbf{x}^\prime)$.
-    \item \textit{Homogeneous kernels} (or radial basis functions): $k(\textbf{x},\textbf{x}^\prime)=k(\left\lVert \textbf{x}-\textbf{x}^\prime\right\rVert )$.
+    \item \textit{Direct construction}: designing kernel functions from scratch.
+    \item \textit{Composition rules}: applying a set of rules to existing kernels to construct new ones.
 \end{itemize}
+In both approaches, ensuring that a kernel function is valid is crucial, meaning it must correspond to a scalar product in some feature space.
 
-\paragraph*{Kernel function design}
-We are not obligated to compute the kernel function by first generating the feature space, as we aim to avoid explicitly calculating the feature vectors.
-Two primary approaches exist for designing a kernel function:
-\begin{itemize}
-    \item Create kernel functions directly from scratch.
-    \item Design kernel functions by applying a predefined set of rules to existing ones.
-\end{itemize}
-In both cases, it's crucial to ensure that the resulting kernel functions are valid, meaning they correspond to a scalar product in some feature space.
+\paragraph*{Design rules}
+According to Mercer's theorem, a valid kernel function must be continuous, symmetric, and positive semi-definite. 
 \begin{theorem}[Mercer]
-    Any continuous, symmetric, positive semi-definite kernel function $k(\textbf{x},\textbf{x}^\prime)$ can be expressed as a dot product in a high-dimensional space. 
+    Any continuous, symmetric, positive semi-definite kernel function $k(\mathbf{x},\mathbf{x}^\prime)$ can be expressed as a dot product in a high-dimensional space. 
 \end{theorem}
-For this theorem, the necessary and sufficient condition for a function $k(\textbf{x},\textbf{x}^\prime)$ to be a valid kernel is that the Gram matrix $\textbf{K}$ is positive semi-definite for all possible choices of $\mathcal{D}=\{x_i\}$.
-This condition implies that $\textbf{x}^T\textbf{K}\textbf{x}>0$ for any non-zero real vector $\textbf{x}$, meaning that the double sum $\sum_i\sum_j\textbf{K}_{ij}\textbf{x}_i\textbf{x}_j$ is strictly positive for any real numbers $\textbf{x}_i$ and $\textbf{x}_j$.
+To satisfy Mercer's conditions, the Gram matrix $\mathbf{K}=\boldsymbol{\Phi}{(\mathbf{x})}^T\boldsymbol{\Phi}(\mathbf{x})$, formed by evaluating the kernel on data pairs, must be positive semi-definite:
+\[\mathbf{x}^T\mathbf{K}\mathbf{x}>0\qquad\forall\mathbf{x}\neq\mathbf{0}\]
 
-Given valid kernels $k_1(\textbf{x},\textbf{x}^\prime)$ and $k_2(\textbf{x},\textbf{x}^\prime)$ the following rules can be applied to design a new valid kernel:
-\begin{enumerate}
-    \item $k_(\textbf{x},\textbf{x}^\prime)=ck_1(\textbf{x},\textbf{x}^\prime)$, where $c>0$ is a constant. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=f(\textbf{x})k_1(\textbf{x},\textbf{x}^\prime)f(\textbf{x}^\prime)$, where $f(\cdot)$ is any function. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=q\left( k_1(\textbf{x},\textbf{x}^\prime) \right)$, where $q(\cdot)$ is a polynomial with non-negative coefficients. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=e^{k_1(\textbf{x},\textbf{x}^\prime)}$. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=k_1(\textbf{x},\textbf{x}^\prime)+k_2(\textbf{x},\textbf{x}^\prime)$. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=k_1(\textbf{x},\textbf{x}^\prime)k_2(\textbf{x},\textbf{x}^\prime)$. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=k_3(\boldsymbol{\phi}(\textbf{x}),\boldsymbol{\phi}(\textbf{x}^\prime))$, where $\boldsymbol{\phi}(\textbf{x})$ maps $\textbf{x}$ to $\mathbb{R}^M$ and $k_3(\cdot,\cdot)$ is a valid kernel in $\mathbb{R}^M$. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=\textbf{x}^T\textbf{A}\textbf{x}$, where $\textbf{A}$ is a symmetric semidefinite matrix. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=k_a(\textbf{x}_a,\textbf{x}_a^\prime)+k_b(\textbf{x}_b,\textbf{x}_b^\prime)$. 
-    \item $k_(\textbf{x},\textbf{x}^\prime)=k_a(\textbf{x}_a,\textbf{x}_a^\prime)k_b(\textbf{x}_b,\textbf{x}_b^\prime)$.
-\end{enumerate}
+Given valid kernels $k_1(\mathbf{x},\mathbf{x}^\prime)$ and $k_2(\mathbf{x},\mathbf{x}^\prime)$ the following rules can be applied to design a new valid kernel:
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Transformation} & \textbf{Equivalence} & \textbf{Notes} \\
+        \hline
+        \textit{Constant} & $c k_1(\mathbf{x}, \mathbf{x}^\prime)$ & $c > 0$ is a constant. \\
+        \hline
+        \textit{Function} & $f(\mathbf{x}) k_1(\mathbf{x}, \mathbf{x}^\prime) f(\mathbf{x}^\prime)$ & $f(\cdot)$ is any function \\
+        \hline
+        \textit{Polynomial} & $q(k_1(\mathbf{x}, \mathbf{x}^\prime))$ & \makecell[l]{$q(\cdot)$ is a polynomial with \\ non-negative coefficients} \\
+        \hline
+        \textit{Exponential} & $e^{k_1(\mathbf{x}, \mathbf{x}^\prime)}$ & Exponential of the kernel function \\
+        \hline
+        \textit{Sum} & $k_1(\mathbf{x}, \mathbf{x}^\prime) + k_2(\mathbf{x}, \mathbf{x}^\prime)$ & Addition of two kernel functions \\
+        \hline
+        \textit{Product} & $k_1(\mathbf{x}, \mathbf{x}^\prime) k_2(\mathbf{x}, \mathbf{x}^\prime)$ & Multiplication of two kernel functions \\
+        \hline
+        \textit{Composite} & $k_3(\boldsymbol{\phi}(\mathbf{x}), \boldsymbol{\phi}(\mathbf{x}^\prime))$ & \makecell[l]{$\boldsymbol{\phi}(\mathbf{x})$ maps $\mathbf{x}$ to $\mathbb{R}^M$ \\ $k_3$ is a valid kernel in $\mathbb{R}^M$} \\
+        \hline
+        \textit{Matrix-based} & $\mathbf{x}^T \mathbf{A} \mathbf{x}$ & \makecell[l]{$\mathbf{A}$ is a symmetric, \\ positive semi-definite matrix} \\
+        \hline
+        \textit{Subspace kernels sum} & $k_a(\mathbf{x}_a, \mathbf{x}_a^\prime) + k_b(\mathbf{x}_b, \mathbf{x}_b^\prime)$ & Kernel sum over partitions of $\mathbf{x}$ \\
+        \hline
+        \textit{Subspace kernels product} & $k_a(\mathbf{x}_a, \mathbf{x}_a^\prime) k_b(\mathbf{x}_b, \mathbf{x}_b^\prime)$ & Kernel product over partitions of $\mathbf{x}$ \\
+        \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
 
 \paragraph*{Kernel trick}
-It's feasible to modify the representation of linear models by substituting terms involving $\phi(\textbf{x})$ with alternatives solely based on $k(\textbf{x},\cdot)$.
-In essence, the output of a linear model can be computed solely based on the similarities between data samples, as computed with the kernel function.
+A key aspect of kernel methods is the kernel trick, where we replace terms involving $\phi(\mathbf{x})$ with equivalent expressions that rely only on $k(\mathbf{x},\cdot)$.
+This allows models to compute outputs based solely on pairwise similarities between data points, making kernel methods versatile across a range of algorithms, including ridge regression, kNN regression, the perceptron, nonlinear PCA, and Support Vector Machines.
 
-This methodology, known as the kernel trick, finds application in various learning algorithms including: ridge regression, $K-NN$ regression, perceptron, nonlinear PCA, and support vector machines.
+\paragraph*{Symbolic kernels}
+Kernel methods are not limited to real-valued vectors; they can be applied to more complex data types, such as graphs, sets, strings, and text. In such cases, the kernel function adapts to measure similarity in non-numeric data structures, enabling kernel methods to support a wide array of applications.
 
-\paragraph*{Gaussian kernel}
-The Gaussian kernel is a widely employed kernel function in various Machine Learning algorithms. 
-Its mathematical representation is given by:
-\[k(\textbf{x},\textbf{x}^\prime)=e^{-\frac{\left\lVert \textbf{x}-\textbf{x}^\prime\right\rVert}{2\sigma^2} }\]
-This kernel function defines a similarity measure between two vectors $\textbf{x}$ and $\textbf{x}^\prime$ in the feature space. 
-It assigns higher similarity to vectors that are closer to each other, based on the Euclidean distance, with $\sigma$ controlling the width of the kernel.
-
-Additionally, the Gaussian kernel can be generalized by replacing the dot product $\textbf{x}^T\textbf{x}^\prime$ with a nonlinear kernel function $\kappa (\textbf{x},\textbf{x}^\prime)$. 
-This leads to the extended form of the Gaussian kernel:
-\[k(\textbf{x},\textbf{x}^\prime)=e^{-\frac{\kappa (\textbf{x},\textbf{x})+\kappa (\textbf{x}^\prime,\textbf{x}^\prime)-2\kappa (\textbf{x},\textbf{x}^\prime)}{2\sigma^2} }\]
-This extension allows the Gaussian kernel to operate in a more flexible feature space, potentially capturing nonlinear relationships between data points, thereby enhancing its applicability in various Machine Learning tasks.
-
-\paragraph*{Symbolic data kernel}
-Kernel methods are not limited to real vectors as inputs; they can be extended to various data structures such as graphs, sets, strings, texts, and more. 
-The kernel function serves as a measure of similarity between two samples.
-For example, in the case of sets, a common kernel function is employed:
-\[k(A_1,A_2)=2^{\left\lvert A_1 \cap A_2\right\rvert }\]
-This kernel function quantifies the similarity between two sets $A_1$ and $A_2$ by computing the cardinality of their intersection. 
-The resulting value reflects the degree of overlap between the sets, indicating their similarity. 
-
-\paragraph*{Generative model kernel}
-Kernel functions can also be defined using probability distributions. 
-In the context of generative models, where $\text{P}(\textbf{x})$ represents the probability distribution, a kernel function can be defined as:
-\[k(\textbf{x},\textbf{x}^\prime)=\text{P}(\textbf{x})\text{P}(\textbf{x}^\prime)\]
-This kernel function is valid as it corresponds to the inner product in a one-dimensional feature space obtained by mapping $\textbf{x}$ to $\text{P}(\textbf{x})$. 
-It effectively measures the similarity between two samples by considering their respective probabilities under the generative model. 
+\paragraph*{Generative kernels}
+Kernel functions can also derive from probability distributions. 
+For example, in a generative modeling context where $\Pr(\mathbf{x})$ denotes a probability distribution, a kernel function could be defined as:
+\[k(\mathbf{x},\mathbf{x}^\prime)=\Pr(\mathbf{x})\Pr(\mathbf{x}^\prime)\]
+This kernel is valid because it represents an inner product in a one-dimensional feature space where each data point $\mathbf{x}$ to $\Pr(\mathbf{x})$. 
 
 \subsection{Kernel ridge regression}
-The loss function utilized in ridge regression is given by:
-\[L(\textbf{w})=\dfrac{1}{2}{\left(\textbf{t}-\boldsymbol{\Phi}\textbf{w}\right)}^T\left(\textbf{t}-\boldsymbol{\Phi}\textbf{w}\right)+\dfrac{\lambda}{2}\textbf{w}^T\textbf{w}\]
-To solve it, we equate the gradient of $L$ with respect to $\textbf{w}$ to zero:
-\[\dfrac{\partial L(\textbf{w})}{\partial \textbf{w}}=\lambda\textbf{w}-\boldsymbol{\Phi}^T(\textbf{t}-\boldsymbol{\Phi}\textbf{w})=0\]
-Now, instead of solving it for $\textbf{w}$, let's perform a variable change ($\textbf{a}=\lambda^{-1}(\textbf{t}-\boldsymbol{\Phi}\textbf{w})$):
-\[\textbf{w}=\boldsymbol{\Phi}^T\lambda^{-1}(\textbf{t}-\boldsymbol{\Phi}\textbf{w})=\boldsymbol{\Phi}^T\textbf{a}\]
-Substituting $\textbf{w}$ in the gradient, we have:
-\begin{align*}
-    &\lambda\textbf{w}-\boldsymbol{\Phi}^T(\textbf{t}-\boldsymbol{\Phi}\textbf{w})=0 \rightarrow \\
-    &\boldsymbol{\Phi}^T\left(\lambda \textbf{a} -\left( \textbf{t}-\boldsymbol{\Phi}\boldsymbol{\Phi}^T\textbf{a}\right) \right)=0 \rightarrow \\
-    &\boldsymbol{\Phi}\boldsymbol{\Phi}^T\textbf{a} + \lambda \textbf{a} =\textbf{t} \rightarrow \\
-    &\textbf{a} = {\left(\textbf{K}+\lambda \textbf{I}\right)}^{-1}\textbf{t}
-\end{align*}
-Here, $\textbf{K}=\boldsymbol{\Phi}\boldsymbol{\Phi}^T$ is known as the Gram matrix.
-The Gram matrix is an $N\times N$ matrix where each element represents the inner product between the feature vectors:
-\[\textbf{K}=\begin{bmatrix}
-    k(\textbf{x}_1,\textbf{x}_1)    & \cdots     & k(\textbf{x}_1,\textbf{x}_N)  \\
-    \vdots                          & \ddots    & \vdots                        \\
-    k(\textbf{x}_N,\textbf{x}_1)    & \cdots     & k(\textbf{x}_N,\textbf{x}_N)  \\
-\end{bmatrix}\]
-The Gram matrix signifies the similarities between each pair of samples in the training data.
+In kernel ridge regression, we aim to minimize a loss function that combines the Residual Sum of Squares with a regularization term to control the model complexity.
+The loss function, $\mathcal{L}(\mathbf{w})$, is defined as:
+\[\mathcal{L}(\mathbf{w})=\dfrac{1}{2}\text{RSS}+\dfrac{\lambda}{2}{\left\lVert \mathbf{w}\right\rVert}_2^2\]
+Here, $\lambda$ is the regularization parameter, controlling the trade-off between the fit to the data and the penalty on the magnitude of the weights $\mathbf{w}$. 
 
-\paragraph*{Prediction function}
-To compute the prediction using the dual representation, we can utilize the following formula:
-\[y(\textbf{x})=\textbf{w}^T\boldsymbol{\phi}(\textbf{x})=\textbf{a}\boldsymbol{\Phi}\boldsymbol{\phi}(\textbf{x})=\textbf{k}{(\textbf{x})}^T{(\textbf{K}+\lambda\textbf{I})}^{-1}\textbf{t}\]
-Here,$\textbf{k}(\textbf{x})$ is defined such that $k_n(\textbf{x})=k(\textbf{x}_n,\textbf{x})$ for all $\textbf{x}_n\in\mathcal{D}$. 
-Accordingly, the prediction is computed as the linear combination of the target values of the samples in the training set.
+To find the optimal weight vector $\mathbf{w}$, we set the gradient of $\mathcal{L}(\mathbf{w})$ with respect to $\mathbf{w}$ to zero:
+\[\lambda\mathbf{w}-\boldsymbol{\Phi}^T\mathbf{t}+\boldsymbol{\Phi}^T\boldsymbol{\Phi}\mathbf{w}=0\]
+By rearranging and isolating $\mathbf{w}$, we can rewrite it as:
+\[\mathbf{w}=\boldsymbol{\Phi}^T\mathbf{a}\]
+Here, $\mathbf{a} = {\left(\mathbf{K}+\lambda \mathbf{I}\right)}^{-1}\mathbf{t}$, and $\mathbf{K}=\boldsymbol{\Phi}\boldsymbol{\Phi}^T$ is the Gram matrix.
+The Gram matrix is an $N\times N$ matrix representing the inner products of feature vectors, indicating the pairwise similarity between training samples.
+
+\paragraph*{Prediction}
+With this formulation, predictions for a new input $\mathbf{x}$ can be computed as:
+\[y(\mathbf{x})=\mathbf{k}{(\mathbf{x})}^T{(\mathbf{K}+\lambda\mathbf{I})}^{-1}\mathbf{t}\]
+Here, $\mathbf{k}(\mathbf{x})$ is a vector with elements $k_n(\mathbf{x})=k(\mathbf{x}_n,\mathbf{x})$ for aeachll $\mathbf{x}_n$ in the training set $\mathcal{D}$. 
+This formulation expresses predictions as a linear combination of the target values of the training samples, weighted by the kernel-based similarities to the new input.
 
 \paragraph*{Comparison}
-The original representation:
-\begin{itemize}
-    \item Involves computing the inverse of $(\boldsymbol{\Phi}\boldsymbol{\Phi}^T+\lambda\textbf{I}_M)$, which yields an  $M \times M$ matrix.
-    \item Is computationally convenient when $M$ is relatively small.
-\end{itemize}
-The dual representation: 
-\begin{itemize}
-    \item Requires computing the inverse of $(\textbf{K}+\lambda\textbf{I}_N)$, which results in an $N \times N$ matrix.
-    \item Is computationally favorable when $N$ is very large or even infinite.
-    \item Eliminates the need to explicitly compute $\boldsymbol{\Phi}$, enabling application to diverse data types such as graphs, sets, strings, and text.
-    \item The computation of the similarity between data samples (i.e., the kernel function) is typically more efficient and simpler than calculating $\boldsymbol{\Phi}$.
-\end{itemize}
+In traditional ridge regression, finding $\mathbf{w}$ requires inverting an $M \times M$ matrix $(\boldsymbol{\Phi}\boldsymbol{\Phi}^T+\lambda\mathbf{I}_M)$ which is efficient when $M$, the number of features, is relatively small.
 
-\subsection{Kernel regression}
-The $k$-nearest neighbors algorithm can be utilized for regression tasks by computing the average of the target values of the $k$ nearest samples in the training data. 
-This can be expressed as:
-\[\hat{f}(\textbf{x})=\dfrac{1}{k}\sum_{\textbf{x}_i\in N_k(\textbf{x})}t_i\]
+In kernel ridge regression, we invert an $N \times N$ matrix $(\mathbf{K}+\lambda\mathbf{I}_N)$, which is preferable when $N$ the number of samples, is relatively large.
+This approach also avoids explicit computation of the feature map $\boldsymbol{\Phi}$, as the kernel function directly captures similarities between samples, resulting in a more efficient and flexible implementation.
+
+\subsection{Kernel k-NN regression}
+The $k$-Nearest Neighbors algorithm algorithm can be adapted for regression by predicting the output as the average of the target values of the $k$ nearest samples in the training data. 
+Specifically, the prediction $\hat{f}(\mathbf{x})$ for a new input $\mathbf{x}$ is given by:
+\[\hat{f}(\mathbf{x})=\dfrac{1}{k}\sum_{\mathbf{x}_i\in N_k(\mathbf{x})}t_i\]
+Here, $N_k(\mathbf{x})$ represents the set of the $k$ nearest neighbors of $\mathbf{x}$, and $t_i$ is the target value associated with $\mathbf{x}_i$. 
+
+While $k$-NN regression is simple and intuitive, it often produces noisy predictions due to the abrupt changes in neighborhood averages as the test point moves across different sample regions.
 
 \paragraph*{Nadaraya-Watson model}
-In k-NN regression, the model output often exhibits significant noise due to the discontinuity of neighborhood averages. 
-The Nadaraya-Watson model, also known as kernel regression, addresses this issue by employing a kernel function to calculate a weighted average of samples:
-\[\hat{f}(\textbf{x})=\dfrac{\sum_{i=1}^N k(\textbf{x},\textbf{x}_i)t_i}{\sum_{i=1}^N k(\textbf{x},\textbf{x}_i)}\]
-Typically, kernels are chosen based on their properties. Two common choices for kernels are:
-\begin{itemize}
-    \item Epanechnikov Kernel (bounded support):
-        \[k(u)=\dfrac{3}{4}{\left(1-u^2\right)} \qquad \left\lvert u \right\rvert \leq 1\]
-    \item Gaussian Kernel (infinite support):
-        \[K(u)=\dfrac{1}{\sqrt{2\pi}\sigma}e^{-\frac{u^2}{2\sigma^2}}\]
-\end{itemize}
+The Nadaraya-Watson model, also referred to as kernel regression, smooths these abrupt changes by applying a kernel function to weight each sample based on its distance to $\mathbf{x}$. 
+This results in a continuous, weighted average of the target values:
+\[\hat{f}(\mathbf{x})=\dfrac{\sum_{i=1}^N k(\mathbf{x},\mathbf{x}_i)t_i}{\sum_{i=1}^N k(\mathbf{x},\mathbf{x}_i)}\]
+Here, $k(\mathbf{x},\mathbf{x}_i)$ is a kernel function that assigns larger weights to samples closer to $\mathbf{x}$ and smaller weights to those further away.
+This approach reduces the discontinuity of predictions, offering a smoother and often more accurate regression output compared to traditional $k$-NN regression.
 
 \subsection{Gaussian processes}
-Starting from the assumptions of Bayesian linear regression:
-\[y(\textbf{x},\textbf{w})=\textbf{w}^T\boldsymbol{\phi}(\textbf{x})\]
-with the following prior probability:
-\[\text{P}(\textbf{w})=\mathcal{N}\left(\textbf{w}|\textbf{0},\tau^2\textbf{I}\right)\]
-Now, let's compute the prior distribution of the outputs of the regression function:
-\[\textbf{y}=\boldsymbol{\Phi}\textbf{w}\implies\mathcal{N}(\textbf{y}|\boldsymbol{\mu},\textbf{S})\]
-Here: 
+A Gaussian Process defines a probability distribution over functions $y(\mathbf{x})$  such that, for any set of input points $\{\mathbf{x}_i\}_{i=1}^{N}$, the function value $\{y(\mathbf{x}_i)\}_{i=1}^{N}$ are jointly Gaussian.
+This property enables GPs to serve as a powerful tool for regression tasks, where the relationship between input data and output predictions is modeled probabilistically.
+ 
+In particular, a GP with inputs $\mathbf{x}$ has a prior distribution over possible functions $y(\mathbf{x})$ as:
+\[y(\mathbf{x})=\mathcal{N}(\mathbf{0},\mathbf{K})\]
+Here we commonly assume a zero mean (i.e., $\boldsymbol{\mu}=\mathbf{0}$) $y(\mathbf{x})$ unless prior information suggests otherwise.
+The covariance matrix $\mathbf{K}$ is built from a kernel function $k(\mathbf{x}_i,\mathbf{x}_j)$, which quantifies the similarity between pairs of input points.  
+
+\paragraph*{Output}
+The target variable $\mathbf{t}$ is modeled as the true process output $\mathbf{y}$ , perturbed by Gaussian noise $\epsilon$ that is independent of the input:
+\[\mathbf{t}_N=\mathbf{y}_N+\epsilon\]
+Here, $\epsilon\sim\mathcal{N}(0,\sigma^2)$. 
+Thus, the conditional distribution of the observed targets given the latent function values is:
+\[\Pr(\mathbf{t}_n|\mathbf{y}_n)=\mathcal{N}(\mathbf{t}_N|\mathbf{y}_N,\sigma^2\mathbf{I}_N)\]
+The prior distribution over the latent function values $\mathbf{y}_N$ is a Gaussian $\mathcal{N}(\mathbf{0},\mathbf{K}_n)$. 
+Therefore, the marginal distribution of the targets $\mathbf{t}_N$ is also Gaussian:
+\[\Pr(\mathbf{t}_N)=\mathcal{N}(\mathbf{t}_N|\mathbf{0},\mathbf{C}_N)\]
+Here, $\mathbf{C}_N=\mathbf{K}_N+\sigma^2\mathbf{I}_N$ represents the combined effect of the kernel-based covariance and noise.
+
+\paragraph*{Gaussian kernel}
+A commonly used kernel in GPs is the Gaussian (or RBF) kernel, defined as:
+\[k(\mathbf{x},\mathbf{x}^\prime)=e^{-\frac{\left\lVert \mathbf{x}-\mathbf{x}^\prime\right\rVert}{2\sigma^2} }\]
+This kernel measures similarity based on Euclidean distance, where $\sigma^2$ controls the smoothness of the function.
+
+Additionally, the Gaussian kernel can be generalized by replacing the Euclidean distance with a more general kernel-based distance measure $k (\mathbf{x},\mathbf{x}^\prime)$, yielding:
+\[k(\mathbf{x},\mathbf{x}^\prime)=e^{-\frac{k (\mathbf{x},\mathbf{x})+k (\mathbf{x}^\prime,\mathbf{x}^\prime)-2k (\mathbf{x},\mathbf{x}^\prime)}{2\sigma^2} }\]
+
+\paragraph*{Prediction}
+To predict the target $t_{N+1}$ at a new, unseen input $\mathbf{x}_{N+1}$, we use the GP framework to define the conditional predictive distribution:
+\[\Pr(\mathbf{t}_{N+1})=\mathcal{N}(\mathbf{t}_{N+1}|\mathbf{0},\mathbf{C}_{N+1})=\mathcal{N}(m(\mathbf{x}_{N+1}),\sigma^2(\mathbf{x}_{N+1}))\]
+Here, $m(\mathbf{x}_{N+1})=\mathbf{k}^T\mathbf{C}_N^{-1}\mathbf{t}$ is the predictive mean, and $\sigma^2(\mathbf{x}_{N+1})=c-\mathbf{k}^T\mathbf{C}_N^{-1}\mathbf{k}$ is the predictive variance, providing a measure of uncertainty.
+The parameter $\mathbf{k}$ is the covariance vector between $\mathbf{x}_{N+1}$ and the training data points, and $c=k(\mathbf{x}_{N+1},\mathbf{x}_{N+1})$ is the self-covariance.
+
+\paragraph*{Hyperparamtere estimation}
+Although GPs are non-parametric, hyperparameters such as $\sigma^2$ (noise level) and those governing the kernel function need to be optimized or chosen. Common approaches include:
 \begin{itemize}
-    \item $\boldsymbol{\mu}=\mathbb{E}[\boldsymbol{y}]=\boldsymbol{\Phi}\mathbb{E}[\boldsymbol{w}]=\textbf{0}$
-    \item $\textbf{S}=\text{Cov}(\textbf{yy}^T)=\boldsymbol{\Phi}\mathbb{E}[\boldsymbol{ww}^T] \boldsymbol{\Phi}^T=\tau^2 \boldsymbol{\Phi\Phi}^T=\textbf{K}$
+    \item Incorporating prior knowledge of the problem domain.
+    \item Maximizing the log-likelihood on a validation dataset.
+    \item Dynamically adjusting as new data becomes available.
 \end{itemize}
-In general, a Gaussian Process is defined as a probability distribution over a function $y(\textbf{x})$ such that the set of values $y(\textbf{x}_i)$ — for an arbitrary ${\textbf{x}_i}$ — jointly have a Gaussian distribution.
-In our case:
-\[\text{P}(\textbf{y})=\mathcal{N}\left(\textbf{y}|\textbf{0},\textbf{K}\right)\]
-where $\textbf{K}$ is the Gram matrix defined as:
-\[K_{nm}=k(\textbf{x}_n,\textbf{x}_m)=\tau^2\boldsymbol{\phi}{(\textbf{x}_n)}^T\boldsymbol{\phi}(\textbf{x}_m)\]
-This provides a probabilistic interpretation of the Kernel function as:
-\[k(\textbf{x}_n,\textbf{x}_m)=\mathbb{E}\left[ y(\textbf{x}_n),y(\textbf{x}_m) \right]\]
-We can apply the usual approaches to design the kernels.
-Two families of kernels typically used with Gaussian processes are:
+
+\subsection{Support Vector Machines}
+Kernel methods are a powerful tool in Machine Learning, yet they have a significant limitation: calculating the kernel function for every sample in a large training set can be computationally prohibitive.
+Sparse kernel methods address this by selecting a subset of the training samples, focusing only on those critical for defining decision boundaries.
+Two prominent examples of sparse kernel methods are Support Vector Machines (SVMs) and Relevance Vector Machines (RVMs).
+
+\paragraph*{Linearly separable problems}
+To achieve optimal separation in linearly separable cases, SVMs aim to find a hyperplane that maximizes the margin. 
+This can be formulated as:
+\[\argmax_{\mathbf{w},b}\left\{\min_n\left[\dfrac{t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right)}{\left\lVert \mathbf{w}\right\rVert }\right]\right\}\]
+The optimization problem is often simplified by establishing a canonical hyperplane where only solutions satisfying:
+\[t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right)=1\quad \forall\mathbf{x}_n\in\mathcal{S}\]
+are considered. 
+This reformulation allows us to convert the problem into a quadratic programming task:
+\begin{align*}
+    \min                      \:&\: \dfrac{1}{2}{\left\lVert \mathbf{w}\right\rVert}_2^2          \\
+    \text{such that }           &\: t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right)\geq 1 \quad\forall n        
+\end{align*}  
+Using Lagrange multipliers, we derive the dual form of this problem:
+\begin{align*}
+    \max                      \:&\: \tilde{\mathcal{L}}(\boldsymbol{\alpha})=\sum_{n=1}^N \alpha_n-\dfrac{1}{2}\sum_{n=1}^N\sum_{m=1}^N \alpha_n\alpha_m t_n t_m k(\mathbf{x}_n,\mathbf{x}_m)          \\
+    \text{such that }           &\: \alpha_n\geq 0 \\
+                                &\: \sum_{n=1}^{N}{\alpha_n t_n = 0} \quad \forall n
+\end{align*}  
+The resulting classifier is represented as:
+\[y(\mathbf{x})=\sum_{n=1}^{N}\alpha_n t_n k(\mathbf{x},\mathbf{x}_n)+b\]
+HOnly the training points with non-zero $\alpha_i$ values (support vectors) influence the decision boundary, and the bias term $b$, is computed as:
+\[b=\dfrac{1}{\left\lvert \mathcal{S}\right\rvert }\sum_{\mathbf{x}_n\in\mathcal{S}} \left(t_n-\sum_{\mathbf{x}_m\in\mathcal{S}}\alpha_m t_m k(\mathbf{x}_n,\mathbf{x}_m)\right)\]
+
+\paragraph*{Linearly non-separable problems}
+In real-world applications, data is often not perfectly separable. 
+To accommodate such cases, SVMs introduce slack variables, $\xi_n \geq 0$, which allow some margin violations. 
+This leads to the soft-margin formulation:
+\begin{align*}
+    \min                      \:&\: \dfrac{1}{2}{\left\lVert \mathbf{w} \right\rVert}_2^2+C\sum_{n=1}^{N}\xi_n         \\
+    \text{such that }           &\: t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right) \geq 1-\xi_n \quad \forall n       
+\end{align*}  
+The parameter $C$ controls the trade-off between maximizing the margin and minimizing classification errors, with higher $C$ values penalizing errors more heavily.
+
+The dual form of the soft-margin problem is:
+\begin{align*}
+    \max                      \:&\: \tilde{\mathcal{L}}(\boldsymbol{\alpha})=\sum_{n=1}^{N}\alpha_n-\dfrac{1}{2}\sum_{n=1}^{N}\sum_{m=1}^N{\alpha_n \alpha_m t_n t_m k(\mathbf{x}_n, \mathbf{x}_m)}         \\
+    \text{such that }           &\: 0 \leq \alpha_n \leq C \\
+                                &\: \sum_{n=1}^{N}\alpha_n t_n = 0 \quad \forall n
+\end{align*}  
+In this setup, the support vectors are the samples for which $\alpha_n > 0$.
+If $\alpha_n < C$, then $\xi_n = 0$, indicating that the sample lies exactly on the margin boundary.
+Conversely, if $\alpha_n = C$, the sample may lie within the margin or be misclassified if $\xi_n > 1$.
+
+Alternatively, this optimization problem can be reformulated using a parameter $\nu$ to control the fraction of margin violations and the number of support vectors.
+The equivalent formulation is:
+\begin{align*}
+    \max                      \:&\: \tilde{\mathcal{L}}(\boldsymbol{\alpha})=-\dfrac{1}{2}\sum_{n=1}^{N}\sum_{m=1}^N{\alpha_n \alpha_m t_n t_m k(\mathbf{x}_n, \mathbf{x}_m)}         \\
+    \text{such that }           &\: 0 \leq \alpha_n \leq \frac{1}{N} \\
+                                &\: \sum_{n=1}^{N}\alpha_n t_n = 0 \\
+                                &\: \sum_{n=1}^{N}\alpha_n\geq \nu \quad \forall n
+\end{align*}  
+In this case, $0\leq\nu<1$ is a user-defined parameter, enabling control over both the fraction of errors and the number of support vectors, ensuring that margin errors and the proportion of support vectors are limited by $\nu$. 
+
+\paragraph*{Training}
+Solving the optimization problem to determine the values of $\alpha_i$ and $b$ can be computationally demanding, especially for large datasets.
+Directly solving the SVM optimization problem typically requires $\mathcal{O}(n^3)$ operations, where $n$ is the number of training samples. 
+To address this, various methods have been developed to improve efficiency:
+\begin{enumerate}
+    \item \textit{Chunking}: this approach divides the problem into smaller, more manageable chunks. 
+        Each chunk, or working set, consists of the current support vectors and a subset of samples with the highest error rates (the worst set). 
+        As iterations proceed, the size of the working set may adjust dynamically. 
+        While chunking expands the working set as necessary, it converges to the optimal solution.
+    \item \textit{Osuna's methods}: a variant of chunking designed specifically for SVM optimization, Osuna's method also employs an iterative approach but maintains a fixed working set size. 
+        Misclassified samples from the dataset replace samples in the working set during iterations, ensuring convergence while keeping the working set stable.
+    \item \textit{Sequential Minimal Optimization}: SMO further reduces computational demands by iteratively optimizing only two variables at a time. 
+        This minimal working set size allows analytical solutions for each iteration, resulting in a faster convergence to the optimal solution.
+\end{enumerate}
+For situations requiring online learning, incremental or chunking-based methods can be used to update the model continuously as new data arrives, bypassing the need for full retraining.
+
+\paragraph*{Multi-class}
+While SVMs are naturally binary classifiers, they can be adapted to handle multi-class problems through the following techniques:
 \begin{itemize}
-    \item Gaussian kernel: 
-        \[k(\textbf{x},\textbf{x}^\prime)=e^{-\frac{\left\lVert \textbf{x} - \textbf{x}^\prime \right\rVert_2^2 }{2\sigma^2}}\]
-    \item Exponential kernel: 
-        \[k(\textbf{x},\textbf{x}^\prime)=e^{-\theta \left\lvert \textbf{x} - \textbf{x}^\prime\right\rvert}\]
+    \item \textit{One against all}: for a $k$-class problem, one against all creates $k$ binary classifiers, each distinguishing a single class from the others.
+        During testing, the classifier with the highest margin determines the predicted class.
+        One against all is memory-efficient but may require more training time.
+    \item \textit{One against one}: decomposes a $k$-class problem into  $\frac{k(k-1)}{2}$ binary classifiers, each trained on a pair of classes. 
+        In testing, each classifier votes, and the label with the most votes is chosen. 
+        One against one offers higher performance and often yields better results.
+    \item \textit{Directed Acyclic Graph SVM}: like one against one, DAGSVM creates $\frac{k(k-1)}{2}$ classifiers but uses a Directed Acyclic Graph during testing, reducing the number of classifiers needed to $k-1$. 
+        This approach reduces test time while maintaining classification accuracy.
 \end{itemize}
+Among these methods, one against one is widely considered to perform best due to its robust pairwise decomposition, while DAGSVM is often preferred for faster testing due to its reduced computational complexity.
