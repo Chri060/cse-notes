@@ -1,4 +1,89 @@
-\section{Columnar database: Snowflake}
+\section{Columnar database}
+
+A column-oriented database, or columnar database, stores data in columns rather than rows. 
+This approach is optimized for Online Analytical Processing (OLAP) and data mining tasks, where efficient read operations over large datasets are essential.
+
+In row-oriented databases, modifying a record is straightforward, but querying might involve reading unnecessary data. 
+Columnar databases, however, allow for reading only the relevant columns, making them highly efficient for read-heavy workloads. 
+However, writing entire tuples requires multiple column accesses, making columnar databases more suitable for scenarios with high read and lower write demands.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Advantages}                 & \textbf{Disadvantages}                   \\ \hline
+    Data compression                    & Increased disk seek time                 \\ \hline
+    Improved bandwidth utilization      & Increased cost of inserts                \\ \hline
+    Improved code pipelining            & Increased tuple reconstruction costs     \\ \hline
+    Improved cache locality             &                                          \\ \hline
+    \end{tabular}
+\end{table}
+When tuples need to be analyzed, they are often reconstructed using a large prefetch, which helps minimize the effect of disk seeks across columns.
+
+\paragraph*{Compression}
+Columnar databases often trade I/O for CPU by leveraging compression techniques more effectively than row-based databases. 
+These databases take advantage of higher data value locality in columns, enabling advanced techniques like run-length encoding.
+Additional space can be used to store multiple copies of data in different sort orders, further optimizing query performance.
+
+\subsection{Cassandra}
+Originally developed by Facebook and now maintained by the Apache Foundation, Cassandra is a popular column-oriented, NoSQL database widely used for high-throughput applications. 
+
+
+\subsubsection{Architecture}
+Cassandra's architecture and its column-oriented approach make it particularly suited for high-availability, large-scale, write-intensive workloads, where distributed, flexible data storage is essential.
 
 
 
+
+
+
+
+\subsubsection{Data model}
+In Cassandra, data is organized into column families, which are analogous to tables in SQL but are more flexible and can have unstructured, client-specified schemas. 
+Column Families allow the storage of sparse data, where some columns may be missing in specific rows, fitting Cassandra's NoSQL model.
+
+Each Cassandra keyspace functions similarly to a database, typically used per application with certain configurations set per keyspace. 
+The primary elements in Cassandra's data model include:
+\begin{enumerate}
+    \item \textit{Keyspace}: equivalent to a database, typically unique per application.
+    \item \textit{Column family}: groups records of similar types, stored as sparse tables.
+    \item \textit{Columns}: each column has three parts:
+        \begin{itemize}
+            \item \textit{Name}: a byte array used for sorting, querying, and indexing.
+            \item \textit{Value}: a byte array; typically not queried directly.
+            \item \textit{Timestamp}: used for conflict resolution, with the most recent write winning.
+        \end{itemize}
+\end{enumerate}
+Additionally, Cassandra supports super columns, which group columns under a common name but lack indexing for sub-columns. These are often used to denormalize data from standard column families.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/cas.png}
+    \caption{Cassandra data model}
+\end{figure}
+
+\subsubsection{Query language}
+Cassandra supports a unique query mechanism based on a slice predicate, allowing precise control over returned columns:
+SliceRange specifies start and end column names, direction (reverse), and count (similar to SQL LIMIT).
+
+To interact with Cassandra, developers can use the API for various read and write operations:
+\begin{lstlisting}[style=Java]
+// retrieve a specific column at the given path
+get() : Column
+// retrieve a set of columns in one row specified by the slice predicate
+get_slice() : List<ColumnOrSuperColumn>
+// retrieve slices for multiple keys based on a SlicePredicate
+multiget_slice() : Map<key, List<ColumnOrSuperColumn>>
+// retrieve multiple columns according to a specified range
+get_range_slices() : List<KeySlice>
+\end{lstlisting}
+For writing operations, Cassandra provides commands such as:
+\begin{lstlisting}[style=Java]
+// insert a new element in a column
+client.insert()
+// update an existing element in a column
+batch_mutate()
+// remove an existing element from a column
+remove()
+\end{lstlisting}
+
+\paragraph*{SQL}
+Cassandra also supports SQL.

@@ -21,23 +21,212 @@ Redis can be used alongside SQL databases for fast access to frequently queried 
 
 Best use cases for Redis are: 
 \begin{itemize} 
-    \item When speed is crucial and you need real-time data processing. 
-    \item When you need more than basic key-value pairs, and complex data structures are required. 
-    \item When the dataset can fit into memory, allowing for in-memory storage to maximize performance.
-     \item When the dataset is non-critical, as Redis persistence mechanisms can add latency, which might not be ideal for mission-critical applications. 
+    \item Applications that require real-time data processing and fast access.
+    \item Scenarios needing complex data structures, such as lists and sets, rather than basic key-value pairs.
+    \item Situations where the dataset fits within memory, allowing for fast in-memory data retrieval.
+    \item Non-critical datasets, as Redis persistence mechanisms can introduce some latency, which may be unsuitable for mission-critical applications.
 \end{itemize}
 
-\paragraph*{Architecture}
-Redis was written in ANSI C by Salvatore Sanfilippo. 
-It is designed to run on most POSIX-compliant systems like Linux, BSD, and macOS, with Linux being the recommended platform for production use.
+\paragraph*{Advantages}
+The advantages of Redis are: 
+\begin{itemize}
+    \item \textit{Performance}: Redis offers high-speed data access, ideal for real-time applications.
+    \item \textit{Availability}: replication and partitioning enhance data availability and fault tolerance.
+    \item \textit{Scalability}: Redis can be scaled to accommodate high-demand scenarios.
+    \item \textit{Portability}: Redis runs on most POSIX-compliant systems and has limited support for Windows.
+\end{itemize}
 
-While Redis is a single-threaded server, it can scale across multiple CPU cores by running several Redis instances in parallel. 
-Redis guarantees that all operations are atomic, meaning no two commands will be executed concurrently.
-Many Redis commands are executed with constant time complexity, making them highly efficient even at scale. 
-
-Redis does not natively support Windows, but Microsoft maintains an open-source 64-bit Windows port of Redis.
+\subsubsection{Architecture}
+Redis, written in ANSI C, runs on most POSIX-compliant systems, with Linux recommended for production environments. 
+Although Redis is single-threaded, it achieves scalability across multiple CPU cores by allowing multiple Redis instances to run in parallel. 
+With constant-time complexity for many commands, Redis remains efficient even with high data volumes.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{images/redis.png}
     \caption{Redis architecture}
 \end{figure}
+Redis offers two persistence mechanisms:
+\begin{itemize}
+    \item \textit{Redis Database Snapshots} (RDB): captures a snapshot of the dataset at specified intervals.
+    \item \textit{Append-Only File} (AOF): logs every write operation, ensuring recovery by replaying commands if Redis restarts.
+\end{itemize}
+Redis enables master-slave replication, where one master Redis instance can synchronize with multiple read-only slave instances. 
+Clients can read data from both master and slave nodes, but only write to the master by default. 
+Redis also supports data partitioning across multiple hosts through:
+\begin{itemize}
+    \item \textit{Client-side partitioning}: client code manages data distribution.
+    \item \textit{Proxy-based partitioning}: uses a proxy layer to distribute requests.
+    \item \textit{Query router partitioning}: Redis Cluster automatically routes requests to the appropriate node.
+\end{itemize}
+
+\paragraph*{Topologies}
+Redis can be deployed in various configurations:
+\begin{itemize}
+    \item \textit{Standalone}: basic setup with optional master-slave replication for read offloading and redundancy. 
+        No automatic failover.
+    \item \textit{Sentinel}: provides automated failover in a master-slave topology, promoting a slave to master if the primary fails. 
+        Data is not distributed across nodes.
+    \item \textit{Twemproxy}: functions as a proxy to distribute data across standalone Redis instances, supporting consistent hashing and basic partitioning.
+    \item \textit{Cluster}: Redis Cluster distributes data across multiple instances with built-in failover and divides the keyspace into hash slots, where each node holds a subset of the hash slots.
+\end{itemize}
+
+\subsubsection{Data model}
+The Redis data model is centered around key-value pairs, with additional data types for more complex storage needs.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|l|}
+    \hline
+    \textbf{Data Type} & \textbf{Description} \\ \hline
+    Strings            & Basic key-value pairs, suitable for caching and counters. \\ \hline
+    Lists              & Ordered collections, useful for queues. \\ \hline
+    Sets               & Unordered unique collections, great for tags and unique items. \\ \hline
+    Sorted Sets        & Sets with key, ideal for rankings. \\ \hline
+    Hashes             & Field-value pairs within a key, good for storing objects. \\ \hline
+    Bitmaps            & Bit-level data, useful for flags and tracking events. \\ \hline
+    HyperLogLogs       & Probabilistic unique counters with low memory usage. \\ \hline
+    Streams            & Log-like data for real-time processing and event sourcing. \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsubsection{Query language}
+Redis uses a command-based language tailored to its data types. 
+Commands are specific to the type of data being manipulated, ensuring efficient data access and manipulation for diverse data structures.
+
+\paragraph*{Strings}
+The basic commands on strings are: 
+\begin{lstlisting}[style=Java]
+// get and set strings
+SET string_field string_value
+GET string_field
+// set or increment numbers values
+SET (int)string_field 1
+INCRBY (int)string_field 1
+// get multiple keys at once
+MGET string_field (int)string_field
+// set multiple keys at once
+MSET string_field string_value (int)string_field 1223
+// get the length of a string 
+STRLEN string_field 
+// update a value retrieving the old one
+GETSET string_field string_value
+\end{lstlisting}
+
+\paragraph*{Keys}
+The basic commands on keys are: 
+\begin{lstlisting}[style=Java]
+// key removal
+DEL key_value
+// test for existence 
+EXISTS key_value
+// get the type of a key
+TYPE key_value
+// refield a key
+REfield bar new_bar
+// set an expiration time to a key 
+EXPIRE key_value 10 
+// get key time-to-live 
+TTL key_value
+\end{lstlisting}
+
+\paragraph*{List}
+The basic commands on list are: 
+\begin{lstlisting}[style=Java]
+// push on either end
+RPUSH key_value string
+LPUSH key_value string
+// pop from either end
+RPOP key_value
+LPOP key_value
+// blocking pop on either end
+BRPOP key_value
+BLPOP key_value
+// pop and Push to another list 
+RPOPLPUSH src_key_value dst_key_value
+// get an element by index on either end
+RINDEX key_value
+LINDEX key_value
+// get a range of elements
+RRANGE key_value 0-1
+LRANGE key_value 0-1
+\end{lstlisting}
+
+\paragraph*{Hash}
+The basic commands on hash are: 
+\begin{lstlisting}[style=Java]
+// set a hashed value
+HSET key:key_value field value 
+// set multiple fields
+HMSET key:key_value lastfield Smith visits 1
+// get a hashed value
+HGET key:key_value field
+// get all the values in a hash 
+HGETALL key:key_value
+// increment a hashed value
+HINCRBY key:key_value visits 1
+\end{lstlisting}
+
+\paragraph*{Sets}
+The basic commands on sets are: 
+\begin{lstlisting}[style=Java]
+// add member to a set
+SADD key value
+// pop a random element 
+SPOP key
+// get all elements
+SMEMBERS key
+// intersect multiple sets
+SINTER key key
+// union multiple sets
+SUNION key key
+// differentiate multiple sets
+SDIFF key key
+\end{lstlisting}
+
+\paragraph*{Sorted sets}
+The basic commands on sorted sets are: 
+\begin{lstlisting}[style=Java]
+    // add member to a sorted set
+    ZADD key key_value value
+    // get the rank of a member 
+    ZRANK key value
+    // get elements by score range 
+    ZRANGEBYSCORE key 200 +inf WITHSCORES
+    // increment score of member
+    ZINCRBY key 10 value 
+    // remove range by score 
+    ZREMRANGEBYSCORE key 0 key_value
+\end{lstlisting}
+
+\subsection{Memcached}
+
+\paragraph*{Cache}
+A cache is a collection of stored data duplicates, designed to quickly provide values that are either difficult or time-consuming to retrieve or compute. 
+Caching enhances performance by making frequently requested data readily available, saving time compared to re-fetching or recalculating. 
+Caches use a simple key-value storage model, typically involving operations to save, retrieve, and delete values. 
+Cache systems often incorporate replacement policies to manage limited storage space efficiently. 
+A cold cache holds no stored data, while a warm cache has useful data loaded, resulting in higher cache hits. 
+The effectiveness of caching depends on the balance between cache hits and misses, with a high hit ratio indicating efficient performance.
+
+\paragraph*{Memcached}
+Memcached is an open-source, distributed memory caching system created in 2003 by Brad Fitzpatrick to boost the performance of dynamic web applications by reducing database load. 
+Using a key-value dictionary model, Memcached is particularly useful for storing frequently accessed, computationally expensive, or commonly shared data in memory, allowing applications to access it quickly. 
+Originally intended to speed up dynamic websites like LiveJournal, Memcached is now widely used to cache data temporarily, ensuring faster response times without putting undue strain on databases.
+
+Technically, Memcached operates as a server that clients can access over TCP or UDP, and multiple Memcached servers can be grouped into pools to expand available cache memory. 
+This setup allows for a high degree of flexibility and scalability, particularly in large applications where caching demands are extensive.
+
+In practice, Memcached excels when caching frequently accessed data. 
+Typical uses for Memcached include caching key session values and data, which are both accessed often and shared widely.
+It's also ideal for storing homepage data, which is computationally expensive and frequently accessed, making it crucial for optimal load times.
+
+Caching at a lower level, as with Memcached, effectively reduces load on databases, which often constitute the main performance bottleneck in backend systems. 
+By handling many database requests at the memory level, Memcached accelerates response times and offloads work from the database.
+
+Memcached employs a simple invalidation strategy by setting expiration times on cached items, allowing data to automatically expire rather than requiring manual deletions. 
+This approach can result in slightly outdated data, which is acceptable for summaries, overviews, and other low-criticality pages. 
+For high-sensitivity data, however, it's possible to set up conditional expiration.
+
+Optimization is key to maximizing Memcached's benefits. 
+Although it reduces database requests, each Memcached call still has a performance cost.
+To mitigate this, techniques like multi-get can retrieve multiple keys in a single call, reducing response time by returning an array of items. 
+Security is another consideration, as early versions of Memcached had no built-in authentication. With the addition of the SASL Auth Protocol, securing access to Memcached has become easier.
