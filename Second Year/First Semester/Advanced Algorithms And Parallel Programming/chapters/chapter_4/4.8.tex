@@ -1,61 +1,50 @@
 \section{Skip lists}
 
-Skip lists are a simple, randomized dynamic search structure invented by William Pugh in 1989. 
-They are easy to implement and maintain a dynamic set of $n$ elements with expected $\mathcal{O}(\log n)$ time complexity for operations like search, insertion, and deletion.
-Skip lists offer strong probabilistic guarantees, ensuring efficient performance in both expectation and with high probability.
+Skip lists, introduced by William Pugh in 1989, are a randomized, dynamic data structure that maintains a sorted set of elements with efficient average-case operations for search, insertion, and deletion.
+They offer a probabilistic time complexity of $\mathcal{O}(\log n)$ for these operations, making them simple to implement yet powerful for dynamic sets where performance is expected rather than strictly guaranteed.
 
-Skip lists improve upon the basic (sorted) linked list, where searches take $\Theta(n)$ time in the worst case. 
-By introducing multiple layers of linked lists, similar to express and local subway lines, searches can be made more efficient.
-The local line connects all elements, like a standard linked list, while the express line connects a subset of elements, allowing faster traversal over the local line.
-The express line acts like a shortcut, speeding up searches by reducing the number of elements to check.
+Skip lists improve upon the basic sorted linked list by adding additional linked lists layered above the main list. 
+The main list connects all elements, like a standard linked list, while each higher level connects increasingly sparse subsets of elements, allowing faster traversal by skipping over parts of the lower lists.
 
 \subsection{Search}
-The search process in a skip list involves: 
+To search for an element in a skip list:
 \begin{enumerate} 
-    \item Walking right in the top linked list until proceeding further would overshoot the target. 
-    \item Dropping down to the next level and continuing the search. 
-    \item Repeat this process until reaching the bottom linked list, where the target element is either found or not.
+    \item Begin at the highest level list.
+    \item Traverse each level by moving right until the target is either found or overshot.
+    \item If overshot, drop down to the next level and repeat the process.
+    \item Continue this process until reaching the bottom level, where the target element is either located or confirmed absent.
 \end{enumerate} 
-Higher-levels lists represent popular stations in the subway analogy. 
-Even spacing of these nodes provides the best worst-case performance.
-For simplicity, evenly distributing nodes across levels results in optimal performance.
+The higher levels of the skip list serve as express lanes, allowing large jumps, while the lower levels provide finer granularity in search.
 
 \paragraph*{Analysis}
-For two levels of linked lists, the search cost is approximately:
-\[|L_1|+\dfrac{|L_2|}{|L_1|}\]
+With two levels in the skip list, the search cost is approximately:
+\[T(n)=\left\lvert L_1\right\rvert +\dfrac{\left\lvert L_2\right\rvert }{\left\lvert L_1\right\rvert }\]
 This is minimized when:
-\[|L_1|^2=|L_2|=n\implies |L_1|=\sqrt{n}\]
-Thus, the search cost becomes:
-\[|L_1|+\dfrac{|L_2|}{|L_1|}=\sqrt{n}+\dfrac{n}{\sqrt{n}}=2\sqrt{n}\]
-Extending this idea to $k$ levels of linked lists results in:
-\[k\sqrt[k]{n}\]
-Finally, for $\log n$ levels, the cost becomes:
-\[2\log n\]
-This structure of $\log n$ linked lists is analogous to a binary tree, making skip lists an efficient and well-balanced data structure that supports fast search, insertion, and deletion.
+\[T(n)=\left\lvert L_1\right\rvert ^2=\left\lvert L_2\right\rvert =n\implies \left\lvert L_1\right\rvert =\sqrt{n}\]
+Resulting in $T(n)=2\sqrt{n}$. 
+Generalizing this to $k$ levels gives a cost of $k\sqrt[k]{n}$
+With $\log n$ levels, the cost becomes:
+\[T(n)=2\log n\]
+This efficient layout mimics a balanced binary tree, enabling skip lists to support rapid searching in practice.
 
 \subsection{Insertion}
-To insert an element $x$ into a skip list:
+To insert a new element $x$: 
 \begin{enumerate}
-    \item Perform a search to determine where $x$ belongs in the bottom-most list.
-    \item Insert $x$ into the bottom list, ensuring that the bottom list contains all elements.
-    \item Randomly promote $x$ to higher levels using coin flips. 
-        Thet is, for each level, with probability $\frac{1}{2}$, promote $x$ to the next higher level.
-        On average, half of the elements are promoted 0 levels, a quarter of the elements are promoted 1 level, and an eighth are promoted 2 levels, and so on.
+    \item Search for $x$'s position in the bottom list.
+    \item Insert $x$  into the bottom list, which holds all elements in sorted order.
+    \item Randomly promote $x$ to higher levels based on coin flips.
+        For each level, $x$ is promoted with a probability of $\frac{1}{2}$, ensuring that, on average, only a small fraction of elements reach the top levels.
+        This randomized promotion keeps the structure balanced with $\log n$ expected levels.
 \end{enumerate}
 The insertion process results in a skip list with a logarithmic number of levels, where the promotion of elements ensures balance across the structure.
 
-\subsection{Skip lists in pratice}
-Skip lists are highly efficient in practice, with searches taking $\mathcal{O}(logn)$ time on average.
+\subsection{Implementation}
+Skip lists are widely used in practice due to their efficiency, with search operations typically taking average time $\mathcal{O}(\log n)$.
 \begin{theorem}
-    With high probability, every search in an $n$-element skip list takes $\mathcal{O}(\log n)$ time. 
+    With high probability, the search time for an $n$-element skip list is $\mathcal{O}(\log n)$.
 \end{theorem}
-The term with high probability refers to events that occur with probability at least $1-\mathcal{O}\left(\frac{1}{n^\alpha}\right)$, where $\alpha\geq 1$. 
-By setting $\alpha$ large enough, the probability of search time exceeding $\mathcal{O}(logn)$ becomes negligibly small.
+Here, the phrase with high probability signifies that the probability of this time complexity holding is at least $1-\mathcal{O}\left(\frac{1}{n^\alpha}\right)$ for a chosen constant $\alpha\geq 1$. 
+By increasing $\alpha$, the likelihood of search times exceeding $\mathcal{O}(\log n)$ can be made arbitrarily low, making this bound practically reliable.
 \begin{lemma}
     With high probability, an $n$-element skip list has $\mathcal{O}(\log n)$ levels.
 \end{lemma}
-
-\paragraph*{Backward analysis}
-Analyzing the search process from the leaf to the root provides further insight.
-Each up move in the search corresponds to the node being promoted during insertion.
-The total number of up moves is bounded by the number of levels, which is $\mathcal{O}(\log n)$ with high probability. 

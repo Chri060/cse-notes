@@ -1,100 +1,88 @@
 \section{Minimum cut problem}
 
-Let $G = (V, E)$ be a connected, undirected graph, where $n = |V|$ and $m = |E|$ represent the number of vertices and edges, respectively. 
-For any subset $S \subset V$, the set $\delta(S) = \{(u, v) \in E : u \in S, v \in S^\prime\}$ represents a cut. 
-The goal of the minimum cut problem is to find the cut with the fewest number of edges.
+Let $G = (V, E)$ be a connected, undirected graph, where $n = \left\lvert V\right\rvert $ and $m = \left\lvert E\right\rvert $ represent the number of vertices and edges, respectively. 
+For any subset $S \subset V$, the set $\delta(S) = \{(u, v) \in E \mid u \in S, v \in S^\prime\}$ defines a cut, separating the vertices in $S$ from those in $S^\prime=V\setminus S$. 
+The minimum cut problem seeks to identify a cut with the fewest edges connecting $S$ and $S^\prime$, effectively partitioning the graph with minimal separation.
 
-\paragraph*{Source-target cut problem}
-In graph theory, a source-target cut refers to a way of partitioning the vertices of a graph into two disjoint subsets such that: one subset contains a designated source vertex $s$, and the other subset contains a designated target vertex $t$.
-In this version, for specified vertices $s \in V$ and $t \in V$, we restrict attention to cuts $\delta(S)$ where $s \in S$ and $t \notin S$. 
-The goal here is to find the cut that minimizes the number of edges crossing between $S$ and $S^\prime$.
+\subsection{Naive algorithm}
+A traditional approach to solving the minimum cut problem is to compute $n-1$ minimum source-target cuts, one for each possible pair of vertices.
+A source-target cut partitions the graph into two disjoint sets such that one subset contains a designated source vertex $s$ and the other contains a designated target vertex $t$.
 
-\paragraph*{Traditional solution}
-Traditionally, the minimum cut problem could be solved by computing $n-1$ minimum source-target cuts, one for each pair of vertices.
-In the minimum source-target cut problem, we are given two vertices $s$ and $t$, and the goal is to find the set $S$ such that $s \in S$ and $t \notin S$, minimizing minimizing $|\delta(S)|$.
-By linear programming duality, the size of the minimum source-target cut is equal to the value of the maximum flow. 
-The fastest known algorithm for solving the maximum flow problem runs in time: 
+The size of the minimum source-target cut is equivalent to the maximum flow between $s$ and $t$. 
+The most efficient algorithm known for the maximum flow problem has a time complexity of:
 \[\mathcal{O}\left(nm \log\left(\frac{n^2}{m}\right)\right)\]
+Here, $n$ is the number of vertices and $m$ is the number of edges. 
 
 \subsection{Karger's algorithm}
-Karger introduced a randomized algorithm to solve the minimum cut problem, which avoids the need for maximum flow computations.
-This approach relies on randomly contracting edges to shrink the graph while preserving the minimum cut with high probability.
+Karger introduced a randomized algorithm that avoids explicit maximum flow calculations by using edge contraction to iteratively simplify the graph.
+This contraction process preserves the minimum cut with high probability, resulting in a more efficient approach.
 
-\paragraph*{Multigraphs}
-In a multigraph, multiple edges can exist between any pair of vertices. 
-However, there are no edges of the form $(v,v)$, known as self-loops. 
-
-\paragraph*{Edge contraction}
-The contraction of an edge $e=(u,v)$ merges the vertices $u$ and $v$ into a single vertex. 
-In the contracted graph the vertices $u$ and $v$ are replaced by a new vertex, denoted $w$.
+Edge contraction involves merging two vertices connected by an edge, $e=(u,v)$, into a single new vertex $w$. 
+The contraction replaces all edges incident to $u$ or $v$ with edges incident to $w$, while removing any self-loops created by this merging process.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{images/ed.png}
     \caption{Edge contraction}
 \end{figure}
-Let $G=(V,E)$ be a multigraph without self-loops, and let $e=\{u,v\}\in E$. 
-Formally, the contraction of $e$, denoted $G\setminus e$, is formed by:
+\begin{definition}[\textit{Edge contraction}]
+    For a multigraph $G=(V,E)$ without self-loops, contracting an edge $e=\{u,v\}\in E$, denoted $G\setminus e$, results in: 
+\end{definition}
 \begin{enumerate}
     \item Replacing vertices $u$ and $v$ with a new vertex $w$.
-    \item Replacing all edges $(u,x)$ or $(v,x)$ with an edge $(w,x)$.
+    \item Redirecting all edges incident to $u$ and $v$ to $w$. 
     \item Removing any self-loops involving $w$.
 \end{enumerate}
-After contraction, the graph $G\setminus e$ is still a multigraph. 
-A crucial observation is that contracting an edge $(u,v)$ preserves cuts where both $u$ and $v$ belong either to the same set $S$ or to its complement $S^\prime$.
-For a cut $\delta(S)$ in the original graph $G$, if $u,v\in S$, then after contraction, $\delta_G(S)=\delta_{G\setminus e}(S)$, where $w$ is substituted for $u$ and $v$.
+After contraction, the graph $G\setminus e$ remains a multigraph.
+Importantly, contracting $(u,v)$ does not affect cuts where $u$ and $v$ are both in the same set. 
 
 \paragraph*{Algorithm}
-Karger's algorithm for finding a minimum cut works as follows:
+Karger's algorithm for the minimum cut works as follows:
 \begin{enumerate}
-    \item Pick an edge uniformly at random and contract the two vertices at its endpoints.
-    \item Repeat the contraction process until only two vertices remain (i.e., after $n-2$ edges have been contracted).
+    \item Select an edge uniformly at random and contract its endpoints. 
+    \item Repeat the contraction process until only two vertices remain.
 \end{enumerate}
-The two remaining vertices represent a partition $(S, S^\prime)$ of the original graph, and the edges between them correspond to the cut $\delta$(S) in the input graph.
-
-Let $k$ be the size of the minimum cut. 
-Focus on a particular minimum cut $\delta(S)$ where $|\delta(S)|=k$
+The two remaining vertices form a partition $(S, S^\prime)$ of the original graph, where the edges connecting $S$ and $S^\prime$ defines the cut $\delta(S)$ in $G$.
 \begin{lemma}
-    Let $\delta(S)$ be a minimum cut in the graph $G=(V,E)$. 
-    The probability that Karger's algorithm outputs the cut $\delta(S)$ is at least:
-    \[\Pr(\text{Karger's algorithm ends with the cut }\delta(S))\geq\dfrac{1}{\binom{n}{2}}\]
+    For a minimum cut $\delta(S)$ in the graph $G=(V,E)$, Karger's algorithm produces this minimum cut with probability at least:
+    \[\Pr(\textnormal{minimum cut})\geq\dfrac{1}{\binom{n}{2}}\]
 \end{lemma}
-
-To increase the probability of success, we run the algorithm $l\cdot \binom{n}{2}$ times. 
-The probability that at least one run succeeds is:
-\[\Pr(\text{one success})=1-\left(1-\dfrac{1}{\binom{n}{2}}\right)^{l\cdot\binom{n}{2}}\geq 1-e^l\]
-By setting $l = c \log n$, the error probability becomes $\frac{1}{n^c}$. 
+To increase the success probability, we repeat Karger's algorithm $l\cdot \binom{n}{2}$ times. 
+The probability that at least one run will successfully produce the minimum cut is:
+\[\Pr(\text{one success})\geq 1-e^l\]
+Setting $l = c \log n$ reduces the error probability to less than:
+\[\Pr(\text{error})\leq\dfrac{1}{n^c}\]
 
 \paragraph*{Complexity}
 One run of Karger's algorithm takes $\mathcal{O}(n^2)$ time.
-Hence, by repeating the algorithm $\mathcal{O}(n^2\log n)$ times, we obtain a randomized algorithm with total time complexity $\mathcal{O}(n^4\log n)$ and an error probability of at most $\frac{1}{\text{poly}(n)}$.
+By repeating the algorithm $\mathcal{O}(n^2\log n)$ times, we obtain a randomized algorithm with total time complexity:
+\[\mathcal{O}(n^4\log n)\] 
+And an error probability of at most:
+\[\Pr(\text{error})\leq\dfrac{1}{\text{poly}(n)}\]
 
 \subsection{Karger and Stein algorithm}
-Karger and Stein introduced a more efficient version of Karger's original algorithm by refining its edge contraction process.
-The key insight comes from analyzing the telescoping product that emerges when calculating the probability of contracting an edge from the minimum cut set $\delta(S)$. 
+Karger and Stein refined Karger's original minimum cut algorithm to improve efficiency by enhancing the edge contraction process.
+The core insight lies in understanding the telescoping product that emerges when calculating the probability of preserving edges in the minimum cut set $\delta(S)$ during contractions.
 
-In the early stages of the contraction, it is very unlikely that an edge from the minimum cut is contracted. 
-However, as the graph shrinks, the likelihood of contracting such an edge increases. 
-The probability that a fixed minimum cut $\delta(S)$ survives down to a smaller subgraph with $l$ vertices is at least:
+In the early stages, it's unlikely that an edge from the minimum cut set is contracted. 
+However, as the graph reduces in size, the probability of contracting such an edge increases. 
+By focusing on the probability that a fixed minimum cut $\delta(S)$ survives contraction to a subgraph with $l$ vertices, we find that:
 \[\Pr(\text{cut survives})=\frac{\binom{l}{2}}{\binom{n}{2}}\]
-By choosing $l=\frac{n}{\sqrt{2}}$, we ensure that the probability of retaining the minimum cut is at least $\frac{1}{2}$.
-This means that, in expectation, two trials of the algorithm should suffice to find the minimum cut with high probability.
+Setting $l=\frac{n}{\sqrt{2}}$ ensures a survival probability of at least $\frac{1}{2}$.
+This suggests that, on average, running two trials of the algorithm should be sufficient to find the minimum cut with high probability.
 
 \paragraph*{Algorithm}
-The steps of Karger and Stein algorithm are: 
+The Karger-Stein algorithm proceeds as follows for a multigraph $G$ with at least six vertices:
 \begin{enumerate}
-    \item From a multigraph $G$ with at least six vertices, repeat the following twice: 
-        \begin{enumerate}
-            \item Run the original edge contraction algorithm until the graph is reduced to $\frac{n}{\sqrt{2}}+1$ vertices.
-            \item Recur on the resulting contracted graph.
-        \end{enumerate}
-    \item Return the minimum of the cuts found in the two recursive calls.
+    \item Run the edge contraction algorithm on $\frac{n}{\sqrt{2}}+1$ vertices.
+    \item Recur on the resulting contracted graph.
+    \item Repeat these steps twice, then return the smaller of the two cuts found.
 \end{enumerate}
-The choice of six as the threshold for recursion depth does not impact the overall asymptotic complexity, but only affects the running time by a constant factor.
+Notably, setting the recursion threshold to six vertices affects only the constant factor of the runtime, without impacting the asymptotic complexity.
 \begin{algorithm}[H]
     \caption{Karger and Stein}
     \begin{algorithmic}[1]
         \Function{contract}{$G=(V,E), t$}
-            \While{$|V| > t$}
+            \While{$\left\lvert V\right\rvert  > t$}
                 \State Choose $e\notin E$ uniformly at random
                 \State $G=G\setminus e$
             \EndWhile 
@@ -102,10 +90,10 @@ The choice of six as the threshold for recursion depth does not impact the overa
         \EndFunction
         \Statex
         \Function{fastmincut}{$G= (V,E)$}
-            \If {$|V| < 6$}
+            \If {$\left\lvert V\right\rvert < 6$}
                 \State \Return mincut($V$)
             \Else 
-                \State $t= \left\lceil  1 + \frac{|V|}{\sqrt{2}}\right\rceil$
+                \State $t= \left\lceil  1 + \frac{\left\lvert V\right\rvert}{\sqrt{2}}\right\rceil$
                 \State $G_1 =$ \Call{contract}{$G, t$}
                 \State $G_2 =$ \Call{contract}{$G, t$}
                 \State \Return $\min \{$\Call{fastmincut}{$G_1$}, \Call{fastmincut}{$G_2$}$\}$
@@ -116,20 +104,16 @@ The choice of six as the threshold for recursion depth does not impact the overa
 
 \paragraph*{Complexity}
 The recurrence relation for the running time of the Karger-Stein algorithm is:
-\[T(n) = 2n^2 + T\left(\frac{n}{\sqrt{2}}\right)\]
-Which solves to:
-\[T(n) = \mathcal{O}(n^2 \log n)\]
-The algorithm succeeds with probability at least $\geq \frac{1}{2}$ at each recursive step. 
-To boost the probability of success, we repeat the algorithm multiple times. 
-Specifically, the recurrence for the success probability $\Pr(n)$ is: 
-\[\Pr(n) \geq 1 - \left( 1 - \frac{1}{2}\Pr\left(\frac{n}{\sqrt{2}} + 1\right)\right)^2\]
-This implies that:
-\[\Pr(n) = \Omega\left(\frac{1}{\log n}\right)\]
-To ensure the algorithm succeeds with high probability we need to run the algorithm $\mathcal{O}(\log^2 n)$ times. 
+\[T(n) = T\left(\frac{n}{\sqrt{2}}\right) + \Theta(n^2)\]
+Which solves to a complexity of $\mathcal{O}(n^2 \log n)$.
+
+The algorithm's success probability at each recursive step is at least $\geq \frac{1}{2}$. 
+To increase the probability of finding the minimum cut, we repeat the algorithm multiple times.
+The probability of success is: 
+\[\Pr(\text{success}) = \Omega\left(\dfrac{1}{\log n}\right)\]
+Thus, to ensure the algorithm succeeds with high probability we need to run the algorithm $\mathcal{O}(\log^2 n)$ times. 
 Thus, the total time complexity of the Karger-Stein algorithm is: 
 \[\mathcal{O}(n^2 \log^3 n)\]
 \begin{corollary}
     Any graph has at most $\mathcal{O}(n^2)$ distinct minimum cuts.
 \end{corollary}
-Like the original Karger's algorithm, the Karger-Stein algorithm is a Monte Carlo algorithm. 
-This means that it guarantees a correct solution with high probability, but there remains a small probability of failure.

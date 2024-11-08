@@ -1,72 +1,26 @@
 \section{Introduction}
 
-\paragraph*{Probabilistic analysis}
-In probabilistic analysis, the algorithm is deterministic, meaning that for any given fixed input, the algorithm will always produce the same result and follow the same execution path each time it runs. 
-This analysis assumes a probability distribution for the inputs and the the algorithm is then analyzed over this distribution. 
-In this type of analysis we have to consider that certain specific inputs may result in significantly worse performance. 
-Addittionally, if the assumed distribution of inputs is inaccurate, the analysis may present a misleading or overly optimistic view of the algorithm's behavior. 
+Probabilistic analysis in algorithms assumes that the algorithm itself is deterministic; for a given fixed input, it will produce the same output and follow the same sequence of operations every time it runs. 
+This analysis model considers a probability distribution over the possible inputs, evaluating the algorithm's performance based on this distribution.
+While this can provide useful insights into average-case behavior, it has limitations.
+or instance, certain specific inputs may lead to particularly poor performance, and if the assumed distribution does not accurately represent real-world inputs, the analysis may yield a misleading or overly optimistic view of the algorithm's expected efficiency.
 
-\paragraph*{Random analysis}
-In contrast, randomized algorithms introduce randomness into their execution, which means that, for a fixed input, the outcome may vary depending on the results of internal random decisions. 
-Randomized algorithms generally work well with high probability for any input.
-However, a small chance that they may fail on any given input, though this probability is low.
-Key elements of randomized algorithms are: 
-\begin{itemize}
-    \item \textit{Indicator variables}: to analyze a random variable $X$, which represents a combination of many random events, we can break it down using indicator variables $X_i$:  
-        \[X = \sum X_i\]
-    \item \textit{Linearity of expectation}: suppose we have random variables $X$, $Y$, and $Z$, where $X$ is the sum of $Y$ and $Z$, then: 
-        \[\mathbb{E}[X] = \mathbb{E}[Y + Z] = \mathbb{E}[Y] + \mathbb{E}[Z]\]
-        This holds true regardless of whether the variables are independent.
-    \item \textit{Recurrence relations}: these relations describe the behavior of an algorithm in terms of smaller subproblems.
-\end{itemize}
+In contrast, randomized algorithms incorporate randomness into their execution process, introducing variability in their behavior even when given a fixed input.
+Due to this inherent randomness, a randomized algorithm may produce different results or follow different execution paths on the same input in separate runs.
+Generally, randomized algorithms are designed to perform well with high probability across any input, though there remains a small probability of failure on any given run.
 
-\subsection{Hiring problem}
-Imagine you need to hire a new employee, and a headhunter sends you one applicant per day for $n$ days. 
-If an applicant is better than the current employee, you fire the current one and hire the new applicant. 
-Since both hiring and firing are costly, you are interested in minimizing these operations.
-
-We may have two estreme cases: 
-\begin{itemize}
-    \item \textit{Worst-case scenario}: the headhunter sends applicants in increasing order of quality, meaning each new applicant is better than the previous one. 
-        In this case, you hire and fire each applicant, resulting in $n$ hires.
-    \item \textit{Best-case scenario}: the best applicant arrives on the first day, so you hire them and make no further changes. 
-        The total cost is just one hire.
-\end{itemize}
-In the average case, the input to the hiring problem is a random ordering of $n$ applicants. 
-There are $n!$ possible orderings, and we assume that each is equally likely. 
-We want to compute the expected cost of our hiring algorithm, which in this case is the expected number of hires.
-
-Let $X(s)$ be the random variable representing the number of applicants hired given the input sequence $s$. 
-To find $\mathbb{E}[X]$, we can break the problem down using indicator random variables $X_i$: 
-\[X_i=\begin{cases} 1\qquad\text{if applicant }i\text{ is hired} \\ 0\qquad\text{otherwise} \end{cases}\]
-The total number of hires $X$ is the sum of these indicator variables:
-\[X=X_1+X_2+\cdots+X_n\]
-Now, using the linearity of expectation, we have:
-\[\mathbb{E}[X]=\mathbb{E}\left[\sum_{i=1}^n X_i\right]=\sum_{i=1}^n\mathbb{E}[X_i]\]
-
-Next, we need to compute $\mathbb{E}[X_i]$. 
-An applicant $i$ is hired only if they are better than all previous $i-1$ applicants.  
-For a uniformly random order of applicants, the probability that applicant $i$ is better than the previous $i-1$ applicants is $\frac{1}{i}$.
-Thus, the expected value for each $X_i$ is:
-\[\mathbb{E}[X_i]=\Pr(\text{applicant }i\text{ is hired})=\dfrac{1}{i}\]
-
-Finally, the expected total number of hires is:
-\[\mathbb{E}[X]=\sum_{i=1}^n\dfrac{1}{i}\]
-This sum is the harmonic series, which is bounded by $\ln n + 1$. 
-Therefore, the average number of hires is approximately $\ln n$.
-
-\paragraph*{Analysis}
-The analysis above assumes that the headhunter sends applicants in a random order. 
-However, if the headhunter is biased you cannot rely on this randomness. 
-In such cases, if you have access to the entire list of applicants in advance, you can take control by randomizing the input yourself.
-By randomly permuting the list of applicants before interviewing them, you essentially convert the hiring problem into a randomized algorithm. 
-This way, the hiring process no longer depends on the headhunter's input order, and you maintain the same expected number of hires, $\mathcal{O}(\log n)$, regardless of the original order.
-In general, randomized algorithms allow for multiple possible executions on the same input, which ensures that no single input can guarantee worst-case performance. 
-Instead of assuming some distribution for the inputs, you actively create your own distribution, thereby moving from passive probabilistic analysis to a more robust, actively randomized approach. 
-
-\subsection{Randomized algorithms}
-Randomized algorithms can be broadly classified into two main types: 
-\begin{itemize}
-    \item \textit{Las Vegas algorithms}: these algorithms enures the correctness of the output (randomness affects only the running time). 
-    \item \textit{Monte Carlo algorithms}: these algorithms return an incorrect solution with a known probability (randomness affects both running time and output). 
-\end{itemize}
+\subsection{Taxonomy}
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l|l|l|}
+    \cline{2-3}
+                                              & \multicolumn{1}{c|}{\textbf{Las Vegas}}                        & \multicolumn{1}{c|}{\textbf{Monte Carlo}}                         \\ \hline
+    \multicolumn{1}{|l|}{\textit{Randomness effect}} & Running time                                      & \makecell[l]{Running time \\ Solution correctness}               \\ \hline
+    \multicolumn{1}{|l|}{\textit{Efficiency (polynomial bound)}} & Expected running time & Worst-case running time  \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+Monte Carlo algorithms are classified further based on their error probabilities. 
+A Monte Carlo algorithm with two-sided error has a nonzero probability of error for both possible outputs. 
+In contrast, a one-sided error algorithm guarantees correctness for at least one of the outputs, meaning it has zero error probability for that output.

@@ -2,59 +2,50 @@
 
 A dictionary is a collection of elements, each associated with a unique search key.
 The goal is to maintain the set efficiently while supporting operations such as insertions and deletions.
-This is analogous to maintaining a database where entries may be added, removed, or searched periodically.
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|l|} \hline
+        \textbf{Operation} & \textbf{Description} \\ \hline
+        \textit{Search}($x, S$) & Check if $x \in S$. \\ \hline
+        \textit{Insert}($x, S$) & Insert $x$ into $S$ if it is not already present \\ \hline
+        \textit{Delete}($x, S$) & Remove $x$ from $S$ if it exists \\ \hline
+        \textit{Minimum}($S$) & Return the smallest key in $S$ \\ \hline
+        \textit{Maximum}($S$) & Return the largest key in $S$ \\ \hline
+        \textit{List}($S$) & Output the elements of $S$ in increasing order of keys \\ \hline
+        \textit{Union}($S_1, S_2$) & \makecell[l]{Merge two sets $S_1$ and $S_2$, maintaining the order such that \\ for every $x_1 \in S_1$ and $x_2 \in S_2$, $x_1 < x_2$} \\ \hline
+        \textit{Split}($S, x, S_1, S_2$) & \makecell[l]{Split $S$ into two sets $S_1$ and $S_2$, where all elements in \\ $S_1$ are $\leq x$ and all elements in $S_2$ are $> x$} \\ \hline
+    \end{tabular}
+\end{table}
 
-Given a universe $U$ of keys with a total order, the task is to manage a set $S \subseteq U$ and support the following operations:
-\begin{itemize}
-    \item \textit{Search}($x, S$): check if $x\in S$.
-    \item \textit{Insert}($x, S$): insert $x$ into $S$ if it is not already present.
-    \item \textit{Delete}($x, S$): remove $x$ from $S$ if it exists. 
-    \item \textit{Minimum}($S$): return the smallest key in $S$.
-    \item \textit{Maximum}($S$): return the largest key in $S$.
-    \item \textit{List}($S$): output the elements of $S$ in increasing order of keys.
-    \item \textit{Union}($S_1, S_2$): Merge two sets $S_1$ and $S_2$, maintaining the total order such that for every $x_1\in S_1$ and $x_2\in S_2$, $x_1<x_2$. 
-    \item \textit{Split}($S, x, S_1, S_2$): split $S$ into two sets $S_1$ and $S_2$, where all elements in $S_1$ are less or equal than $x$ and all elements in $S_2$ are greater than $x$.
-\end{itemize}
-Various data structures can be used to solve the dictionary problem, each with distinct trade-offs in performance and complexity.
-
-\subsection{Arrays}
-The array can be: 
-\begin{itemize} 
-    \item \textit{Unordered array}: searching and deleting an element take $\mathcal{O}(n)$ time, while inserting an element takes $\mathcal{O}(1)$. 
-        This is useful for scenarios like log files, where insertions are frequent, but searches and deletions are rare. 
-    \item \textit{Ordered array}: searching takes $\mathcal{O}(\log n)$ time using binary search, while inserting and deleting take $\mathcal{O}(n)$. 
-        This is applicable for lookup tables, where searches are frequent, but insertions and deletions are infrequent. 
-\end{itemize}
-
-\subsection{Binary search trees}
-A binary search tree (BST) is a binary tree where each internal node stores an item $(k, e)$ representing a key $k$ and associated element $e$. 
+The basic strutures complexity for the main operations are the following: 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l|l|l|l|}
+    \cline{2-4}
+                                                   & \multicolumn{1}{c|}{\textbf{Search}} & \multicolumn{1}{c|}{\textbf{Delete}} & \multicolumn{1}{c|}{\textbf{Insert}} \\ \hline
+    \multicolumn{1}{|l|}{\textit{Unordered array}} & $\mathcal{O}(n)$                     & $\mathcal{O}(n)$                     & $\mathcal{O}(1)$                     \\ \hline
+    \multicolumn{1}{|l|}{\textit{Ordered array}}   & $\mathcal{O}(\log n)$                & $\mathcal{O}(n)$                     & $\mathcal{O}(n)$                     \\ \hline
+    \multicolumn{1}{|l|}{\textit{Trees}}           & $\mathcal{O}(\log n)$                & $\mathcal{O}(\log n)$                & $\mathcal{O}(\log n)$                \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+\subsection{Trees}
+\paragraph*{Binary Search Tree}
+A Binary Search Tree (BST) is a binary tree where each internal node stores an item $(k, e)$ representing a key $k$ and associated element $e$. 
 The structure of the tree satisfies the property that: 
 \begin{itemize} 
-    \item Keys in the left subtree of any node $v$ are less or equal than $k$. 
-    \item Keys in the right subtree of $v$ are greater than $k$. 
+    \item Keys in the left subtree of any node $v\leq k$. 
+    \item Keys in the right subtree of $v>k$. 
 \end{itemize}
 The drawback of the standard BST is that an unbalanced sequence of insertions may degrade it into a linear structure, resulting in poor performance for searches, inserts, and deletes.
 
-\subsection{Balanced trees}
-To overcome the drawback of unbalanced BSTs, several balanced tree structures have been developed. 
-These ensure that the tree height remains $\mathcal{O}(\log n)$, providing efficient operations.
-
-\paragraph*{AVL trees}
-An AVL tree is a self-balancing binary search tree where the heights of the two child subtrees of any node differ by at most one. 
-Rebalancing operations (rotations) ensure that the height of the tree remains logarithmic. 
+\paragraph*{AVL}
+An AVL tree is a self-balancing BST where the heights of the two child subtrees of any node differ by at most one. 
+Rotations ensure that the height of the tree remains logarithmic. 
 While AVL trees guarantee fast lookups and updates, they can be more complex to implement due to the need for maintaining balance factors.
 
-\paragraph*{Splay trees}
-Splay trees are another type of self-adjusting binary search tree that guarantee an amortized time complexity of $\mathcal{O}(\log n)$ per operation. 
+\paragraph*{Splay}
+Splay trees are another type of self-adjusting BST.
 The key idea is the splay operation, which moves a node accessed via a search or update to the root through rotations. 
 This ensures that frequently accessed nodes stay near the root, while infrequently accessed nodes do not contribute much to the overall cost.
-
-One of the primary benefits is that they offer amortized logarithmic time for all operations, making them efficient on average over a sequence of operations. 
-Additionally, splay trees are relatively simple to implement compared to other balanced trees because they do not require storing explicit balance information at each node. 
-Another notable advantage is their adaptability to arbitrary access patterns, ensuring that frequently accessed elements are kept near the root, which improves the performance of subsequent accesses.
-
-Each operation can involve multiple rotations, leading to a logarithmic number of rotations per operation, which can make individual operations slower in some cases. 
-Furthermore, splay trees are inefficient when used with higher-dimensional search trees. 
-This inefficiency arises because the secondary data structures associated with each node may need to be recomputed after every rotation, significantly increasing the cost from a constant to a super-linear function of the subtree size.
-Lastly, while splay trees provide good amortized performance, they do not guarantee that every individual operation will run quickly. 
-Instead, the performance guarantee applies only to the total cost of a sequence of operations.
