@@ -1,32 +1,35 @@
 \section{Accuracy issues}
 
-There are various accuracy issues when doing image rectification: 
-\begin{enumerate}
-    \item Noise and numerical errors: noise and numerical errors in the input data can affect the accuracy of the rectification process. 
-        It's essential to preprocess and filter the data to minimize these issues.
-    \item Little information: when choosing lines to identify vanishing points, it's crucial to select lines that are sufficiently far apart. 
-        Choosing lines that are too close to each other can lead to inaccuracies in vanishing point estimation and rectification.
-    \item Vanishing point near infinity: in cases where the vanishing point is nearly at infinity, it can be challenging to perform accurate affine rectification. 
-        To address this issue:
+Achieving accurate image rectification is influenced by several factors. 
+Here, we identify key challenges and strategies for improving accuracy:
+\begin{enumerate} 
+    \item \textit{Noise and numerical errors}: noise and numerical errors in the input data can significantly impact the rectification process, leading to inaccuracies. 
+        Preprocessing techniques, such as noise filtering and data normalization, are essential to mitigate these issues and improve stability in the rectification calculations.
+    \item \textit{Insufficient line information}: selecting appropriate lines to determine vanishing points is critical. Lines that are too close to each other may result in poorly defined vanishing points, introducing inaccuracies into the rectification. 
+        It is important to select lines that are sufficiently spaced to ensure precise vanishing point estimation.
+    \item \textit{Vanishing points near infinity}: when a vanishing point is nearly at infinity, achieving accurate affine rectification becomes challenging. 
+        To address this issue, consider the following approaches:
         \begin{itemize}
-            \item Draw two lines in the scene that are perpendicular to the given lines in the image.
-                If the two new lines are not parallel, adjust one of the intersection points to make them parallel.
-                \begin{figure}[H]
-                    \centering
-                    \includegraphics[width=0.4\linewidth]{images/vpi.png}
-                \end{figure}
-                Finally, apply affine reconstruction to obtain accurate results. 
-                \begin{figure}[H]
-                    \centering
-                    \includegraphics[width=0.5\linewidth]{images/ar.png}
-                \end{figure}
-            \item When dealing with sets of parallel lines, you can choose one line from each set and randomly select another pair of lines, making sure they are perpendicular. 
-                With these four lines, you can compute the matrix product of $K$ and its transpose, denoted as $KK^T$, and then derive $K$ through Cholesky factorization.
-                Afterward, you can apply the rectifying transformation using the matrix:
-                \[H_{rect}=\begin{bmatrix}
-                    K & t \\ 
-                    0 & 1
-                \end{bmatrix}^{-1}\] 
-        \end{itemize}
+            \item Draw two lines in the scene perpendicular to the original lines in the image. 
+            If these lines are not parallel, adjust their intersections to make them parallel.
+            This adjustment helps bring the vanishing point closer, making it easier to compute an affine transformation.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.4\linewidth]{images/vpi.png}
+                \caption{Aligning lines to bring the vanishing point closer}
+            \end{figure}
+            After adjusting, apply affine reconstruction to obtain more accurate results.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/ar.png}
+                \caption{Applying affine reconstruction}
+            \end{figure}
+            \item For scenes with multiple sets of parallel lines, select one line from each set and randomly choose an additional pair of perpendicular lines. 
+            Using these four lines, compute the matrix product $\mathbf{KK}^T$, where $\mathbf{K}$ represents the camera calibration matrix. 
+            Derive $\mathbf{K}$ through Cholesky factorization and use it in the rectifying transformation:
+            \[\mathbf{H}_{\text{rect}} = \begin{bmatrix} \mathbf{K} & \mathbf{t} \\ 0 & 1 \end{bmatrix}^{-1} \]
+            where $\mathbf{t}$ is a translation vector. 
+            This transformation corrects perspective distortions.
+        \end{itemize}        
 \end{enumerate}
 The accuracy of image rectification is crucial for various computer vision and image processing applications, and addressing these issues is essential for obtaining reliable results.
