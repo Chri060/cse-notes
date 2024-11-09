@@ -1,0 +1,173 @@
+\section{Architectures}
+
+The first Convolutional Neural Network (CNN), known as LeNet, was introduced in 1998. 
+LeNet was pioneering for its ability to recognize handwritten characters, marking a significant step forward in image recognition.
+
+\subsection{AlexNet}
+AlexNet, developed by Krizhevsky, Sutskever, and Hinton in 2012, expanded upon LeNet's architecture. 
+While similar in its use of convolutional layers, AlexNet features five convolutional layers and three fully connected layers. 
+Its input size is $224 \times 224 \times 3$, and it trains a substantial 60 million parameters.
+
+AlexNet introduced key innovations to counteract overfitting and improve performance. Notably, it was the first network to incorporate ReLU activations, dropout regularization, weight decay, and max-pooling. 
+These techniques made AlexNet far more efficient and robust, setting a new standard in Deep Learning for image classification.
+
+\subsection{VGG16}
+VGG16, introduced in 2014, is a deeper evolution of AlexNet's convolutional structure. 
+It uses smaller $3\times 3$ filters and increases the network's depth, scaling up the parameter count to 138 million. 
+VGG16 achieved remarkable success, securing first place in the localization track and second place in the classification track of the 2014 ImageNet Challenge. 
+The input size for VGG16 remains the same as AlexNet at $224 \times 224 \times 3$.
+
+The VGG16 paper offers an in-depth exploration of the impact of network depth on performance. 
+The authors systematically increase the network's depth by adding more convolutional layers, made possible through the exclusive use of small 3x3 filters in all layers. 
+This approach allows for larger receptive fields through a sequence of $3\times 3$ convolutions, yielding several advantages:
+\begin{itemize}
+    \item Fewer parameters compared to using larger filters in a single layer.
+    \item Increased non-linearity due to additional activation layers, enhancing the network's representational power.
+\end{itemize}
+This strategy enables VGG16 to capture complex image features efficiently, while maintaining manageable computational complexity.
+
+\subsection{Networks in Networks}
+The Network in Network (NIN) architecture introduces a novel approach to convolutional neural networks by replacing standard convolutional layers with mlpconv layers. 
+In this approach, rather than using a single convolutional layer followed by an activation function, each convolutional layer is substituted with a small Multi-Layer Perceptron, comprising a stack of fully connected layers followed by ReLU activations. 
+This design allows for a more powerful functional approximation than traditional convolutional layers, as it captures complex feature interactions across channels in a sliding manner over the entire image.
+
+NIN also incorporates Global Average Pooling (GAP) layers as a structural regularization method, replacing fully connected layers at the network's end. 
+Instead of flattening feature maps and feeding them into dense layers, GAP computes the average of each feature map, producing a single value per map. 
+This is equivalent to multiplying the feature map by a non-trainable, block-diagonal constant matrix, in contrast to a trainable dense matrix in traditional FC layers.
+
+\paragraph*{Global Averaging Pooling}
+GAP has several advantages:
+\begin{itemize}
+    \item \textit{Reduction in parameters and overfitting}: fully connected layers contain a high number of parameters and are prone to overfitting.
+        GAP reduces parameter count, making the model lighter and more robust.
+    \item \textit{Direct connection to output classes}: GAP enables a straightforward connection between feature maps and output classes, enhancing model interpretability, particularly useful for tasks such as localization.
+    \item \textit{Robustness to spatial transformations}: by averaging over spatial dimensions, GAP enhances the network's robustness to image shifts and transformations, unlike fully connected layers, which are sensitive to the spatial arrangement of features.
+    \item \textit{Compatibility with variable input sizes}: GAP can accommodate images of different input sizes, making NIN more flexible than conventional architectures that require a fixed input size.
+\end{itemize}
+Finally, GAP is followed by a simple softmax layer for classification. 
+Importantly, the number of feature maps before the GAP layer should match the number of output classes. 
+However, if there is a mismatch, a hidden layer can adjust the feature dimension.
+This structure reduces overfitting, improves interpretability, and makes the network resilient to spatial transformations, as convolutional feature extraction is shift-invariant, but fully connected layers are not.
+
+NIN's use of GAP layers aligns feature maps directly with classes, acting as a structural regularizer and making the network lighter, more interpretable, and robust to spatial changes in input images.
+
+\subsection{InceptionNet}
+The InceptionNet architecture, introduced by Google in 2014, marked a significant step forward in Deep Learning, achieving high performance with relatively low computational costs. 
+Unlike traditional networks that simply increase depth or width to improve accuracy—at the cost of a significant rise in parameters and risk of overfitting—InceptionNet introduced inception modules as a more efficient and scalable approach. 
+InceptionNet was highly successful, winning the 2014 ILSVRC (ImageNet Large Scale Visual Recognition Challenge) with an impressive 6.7\% top-5 error rate.
+
+InceptionNet uses parallel convolutional layers of varying filter sizes ($1\times 1$, $3\times 3$, $5\times 5$) within each module. 
+These filters capture features at multiple scales, allowing the network to detect small and large image features within a single layer. 
+The outputs of these different filters are concatenated along the channel dimension, preserving the spatial dimensions while significantly expanding the depth of the activation map.
+
+\paragraph*{Inception module} 
+To manage computational costs, each inception module includes $1\times 1$ convolutions as bottleneck layers before the larger $3\times 3$ and $5\times 5$ convolutions.
+This bottleneck layer reduces the number of input channels, significantly lowering the total computation required for each module. 
+By reducing dimensionality at strategic points, the inception module effectively balances depth expansion with manageable resource requirements. 
+This setup results in a network that is both deep and computationally efficient, capable of leveraging non-linearities while minimizing redundant calculations.
+
+Some of the key elements of the inception module include:
+\begin{itemize}
+    \item Multiple filter sizes ($1\times 1$, $3\times 3$, $5\times 5$) at the same layer level, enabling detection of different feature scales.
+    \item $1\times 1$ bottleneck layers before larger convolutions, which reduce input channels and thus the number of operations.
+    \item Zero-padding to preserve spatial dimensions across layers, allowing smooth concatenation of outputs from each branch in depth.
+\end{itemize}
+
+\paragraph*{GoogleLeNet} 
+The original version of InceptionNet, called GoogleLeNet, contains 22 layers, including multiple inception modules and pooling layers. 
+It starts with two initial layers of convolution and pooling, followed by a stack of nine inception modules.
+Instead of using fully connected layers, GoogleLeNet applies Global Average Pooling at the end, followed by a linear classifier and softmax for classification, which helps reduce overfitting and parameter count. 
+Overall, GoogleLeNet contains only 5 million parameters—a small fraction of other deep networks of its time.
+
+To further enhance training stability and address the dying neuron problem, GoogleLeNet adds two auxiliary classifiers at intermediate layers. 
+These auxiliary classifiers compute intermediate losses during training, promoting meaningful feature extraction at earlier layers.
+During inference, these classifiers are omitted, leaving only the final output layer for predictions.
+
+The key features of InceptionNet are:
+\begin{enumerate}
+    \item \textit{Parallel connections and multiple filter sizes}: each inception module includes multiple filter sizes ($1\times 1$, $3\times 3$, $5\times 5$), enabling feature extraction across multiple scales in parallel.
+    \item \textit{Bottleneck layers} ($1\times 1$ convolutions): by reducing the number of input channels before applying larger filters, bottleneck layers optimize computational efficiency and parameter usage.
+    \item \textit{Auxiliary losses for training stability}: auxiliary classifiers enhance training convergence by providing additional loss signals, although they are removed for inference.
+\end{enumerate}
+InceptionNet's modular, scalable design and computational efficiency made it a transformative architecture in Deep Learning, setting a standard for designing high-performing networks with limited resources.
+
+\subsection{ResNet}
+ResNet (Residual Network) introduced a revolutionary approach to building very deep neural networks, with 152 layers trained on ImageNet and even deeper models, such as 1202-layer networks, trained on CIFAR datasets. 
+ResNet was the winner of the 2015 ILSVRC competition, achieving a 3.6\% top-5 error rate, surpassing human-level performance in classification and localization tasks.
+
+The key insight behind ResNet is that simply increasing the depth of a network does not guarantee improved accuracy. 
+Empirical results showed that as depth increases, performance often worsens due to optimization difficulties, rather than overfitting, as both training and test errors increase. 
+This indicates that deeper networks are inherently harder to optimize than shallower ones, even when overfitting isn't an issue.
+
+ResNet addresses this problem by introducing identity shortcut connections (or skip connections), which create residual learning blocks. 
+Instead of learning the full output function $F(x)$, the network learns a residual mapping $F(x)=H(x)-x$, where $H(x)$ is the ideal output function. 
+This formulation implies that the network only needs to learn a small delta or adjustment over the input, which makes it easier to optimize.
+
+The benefits of identity shortcut connections are:
+\begin{itemize}
+    \item \textit{Mitigates the vanishing gradient problem}: the shortcut connection allows gradients to flow more freely through the network, making it possible to train very deep networks.
+    \item \textit{No additional parameters}: the identity mapping does not add any new parameters or significant computational cost.
+    \item \textit{Enables identity propagation}: if layers are optimal, the residual weight can converge to zero, allowing information to pass unaltered via the identity mapping.
+\end{itemize}
+In essence, the residual block encourages each block to focus on learning a small update over the previous layer's output, which is easier to optimize than a direct transformation. 
+This approach allows the network to stack more layers without degradation.
+
+\paragraph*{Architecture}
+ResNet is constructed using residual blocks, where each block consists of two convolutional layers followed by ReLU activations, with an identity shortcut connection that bypasses these layers, directly adding the input to the output. 
+This design enables the network to learn residual mappings, which significantly eases the optimization of deeper networks.
+
+For very deep models, such as those with over 50 layers, ResNet incorporates bottleneck layers. 
+These layers use $1\times 1$ convolutions to reduce the dimensionality of the input before applying larger convolutions, which helps mitigate the computational load, similar to the approach used in the inception module. 
+Additionally, downsampling occurs through convolutions with a stride of 2, which reduces the spatial dimensions of the feature maps while doubling the number of filters at each downsampling stage.
+
+The architecture concludes with a Global Average Pooling layer, which reduces the spatial dimensions to a single value per feature map, followed by a softmax classifier for final classification. 
+This design eliminates the need for fully connected layers, making the model more efficient and less prone to overfitting. 
+Overall, ResNet's use of residual blocks and bottleneck layers allows for the construction of very deep networks while maintaining computational efficiency and optimizing performance.
+
+The innovations of ResNet are: 
+\begin{enumerate}
+    \item \textit{Residual learning}: each block learns a residual mapping, simplifying optimization and allowing much deeper networks.
+    \item \textit{Identity shortcuts}: skip connections help mitigate gradient vanishing, enabling stable training of networks with hundreds of layers.
+    \item \textit{Bottleneck layers}: $1\times 1$ convolutions reduce the depth within each block, keeping computational complexity manageable.
+\end{enumerate}
+
+\subsection{MobileNet}
+MobileNet was specifically designed to optimize deep learning models for mobile and embedded applications, where resource constraints such as computational power, memory, and battery life are critical. 
+Traditional convolutional networks, particularly those with standard 2D convolutional layers, are computationally demanding and require a large number of parameters, making them impractical for mobile devices.
+
+In standard 2D convolutional layers, each filter mixes information across all input channels, which results in a high number of parameters and operations. 
+These layers can be quite computationally expensive, making them unsuitable for devices with limited resources.
+
+MobileNet addresses these limitations by introducing a more efficient approach known as separable convolutions, which break the convolution operation into two simpler steps:
+\begin{enumerate}
+    \item \textit{Depth-wise convolution}: this step applies a 2D convolution independently on each input channel. 
+        Instead of mixing channels together, it performs a convolution on each individual channel separately, significantly reducing the number of computations.
+    \item \textit{Point-wise convolution}: this step is a $1\times 1$ convolution that combines the output of the depth-wise convolution. 
+        Since it uses $1\times 1$ filters, it does not perform spatial convolution, but rather mixes the information across channels.
+\end{enumerate}
+By splitting the convolution into these two steps, MobileNet significantly reduces the computational load and the number of parameters. 
+The depth-wise convolution minimizes operations across input channels, and the point-wise convolution efficiently mixes the information across channels without the spatial complexity of a full convolution.
+
+The benefits of these network are: 
+\begin{itemize}
+    \item \textit{Fewer parameters}: since each convolution step is more efficient, MobileNet models require far fewer parameters than traditional networks.
+    \item \textit{Lower computational cost}: the separation of convolution into depth-wise and point-wise operations reduces the number of floating-point operations (FLOPs), making the network less computationally demanding.
+    \item \textit{Suitable for mobile and embedded devices}: with fewer parameters and operations, MobileNet is well-suited for real-time inference on devices with limited processing power and memory.
+\end{itemize}
+
+\subsection{Latest architectures}
+Recent advancements in deep learning have led to the development of several novel architectures, each addressing specific challenges such as network efficiency, depth, and feature reuse. 
+Some of the most notable architectures include:
+\begin{itemize}
+    \item \textit{Wide ResNet}: this variation of ResNet increases the number of filters in each layer, making the residual blocks wider instead of deeper. 
+        By increasing the width rather than the depth, Wide ResNet is more computationally efficient and can be parallelized more effectively, improving performance without a significant increase in complexity.
+    \item \textit{ResNeXt}: ResNeXt expands upon the ResNet framework by introducing multiple parallel paths within each block. 
+        While similar to the inception module, where activation maps are processed in parallel, ResNeXt differs in that all paths share the same topology. 
+        This increases the network's capacity while maintaining computational efficiency, as the parallel paths allow for greater diversity of learned features.
+    \item \textit{DenseNet}: DenseNet introduces short connections between convolutional layers within each block, where each layer takes the output of all preceding layers as its input. 
+        This dense connectivity pattern leads to better feature reuse, as every feature is propagated through the entire network. 
+        It helps alleviate the vanishing gradient problem by maintaining strong gradients throughout the network, which improves training efficiency and allows the network to learn more compact representations.
+    \item \textit{EfficientNet}: EfficientNet proposes a new scaling method that uniformly scales all dimensions of the network—depth, width, and resolution—using a compound coefficient. 
+        This simple yet effective method achieves state-of-the-art performance with fewer parameters and operations by optimizing the scaling of these dimensions in a balanced way. 
+        EfficientNet sets a new standard for efficient deep learning models by improving accuracy while reducing computational overhead.
+\end{itemize}
