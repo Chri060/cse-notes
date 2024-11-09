@@ -1,14 +1,26 @@
-\section{Power of a number}
+\section{Randomized algorithms}
 
-The problem at hand is to compute the value of $a^n$, where $n\in\mathbb{N}$. 
-The naive approach involves multiplying $a$ by itself $n$ times, resulting in a total complexity of $\Theta(n)$. 
+Probabilistic analysis in algorithms assumes that the algorithm itself is deterministic; for a given fixed input, it will produce the same output and follow the same sequence of operations every time it runs. 
+This analysis model considers a probability distribution over the possible inputs, evaluating the algorithm's performance based on this distribution.
+While this can provide useful insights into average-case behavior, it has limitations.
+or instance, certain specific inputs may lead to particularly poor performance, and if the assumed distribution does not accurately represent real-world inputs, the analysis may yield a misleading or overly optimistic view of the algorithm's expected efficiency.
 
-We can also use a divide and conquer algorithm to solve this problem by dividing the exponent by two, as follows:
-\[a^n=\begin{cases} a^\frac{n}{2}\cdot a^\frac{n}{2}  \:\:\:\:\qquad\qquad \text{if }n\text{ is even} \\ a^\frac{n-1}{2}\cdot a^\frac{n-1}{2} \cdot a \qquad \text{if }n\text{ is odd} \end{cases}\]
-In this approach, both the divide and combine phases have a constant complexity, as they involve a single division and a single multiplication, respectively. 
-Each iteration reduces the problem size by half, and we solve one sub-problem (with two equal parts).
+In contrast, randomized algorithms incorporate randomness into their execution process, introducing variability in their behavior even when given a fixed input.
+Due to this inherent randomness, a randomized algorithm may produce different results or follow different execution paths on the same input in separate runs.
+Generally, randomized algorithms are designed to perform well with high probability across any input, though there remains a small probability of failure on any given run.
 
-Thus, the recurrence relation for the complexity is:
-\[T(n)=1T\left(\dfrac{n}{2}\right)+\Theta(1)\]
-By applying the master method, we find a final complexity of:
-\[\Theta(\log n)\]
+\subsection{Taxonomy}
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l|l|l|}
+    \cline{2-3}
+                                              & \multicolumn{1}{c|}{\textbf{Las Vegas}}                        & \multicolumn{1}{c|}{\textbf{Monte Carlo}}                         \\ \hline
+    \multicolumn{1}{|l|}{\textit{Randomness effect}} & Running time                                      & \makecell[l]{Running time \\ Solution correctness}               \\ \hline
+    \multicolumn{1}{|l|}{\textit{Efficiency (polynomial bound)}} & Expected running time & Worst-case running time  \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+Monte Carlo algorithms are classified further based on their error probabilities. 
+A Monte Carlo algorithm with two-sided error has a nonzero probability of error for both possible outputs. 
+In contrast, a one-sided error algorithm guarantees correctness for at least one of the outputs, meaning it has zero error probability for that output.

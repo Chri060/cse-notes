@@ -1,114 +1,51 @@
-\section{Primality problem}
+\section{Model analysis}
 
-The primality problem involves determining whether a given integer $n\geq 2$ is a prime number.
-\begin{definition}[\textit{Prime number}]
-    An integer $p\geq 2$ is called prime if and only if it has no positive divisors other than $1$ and itself. 
+\begin{definition}[\textit{Computationally Stronger}]
+    A model $A$ is said to be computationally stronger than model $B$ ($A \geq B$) if any algorithm written for $B$ can run unchanged on $A$ with the same parallel time and basic properties.
 \end{definition}
+\begin{lemma}
+    Assume $P^\prime<P$, and same size of shared memory.
+    Any problem that can be solved for a $P$-processor PRAM in $T$ steps can be solved in a $P^\prime$ processor PRAM in $T^\prime=O(T\frac{P}{P^\prime})$ steps
+\end{lemma}
+\begin{lemma}
+    Assume $M^\prime < M$. 
+    Any problem that can be solved for a $P$-processor and $M$-cell PRAM in $T$ steps can be solved on a $\max(P, M^\prime)$-processor $M^\prime$-cell PRAM in $\mathcal{O}\left(T\frac{M}{M^\prime}\right)$ steps.
+\end{lemma}
 
-\subsection{Naive algorithm}
-The simplest way to test if a number $n$ is prime is to check if it has any divisors other than $1$ and itself.
-Since any factor of $n$ greater than $\sqrt{n}$ would have a corresponding factor smaller than $\sqrt{n}$, we only need to check divisibility up to $\sqrt{n}$. 
-\begin{algorithm}[H]
-    \caption{Naive primality test}
-    \begin{algorithmic}[1]
-        \If{$n=2$} 
-            \State \Return true 
-        \EndIf 
-        \If{$n\text{ is even}$}
-            \State \Return false 
-        \EndIf 
-        \For{$i=1$ \textit{to} $\sqrt{\frac{n}{2}}$}
-            \If{$2i+i$ divides $n$}
-                \State \Return false 
-            \EndIf 
-        \EndFor 
-        \State \Return true 
-    \end{algorithmic}
-\end{algorithm} 
-The time complexity of this naive algorithm is $\mathcal{O}(\sqrt{n})$.
+The direct implementation of a PRAM on real hardware poses certain challenges due to its theoretical nature. 
+Despite this, PRAM algorithms can be adapted for practical systems, allowing the abstract model to influence real-world designs.
 
-\subsection{Fermat primality test}
-To improve efficiency, we can use a probabilistic primality test based on Fermat's Little Theorem, which states:
-\begin{theorem}[Fermat]
-    If $p$ is a prime number and $a$ and integer $a$ is an integer such that $0<a<p$, then $a^{p-1}\mod p= 1$. 
-\end{theorem}
-This theorem leads to a simple test for primality.
-If $n$ is prime, $a^{n-1}\mod n= 1$ for some randomly chosen $a$. 
-However, if $n$ is composite, it may still satisfy this condition for certain $a$, in which case it is called a pseudoprime to base $a$.
-\begin{algorithm}[H]
-    \caption{Fermat's primality test}
-    \begin{algorithmic}[1]
-        \If{$2^{n-1}\mod n=1$} 
-            \State $n$ is possibly prime 
-        \Else 
-            \State $n$ is composite
-        \EndIf
-    \end{algorithmic}
-\end{algorithm} 
-The Fermat test runs in $\mathcal{O}(\log^2n)$ using modular exponentiation. 
-However, it can mistakenly classify some composite numbers as prime (false positives).
+\subsection{Amdahl law}
+In parallel computing, we consider two types of program segments: serial segments and parallelizable segments. 
+The total execution time depends on the proportion of each.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/am.png}
+    \caption{Serial and parallel models}
+\end{figure}
+When using more than one processor, the speedup is always less than the number of processors. 
+In a program, the parallelizable portion is often represented by a fixed fraction $f$. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/am1.png}
+    \caption{Serial model}
+\end{figure}
+Using the serial version of the model, the speedup function $\text{SU}(p,f)$ is derived as follows:
+\[\text{SU}(p,f)=\dfrac{1}{(1-f)+\frac{f}{p}}\]
+As the number of processors $p$ approaches infinity, the speedup is limited by the serial portion:
+\[\lim_{p\rightarrow\infty}\text{SU}(p,f)=\dfrac{1}{1-f}\]
+This shows that even with an infinite number of processors, the maximum speedup is constrained by the serial fraction of the program. 
 
-
-\subsection{Carmichael primality test}
-\begin{definition}[\textit{Carmichael number}]
-    A composite number $n\geq 2$ is a Carmichael number if, for every integer $a$ coprime to $n$, it holds that $a^{n-1} \mod n = 1$
-\end{definition}
-\begin{algorithm}[H]
-    \caption{Carmichael primality test}
-    \begin{algorithmic}[1]
-        \State Randomly choose $a\in[2,n-1]$
-        \If{$a^{n-1}\mod n=1$} 
-            \State $n$ is possibly prime 
-        \Else 
-            \State $n$ is composite
-        \EndIf
-    \end{algorithmic}
-\end{algorithm} 
-
-\subsection{Miller-Rabin primality test}
-The Miller-Rabin test improves on Carmichael's test by checking additional properties that only hold for prime numbers. 
-Specifically, it looks for non-trivial square roots of $1\mod n$. 
-\begin{definition}[\textit{Non-trivial square root}]
-    An number $a$ is a non-trivial square root of $1 \mod n$ if: 
-    \[a^2 \mod n = 1 \qquad a \neq 1 \qquad a \neq n - 1\]
-\end{definition}
-The Miller-Rabin test randomly selects bases and tests whether they exhibit properties consistent with a prime modulus.
-\begin{algorithm}[H]
-    \caption{Miller-Rabin primality test}
-    \begin{algorithmic}[1]
-        \Function{power}{$a,p,n$} 
-            \If{$p=0$} \Comment Compute $a^p \mod n$
-                \State \Return 1
-            \EndIf 
-            \State $x=$ \Call{power}{$a, \frac{p}{2}, n$}
-            \State $res= (x \cdot x)\:\%\:n$
-            \If{$res=1$\textbf{ and }$x\neq 1$\textbf{ and }$x\neq n-1$} \Comment check $x^2 \mod n = 1$ and $x \neq 1, n-1$
-                \State $isProbablyPrime=\text{false}$
-            \EndIf
-            \If{$p\:\%\:2=1$}
-                \State $res=(a\cdot res)\:\%\:n$
-            \EndIf
-            \State \Return $res$
-        \EndFunction
-        \Statex 
-        \Function{primalitytest}{$n$}
-            \State $a = random(2, n-1)$
-            \State $isProbablyPrime = \text{true}$
-            \State $result = \Call{power}{a, n-1, n}$
-            \If{$res \neq 1$ \textbf{or} $!isProbablyPrime$}
-                \State \Return false
-            \Else
-                \State \Return true
-            \EndIf
-        \EndFunction
-    \end{algorithmic}
-\end{algorithm}
-Each iteration of the Miller-Rabin test has a low probability of incorrectly identifying a composite number as prime, and repeating the test $k$ times reduces this probability to $\left(\frac{1}{4}\right)^k$. 
-\begin{theorem}
-    If $p$ is prime and $0 < a < p$, the only solutions to $a^2 \mod p = 1$ are $a = 1$ and $a = p - 1$.
-\end{theorem}
-\begin{theorem}
-    If $n$ is composite, the Miller-Rabin test incorrectly classifies $n$ as prime with probability at most is at most $\frac{1}{4}$.
-\end{theorem}
-The Miller-Rabin test runs in $\mathcal{O}(\log^2n)$ time, making it efficient and reliable for large numbers. 
-It is commonly used in practice for cryptographic applications where probabilistic primality testing is acceptable.
+\subsection{Gustafson law}
+In contrast to Amdahl's Law, John Gustafson proposed a different view in 1988, challenging the assumption that the parallelizable portion of a program remains fixed. 
+Key differences include:
+\begin{itemize}
+    \item The parallelizable portion of the program is not a fixed fraction.
+    \item Absolute serial time is fixed, while the problem size grows to exploit more processors.
+\end{itemize}
+Amdahl's law is based on a fixed-size model, while Gustafson's law operates on a fixed-time model, where the problem grows with increased processing power.
+The speedup in Gustafson's model is expressed as:
+\[\text{SU}(p)=s+p(1-s)\]
+Here, $s$ is the fixed serial portion of the program.
+As a result, this model suggests linear speedup is possible as the number of processors increases, especially for highly parallelizable tasks. 
+Gustafson's law is empirically applicable to large-scale parallel algorithms, where increasing computational power enables solving larger and more complex problems within the same time frame.

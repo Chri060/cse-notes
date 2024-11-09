@@ -1,0 +1,220 @@
+\section{Dictionary problem}
+
+A dictionary is a collection of elements, each associated with a unique search key.
+The goal is to maintain the set efficiently while supporting operations such as insertions and deletions.
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|l|} \hline
+        \textbf{Operation} & \textbf{Description} \\ \hline
+        \textit{Search}($x, S$) & Check if $x \in S$. \\ \hline
+        \textit{Insert}($x, S$) & Insert $x$ into $S$ if it is not already present \\ \hline
+        \textit{Delete}($x, S$) & Remove $x$ from $S$ if it exists \\ \hline
+        \textit{Minimum}($S$) & Return the smallest key in $S$ \\ \hline
+        \textit{Maximum}($S$) & Return the largest key in $S$ \\ \hline
+        \textit{List}($S$) & Output the elements of $S$ in increasing order of keys \\ \hline
+        \textit{Union}($S_1, S_2$) & \makecell[l]{Merge two sets $S_1$ and $S_2$, maintaining the order such that \\ for every $x_1 \in S_1$ and $x_2 \in S_2$, $x_1 < x_2$} \\ \hline
+        \textit{Split}($S, x, S_1, S_2$) & \makecell[l]{Split $S$ into two sets $S_1$ and $S_2$, where all elements in \\ $S_1$ are $\leq x$ and all elements in $S_2$ are $> x$} \\ \hline
+    \end{tabular}
+\end{table}
+
+The basic strutures complexity for the main operations are the following: 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l|l|l|l|}
+    \cline{2-4}
+                                                   & \multicolumn{1}{c|}{\textbf{Search}} & \multicolumn{1}{c|}{\textbf{Delete}} & \multicolumn{1}{c|}{\textbf{Insert}} \\ \hline
+    \multicolumn{1}{|l|}{\textit{Unordered array}} & $\mathcal{O}(n)$                     & $\mathcal{O}(n)$                     & $\mathcal{O}(1)$                     \\ \hline
+    \multicolumn{1}{|l|}{\textit{Ordered array}}   & $\mathcal{O}(\log n)$                & $\mathcal{O}(n)$                     & $\mathcal{O}(n)$                     \\ \hline
+    \multicolumn{1}{|l|}{\textit{Trees}}           & $\mathcal{O}(\log n)$                & $\mathcal{O}(\log n)$                & $\mathcal{O}(\log n)$                \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+\subsection{Trees}
+\paragraph*{Binary Search Tree}
+A Binary Search Tree (BST) is a binary tree where each internal node stores an item $(k, e)$ representing a key $k$ and associated element $e$. 
+The structure of the tree satisfies the property that: 
+\begin{itemize} 
+    \item Keys in the left subtree of any node $v\leq k$. 
+    \item Keys in the right subtree of $v>k$. 
+\end{itemize}
+The drawback of the standard BST is that an unbalanced sequence of insertions may degrade it into a linear structure, resulting in poor performance for searches, inserts, and deletes.
+
+\paragraph*{AVL}
+An AVL tree is a self-balancing BST where the heights of the two child subtrees of any node differ by at most one. 
+Rotations ensure that the height of the tree remains logarithmic. 
+While AVL trees guarantee fast lookups and updates, they can be more complex to implement due to the need for maintaining balance factors.
+
+\paragraph*{Splay}
+Splay trees are another type of self-adjusting BST.
+The key idea is the splay operation, which moves a node accessed via a search or update to the root through rotations. 
+This ensures that frequently accessed nodes stay near the root, while infrequently accessed nodes do not contribute much to the overall cost.
+
+\subsection{Treaps}
+Treaps are a type of randomized binary search tree that provide efficient time bounds for operations while requiring minimal balance maintenance.
+Unlike traditional balanced search trees, treaps rely on randomized priorities to achieve a balanced structure, leading to simplicity and efficiency in implementation.
+The structure of a treap resembles the one obtained if elements were inserted in the order of randomly assigned priorities.
+\begin{definition}[\textit{Treap}]
+    A is a binary search tree where each node contains an element $x$ with a unique key $\text{key}(x) \in U$ and an associated random priority $\text{prio}(x) \in \mathbb{R}$.
+\end{definition}
+\begin{property}[Search tree]
+    For any node $x$, all elements $y$ in the left subtree satisfy $\text{key}(y) < \text{key}(x)$, and all elements $y$ in the right subtree satisfy $\text{key}(y) > \text{key}(x)$.
+\end{property}
+\begin{property}[Heap]
+    For any pair of nodes $x$ and $y$, if $y$ is a child of $x$, then $\text{prio}(y) > \text{prio}(x)$.
+\end{property}
+\begin{lemma}
+    Given $n$ elements with keys $\text{key}(x_i)$ and priorities $\text{prio}(x_i)$, there exists a unique treap that satisfies both the search tree property and the heap property.
+\end{lemma}
+Thus, the structure of the treap is entirely determined by the insertion order of elements based on their priorities.
+
+\subsubsection{Search}
+Searching in a treap follows the same process as in binary search trees: starting from the root, the search path is determined by comparing the search key with the keys of nodes along the path.
+\begin{algorithm}[H]
+    \caption{Search}
+    \begin{algorithmic}[1]
+        \State $v = root$
+        \While{$v \neq \text{null}$}
+            \If{$\text{key}(v) = k$}
+                \State \Return $v$ \Comment Element found
+            \EndIf
+            \If{$\text{key}(v) < k$}
+                \State $v = \Call{rightchild}{v}$
+            \EndIf
+            \If{$ \text{key}(v) > k$}
+                \State $v = \Call{leftchild}{v}$
+            \EndIf
+        \EndWhile
+        \State \Return $\text{null}$ \Comment Element not found
+    \end{algorithmic}
+\end{algorithm}
+The expected time complexity of a search depends on the depth of the path traversed. 
+For a treap with $n$ elements, the expected depth is $\mathcal{O}(\log n)$ due to the randomized priorities.
+
+\begin{definition}[\textit{Harmonic number}]
+    The $n$-th harmonic number is defined as:
+    \[H_n=\sum_{k=1}^n\dfrac{1}{k}=\ln n + \mathcal{O}(1)\]    
+\end{definition}
+Let $T$ be a treap with elements $x_1, \dots, x_n$, and let $x_m$ be the element we are searching for.
+\begin{lemma}[Succesful search]
+    The expected number of nodes on the path to $x_m$ is given by:
+    \[H_{m}+H_{n-m+1}-1\]
+\end{lemma}
+Let $m$ represent the number of keys smaller than the search key $k$.
+\begin{lemma}[Unsuccesful search]
+    The expected number of nodes on the path during an unsuccessful search is:
+    \[H_{m}+H_{n-m}\] 
+\end{lemma}
+
+\subsubsection{Insertion and deletion}
+Insertion and deletion operations in treaps involve rotating nodes to maintain the heap property.
+\begin{algorithm}[H]
+    \caption{Insert}
+    \begin{algorithmic}[1]
+        \State Choose $\text{prio}(x)$
+        \State Search for the position of $x$ in the tree
+        \State Insert $x$ as a leaf
+        \While{$\text{prio}(\text{parent}(x)) > \text{prio}(x)$} \Comment Restore the heap property
+            \If{$x$ is left child} 
+                \State \text{RotateRight}(\text{parent}($x$))
+            \Else 
+                \State \text{RotateLeft}(\text{parent}($x$))
+            \EndIf
+        \EndWhile
+    \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+    \caption{Delete}
+    \begin{algorithmic}[1]
+        \State Find $x$ in the tree
+        \While{$x$ is not a leaf} 
+            \State $u = \text{child with smaller priority}$
+            \If{$u$ is left child} 
+                \State RotateRight($x$)
+            \Else 
+                \State RotateLeft($x$)
+            \EndIf
+        \EndWhile
+        \State Delete $x$
+    \end{algorithmic}
+\end{algorithm}
+These operations maintain both the search tree property and heap property.
+\begin{lemma}
+    The expected running time of the insert and delete operations is $\mathcal{O}(\log n)$, with an expected 2 rotations per operation.
+\end{lemma}
+
+\subsubsection{Split and union}
+\paragraph*{Split}
+To split treap $T$ by key $k$:
+\begin{enumerate}
+    \item Insert a new element $x$ with $\text{key}(x) = k$ and $\text{prio}(x) = -\infty$.
+    \item Insert $x$ into $T$.
+    \item Delete $x$; the left and right subtrees of $x$ become $T_1$ and $T_2$, respectively.
+\end{enumerate}
+
+\paragraph*{Union}
+To merge two treaps $T_1$ and $T_2$:
+\begin{enumerate}
+    \item Select a key $k$ such that $\text{key}(x_1) < k < \text{key}(x_2)$ for all $x_1 \in T_1$ and $x_2 \in T_2$. 
+    \item Create a new node $x$ with $\text{key}(x) = k$ and $\text{prio}(x) = -\infty$. 
+    \item Set $T_1$ and $T_2$ as the left and right subtrees of $x$, respectively. 
+    \item Delete $x$ from the resulting tree.
+\end{enumerate}
+\begin{lemma} 
+    The expected time complexity of both union and split operations is $\mathcal{O}(\log n)$.
+\end{lemma}
+
+\subsubsection{Implementation}
+In treaps, priorities are random values drawn from $[0, 1)$, ensuring that tree balancing remains probabilistic rather than explicit.
+If two nodes have equal priorities, tie-breaking is achieved by appending uniformly random bits to the priorities until a difference is found. 
+This preserves randomness and ensures that the heap property is maintained.
+
+\subsection{Skip lists}
+Skip lists, introduced by William Pugh in 1989, are a randomized, dynamic data structure that maintains a sorted set of elements with efficient average-case operations for search, insertion, and deletion.
+They offer a probabilistic time complexity of $\mathcal{O}(\log n)$ for these operations, making them simple to implement yet powerful for dynamic sets where performance is expected rather than strictly guaranteed.
+
+Skip lists improve upon the basic sorted linked list by adding additional linked lists layered above the main list. 
+The main list connects all elements, like a standard linked list, while each higher level connects increasingly sparse subsets of elements, allowing faster traversal by skipping over parts of the lower lists.
+
+\subsubsection{Search}
+To search for an element in a skip list:
+\begin{enumerate} 
+    \item Begin at the highest level list.
+    \item Traverse each level by moving right until the target is either found or overshot.
+    \item If overshot, drop down to the next level and repeat the process.
+    \item Continue this process until reaching the bottom level, where the target element is either located or confirmed absent.
+\end{enumerate} 
+The higher levels of the skip list serve as express lanes, allowing large jumps, while the lower levels provide finer granularity in search.
+
+\paragraph*{Analysis}
+With two levels in the skip list, the search cost is approximately:
+\[T(n)=\left\lvert L_1\right\rvert +\dfrac{\left\lvert L_2\right\rvert }{\left\lvert L_1\right\rvert }\]
+This is minimized when:
+\[T(n)=\left\lvert L_1\right\rvert ^2=\left\lvert L_2\right\rvert =n\implies \left\lvert L_1\right\rvert =\sqrt{n}\]
+Resulting in $T(n)=2\sqrt{n}$. 
+Generalizing this to $k$ levels gives a cost of $k\sqrt[k]{n}$
+With $\log n$ levels, the cost becomes:
+\[T(n)=\mathcal{O}(\log n)\]
+This efficient layout mimics a balanced binary tree, enabling skip lists to support rapid searching in practice.
+
+\subsubsection{Insertion}
+To insert a new element $x$: 
+\begin{enumerate}
+    \item Search for $x$'s position in the bottom list.
+    \item Insert $x$  into the bottom list, which holds all elements in sorted order.
+    \item Randomly promote $x$ to higher levels based on coin flips.
+        For each level, $x$ is promoted with a probability of $\frac{1}{2}$, ensuring that, on average, only a small fraction of elements reach the top levels.
+        This randomized promotion keeps the structure balanced with $\log n$ expected levels.
+\end{enumerate}
+The insertion process results in a skip list with a logarithmic number of levels, where the promotion of elements ensures balance across the structure.
+
+\subsubsection{Implementation}
+Skip lists are widely used in practice due to their efficiency, with search operations typically taking average time $\mathcal{O}(\log n)$.
+\begin{theorem}
+    With high probability, the search time for an $n$-element skip list is $\mathcal{O}(\log n)$.
+\end{theorem}
+Here, the phrase with high probability signifies that the probability of this time complexity holding is at least $1-\mathcal{O}\left(\frac{1}{n^\alpha}\right)$ for a chosen constant $\alpha\geq 1$. 
+By increasing $\alpha$, the likelihood of search times exceeding $\mathcal{O}(\log n)$ can be made arbitrarily low, making this bound practically reliable.
+\begin{lemma}
+    With high probability, an $n$-element skip list has $\mathcal{O}(\log n)$ levels.
+\end{lemma}

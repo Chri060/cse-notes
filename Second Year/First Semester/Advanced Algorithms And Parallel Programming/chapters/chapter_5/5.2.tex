@@ -1,114 +1,153 @@
-\section{Longest common subsequence problem}
+\section{Parallelization}
 
-Given two sequences $x[1\dots m]$ and $y[1\dots n]$, the goal is to find the longest subsequence that is common to both sequences.
-A subsequence is derived by deleting some (or no) elements from the original sequence without rearranging the remaining elements.
-The Longest Common Subsequence (LCS) problem, therefore, seeks a subsequence of maximum possible length that appears in both sequences in the same relative order.
+\paragraph*{Automatic parallelization}
+Write sequential
+algorithm
+Implement with
+sequential code
+Leave all the
+parallelization work to
+automatic tools
 
-\paragraph*{Naive algorithm}
-The brute-force approach to solving the LCS problem generates all possible subsequences of the first sequence $x$ and checks each one to see if it is also a subsequence of $y$. 
-The steps for the brute-force LCS algorithm are outlined below:
-\begin{enumerate}
-    \item \textit{Generate all subsequences of $x$}: for a sequence of length $m$, there are $2^m$ possible subsequences, each corresponding to a unique bit vector of length $m$, where each bit indicates whether the corresponding element in $x$ is included in the subsequence.
-    \item \textit{Check Each Subsequence in $y$}: for each subsequence of $x$, verify if it is also a subsequence of $y$. 
-        This can be done by iterating over $y$ and checking if the elements of the subsequence appear in the same order within $y$.
-    \item \textit{Track the Longest Common Subsequence}: while iterating over all subsequences, keep track of the longest one that is a subsequence of both $x$ and $y$. 
-        Once all possible subsequences have been checked, the longest of these will be the LCS.
-\end{enumerate}
-The brute-force algorithm is highly inefficient due to its exponential time complexity:
-There are $2^m$ subsequences of $x$, as each element in $x$ has the option to either be included or excluded from any given subsequence.
-To verify if a subsequence of $x$ is also a subsequence of $y$, we must iterate through $y$, which requires $\mathcal{O}(n)$ time for each subsequence.
-Since there are $2^m$ subsequences to check, and each check takes $\mathcal{O}(n)$ time, the total time complexity of the brute-force LCS algorithm is:
-\[\mathcal{O}(n2^m)\]
-In the worst case, this approach quickly becomes computationally infeasible for even moderately large input sizes.
+Complete automatic
+parallelization is (at the
+moment?) not feasible
+Tools are not able to
+extract all the available
+parallelism from a
+specification designed
+to be executed in
+sequential way
 
-\subsection{Recursive algorithm}
-To solve the LCS problem recursively, we break it down as follows:
-\begin{enumerate}
-    \item \textit{Find the length of the LCS}: define a recursive function that returns the length of the longest common subsequence between prefixes of two sequences.
-    \item \textit{Extend to return the LCS itself}: modify the algorithm to keep track of subsequence characters for reconstructing the LCS.
-\end{enumerate}
-Define $c[i, j] = |\text{LCS}(x[1 \dots i], y[1 \dots j])|$.
-hen, the length of the LCS for the full sequences $x$ and $y$ is given by $c[m,n]=|\text{LCS}(x, y)|.$
 
-\begin{theorem}
-    The recursive formula for $c[i,j]$ is as follows: 
-    \[\begin{cases}
-        c[i-1, j-1] + 1 \qquad\qquad\quad \text{if }x[i] = y[j] \\
-        \max\left\{c[i-1, j], c[i, j-1]\right\} \qquad \text{otherwise}
-    \end{cases}\]
-\end{theorem}
-This approach leverages the optimal substructure property of LCS, which means that an optimal solution for the problem contains optimal solutions to its subproblems.
-\begin{definition}[\textit{Optimal substructure}]
-    An optimal solution to a problem instance contains optimal solutions to subproblems.
-\end{definition}
-If $z = \text{LCS}(x, y)$, then any prefix of $z$ is an LCS of some prefix of $x$ and some prefix of $y$.
-\begin{algorithm}[H]
-    \caption{Recursive LCS}
-    \begin{algorithmic}
-        \Function{LCS}{$x,y,i,j$}
-            \If{$x[i] = y[j]$} 
-                \State $c[i,j]=$ \Call{LCS}{$x, y, i-1, j-1$} $+$ 1
-            \Else 
-                \State $c[i,j]=\max[$\Call{LCS}{$x, y, i-1, j$},\Call{LCS}{$x, y, i, j-1$} $]$
-            \EndIf 
-            \State \Return $c[i,j]$
-        \EndFunction
-    \end{algorithmic}
-\end{algorithm}  
-In the worst case, when $x[i] \neq y[j]$ at most recursive calls, the algorithm evaluates two subproblems for each pair $(i,j)$. 
-This results in an exponential time complexity $\mathcal{=}(2^{m+n})$, as the recursion tree height can reach $m+n$.
+\paragraph*{Manual parallelization}
+The programmer needs
+to give hints to the
+tools
+Write parallel
+algorithms
+Implement with high
+level parallel code
+Leave only code
+compilation to the tools
+There are three critical aspects:
+Which type of parallelism has to be considered
+How to design the parallel algorithm
+• Trying to parallelize existing sequential
+algorithms
+• From scratch
+How to provide information about the
+parallelism to the tools
 
-However, many subproblems are solved repeatedly, making the recursive approach highly inefficient.
 
-\subsection{Memoization algorithm}
-To avoid redundant calculations, we use memoization by storing results of subproblems in a table, allowing subsequent calls to simply retrieve stored values instead of recalculating them.
-\begin{definition}[\textit{Memoization}] 
-    After computing a solution to a subproblem, store it in a table so that future calls can retrieve the result without redoing the work. 
-\end{definition}
-\begin{algorithm}[H]
-    \caption{Memoized recursive LCS}
-    \begin{algorithmic}
-        \Procedure{LCS}{$x,y,i,j$}
-        \If{$c[i, j] = \text{null}$}
-            \If{$x[i] = y[j]$} 
-                \State $c[i,j]=$ \Call{LCS}{$x, y, i-1, j-1$} $+$ 1
-            \Else 
-                \State $c[i,j]=\max[$\Call{LCS}{$x, y, i-1, j$},\Call{LCS}{$x, y, i, j-1$} $]$
-            \EndIf 
-        \EndIf
-        \EndProcedure
-    \end{algorithmic}
-\end{algorithm}  
-The memoization approach has a time complexity of $\Theta(mn)$ since we solve each subproblem only once, and there are $mn$ possible subproblems (one for each pair $(i,j)$ where $1\leq i \leq m$ and $1 \leq j \leq n$).
-The space complexity is also $\Theta(mn)$, as we store each subproblem result in a table.
+\subsection{Taxonomy}
+There is not a single kind of parallelism:
+Instruction Parallelism
+Data Parallelism
+❑ They can be combined: Flynn’s Taxonomy
+❑ Proposed in 1966 to classify computer
+architectures, but it can describe types of
+parallelism in general
+1. Single Instruction Single Data
+❑ This is the sequential case:
+❑ Single instruction:
+CPU processes single instruction stream
+❑ Single data:
+A single data input stream
+❑ Deterministic execution
+❑ Examples:
+All the single core architectures
+2. Single Instruction Multiple Data
+❑ Single instruction:
+All the cores execute the same instruction in the
+same clock cycles
+❑ Multiple data:
+Each core elaborate different data
+❑ Synchronous and deterministic execution
+❑ Examples:
+most of the
+modern GPUs
+3. Multiple Instruction Single Data 
+Multiple Instruction
+Each core process the data with different
+instructions
+❑ Single Data
+A single data stream is fed into multiple
+processing units
+❑ Examples:
+Experimental
+architectures
+Any multicore
+architecture if
+we relax
+synchronization
+4. Multiple Instruction Multiple Data 19
+❑ Multiple Instruction
+Each core executes different instructions
+❑ Multiple data
+Each core processes different data
+❑ Execution can be synchronous or asynchronous,
+deterministic or not
+❑ Examples:
+multicores
 
-\subsection{Dynamic programming}
-The dynamic programming (DP) solution to the LCS problem builds the solution bottom-up, filling out a table from smaller subproblems to larger ones. 
-This avoids the recursive overhead and is efficient for both time and space.
-In particular, the steps are: 
-\begin{enumerate}
-    \item \textit{Build the table bottom-up}: create a table $c$ where $c[i,j]$ represents the length of the LCS of prefixes $x[1\dots i]$ and $y[1\dots j]$. 
-        Start from $c[0,0]$ and fill the table up to $c[m,n]$ based on the recurrence relation from the recursive algorithm.
-    \item \textit{Backtrack to reconstruct the LCS}: after computing $c[m,n]$, use the table to trace back from $c[m,n]$ to $c[0,0]$ to reconstruct the LCS.
-\end{enumerate}
-\begin{algorithm}[H] 
-    \caption{Dynamic Programming LCS} 
-    \begin{algorithmic} 
-        \Procedure{LCS}{$x, y$} 
-            \State Initialize $c[0\dots m,0\dots n]$ to 0 
-            \For{$i = 1$ to $m$} 
-                \For{$j = 1$ to $n$} 
-                    \If{$x[i] = y[j]$} 
-                        \State $c[i, j] = c[i-1, j-1] + 1$ 
-                    \Else 
-                        \State $c[i, j] = \max(c[i-1, j], c[i, j-1])$ 
-                    \EndIf 
-                \EndFor 
-            \EndFor 
-            \State \Return $c[m, n]$ 
-        \EndProcedure 
-    \end{algorithmic} 
-\end{algorithm}
-The DP approach has time complexity $\mathcal{O}(mn)$ because we fill each entry of the $m\times n$ table once. 
-The space complexity is also $\mathcal{=}(mn)$, as we store the results in the table. 
-This solution is both efficient and avoids redundant calculations, making it suitable for large inputs.
+\paragraph*{PArallelism level}
+Level of Parallelism
+1 Bits: Bits composing words represent different data
+A single instruction can manipulate different data
+at a time
+It is very relevant in Hardware Implementation of
+algorithm
+It can become significant also in software
+implementation (e.g., representing set of elements
+as strings of bits)
+2 Instructions: Different instructions executed at the same time
+on the same core
+Supported by multiple execution units, pipeline,
+vector, SIMD units etc.
+This type of parallelism can be easily extracted by
+compilers
+3 Tasks :  a logically discrete section of computational
+work
+Typically a program or program-like set of
+instructions that is executed by a processor
+Parallel program
+Multiple tasks running on multiple processors
+Supported by shared memory, cache coherence
+mechanisms
+ Usually difficult to be automatically extracted
+
+\subsection{Task level parallelism}
+- Parallel Task Graph
+❑Vertices correspond
+to tasks
+❑Edges represent
+precedencies or
+data
+communications
+❑Each task is
+executed once (in
+principle)
+ - Pipeline
+ ❑Like processor pipeline
+ ❑Edges represent data
+ passing
+ ❑Suitable to parallelize
+ streaming elaboration such
+ as audio and video
+ encoding
+ ❑Each task is executed at
+ each stage
+
+ Communication
+❑ Two main models for communication
+❑ Shared memory:
+All the processors, so all the tasks, share a
+global memory with the same address space
+Modifications in a memory location performed
+by a processor are seen by all the other
+processors
+❑ Message Passing:
+Each task has its private memory
+Tasks communicate by explicitly sending and
+receiving messages

@@ -1,116 +1,28 @@
-\section{Performance}
+\section{Accounting method}
 
-The main values used to evaluate the performance are: 
-\renewcommand*{\arraystretch}{2}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|c|}
-    \hline
-    \textbf{Parameter} & \textbf{Description} \\ \hline
-    $T^\ast(n)$ & \makecell{Time to solve a problem of input size $n$ on one processor \\ using best sequential algorithm}               \\ \hline
-    $T_1(n)$ & Time to solve a problem on one processor                  \\ \hline
-    $T_p(n)$ & Time to solve a problem on $p$ processors                    \\ \hline
-    $T_{\infty}(n)$ & Time to solve a problem on $\infty$ processors        \\ \hline
-    $\text{SU}_p = \dfrac{T^\ast(n)}{T_p(n)}$ & Speedup on $p$ processors    \\ \hline
-    $E_p = \dfrac{T_1}{p T_p(n)}$ & Efficiency                               \\ \hline
-    $C(n) = p T_p(n)$ & Cost                                               \\ \hline
-    $W(n)$ & Work (total number of operations)                               \\ \hline
-    \end{tabular}
-\end{table}
-\renewcommand*{\arraystretch}{1}
+In the accounting method of amortized analysis, each operation is assigned a fictitious amortized cost, denoted as $\hat{c}_i$, which represents an accounting balance for the operation. 
+This balance can either be used immediately or saved to cover the cost of future operations. 
+The amortized cost consists of two main components: 
+\begin{itemize} 
+    \item \textit{Immediate cost}: the actual cost incurred for performing the operation. 
+    \item \textit{Banked cost}: any excess cost that is set aside and saved for future operations. 
+\end{itemize}
+The core idea of the accounting method is that the total accumulated banked cost should never be negative, ensuring that there are sufficient funds to cover the costs of future operations. 
+Mathematically, this can be expressed as:
+\[\sum_{i=1}^n\hat{c}_i\geq\sum_{i=1}^nc_i\]
+Here, $c_i$ represents the true cost of the $i$-th operation, and $\hat{c}_i$ is the amortized cost.
+By ensuring that the bank balance remains non-negative, the amortized cost provides an upper bound on the true total cost of all operations, thereby guaranteeing efficient performance.
 
-\subsection{Matrix-vector multiplication}
-Matrix-vector multiplication involves multiplying a matrix by a vector.
+\paragraph*{Hash table resizing}
+For a dynamic hash table that adjusts its size as needed, the accounting method can be applied to model the costs associated with insertions and table expansions. 
+In this case, each insertion is assigned an amortized cost of $\hat{c}_i = 3$: 
+\begin{itemize}
+    \item \textit{Immediate cost}: the immediate cost of inserting an element into the expanded table is one unit. 
+    \item \textit{Banked cost}: two units are banked with each insertion, to cover the cost of future expansions. 
+\end{itemize}
+When the table doubles in size, the banked cost ensures that the expansion remains efficient.
+Specifically, half of the banked units are used to insert the existing elements into the new table, while the remaining units help move the elements that were added after the last expansion. 
+This strategy ensures that the bank balance never goes negative, allowing the amortized cost to provide an upper bound on the true cost of all operations.
 
-To perform the multiplication, each element of the resulting vector is computed by taking the dot product of the rows of the matrix with the vector. 
-Specifically, if you have a matrix $\mathbf{A}$ of size $n\times n$ and a vector $\mathbf{v}$ of size $n$, the resulting vector $\mathbf{u}$ will have size $n\times n$:
-\[\mathbf{u}=\mathbf{Av}\]
-The entry $u_i$ of the resulting vector is calculated as:
-\[u_i=\sum_{j=1}^na_{ij}v_j\]
-Here, $a_{ij}$ are the elements of the matrix $\mathbf{A}$. 
-The algorithm that computes the vector $\mathbf{u}$ is:
-\begin{algorithm}[H]
-    \caption{Matrix-vector multiplication}
-    \begin{algorithmic}[1]
-        \State Global read $x \leftarrow \mathbf{v}$ \Comment{Broadcast vector $\mathbf{v}$ to all processors}
-        \State Global read $y \leftarrow \mathbf{a}_{i}$ \Comment{Read corresponding rows of matrix $\mathbf{A}$}
-        \State Compute $w = x y$ \Comment{Multiply matrix row with vector $\mathbf{v}$}
-        \State Global write $w \rightarrow u_i$ \Comment{Write result to the output vector $\mathbf{u}$}
-    \end{algorithmic}
-\end{algorithm}  
-The performance measures of this algorithm in the best-case scenario are shown in the following table:
-\renewcommand*{\arraystretch}{2}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|cc|}
-    \hline
-    \textbf{Measure} & $T_1$ & $T_p$ \\ \hline
-    \textbf{Complexity} & $\mathcal{O}(n^2)$ & $\mathcal{O}\left(\dfrac{n^2}{p}\right)$ \\ \hline
-    \end{tabular}
-\end{table}
-\renewcommand*{\arraystretch}{1}
-
-\subsection{Single program multiple data sum}
-In single program multiple data (SPMD), each processor operates independently on its subset of the data, typically using the same code but possibly with different input data. 
-This model is commonly used in high-performance computing, scientific simulations, and data analysis tasks, enabling significant performance improvements by leveraging parallelism. 
-
-In the context of SPMD, a sum refers to the process of aggregating data from multiple processors or cores that are executing the same program on different segments of data. 
-Here's how it typically works:
-\begin{enumerate}
-    \item  \textit{Data distribution}: the data is divided into chunks, with each CPU assigned a specific subset to work on.
-    \item \textit{Local computation}: each processor executes the same summation program on its assigned data.
-    \item \textit{Local results}: after computing their local sums, each processor has a partial sum.
-    \item \textit{Reduction}: the partial sums are then combined (reduced) to get the final sum. 
-    \item \textit{Final output}: the final result is the total sum of all the partial sums computed by the individual processors.
-\end{enumerate}
-
-\begin{algorithm}[H]
-    \caption{SPMD sum}
-    \begin{algorithmic}[1]
-        \State Global read $x \leftarrow \mathbf{b}$ \Comment{Broadcast array $\mathbf{b}$ to all processors}
-        \State Global write $y \rightarrow \mathbf{c}$ \Comment{Broadcast array $\mathbf{c}$ to all processors}
-        \State Compute $z=x+y$ \Comment{Sum all vectors elements}
-        \State Global write $z\rightarrow \mathbf{a}$ \Comment{Write result to the output array $\mathbf{a}$}
-    \end{algorithmic}
-\end{algorithm}
-The performance measures of this algorithm are shown in the following table:
-\renewcommand*{\arraystretch}{2}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|cc|}
-    \hline
-    \textbf{Measure} & $T_1$ & $T_p$  \\ \hline
-    \textbf{Complexity} & $\mathcal{O}(n)$ & $\mathcal{O}\left(\frac{n}{p}+\log p\right)$ \\ \hline
-    \end{tabular}
-\end{table}
-\renewcommand*{\arraystretch}{1}
-
-\subsection{Matrix-matrix multiplication}
-Matrix-matrix multiplication involves multiplying a matrix by another matrix.
-
-To perform the multiplication, each element of the resulting matrix is computed by taking the dot product of the rows of the first matrix with the columns of the second matrix. 
-Specifically, if you have a matrix $\mathbf{A}$ of size $m\times n$ and a matrix $\mathbf{B}$ of size $n\times p$, the resulting matrix $\mathbf{C}$ will have size $m\times p$:
-\[\mathbf{C}=\mathbf{AB}\]
-The entry $c_{ij}$ of the resulting matrix is calculated as:
-\[c_{ij}=\sum_{k=1}^na_{ik}b_{kj}\]
-Here, $a_{ik}$ are the elements of matrix $\mathbf{A}$ and $b_{kj}$ are the elements of matrix $\mathbf{B}$.
-\begin{algorithm}[H]
-    \caption{Matrix-matrix multiplication}
-    \begin{algorithmic}[1]
-        \State Global read $x \leftarrow \mathbf{a}_i$ \Comment{Read corresponding rows of matrix $\mathbf{A}$}
-        \State Global read $y \leftarrow \mathbf{b}_i$ \Comment{Read corresponding columns of matrix $\mathbf{B}$}
-        \State Compute $w = x y$ \Comment{Multiply matrix $\mathbf{A}$ row with matrix $\mathbf{B}$ column}
-        \State Global write $w \rightarrow \mathbf{u}_i$ \Comment{Write result to corresponding row of output matrix $\mathbf{u}$}
-    \end{algorithmic}
-\end{algorithm}  
-The performance measures of this algorithm are shown in the following table:
-\renewcommand*{\arraystretch}{2}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|cc|}
-    \hline
-    \textbf{Measure} & $T_1$ & $T_p$ \\ \hline
-    \textbf{Complexity} & $\mathcal{O}(n^3)$ & $\mathcal{O}\left(\dfrac{n^3\log n}{p}\right)$ \\ \hline
-    \end{tabular}
-\end{table}
-\renewcommand*{\arraystretch}{1}
+By charging each insertion an amortized cost of three, and using the banked cost to effectively cover the resizing expenses, the dynamic hash table remains efficient. 
+The amortized cost guarantees that the average cost per operation remains constant over time, even during resizing operations, thus ensuring sustained performance.

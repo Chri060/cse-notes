@@ -1,70 +1,20 @@
-\section{Parallel Random Access Machine}
+\section{Aggregate method}
 
-A Parallel Random Access Machine (PRAM) is an abstract machine designed to model algorithms for parallel computing. 
-\begin{definition}[\textit{Parallel Random Access Machine}]
-    A Parallel Random Access Machine (PRAM) is defined as a system $M^\prime = \langle M, X, Y, A \rangle$, where:
-\end{definition}
-\begin{itemize}
-    \item $M$ represent an infinite collection of identical RAM processors without memory. 
-    \item $X$ represent the system's input.
-    \item $Y$ represent the system's output.
-    \item $A$ are shared memory cells between processors.
-\end{itemize}
-The set of RAMs $M$ contains an unbounded collection of processors $P$, that have unbounded registers for internal storage. 
-The set of shared memory cells $A$ is unbounded and can be accessed in constant time.
-This set is used by the processors $P$ to communicate with each other. 
+The aggregate method of amortized analysis calculates the average cost per operation over a sequence of operations, even when some individual operations may be expensive. 
+This technique is especially useful for data structures that involve periodic costly operations, as it spreads the cost of these infrequent expensive operations across many cheaper ones.
 
-\subsection{Computation}
-The computation in a PRAM consists of five phases, carried out in parallel by all processors. 
-Each processor performs the following actions:
-\begin{enumerate}
-    \item Reads a value from one of the input cells $X_i$.
-    \item Reads from one of the shared memory cells $A_i$.
-    \item Performs some internal computation.
-    \item May write to one of the output cells $Y_i$.
-    \item May write to one of the shared memory cells $A_i$.
-\end{enumerate}
-Some processors may remain idle during computation. 
+\paragraph*{Hash table resizing}
+While a single insertion during a resizing operation might appear costly, with a time complexity of $\mathcal{O}(n)$, this does not imply that $n$ insertions will collectively result in a cost of $\mathcal{O}(n^2)$. 
+In practice, the total cost for $n$ insertions remains closer to $\mathcal{O}(n)$, ensuring better overall efficiency.
 
-\paragraph*{Conflicts}
-Conflicts can arise in the following scenarios:
-\begin{itemize}
-    \item \textit{Read conflicts}: two or more processors may simultaneously attempt to read from the same memory cell.
-    \item \textit{Write conflicts}: two or more processors attempt to write simultaneously to the same memory cell.
-\end{itemize}
-PRAM models are classified based on their ability to handle read/write conflicts, offering both practical and realistic classifications:
-\renewcommand*{\arraystretch}{2}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|l|l|}
-    \hline
-    \multicolumn{1}{|c|}{\textbf{PRAM model}} & \multicolumn{1}{c|}{\textbf{Operation}} \\ \hline
-    Exclusive Read                            & Read from distinct memory locations     \\
-    Exclusive Write                           & Write to distinct memory locations      \\
-    Concurrent Read                           & Read from the same memory locations     \\
-    Concurrent Write                          & Write to the same memory locations      \\ \hline
-    \end{tabular}
-\end{table}
-\renewcommand*{\arraystretch}{1}
-When a write conflict occurs, the final value written depends on the conflict resolution strategy:
-\begin{itemize}
-    \item \textit{Priority CW}: processors are assigned priorities, and the value from the processor with the highest priority is written.
-    \item \textit{Common CW}: all processors are allowed to complete their write only if all values to be written are equal.
-    \item \textit{Arbitrary CW}: a randomly chosen processor is allowed to complete its write operation.
-\end{itemize}
+To illustrate this, let the cost of the $i$-th insertion be denoted as $c_i$:
+\[c_i=\begin{cases}
+    i \qquad\text{if }i - 1 \text{ is an exact power of }2 \\
+    1 \qquad\text{otherwise}
+\end{cases}\]
+In this scheme, when $i - 1$ is an exact power of $2$, the hash table doubles in size, and all existing entries must be rehashed and inserted into the new table, resulting in a higher cost. 
+For all other insertions, the cost remains constant at $1$.
 
-\subsection{Conclusion}
-The PRAM model is both attractive and important for parallel algorithm designers for several reasons:
-\begin{itemize}
-    \item \textit{Natural}: the number of operations executed per cycle on $P$ processors is at most $P$.
-    \item \textit{Strong}: any processor can access and read/write any shared memory cell in constant time.
-    \item \textit{Simple}: it abstracts away communication or synchronization overhead.
-    \item \textit{Benchmark}: if a problem does not have an efficient solution on a PRAM, it is unlikely to have an efficient solution on any other parallel machine.
-\end{itemize}
-Some possible variants of the PRAM machine model are: 
-\begin{itemize}
-    \item \textit{Bounded number of shared memory cells}: when the input data set exceeds the capacity of the shared memory, values can be distributed evenly among the processors.
-    \item \textit{Bounded number of processors}: if the number of execution threads is higher than the number of processors, processors may interleave several threads to handle the workload.
-    \item \textit{Bounded size of a machine word}: limits the size of data elements that can be processed in a single operation.
-    \item \textit{Handling access conflicts}: constraints on simultaneous access to shared memory cells must be considered.
-\end{itemize}
+Despite the occasional high cost of resizing, the total cost for $n$ insertions over time is $\mathcal{O}(n)$. 
+This means that, on average, the cost of each insertion is: 
+\[\frac{\mathcal{O}(n)}{n}=\mathcal{O}(1)\]

@@ -1,0 +1,148 @@
+\section{Selection problem}
+
+The selection problem involves finding the element of a specified rank in a set of $n$ distinct numbers.
+Given an integer $i$ where $1\leq i \leq n$, the task is to return the element that is larger than exactly $i-1$ other elements in the set.
+We can have three extreme cases: minimum element ($i=1$), maximum element ($i=n$), or median element. 
+
+\subsection{Naive algorithm}
+A straightforward approach to solving the selection problem is to first sort the array and then return the $i$-th smallest element from the sorted array.
+The worst-case running time for this approach is dominated by the sorting step, which takes $\Theta(n\log n)$ time. 
+Selecting the $i$-th element from the sorted array is a constant-time operation, resulting in a total complexity of:
+\[T(n)=\Theta(n\log n)\]
+While this solution is simple, it is not the most efficient, as it relies on sorting the entire array, even though only one element is ultimately needed.
+
+However, there are more efficient algorithms that can solve the selection problem in linear time. 
+Two popular approaches are:
+\begin{itemize}
+    \item \textit{Quickselect}: this algorithm is based on the partitioning method of Quicksort, but instead of recursively sorting both sides of the partition, it only recurses on the side that contains the desired element.
+        Quickselect has an average-case time complexity of $\mathcal{O}(n)$. 
+    \item \textit{Median of medians}: this more sophisticated approach uses a median of medians strategy to ensure that each partition step reduces the problem size by a constant fraction.
+        The median of medians algorithm has a worst-case time complexity of $\mathcal{O}(n)$, making it more predictable than Quickselect in terms of performance.
+\end{itemize}
+
+\subsection{Minmax}
+To determine the minimum or maximum of a set of $n$ elements, an optimal approach requires exactly $n-1$ comparisons. 
+\begin{algorithm}[H]
+    \caption{Minimum and maximum}
+    \begin{algorithmic}[1]
+        \Function{minimum}{$A$}
+        \State $\min=A[1]$ 
+        \For{$i=2$ \textbf{to} $\text{length}(A)$}
+            \If{$\min>A[i]$}
+                \State $\min=A[i]$
+            \EndIf
+        \EndFor
+        \State \Return $\min$
+        \EndFunction
+        \Statex 
+        \Function{maximum}{$A$}
+        \State $\max=A[1]$ 
+        \For{$i=2$ \textbf{to} $\text{length}(A)$}
+            \If{$\max<A[i]$}
+                \State $\max=A[i]$
+            \EndIf
+        \EndFor
+        \State \Return $\max$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}  
+This algorithm performs exactly $n-1$ comparisons, making it optimal for finding either the minimum or maximum in a set.
+
+If both the minimum and maximum are needed, a naive approach would be to execute two passes over the array resulting in $2n-2$ comparisons.
+However, a more efficient approach allows both the minimum and maximum to be found in fewer than $3\left\lfloor \frac{n}{2} \right\rfloor$ comparisons.
+
+The optimized approach works by comparing elements in pairs and adjusting the minimum and maximum accordingly. 
+This reduces the number of total comparisons by approximately 25\%.
+
+\subsection{Quickselect}
+Quickselect is an efficient, divide-and-conquer algorithm designed to find the $i$-th smallest element in an unsorted array with an expected time complexity of $\mathcal{O}(n)$. 
+The algorithm builds on the principles of randomized quicksort by using a pivot to partition the array, but it only recurses on the side that contains the desired element, reducing unnecessary work.
+\begin{algorithm}[H]
+    \caption{Quickselect}
+    \begin{algorithmic}[1]
+            \Function{rand-select}{$A,p,q,i$}
+                \If{$p=q$}
+                    \State \Return $A[p]$ 
+                \EndIf 
+                \State $i= $ \Call{rand-partition}{$A,p,q$}
+                \State $k=r-p+1$ \Comment $k=\text{rank}(A[r])$ 
+                \If {$i=k$} 
+                    \State \Return $A[r]$   
+                \EndIf 
+                \If {$i<k$} 
+                    \State \Return \Call{rand-select}{$A, p, r - 1, i$}
+                \Else 
+                    \State \Return \Call{rand-select}{$A, r + 1, q, i - k$}
+                \EndIf 
+            \EndFunction
+    \end{algorithmic}
+\end{algorithm}  
+The running time of Quickselect depends on the quality of the partitioning achieved by the random pivot. 
+This results in the following cases:
+\begin{itemize}
+    \item \textit{Best case}: if each partition splits the array evenly, the recurrence relation becomes: 
+        \[T(n) = T\left(\dfrac{9}{10}n\right) + \Theta(n)= \Theta(n)\]
+        Solving this recurrence yields $\Theta(n)$, meaning that Quickselect runs in linear time when the partition is balanced.
+    \item \textit{Worst case}: if each partition results in only one element on one side and the rest on the other, the recurrence relation is:
+        \[T(n)=T(n-1)+\Theta(n)\]
+        This gives $\Theta(n^2)$, leading to quadratic time complexity in the worst case, although this is rare in practice due to random pivot selection.
+\end{itemize}
+
+\paragraph*{Analysis}
+The analysis involves defining the expected running time $\mathbb{E}[T(n)]$ and taking into account the probability distribution of possible splits.
+Let $X_k$ be an indicator variable for whether the partition creates a $k\mid(n-k-1)$ split:
+\[X_k=\begin{cases}  1 \qquad \text{if PARTITION generates a } k \mid n-k-1\text{ split} \\ 0 \qquad\text{otherwise} \end{cases}\]
+The expected running time is then:
+\[T(n)=\sum_{k=0}^{n-1}X_k\left(T\left(\max\left\{k, n - k -1\right\}\right)+\Theta(n)\right)\]
+Taking expectations, we get:
+\[\mathbb{E}[T(n)]=\mathbb{E}\left[\sum_{k=0}^{n-1}X_k\left(T\left(\max\left\{k, n - k -1\right\}\right)+\Theta(n)\right)\right]\]
+By applying bounds and the principle of linearity of expectation, it can be shown that:
+\[\mathbb{E}[T(n)] \leq c n\]  
+For a constant $c > 0$, confirming that Quickselect achieves $\Theta(n)$ expected time complexity.
+
+\paragraph*{Practical performance}
+Quickselect is highly efficient in practice, often outperforming deterministic selection algorithms due to its linear average-case time.
+The worst-case $\Theta(n^2)$ performance is rare, especially if a good pivot strategy or random selection is used. 
+Its efficiency makes it a popular choice in scenarios where the expected linear time is sufficient for robust performance.
+
+\subsection{Median of medians}
+The Median of Medians algorithm is a deterministic selection algorithm that guarantees worst-case linear time complexity for selecting the $i$-th smallest element in an unsorted array.
+Unlike randomized algorithms, this method avoids the risk of quadratic behavior and provides a reliable worst-case performance.
+\begin{algorithm}[H]
+    \caption{Median of medians}
+    \begin{algorithmic}[1]
+        \Function{select}{$i,n$} 
+            \State Divide the array in 5 elements groups (each with the median) \Comment Complexity $\Theta(n)$
+            \State Recursively select the median $x$ of the groups medians as pivot \Comment Complexity $T\left(\frac{n}{5}\right)$
+            \State Partition around the pivot $x$, and let $k = \text{rank}(x)$ \Comment Complexity $\Theta(n)$
+            \If{$i=k$} \Comment Complexity $T\left(\frac{3n}{4}\right)$
+                \State \Return $x$ 
+            \ElsIf{$i<k$} 
+                \State \Call{select}{$i$-th smallest element in the lower part, $n$}
+            \Else 
+                \State \Call{select}{$(i-k)$-th smallest element in the upper part, $n$}
+            \EndIf
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}  
+
+\paragraph*{Analysis}
+To understand why the algorithm is efficient, note that choosing $x$ as the median of medians ensures a reasonably balanced partition.
+Specifically, at least half of the group medians are guaranteed to be less than or equal to $x$.
+Since each group has five elements, at least $\left\lfloor\frac{n}{10}\right\rfloor$ elements in $A$ are smaller than $x$, and at least $\left\lfloor\frac{n}{10}\right\rfloor$ elements are larger. 
+Therefore, each partition discards at least $\left\lfloor\frac{3n}{10}\right\rfloor$ elements, ensuring significant progress with each recursive step.
+The recurrence relation for the algorithm's time complexity is given by:
+\[T(n)=T\left(\dfrac{1}{5}n\right)+T\left(\dfrac{3}{4}n\right)+\Theta(n)\]
+This relation can be solved to yield $T(n)=\Theta(n)$, proving that the algorithm runs in linear time.
+
+\paragraph*{Practical considerations}
+While the median of medians algorithm offers a strong theoretical guarantee of linear time, its practical efficiency is often hindered by relatively high constant factors in its complexity. 
+Here are a few key points about its real-world performance:
+\begin{itemize}
+    \item \textit{Work per level}: at each level of recursion, the work done is a fraction of the previous level. 
+        Although the algorithm remains linear, the constant factors are substantial due to the overhead of partitioning and the recursive calculation of medians.
+    \item \textit{Comparisons}: altough median of medians is optimal in the worst case, it is often outperformed in practice by the randomized Quickselect algorithm. 
+        Quickselect, with its lower constant factors, tends to be faster on average, even though its worst-case complexity is $\Theta(n^2)$. 
+\end{itemize}
+The Median of Medians algorithm is particularly valuable in applications where a strong worst-case guarantee is essential, ensuring linear time regardless of input characteristics. 
+However, in practical scenarios with large datasets, the randomized Quickselect algorithm is often preferred for its faster average performance, despite the possibility of quadratic worst-case behavior.
