@@ -1,0 +1,625 @@
+\section{OpenMP}
+
+OpenMP (Open Multi-Processing) is an API for
+multi-threaded shared memory programming
+Provides compiler directives, library
+routines, and environment variables
+Needs compiler support
+Header omp.h
+Add -fopenmp to the gcc options on Linux
+
+
+Standardization and portability
+Standard across a variety of shared memory
+architectures and platforms
+Supports Fortran, C and C++
+Scalable from embedded systems to the
+supercomputer
+❑ Ease of use
+Simple and limited set of directives → 3 or 4
+are enough to implement significant
+parallelism
+Incremental parallelization of a serial program
+Coarse-grained and fine-grained parallelism
+
+OpenMP is based on the fork-join paradigm:
+A master thread forks a specified number of
+slave threads
+Tasks are divided among slaves
+Slaves run concurrently as the runtime
+environment allocates threads to different
+processors
+
+Preprocessor directives called pragma (pragmatic
+information).
+They are the main part of the OpenMP standard
+Identify tasks and their synchronizations
+\begin{lstlisting}[style=C]
+#pragma omp <name> [list of clauses]
+\end{lstlisting}
+❑ Auxiliary C functions
+Used to set and get relevant information such
+as number of available threads
+Used to manage explicit locks
+❑ Environment variables
+
+\subsection{Control structures}
+OpenMP programs execute serially until they reach
+a parallel directive
+The thread that was executing the code spawns
+a group of slave threads and becomes the
+master (thread ID 0)
+The code in the structured block is replicated,
+each thread executes a copy
+At the end of the block there is an implied
+barrier, only the master thread continues 
+\begin{lstlisting}[style=C]
+#pragma omp parallel {
+    /* parallel section */
+}
+\end{lstlisting}
+Optional clauses to the parallel directive:
+Conditional parallelization with if(condition)
+Number of spawned threads with
+num_threads(int)
+Data scope clauses (see later)
+❑ Under the hood, your compiler might replace the
+directive with a Pthreads implementation 
+The number of threads in a parallel region is
+determined by the following factors, in order of
+precedence:
+Evaluation of the if clause
+Value of the num_threads clause
+Use of the omp_set_num_threads() library
+function
+Setting of the OMP_NUM_THREADS environment
+variable
+Implementation default, e.g., the number of
+CPUs on a node.
+
+\subsection{Work sharing}
+Work-sharing constructs divide the execution of a
+code region among the members of the team that
+encounter it
+A work-sharing construct must be enclosed
+within a parallel region for the directive to
+execute in parallel
+Work-sharing constructs do not launch new
+threads
+There is no implied barrier upon entry to a
+work-sharing construct, however there is an
+implied barrier at the end of a work sharing
+construct 
+for: shares iterations
+of a loop across the
+team (data
+parallelism)
+sections: breaks work
+into separate,
+discrete sections,
+each executed by a
+thread (functional
+parallelism)
+single/master:
+serializes a section of
+code.
+\begin{lstlisting}[style=C]
+#pragma omp parallel {
+    #pragma omp for
+    /* for loop */
+}
+\end{lstlisting}
+❑ Parallelize execution of iterations
+Iterations number cannot be internally modified
+❑ Possible clauses include:
+schedule describing how iterations of the loop
+are divided among the threads in the team
+nowait to avoid synchronizing at the end of the
+parallel loop.
+Data-scope clauses
+A reduction variable in a loop aggregates (e.g.,
+accumulates) a value that:
+depends on each iteration of the loop
+does not depend on the iteration order
+❑ The reduction (operator: list) clause helps to
+perform a reduction
+A private copy of each variable in the list is
+updated by each thread
+At the end the reduction operation is applied to
+all private copies and the end result is written
+into a global variable
+Available operators: + * - & | ^ && || min max
+Most typical for schedules
+static: loop iterations are divided into blocks
+of size chunk and then statically assigned to
+threads. If chunk is not specified, the iterations
+are evenly (if possible) divided contiguously
+among the threads
+dynamic: loop iterations are divided into blocks
+of size chunk and distributed at runtime among
+the threads; when a thread finishes one chunk,
+it is dynamically assigned another. The default
+chunk size is 1
+runtime: depends on the environment variable
+OMP_SCHEDULE
+guided: static, gradually decreases the chunk
+size (chunk specifies the smallest one)
+
+Trade-off between low overhead (large chunks, static
+scheduling) and load balancing (small chunks, dynamic
+scheduling)
+\begin{lstlisting}[style=C]
+#pragma omp parallel {
+    #pragma omp sections {
+        #pragma omp section {
+            /* code section 1 */
+        }
+        #pragma omp section {
+            /* code section 2 */
+        }
+    }
+}
+\end{lstlisting}
+
+Specifies that the
+enclosed section(s) of
+code are to be
+executed in parallel
+❑ Each section is
+executed once by a
+thread in the team
+
+
+\begin{lstlisting}[style=C]
+#pragma omp parallel {
+    #pragma omp single {
+        /* code section */
+    }
+    #pragma omp master {
+        /* code section */
+    }
+}
+\end{lstlisting}
+single specifies that a section of a code is
+executed only by a single thread
+❑ master specifies that a section of a code is
+executed only by the master
+
+\subsection{Synchronization}
+\begin{lstlisting}[style=C]
+#pragma omp critical [name] {
+    /* code section */
+}
+\end{lstlisting}
+The critical directive specifies a region of code
+that must be executed by only one thread at a time
+❑ The optional name enables multiple different
+critical regions:
+names act as global identifiers: different
+critical regions with the same name are
+treated as the same region
+all critical sections which are unnamed are
+treated as the same section
+\begin{lstlisting}[style=C]
+#pragma omp barrier
+\end{lstlisting}
+The barrier directive synchronizes all threads in
+the team
+❑ When a barrier directive is reached, a thread will
+wait at that point until all other threads have
+reached that barrier. All threads then resume
+executing in parallel the code that follows the
+barrier
+❑ Not very used because of implicit synchronization
+of other constructs
+\begin{lstlisting}[style=C]
+#pragma omp atomic
+    /* statement */
+\end{lstlisting}
+The atomic directive ensures that a specific
+storage location is accessed atomically
+❑ Multiple reads and writes are not allowed
+❑ Only valid for the following statement, not for a
+structured bloc
+
+\subsection{Data environment}
+OpenMP is based upon the shared memory
+programming model so most variables are shared
+by default
+❑ The OpenMP Data Scope Attribute Clauses are
+used to explicitly define how variables should be
+scoped. They include:
+private
+shared
+default
+reduction
+Data Scope Attribute Clauses are used in
+conjunction with several directives to
+define how and which data variables in the
+serial section of the program are transferred to
+the parallel sections
+define which variables will be visible to all
+threads in the parallel sections and which
+variables will be privately allocated to all
+threads
+\begin{lstlisting}[style=C]
+#pragma omp <name> private (list)
+\end{lstlisting}
+The private clause declares variables in its list to
+be private to each thread
+❑ private variables behave as follows:
+a new object of the same type is declared once
+for each thread in the team
+all references to the original object are replaced
+with references to the new object
+assume that each variable is uninitialized for
+each thread – or use firstprivate
+
+
+
+\begin{lstlisting}[style=C]
+#pragma omp <name> shared (list)
+\end{lstlisting}
+The shared clause declares variables in its list to
+be shared among all threads in the team
+❑ A shared variable exists in only one memory
+location and all threads can read or write to that
+address
+❑ It is the programmer's responsibility to ensure that
+multiple threads properly access shared variables
+
+
+
+\begin{lstlisting}[style=C]
+#pragma omp <name> default (shared | none)
+\end{lstlisting}
+The scope of all variables is set to shared or none
+default(shared)is already the default, so it
+can be omitted
+❑ Specific variables can be exempted from the
+default using specific clauses (private, shared,
+etc.)
+❑ Using none as a default requires that the
+programmer explicitly scope all variables
+❑ In some implementations default (private) is
+also an option
+
+
+\subsection{Memory model}
+
+Threads have private memory and they can access
+a shared memory (single address space)
+❑ Variables are scoped through appropriate clauses
+❑ What happens when a thread modifies a shared
+variable? When do the other threads see the
+modified value? → Memory consistency model
+When does Thread 0 see the modification to y?
+When does Thread 1 see the modification to x?
+❑ The compiler does not know how threads will
+interact. What happens if it moves the
+assignment to x after the if construct?
+❑ In what order are variables stored in the main
+memory?
+Sequential memory consistency: each thread
+performs loads and stores in the original
+sequential order, and stores are atomic
+❑ Only one thread executes function_call
+❑ Excludes optimizations that move instructions,
+limits performance
+OpenMP employs a relaxed memory consistency
+model, i.e., all threads have the same view of
+memory at specific points in the code
+(consistency points)
+❑ In between such points each thread has its own
+temporary view of memory which may be
+different from the temporary view of other
+threads
+❑ Read-only data → no consistency issues
+❑ Shared data that needs to be modified →
+possible data races
+❑ The user needs to know when a shared variable
+may be read reliably
+
+\begin{lstlisting}[style=C]
+#pragma omp flush [flush-set]
+\end{lstlisting}
+The flush directive enforces global consistency
+of shared variables
+❑ Between a flush and the next update of shared
+variables all threads are guaranteed to have the
+same global view of all shared memory
+❑ Without flush-set all shared variables are
+affected; if possible, don't use a flush-set
+Compilers are allowed to move flush
+constructs if they have a disjoint set
+Difficult to use correctly, invalid behavior
+All threads must execute the same flush to
+guarantee consistency
+❑ To simplify development, a flush construct is
+implied:
+During a barrier region
+At entry and exit of parallel and critical
+At exit from worksharing constructs, unless
+nowait is specified
+❑ A flush construct is not implied
+At entry of worksharing constructs
+At entry and exit of master
+
+
+\subsection{Runtime functions}
+The OpenMP standard defines an API for library
+calls that perform a variety of functions to control
+execution of the program
+\begin{lstlisting}[style=C]
+    int omp_get_num_threads()
+    Returns the number of threads that are
+    currently in the team executing the parallel
+    region from which it is called
+    ❑ int omp_get_thread_num()
+    Returns an identifier for the thread making this
+    call. This number will be between 0 and
+    omp_get_num_threads - 1. The master thread of
+    the team is thread 0
+    void omp_set_num_threads(int num_threads)
+Sets the number of threads that will be used in
+the next parallel region
+❑ double omp_get_wtime()
+Provides a wall clock timing routine
+❑ double omp_get_wtick()
+Returns the number of seconds between two
+clock ticks
+\end{lstlisting}
+
+\paragraph*{Environment variables}
+❑ Environment variables are set to control execution
+of all programs, for example with the export
+command in bash
+
+\subsection{Nested parallelism}
+Enable/disable nested parallelism
+ Through the runtime function omp_set_nested()
+ Through the environment variable OMP_NESTED
+ Defaults are implementation-dependent
+❑ Set a default number of threads at different levels
+of nested parallelism with
+\begin{lstlisting}[style=C]
+OMP_NUM_THREADS=<list,of,integers>
+OMP_MAX_ACTIVE_LEVELS defines the upper limit on
+the number of active parallel regions that may be
+nested
+❑ OMP_THREAD_LIMIT avoids that recursive
+applications create too many threads
+\end{lstlisting}
+ If the nesting level is deeper than the number of
+entries in the list, the last value is used for all
+subsequent nested parallel regions.
+Each thread starts a new team, so thread IDs start
+from 0 again!
+❑ omp_get_thread_num() is not enough to identify a
+thread
+Runtime functions for nested parallelism
+\begin{lstlisting}[style=C]
+omp_get_thread_limit
+omp_get_max_active_levels
+omp_set_max_active_levels(int max_levels)
+omp_get_level
+omp_get_active_level
+active regions only (i.e., with more than one    thread)
+omp_get_ancestor_thread_num
+omp_get_team_size
+\end{lstlisting}
+
+
+
+
+
+\subsection{Thread cancellation}
+Until OpenMP 3.1, parallel execution cannot be
+aborted
+• Parallel regions must always run to completion
+• Alternatively, the region does not start at all
+❑ OpenMP 4.0 introduces cancellation
+• Best effort: does not guarantee to trigger
+termination immediately
+❑ Useful for divide-and-conquer algorithms (e.g.,
+stop searching when you find the element) and to
+handle errors
+\begin{lstlisting}[style=C]
+// cancel current thread 
+#pragma omp cancel <construct-type>
+// check if any thread requested cancellation
+#pragma omp cancellation point
+\end{lstlisting}
+A thread that wishes to terminate the execution
+must have cancel in its execution path
+❑ The cancel directive raises a flag
+❑ When a thread encounters cancellation point,
+it checks the cancellation flag
+The status of cancellation is also checked
+• At another cancel region
+• At a barrier (implicit or explicit)
+❑ The user is responsible of setting cancellation
+points to ensure timely cancellation
+❑ There is an overhead in checking for cancellation,
+so OMP_CANCELLATION is disabled by default
+
+\subsection{Tasks}
+Tasks are useful to parallelize algorithm with
+irregular and runtime-dependent execution flow
+❑ Simplest example: while loop
+❑ Queuing system that dynamically assigns work
+to threads
+❑ Simplest definition: an OpenMP task is a block
+of code contained in a parallel region that can
+be executed simultaneously with other tasks in
+the same region
+❑ Tasks are not guaranteed to be executed where
+they are defined in the source code
+Correction: use the
+taskwait construct to
+force the pending child
+tasks to complete
+before resuming
+execution
+Note that you could use master instead of
+single, but there is no barrier on exit!
+❑ Same concern if nowait is used
+
+Task synchronization
+❑ When a thread encounters a task construct, the
+task is created but not immediately executed
+❑ Tasks are guaranteed to be completed
+• At a barrier (implicit or explicit)
+• At task synchronization points
+\begin{lstlisting}[style=C]
+#pragma omp taskwait 
+#pragma omp taskgroup
+\end{lstlisting}
+taskwait forces completion of child tasks only,
+taskgroup synchronizes also their descendants
+
+
+Task dependences
+❑ Tasks can be used to overlap computation and
+I/O (pipeline parallelism)
+After start-up, the three activities can be run at
+the same time on different chunks of data
+❑ The pipeline can be implemented through
+sections, but communication and load imbalance
+are a problem
+By creating tasks instead of sections, each thread
+can execute any task as long as its inputs are
+ready
+❑ The depend clause indicates a dependence
+between tasks
+The priority clause can be used to hint that
+more important tasks should be executed more
+frequently
+Before running
+the program,
+OMP_MAX_TASK_
+PRIORITY has to
+be set (default
+is 0)
+Numbers are
+relative, the
+execution must
+not depend on
+them
+Possible execution order with 3 threads
+As long as dependences are respected, the loop
+iterations can be executed in an arbitrary order
+❑ No explicit flush required (it is implied before
+and after every task)
+❑ Task scheduling overhead might be a problem
+
+\paragraph*{Loops}
+Covenience construct to simplify using tasks
+when there is a loop in the code
+To keep the number of created tasks low,
+num_tasks sets the number of tasks that the
+runtime system can generate
+❑ Each task gets assigned a number of iterations
+which is the minimum between grainsize and
+the total number of iterations
+Each iteration became a task
+❑ Dependences are no longer needed
+Larger units of work are scheduled, lower
+overhead, but less flexibility to handle load
+imbalance
+
+\subsection{SIMD vectroization}
+\begin{lstlisting}[style=C]
+#pragma omp simd
+    /* for loop */
+\end{lstlisting}
+The loop is divided into chunks, all iterations are
+executed by a single thread with SIMD vector
+instructions
+• Chunks should fit a vector register for
+performance
+• Each iteration is executed by a SIMD lane
+❑ The compiler will generate SIMD instructions, it is
+up to the user to ensure this maintains correct
+behavior
+Data scope clauses (private, firstprivate,
+reduction, etc.) can be used in a simd directive
+❑ A collapse clause can be used to fuse two
+perfectly nested loops (watch out for complexity!)
+❑ The simdlen(size) clause suggests a preferred
+vector length
+• Maybe the code will work better with a specific
+vector length
+• The compiler is free to ignore it
+• It can hurt performance but the results remain
+correct
+In the case of loop-carried dependencies, the
+vector length must be smaller than the smallest
+dependence distance in the loop
+❑ The safelen clause sets an upper limit to the
+vector length that the compiler cannot exceed
+Composite loop-SIMD work-sharing construct:
+\begin{lstlisting}[style=C]
+#pragma omp for simd
+    /* for loop */
+\end{lstlisting}
+Portable implementation
+❑ Number of threads and scheduling policy greatly
+affect performance
+• If the number of threads increases, work for
+each thread is smaller
+• Each thread should work with a chunk
+corresponding to the vector length
+Distribute iterations among threads in a team, then
+each thread uses SIMD instructions
+To avoid performance degradation, the simd:
+modifier can be added to the scheduling directive
+\begin{lstlisting}[style=C]
+#pragma omp for simd schedule(simd:static, 5) 
+\end{lstlisting}
+Declare a function to be compiled for calls within a
+SIMD loop
+\begin{lstlisting}[style=C]
+#pragma omp declare simd
+    /* function definition */
+\end{lstlisting}
+Multiple directives can be added to generate
+multiple compiled versions
+
+
+\subsection{OpenMP for heterogeneous architectures}
+Recent versions of the
+OpenMP standard support
+parallel execution on
+heterogeneous
+architectures
+host CPU
+one or more attached
+accelerators (GPUs,
+FPGAs, DSPs, …)
+❑ The same code can be run
+on the host and on the
+target device
+\begin{lstlisting}[style=C]
+#pragma omp target
+    /* code region */
+\end{lstlisting}
+Offloads the execution of code to an accelerator
+device (if present)
+• If not present, continues execution on the host
+• Same when an if clause evaluates to false
+❑ A thread on the target device executes the code
+❑ Synchronous execution: the host thread blocks
+until the device thread has finished
+• Use the nowait clause to avoid
+The map clause copies variables that are needed by
+the target region in the target device memory
+• A mapped variable is a shared variable
+• Synchronization/consistency issues apply
+❑ The initial device thread encounters a parallel
+region and spawns a team of device threads
+If mapping requires copy operations across
+distributed memories, which are expensive!
+map-type gives information to the compiler to
+avoid unnecessary data transfers
+The default value is tofrom

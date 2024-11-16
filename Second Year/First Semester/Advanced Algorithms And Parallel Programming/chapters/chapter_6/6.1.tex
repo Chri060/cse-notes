@@ -1,0 +1,114 @@
+\section{Pthreads}
+
+Thread management
+Creation
+Joining
+Detaching
+Set/query attributes
+Synchronization
+Mutexes: Control access to mutual exclusion
+sections
+Condition variables: Control conditional interthreads communications
+Once created, threads are peers, and may create
+other threads: there is no implied hierarchy or
+dependency between threads.
+The maximum number of threads depends on the
+implementation
+
+\subsection{Thread creation}
+The creation of a thread is: 
+\begin{lstlisting}[style=C]
+int pthread_create(pthread_t * thread, const pthread_attr_t * attr, void * (* start_routine) (void *), void *arg)
+\end{lstlisting}
+Here: 
+\begin{itemize}
+    \item thread: identifier for the new thread returned by
+    the subroutine
+    attr: used to set thread attributes
+    Joinable/detached
+    Scheduling
+    Stack size
+    start_routine: the C routine that the thread will
+    execute once it is created.
+    arg: argument passed to start_routine. It must be
+    passed by address as a pointer cast of type void
+\end{itemize}
+
+\subsection{Thread elimination}
+The thread returns from its starting routine
+The thread makes a call to the pthread_exit
+subroutine
+The thread is canceled by another thread via the
+pthread_cancel routine
+The entire process is terminated
+• (Created threads survive if main calls
+pthread_exit)
+
+\subsection{Threads join}
+The joining of a thread is: 
+\begin{lstlisting}[style=C]
+int pthread_join(pthread_t thread, void ** retval)
+\end{lstlisting}
+Here: 
+\begin{itemize}
+    \item pthread_join blocks the calling thread until the
+    specified thread terminates
+    retval will contain the copy of the argument of
+    pthread_exit
+\end{itemize}
+Threads can be created as joinable or detached
+A joinable thread can become detached (not vice
+versa)
+Explicitly set joinable or detached attribute
+Default attribute should be joinable
+Not all implementations adopt this default
+Detached threads may consume less resources
+
+\paragraph*{Barriers}
+We can use barriers for join operations: 
+\begin{lstlisting}[style=C]
+    int pthread_barrier_init(pthread_barrier_t * barrier, pthread_barrierattr_t * attr, unsigned int count)
+
+    int pthread_barrier_wait(pthread_barrier_t * barrier)
+\end{lstlisting}
+pthread_join requires to wait for a specific
+thread exit
+Several threads can be synchronized among them
+through barriers
+all the threads of the group need to wait for all
+the other threads, then they can resume
+working
+count is the number of threads to be waited
+Not all implementations include barriers!
+
+\subsection{Thread mutex}
+Mutex (mutual exclusion) variables are the basic
+method to protect shared data when multiple
+writes occur
+Only one thread can lock a mutex variable at any
+given time
+If several threads try to lock a mutex only one
+thread will be successful
+\begin{lstlisting}[style=C]
+    pthread_mutex_lock(&my_lock);
+    /* critical section */
+    pthread_mutex_unlock(&my_lock);
+\end{lstlisting}
+Threads that could not acquire the mutex are
+blocked
+Less blocking overhead: trylock
+The thread can keep on working while the lock
+is not available
+Multiple mutexes can lead to deadlocks
+Three types of mutexes:
+Normal
+Recursive
+Error check
+
+\paragraph*{Condition variables}
+Mutexes implement synchronization by serializing
+data accesses
+Condition variables allow threads to synchronize
+explicitly by signaling the meeting of a condition
+Without condition variables, the programmer
+would need to poll to check if the condition is met

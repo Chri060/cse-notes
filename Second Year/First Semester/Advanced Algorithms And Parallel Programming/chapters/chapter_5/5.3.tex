@@ -1,62 +1,60 @@
 \section{Parallelism design}
 
+Designing an effective parallel algorithm involves more than simply extracting all available parallelism. 
+Not all parallelism is usable on a given architecture, as certain types may introduce overhead or be limited by the hardware. 
+To create a practical and efficient parallel solution, designers must consider the architecture's specific parallel capabilities and communicate this parallelism to the compilation tools effectively.
 
+Translation from pseudo-code to high-level languages is generally straightforward, as most sequential architectures conform to a von Neumann model. 
+While real processors vary widely in design, modern compilers can typically bridge these differences, optimizing applications for specific hardware.
 
+\paragraph*{New programming languages}
+New languages developed specifically for parallel programming offer advanced features for expressing parallelism, but their adoption has been limited: since they tend to have immature compilers, and developers must invest time in learning new syntax and semantics.
+In contrast, extensions to established languages are easier to adopt and integrate with existing compilers but have limitations. 
+These extensions typically only support certain forms of parallelism, making it challenging to represent more complex structures like pipeline parallelism.
 
-Design a «good» parallel algorithm by extracting
-all the available parallelism is not enough
-not all the extracted parallelism is exploitable
-on a real architecture
-❑ We need to consider which parallelism is available
-on the considered architecture
-Non suitable parallelism can introduce overhead
-❑ We need to «describe» the parallelism to the
-compilation tools to make it exploitable
+\paragraph*{Design guidelines}
+Designing parallel algorithms is complex, with no universal algorithmic approach to follow. 
+However, some general guidelines can help streamline the process: 
+\begin{itemize}
+    \item Machine-independent design: focus first on identifying concurrency in the problem rather than specific hardware requirements. 
+    \item Aim to delay machine-specific decisions to keep the design flexible.
+    \item Parallel program structure: while there are broad principles, parallel program structure often depends on the specific language or architecture used. 
+        Most problems can be solved using multiple parallel approaches, so a good starting point is to explore various solutions and select the most promising.
+\end{itemize}
+For designing an algorithm, we usually understand the problem to be solved, analyze the dependencies, partition the solution, and use the PCAM methodology to define other aspects. 
+Instead, if we want to create an entire parallel program, we have to: analyze the target architecture, select the best parallel programming architecture, and analyze the communications. 
 
-Translation from pseudo-code to high level source
-code (e.g., C/C++) is usually quite trivial
-❑ All the sequential machine can be modeled as a
-von Neumann Architecture
-❑ Real processors can differ a lot, but compilers are
-usually able to manage this gap and optimize the
-application for a given architecture
+\subsection{PCAM mehod}
+The Partitioning-Communication-Agglomeration-Mapping (PCAM) methodology is a structured approach to designing efficient parallel algorithms, consisting of four interrelated phases:
+\begin{enumerate}
+    \item \textit{Partitioning}: the goal of partitioning is to reveal parallelizable components within the problem, dividing it into many small, independent tasks to create a fine-grained decomposition. 
+        Effective partitioning divides both the computational tasks and associated data without unnecessary replication.
+        \begin{itemize}
+            \item \textit{Functional partitioning}: focuses on decomposing the problem based on the actions or computations required. 
+                Tasks are defined by the different functions or operations needed to solve the problem.
+            \item \textit{Domain partitioning}: divides the problem based on data, where each task processes a subset of the data. 
+                This method is often preferred for problems that naturally separate into data chunks; ideally, tasks should have equal data sizes to balance workloads.
+        \end{itemize}
+        A combination of functional and domain partitioning may sometimes be effective to optimize parallelization.
+    \item \textit{Communication}: once partitioned, tasks must interact to exchange necessary information. 
+        This phase addresses the nature and management of communication between tasks, aiming to minimize overhead and maximize efficiency.
+        
+        The communication can be classified as: local or global (limited to a small set of neighboring tasks or involve many tasks simultaneously), structured or unstructured (follow regular patterns or arbitrary, dynamic connections), statyc or dynamic (communication partners may be fixed in advance or determined at runtime), and synchronous or asynchronous (tasks may synchronize their communication or communicate independently).
+        The communication modes are: point-to-point (direct data transfer between two tasks) or collective (multiple tasks within a group). 
 
-New programming languages (mainly developed
-for research activity):
-+Introduced since parallel programming is a
-different paradigm
-- did not have big success:
-• too immature compilers
-• you need to learn a new language
-❑ Extensions to existing programming language
-+can be easily adopted by designer
-+can be easily integrated in existing compilers
-- can describe only some types of parallelism
-(e.g., pipeline parallelism is difficult to be
-described)
-
-Designing parallel algorithms is not an easy task
-❑ There is not an algorithm to design parallel
-algorithms
-❑ These are some rules which can help in the design
-❑ Design of parallel programs have more specific
-rules but they depend on the particular chosen
-language/architecture
-Most problems have several possible parallel
-solutions
-❑ A good approach is to start from machineindependent issues (concurrency) and delay
-target-specific aspects as much as possible
-
-Parallel Algorithms and Parallel
-Programs
-1. Design a parallel algorithm:
-• Understand the problem to be solved
-• Analyze data dependences
-• Partition the solution
-• PCAM methodology
-2. Design a parallel program:
-⚫ Analyze the target architecture(s)
-⚫ Select best parallel programming language
-⚫ Analyze the communications (cost, latency,
-bandwidth, visibility, synchronization, etc.)
-
+        Communication is a critical aspect in parallel computing since excessive or poorly managed communication can negate the benefits of parallelism. 
+    \item \textit{Agglomeration}: this phase transitions from theoretical task partitioning to a more practical implementation by grouping tasks into larger units to improve efficiency on the target parallel architecture.
+        \begin{itemize}
+            \item \textit{Task consolidation}: combines smaller tasks into larger ones to increase computational granularity and reduce communication needs.
+            \item \textit{Data and computation replication}: may replicate data or computation selectively to reduce dependency on frequent communication.
+            \item \textit{Load balancing and overlapping}: ensures an even distribution of workload, overlapping communication with computation when possible.
+            
+        \end{itemize}
+        Agglomeration often changes key performance ratios, increasing task size to reduce communication demands, thereby enhancing efficiency but potentially decreasing parallelism. 
+        This phase must balance the reduction of communication overhead with maintaining adequate parallelism.
+    \item \textit{Mapping}: mapping assigns tasks to specific processors, with the objective of minimizing total execution time. 
+        Although straightforward in shared-memory systems, mapping in distributed systems requires careful consideration of locality (place frequently communicating tasks on the same or neighboring processors to minimize communication time) and concurrency (assign concurrent tasks to separate processors to maximize parallel execution).
+        Mapping is an $\mathcal{NP}$-complete problem, so heuristic algorithms are used to approximate optimal solutions.
+        Mapping can be complex due to resource limitations and the potential for conflicting goals between maximizing concurrency and minimizing communication costs.
+\end{enumerate}
+In practice, the phases of the PCAM methodology are often interdependent and may overlap, requiring iterative refinement to optimize parallel algorithm performance.

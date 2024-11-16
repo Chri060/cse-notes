@@ -1,0 +1,107 @@
+\section{Computational learning theory}
+
+We start by considering an input space $\mathcal{X}$ with $M$-dimensional features, with an output space denoted as $\mathcal{Y}$. 
+We also have a joint probability $\Pr(\mathbf{x},t)$, a loss function $\mathcal{L}$, and the hypothesis space $\mathcal{H}\subset\{h:\mathcal{X}\times\mathcal{Y}\}$
+
+Let's suppose $L$ has identified a hypothesis $h^\ast$ that makes no error on the training data. 
+We need to find how many training samples from $\mathcal{X}$ are required to ensure that $L$ has learned a true concept. 
+\begin{theorem}[No free lunch]
+    Let $\text{acc}_G(L)$ represent the accuracy of learner $L$ on samples not included in the training set.
+    Let $\mathcal{F}$ be the collection of all potential concepts where $y=f(\mathcal{x})$.
+    For any binary classifier $L$ and any possible training set:
+    \[\dfrac{1}{\left\lvert \mathcal{F} \right\rvert}\sum_{\mathcal{F}}\text{acc}_G(L)=\dfrac{1}{2}\]
+\end{theorem}
+This means that on avereage every binary classification will behave like a random guess.
+
+This means that there is no model in Machine Learning that is superior with respect to all other models. 
+This means also that in Machine Learning we always operate under some assumptions (sucha as the assumptions that at least a good approximation of the searched function is in the hypothesis space). 
+\begin{corollary}
+    For any two learners, $L_1$ and $L_2$, if exists $f(\cdot)$ where $\text{acc}_G(L_1)>\text{acc}_G(L_2)$ then exists $f^\prime(\cdot)$ where $\text{acc}_G(L_2)>\text{acc}_G(L_1)$. 
+\end{corollary}
+
+\subsection{Ideal learning}
+Let's assume that the hypothesis space $\mathcal{H}$ contains the real function, so the learner $L$ can obtain a null training error.
+
+Let be $\mathcal{D}$ be the training data drawn from a stationary distribution and labeled (without noise) according to a concept we intend to learn.
+A binary classifier $L$ produces a hypothesis $h \in H$ such that: 
+\[h^\ast=\argmin_{h\in H}\text{error}_{\text{train}}(h)\]
+We determine the training error of a hypothesis as the probability of misclassifying a sample:
+\[\text{error}_{\mathcal{D}}(h)=\Pr_{x \in \mathcal{D}}\left[h(x)\neq c(x)\right]\]
+However, our interest lies in the true error (probability of making a mistake on a sample) of:
+\[\text{error}_{\text{true}}(h)=\Pr_{x \sim P(X)}\left[h(x)\neq c(x)\right]\]
+
+We say that $\mathcal{H}$ overfits the training data if $\text{error}_{\text{true}}>\text{error}_{\mathcal{D}}$, but we cannot accurately bound $\text{error}_{\text{true}}$ given $\text{error}_{\mathcal{D}}$ because the training data are not independent of $\mathcal{H}$
+Therefore, we require a stricter bounding of the error under additional assumptions.
+
+\begin{definition}[\textit{Consistent hypothesis}]
+    A hypothesis $\mathcal{H}$ is deemed consistent with a training dataset $\mathcal{D}$ of the concept $c$ if and only if $h(x) = c(x)$ for each training sample in $\mathcal{D}$: 
+    \[\text{consistent}(h,\mathcal{D})\overset{\text{def}}{=}h(x)=c(x)\qquad\forall\left\langle x,c(x) \right\rangle\in\mathcal{D}\]
+\end{definition}
+In other words, is an hypothesis with null training error.
+\begin{definition}[\textit{Version space}]
+    The version space, $\text{VS}_{\mathcal{H},\mathcal{D}}$, with respect to the hypothesis space $\mathcal{H}$ and the labeled dataset $\mathcal{D}$, is the subset of hypothesis in $\mathcal{H}$ consistent with $\mathcal{D}$: 
+    \[\text{VS}_{\mathcal{H},\mathcal{D}}\overset{\text{def}}{=}\left\{h\in \mathcal{H}\mid\text{consistent}(h,\mathcal{D})\right\}\]
+\end{definition}
+Thus, the version space consists of all the hypothesis spaces in which we have a null training error. 
+
+From now on, we consider only consistent learners, which always output a consistent hypothesis.
+This means that each time we train a Machine Learning algorithm, it will always find the function with zero training error when we have a consistent hypothesis. 
+
+If we aim to bound the $\text{error}_{\text{true}}$ of a consistent learner, we need to find a bound for all the hypothesis in $\text{VS}_{\mathcal{H},\mathcal{D}}$. 
+\begin{theorem}
+    If the hypothesis space $\mathcal{H}$ is finite and $\mathcal{D}$ is a sequence of $N\geq 1$ independent random examples of some target concept $c$, then for any $0\leq\varepsilon\leq 1$, the probability that $\text{VS}_{\mathcal{H},\mathcal{D}}$ contains a hypothesis error greater than $\varepsilon$ is less than $\left\lvert \mathcal{H}\right\rvert e^{\varepsilon N}$: 
+    \[\Pr(\exists h \in \mathcal{H}\mid\text{error}_{\mathcal{D}}(h)=0\land \text{error}_{\text{true}}(h)\geq\varepsilon)\leq \left\lvert \mathcal{H}\right\rvert e^{\varepsilon N}\]
+\end{theorem}
+
+\paragraph*{Practical application}
+Let's denote $\delta$ as the probability of having $\text{error}_{\text{true}}>\varepsilon$ for a consistent hypothesis:
+\[\left\lvert H\right\rvert e^{-\varepsilon N} \leq \delta\]
+By using the logaritms, we can bound both $N$ and $\varepsilon$. 
+
+\begin{definition}[\textit{Probably Approximately Correct learnable concept}]
+    A concept $C$ is PAC-learnable by $L$ using $\mathcal{H}$ if: 
+    \[\forall c\in C, \text{distributions }\Pr(\mathcal{X}), 0 < \varepsilon < \frac{1}{2},  0 < \delta < \frac{1}{2}\]
+    The learner $L$ will with a probability at least $1 - \delta$ output a hypothesis $h \in \mathcal{H}$ such that:
+    \[\text{error}_{\text{true}}(h) \leq \varepsilon\] 
+    In time that is polynomial in $\frac{1}{\varepsilon}, \frac{1}{\delta}, M, \text{ and }\text{size}(c)$.
+\end{definition}
+A sufficient condition to prove PAC learnability is proving that a learner $L$ requires only a polynomial number of training examples, and processing per example is polynomial.
+
+\subsection{Agnostic learning}
+Up to this point, we've operated under the assumption that the version space $\text{VS}_{\mathcal{H},\mathcal{D}}$ is not empty, and that the learner $L$ will consistently output a hypothesis $\mathcal{H}$ such that the error on the dataset is zero. 
+However, in a more general scenario, an agnostic learner might output a hypothesis $\mathcal{H}$ with $\text{error}_{\mathcal{D}}(h) > 0$.
+This means, that it will output a function that is similar to the real one, but not exactly the same. 
+\begin{theorem}
+    If the hypothesis space $\mathcal{H}$ is finite and $\mathcal{D}$ is a sequence of $N\geq 1$ independent and identically distributed random variables examples of some target concept $c$, then for any $0 \leq \varepsilon \leq 1$, and for any learned hypothesis $\mathcal{H}$, the probability that $\text{error}_{\text{true}}(h) - \text{error}_{\mathcal{D}}(h) > \varepsilon$ is less than $\left\lvert \mathcal{H}\right\rvert e^{-2N\varepsilon^2}$:
+    \[\Pr(\exists h\in \mathcal{H}\mid\text{error}_{\text{true}}(k)>\text{error}_{\mathcal{D}}(h)+\varepsilon)\leq \left\lvert \mathcal{H}\right\rvert e^{-2N\varepsilon^2}\]
+\end{theorem}
+
+Similar to previous derivations, we can establish a bound on the sample complexity:
+\[N\geq\dfrac{1}{2\varepsilon^2}\left(\ln\left\lvert \mathcal{H}\right\rvert+\ln\left(\dfrac{1}{\delta}\right)\right)\]
+Furthermore, we can also constrain the true error of the hypothesis as follows:
+\[\text{error}_{\text{true}}(h)\leq \text{error}_{\mathcal{D}}(h)+\sqrt{\dfrac{\ln\left\lvert \mathcal{H} \right\rvert+\ln\frac{1}{\delta}}{2N}}\]
+Here, $\text{error}_{\mathcal{D}}(h)$ describe the bias, while the other term describes the variance. 
+
+
+
+
+
+
+\subsection{Vapnik-Chervonenkis dimension}
+The VC dimension represents the size of the subset of $X$ for which $\left\lvert \mathcal{H}\right\rvert$ can ensure a zero training error, regardless of the target function. 
+\begin{definition}[\textit{Dichotomy}]
+    A dichotomy of a set $S$ of instances is defined as a partition of $S$ into two disjoint subsets. 
+\end{definition}
+\begin{definition}[\textit{Shattered}]
+    A set of instances $S$ is said to be shattered by hypothesis space $\mathcal{H}$ if and only if for every dichotomy of $S$, there exists some hypothesis in $\mathcal{H}$ consistent with this dichotomy.
+\end{definition}
+\begin{definition}[\textit{VC dimension}]
+    The Vapnik-Chervonenkis dimension, $\text{VC}(\mathcal{H})$, of hypothesis space $\mathcal{H}$ over instance space $X$, is the largest finite subset of $X$ shattered by $\mathcal{H}$.
+\end{definition}
+If an arbitrarily large set of $\mathcal{X}$ can be shattered by $\mathcal{H}$, then $\text{VC}(\mathcal{H})=\infty$.
+
+If $\left\lvert \mathcal{H}\right\rvert < \infty$, then $\text{VC}(\mathcal{H}) \leq \log_2(\left\lvert \mathcal{H}\right\rvert)$.
+When $\text{VC}(\mathcal{H})=d$, it implies that there are at least $2^d$ hypothesis in $\mathcal{H}$ to label $d$ instances. 
+Consequently, $\left\lvert \mathcal{H}\right\rvert \geq 2^d$.
+With a probability of at least $(1-\delta)$, every $h\in \mathcal{H}$ satisfies the following inequality:
+\[\text{error}_{\text{true}}(h)\leq \text{error}_{\mathcal{D}}(h)+\sqrt{\dfrac{\text{VC}(\mathcal{H})\left(\ln\frac{2N}{\text{VC}(\mathcal{H})}+1\right)+\ln\frac{4}{\delta}}{N}}\]
