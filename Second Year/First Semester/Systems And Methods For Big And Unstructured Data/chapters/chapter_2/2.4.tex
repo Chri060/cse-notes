@@ -27,10 +27,36 @@ Additional space can be used to store multiple copies of data in different sort 
 \subsection{Cassandra}
 Originally developed by Facebook and now maintained by the Apache Foundation, Cassandra is a popular column-oriented, NoSQL database widely used for high-throughput applications. 
 
-
 \subsubsection{Architecture}
 Cassandra's architecture and its column-oriented approach make it particularly suited for high-availability, large-scale, write-intensive workloads, where distributed, flexible data storage is essential.
 
+Cassandra is masterless since it has no single point of failure. 
+Since we have column families based on groups of columns, we have no joins and the data are duplicated. 
+The consistency of Cassandra is tunable based on the needs.
+
+\paragraph*{Server mapping}
+How do you decide which server(s) a key-value resides on with a masterless approach. 
+We design a dependency in a ring form, with the servers connected only with the ring. 
+
+Always a constant amount of network traffic (except for gossip storms)
+Simple Strategy
+• Single datacenter
+• Clockwise placement to the next node(s)
+• Network Topology
+Strategy
+• Multiple datacenters (don't lose all the copies if a datacenter fails)
+• Supporting local queries
+
+If a server fails we need to inform the others. 
+To avoid using too much bandwith we use gossip protocol: Each node picks its discussants (up to 3)
+• Having three messages for each round of gossip adds a degree of anti-entropy.
+• This process allows obtaining "convergence" of data shared between
+the two interacting nodes much faster
+Protocol:
+•Nodes periodically gossip
+their membership list
+•On receipt, the local
+membership list is updated
 
 
 
@@ -86,4 +112,22 @@ remove()
 \end{lstlisting}
 
 \paragraph*{SQL}
-Cassandra also supports SQL.
+Cassandra also supports SQL since it is based in tables with a single column.
+The main difference is that in relational databases we have a domain-based model, while in columnar databases we have a query-based model. 
+Thus, in this case we start from the queries, and then we design the data model based on that since each column has a key that is used to filter all the elements in the column. 
+
+In case we need to use multiple keys for a family of column we may use an aggregate key, that comprises all the key that may be used in the queries: 
+\begin{lstlisting}[style=C]
+attribute1:attribute2: { user1, user2}
+\end{lstlisting}
+We can query based on the first attribute, or both. 
+
+Columns
+are sorted according to
+\texttt{CompareWith} or \texttt{CompareSubcolumnsWith}
+
+Rows
+are placed according to their Partitioner:
+•Random: MD5 of key
+•Order-Preserving: actual key
+are sorted by key, regardless of partitioner

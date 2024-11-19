@@ -20,7 +20,7 @@ MongoDB is a highly popular, open-source, document-oriented database that offers
 Unlike traditional relational databases, MongoDB stores data in JSON-like documents, making it more dynamic and developer-friendly. 
 Its schema-less design enables the effortless adaptation of data models as requirements evolve. 
 Moreover, MongoDB supports automatic data sharding, which ensures seamless horizontal scaling across multiple servers.
-\begin{table}[h!]
+\begin{table}[H]
     \centering
     \begin{tabular}{|l|p{10cm}|}
     \hline
@@ -150,6 +150,15 @@ Documents can be inserted into a collection using:
 \begin{lstlisting}[style=MongoDB]
 db.<collection_name>.insert()
 \end{lstlisting}
+Indexes are data structures that store a small portion of the collection's data set in an easy to traverse form, ordered by the value of the field. 
+Indexes support the efficient execution of some types of queries.
+Indexes are created with the \texttt{createIndex} operator which accepts a list of the fields with respect to which create the index and their corresponding ordering. 
+\begin{lstlisting}[style=MongoDB]
+db.<collection_name>.createIndex()
+\end{lstlisting}
+
+
+
 
 \paragraph*{Read}
 Retrieve all documents in a collection with optional formatting for readability:
@@ -158,14 +167,46 @@ db.<collection_name>.find().pretty()
 \end{lstlisting}
 Filters can be added to the \texttt{find} function to narrow down results:
 \begin{lstlisting}[style=MongoDB] 
-db.<collection_name>.find({ key: value }) 
+db.<collection_name>.find() 
 \end{lstlisting}
+When collecting documents, it is possible to sort and limit the results. 
+These operations can be performed through the \texttt{\$sort} and \texttt{\$limit} stages or using the \texttt{sort} and \texttt{limit} methods.
+\begin{lstlisting}[style=MongoDB] 
+db.<collection_name>.find().sort().limit(number)
+\end{lstlisting}
+Filtering operations may exhibit different behaviors depending on the type of complex field a query accesses, such as subdocuments or arrays. 
+Queries that evaluate one or more conditions on the fields of a subdocument are not subject to any particular behavioral change. 
+However, queries that evaluate a single condition on the fields of documents within an array will return the main document if at least one of the documents in the array satisfies the condition. 
+When multiple conditions are evaluated on the documents in an array field, they will be assessed individually for each document in the array. 
+In this case, the main document is returned if, for each condition, there exists at least one document that satisfies it. 
+It does not matter if only one document satisfies all conditions or if multiple documents each satisfy a single condition.
+If a query targets multiple conditions on the fields of the same document within an array, the \texttt{\$elemMatch} stage must be used. 
+The \texttt{\$elemMatch} operator matches documents containing an array field with at least one element that satisfies all of the specified query criteria.
+When a collection consists of documents containing arrays, retrieving the content of those arrays may be useful. This can be accomplished using the \texttt{\$unwind} stage. 
+The \texttt{\$unwind} stage reshapes the collection so that each document is replaced by a set of new documents, one for each element in the document's array.
+These new documents retain all fields from the original document and include a field with the name of the array field, which contains one of the elements.
+
 MongoDB supports SQL-like aggregation for advanced data processing. 
 Data passes through a pipeline where transformations and calculations are applied:
 \begin{lstlisting}[style=MongoDB]
 db.parts.aggregate()
 \end{lstlisting}
-For complex data aggregation, MongoDB supports the map-reduce paradigm:
+Aggregate operations in MongoDB, aimed at grouping data with respect to one or more fields, are achieved using the \texttt{\$group} stage within the \texttt{aggregate} method.
+This stage requires specifying the fields on which to perform the aggregation and the aggregation functions to apply. 
+When the \texttt{\$group} stage is applied, only the fields used for the aggregation or explicitly created within this stage will be available in subsequent stages of the pipeline. 
+To perform a grouping operation on the entire dataset, a dummy \texttt{\_id} can be used in the \texttt{\$group} stage by setting \texttt{\_id} to a constant value. 
+This is why the \texttt{\$} operator is crucial in the grouping stage for referencing specific fields.
+MongoDB's aggregation framework employs a pipeline model, where multiple stages are chained together to transform and analyze data. 
+It is necessary to explicitly define all the stages in the pipeline. 
+In addition to \texttt{\$group}, the following are some commonly used stages:
+\begin{itemize}
+    \item \texttt{\$match}: Filters documents based on specified conditions.
+    \item \texttt{\$project}: Defines projections to reshape the document structure.
+    \item \texttt{\$unwind}: Deconstructs array fields into separate documents (explained earlier).
+    \item \texttt{\$sort}: Orders the documents based on specified fields.
+    \item \texttt{\$limit}: Limits the number of documents passed to the next stage.
+\end{itemize}
+\noindent For complex data aggregation, MongoDB supports the map-reduce paradigm:
 \begin{lstlisting}[style=MongoDB]
 db.collection.mapReduce()
 \end{lstlisting}
@@ -210,4 +251,8 @@ These operators enable precise matching and logical operations.
     \texttt{\$not} & Inverts the effect of a query expression \\ \hline
     \texttt{\$nor} & Joins query clauses with a logical NOR \\ \hline
     \texttt{\$exists} & Matches documents that have a specified field \\ \hline
+    \texttt{\$type} & Matches documents whose chosen field is of a specified type \\ \hline
+    \texttt{\$text} & Matches documents based on text search on indexed fields \\ \hline
+    \texttt{\$regex} & Matches documents based on a specified regular expression \\ \hline
+    \texttt{\$where} & Matches documents based on a JavaScript expression \\ \hline
 \end{longtable}
