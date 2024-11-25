@@ -1,13 +1,67 @@
 \section{Vector database}
 
-\subsection{Cassandra}
+Vector databases are gaining significant traction, driven by the rise of artificial intelligence (AI) and machine learning (ML) applications, particularly those leveraging large language models (LLMs) in combination with retrieval-augmented generation (RAG). 
+These technologies enable more sophisticated data retrieval methods, providing powerful enhancements to search, recommendation, and discovery systems. 
 
+By storing and processing data as high-dimensional vector representations, vector databases facilitate more efficient and context-aware data retrieval. 
+Unlike traditional databases that rely on keyword-based search, vector databases allow AI systems to interpret the semantic similarity and context between data points. 
+This capability is especially valuable for applications that require understanding the meaning and relationships between large datasets, such as personalized search, content recommendations, and natural language understanding.
 
+\subsection{Vectors}
+A vector database organizes data as high-dimensional vector representations, which allows for contextual search and discovery that goes beyond simple keyword matching. 
+Vectors are grouped according to their semantic similarity, meaning the database can retrieve data based on the inherent meaning or context, rather than exact matches. 
+This makes data retrieval more efficient and meaningful, particularly for tasks that involve understanding the relationship between data points.
 
-\subsubsection{Architecture}
+In the fields of mathematics and physics, a vector is a quantity characterized by both magnitude and direction. 
+Similarly, in vector databases, vectors represent various attributes or features of an object, capturing key characteristics in a structured, multidimensional space. 
+These vector representations form the foundation of information processing in many AI and ML applications, enabling machines to understand and interpret complex data patterns.
 
+One common technique used to create these vectors is embedding, which transforms data into vector format. 
+For textual data, pre-trained models map words and phrases into a multidimensional space, effectively capturing their meanings and relationships in context. 
+This process allows vector databases to find and retrieve relevant information based on vector similarity, rather than relying on exact text matches, offering more nuanced and context-aware search results.
 
-\subsubsection{Data model}
+\paragraph*{Similarity}
+o measure the similarity between vectors, metrics like Cosine similarity and Euclidean distance are commonly employed.
+Cosine similarity is particularly popular due to its computational efficiency and ability to capture the orientation of vectors in space, making it ideal for comparing the semantic similarity between high-dimensional vectors. 
+These similarity measures enable the database to determine how closely related two data points are, helping AI systems retrieve the most contextually relevant information based on the vector representations.
 
+\subsection{Vectors matching}
+Vector databases excel not only in efficiently storing high-dimensional vectors but also in enabling fast and accurate matching of vectors. 
+Searching for nearest neighbors in an unindexed database involves calculating the distance from the query vector to each point in the dataset, which can be highly computationally expensive for large datasets.
+Therefore, using indexing techniques to speed up this process is essential for efficient vector matching.
 
-\subsubsection{Query language}
+\paragraph*{Tree-based indexes}
+One common approach to creating efficient vector indexes is through tree-based techniques, which organize data into structures that optimize search operations. 
+Below are two popular tree-based indexing methods used for vector matching:
+\begin{itemize}
+    \item \textit{K-dimensional trees}: a type of binary space partitioning tree. 
+        In this structure, each node represents a $k$-dimensional point. 
+        The non-leaf nodes define splitting hyperplanes that partition the space into two regions. 
+        Each split is based on the median value of a specific dimension. 
+        The primary advantage of $K$-d trees is that they reduce the search space by narrowing down potential matches at each level of the tree.
+        The time complexity for search operations in K-d trees is $\mathcal{O}(\log n)$, where $n$ is the number of objects in the dataset. 
+        However, this method becomes less efficient as the dimensionality of the data increases. 
+        With high-dimensional vectors, the tree becomes less effective, and the performance may degrade to a level similar to exhaustive search, as most of the points in the tree will need to be evaluated. 
+    \item \textit{R-trees}: this indexing structure groups nearby objects into bounding rectangles, which are then represented at higher levels of the tree. 
+        The key idea is that if a query does not intersect a bounding rectangle at a certain level, it will not intersect any of the objects contained within it. 
+        This enables the search process to eliminate large portions of the dataset without checking each individual vector. 
+        At the leaf level, each rectangle corresponds to a single object, while higher levels aggregate multiple objects into larger rectangles, forming a coarse approximation of the dataset.
+        R-trees are balanced binary trees, meaning that the leaf nodes are always at the same depth. 
+        The tree is structured in pages, and each page has a minimum and maximum fill limit, which optimizes storage and retrieval.
+        A key challenge in R-tree construction is ensuring that the tree is well-balanced, that the bounding rectangles do not cover too much empty space, and that there is minimal overlap between them. 
+        This reduces the number of subtrees that need to be examined during a search, improving search efficiency.
+\end{itemize}
+
+\paragraph*{Approximation}
+For high-dimensional data, exact search techniques like K-d trees and R-trees often perform poorly due to the curse of dimensionality.
+To address this challenge, vector databases use Approximate Nearest Neighbor (ANN) algorithms to speed up searches in large datasets.
+\begin{itemize}
+    \item \textit{Locality Sensitive hashing} (LSH):  LSH is a technique that hashes similar items into the same buckets, increasing the likelihood of matching similar data points. 
+        Unlike traditional hashing, which minimizes collisions, LSH maximizes them to reduce the dimensionality of data, making it suitable for clustering and nearest-neighbor searches.
+    \item \textit{Hierarchical Navigable Small World} (HNSW): HNSW is an efficient algorithm for ANN searches in high-dimensional spaces. 
+        It organizes data points into a hierarchical graph where nodes represent vectors. 
+        The search begins at the top layer, which contains a few representative nodes, and moves downward through more detailed layers, progressively refining the result. 
+        HNSW sacrifices some accuracy for faster search times, making it highly scalable, fast, and adaptable to large datasets. 
+        It is also memory efficient, suitable for real-time applications with dynamic data.
+    \item \textit{Inverted File with Product Quantization} (IVFPQ):
+\end{itemize}
