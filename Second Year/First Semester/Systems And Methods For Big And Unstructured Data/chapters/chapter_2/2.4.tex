@@ -28,40 +28,59 @@ Additional space can be used to store multiple copies of data in different sort 
 Originally developed by Facebook and now maintained by the Apache Foundation, Cassandra is a popular column-oriented, NoSQL database widely used for high-throughput applications. 
 
 \subsubsection{Architecture}
-Cassandra's architecture and its column-oriented approach make it particularly suited for high-availability, large-scale, write-intensive workloads, where distributed, flexible data storage is essential.
+Cassandra's architecture is optimized for high availability, scalability, and write-intensive workloads, making it ideal for distributed, flexible data storage systems. 
+Its column-oriented design, combined with a masterless structure, eliminates single points of failure while providing tunable consistency for varying application requirements.
 
-Cassandra is masterless since it has no single point of failure. 
-Since we have column families based on groups of columns, we have no joins and the data are duplicated. 
-The consistency of Cassandra is tunable based on the needs.
+Cassandra's masterless architecture ensures no single node holds ultimate control, distributing data across a ring of nodes. 
+This ring topology connects servers in a circular fashion, enabling redundancy and fault tolerance.
+Each node in the ring is responsible for a portion of the data, and data placement follows a clockwise strategy to the next nodes in the ring, ensuring even distribution.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\linewidth]{images/ring.png}
+    \caption{Ring architecture}
+\end{figure}
 
-\paragraph*{Server mapping}
-How do you decide which server(s) a key-value resides on with a masterless approach. 
-We design a dependency in a ring form, with the servers connected only with the ring. 
+Cassandra minimizes network overhead, except during rare gossip storms. 
+Nodes periodically exchange small membership updates via the gossip protocol, ensuring consistent and accurate cluster state awareness.
+Each node gossips with up to three peers, fostering rapid convergence and anti-entropy to synchronize data efficiently.
 
-Always a constant amount of network traffic (except for gossip storms)
-Simple Strategy
-• Single datacenter
-• Clockwise placement to the next node(s)
-• Network Topology
-Strategy
-• Multiple datacenters (don't lose all the copies if a datacenter fails)
-• Supporting local queries
+\paragraph*{Gossip protocol}
+Cassandra uses a lightweight gossip protocol to maintain cluster state while minimizing bandwidth consumption. 
+Each node communicates with a small subset of peers (up to three) during a gossip round. 
+This exchange helps disseminate cluster information efficiently and introduces a layer of anti-entropy, allowing data to converge more quickly across the cluster. 
+Nodes periodically share their membership list, updating their local view upon receiving updates from peers. 
+This ensures the cluster remains synchronized and resilient, even in the face of failures or network issues.
 
-If a server fails we need to inform the others. 
-To avoid using too much bandwith we use gossip protocol: Each node picks its discussants (up to 3)
-• Having three messages for each round of gossip adds a degree of anti-entropy.
-• This process allows obtaining "convergence" of data shared between
-the two interacting nodes much faster
-Protocol:
-•Nodes periodically gossip
-their membership list
-•On receipt, the local
-membership list is updated
+The operations that we can do are: 
+\begin{itemize}
+    \item \textit{Write}: Cassandra prioritizes speed and availability for writes, avoiding disk seeks and locks to maintain scalability.
+    When a client sends a write request, it is directed to a coordinator node, which identifies responsible replicas and forwards the data. 
+        If a replica is temporarily unavailable, the coordinator buffers the data, ensuring eventual consistency via a mechanism called hinted handoff.
+        Data is initially written to a commit log for durability, then updated in an in-memory structure called the memtable. 
+        Over time, the memtable is flushed to disk as SSTables, which are indexed and include bloom filters for efficient reads. 
+        Periodic compaction merges updates and applies tombstones to optimize storage.
+    
+        A bloom filter is a compact and efficient data structure used to represent a set of items. 
+        It allows quick membership checks to determine if an item is possibly in the set, with minimal memory overhead.
+        While bloom filters can produce false positives they never produce false negatives, ensuring that if an item is in the set, it is always identified as such. 
+        This makes Bboom filters highly effective for applications where occasional false positives are acceptable, but false negatives are not.
+    \item \textit{Delete}: deletions are handled lazily by adding a tombstone marker rather than immediately removing the data. 
+        These tombstones are processed during compaction to permanently delete the marked records, reducing overhead and improving write performance.
+    \item \textit{Read}: reads often involve querying the closest replica for data, but the coordinator may contact multiple replicas to ensure consistency. 
+        If discrepancies arise between replicas, the system initiates a background process called read repair to synchronize the data. 
+        While reads may be slower than writes due to consistency checks, they remain efficient through the use of memtables, commit logs, and Bloom filters to limit disk access.
+\end{itemize}
 
-
-
-
-
+\paragraph*{Consistency levels}
+Cassandra provides flexible consistency levels, allowing clients to choose based on application needs:
+\begin{itemize}
+    \item \texttt{ANY}: data can be written to any node (even non-replicas).
+    \item \texttt{ONE}: at least one replica must confirm.
+    \item \texttt{QUORUM}: a majority of replicas (across all datacenters) must confirm.
+    \item \texttt{LOCAL\_QUORUM}: majority confirmation in the coordinator's datacenter.
+    \item \texttt{EACH\_QUORUM}: majority confirmation in each datacenter.
+    \item \texttt{ALL}: all replicas in all datacenters must confirm.
+\end{itemize}
 
 \subsubsection{Data model}
 In Cassandra, data is organized into column families, which are analogous to tables in SQL but are more flexible and can have unstructured, client-specified schemas. 
@@ -120,14 +139,11 @@ In case we need to use multiple keys for a family of column we may use an aggreg
 \begin{lstlisting}[style=C]
 attribute1:attribute2: { user1, user2}
 \end{lstlisting}
-We can query based on the first attribute, or both. 
+Queries can be performed using the first attribute or a combination of attributes, depending on the data model.
 
-Columns
-are sorted according to
-\texttt{CompareWith} or \texttt{CompareSubcolumnsWith}
-
-Rows
-are placed according to their Partitioner:
-•Random: MD5 of key
-•Order-Preserving: actual key
-are sorted by key, regardless of partitioner
+Columns within a row are sorted based on the specified comparator, either through \\ \texttt{CompareWith} for primary columns or \texttt{CompareSubcolumnsWith} for subcolumns.
+Rows are distributed across the cluster based on the partitioning strategy:
+\begin{itemize}
+    \item \textit{Random partitioning}: uses the hash of the row key for uniform data distribution.
+    \item \textit{Order-preserving partitioning}: uses the actual row key to maintain a natural order.
+\end{itemize}
