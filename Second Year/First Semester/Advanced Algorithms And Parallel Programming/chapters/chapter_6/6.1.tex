@@ -1,114 +1,94 @@
-\section{Pthreads}
+\section{POSIX Threads}
 
-Thread management
-Creation
-Joining
-Detaching
-Set/query attributes
-Synchronization
-Mutexes: Control access to mutual exclusion
-sections
-Condition variables: Control conditional interthreads communications
-Once created, threads are peers, and may create
-other threads: there is no implied hierarchy or
-dependency between threads.
-The maximum number of threads depends on the
-implementation
+Pthreads (POSIX Threads) provide a standardized API for thread management in multi-threaded programming. 
+They offer mechanisms for thread creation, synchronization, and management, enabling concurrent execution of tasks.
+
+Threads are peers, meaning that once they are created, there is no inherent hierarchy between them. 
+Threads can also create additional threads, with no dependencies or constraints between them. 
+The maximum number of threads depends on the system's implementation.
+
+Pthreads offer several tools for synchronization and thread management, including mutexes for controlling access to shared resources and condition variables for inter-thread communication.
 
 \subsection{Thread creation}
-The creation of a thread is: 
+To create a new thread in Pthreads, the \texttt{pthread\_create} function is used:
 \begin{lstlisting}[style=C]
 int pthread_create(pthread_t * thread, const pthread_attr_t * attr, void * (* start_routine) (void *), void *arg)
 \end{lstlisting}
-Here: 
+Here's what each parameter means:
 \begin{itemize}
-    \item thread: identifier for the new thread returned by
-    the subroutine
-    attr: used to set thread attributes
-    Joinable/detached
-    Scheduling
-    Stack size
-    start_routine: the C routine that the thread will
-    execute once it is created.
-    arg: argument passed to start_routine. It must be
-    passed by address as a pointer cast of type void
+    \item \texttt{thread}: a pointer to a \texttt{pthread\_t} variable, which will hold the identifier of the new thread.
+    \item \texttt{attr}: a pointer to a \texttt{pthread\_attr\_t} structure that can be used to set thread attributes such as scheduling policies, stack size, and whether the thread is joinable or detached.
+    \item \texttt{start\_routine}: the function that the new thread will execute once created.
+    \item \texttt{arg}: a pointer to the argument passed to \texttt{start\_routine}. 
+        It must be passed as a \texttt{void*}.
 \end{itemize}
 
 \subsection{Thread elimination}
-The thread returns from its starting routine
-The thread makes a call to the pthread_exit
-subroutine
-The thread is canceled by another thread via the
-pthread_cancel routine
-The entire process is terminated
-• (Created threads survive if main calls
-pthread_exit)
+A thread can be terminated in several ways:
+\begin{itemize}
+    \item By returning from its start routine.
+    \item By calling \texttt{pthread\_exit}.
+    \item If it is canceled by another thread using \texttt{pthread\_cancel}.
+    \item When the entire process is terminated.
+\end{itemize}
+If the main thread calls \texttt{pthread\_exit}, any threads created by it will remain running until they complete or are canceled.
 
 \subsection{Threads join}
-The joining of a thread is: 
+To wait for a thread to finish execution, use the \texttt{pthread\_join} function:
 \begin{lstlisting}[style=C]
 int pthread_join(pthread_t thread, void ** retval)
 \end{lstlisting}
-Here: 
+Here's what each parameter means:
 \begin{itemize}
-    \item pthread_join blocks the calling thread until the
-    specified thread terminates
-    retval will contain the copy of the argument of
-    pthread_exit
+    \item \texttt{pthread}: the thread whose execution is being waited on.
+    \item \texttt{retval}: a pointer to store the return value of the terminated thread (if any). 
+        This is the value passed to \texttt{pthread\_exit} by the thread.
 \end{itemize}
-Threads can be created as joinable or detached
-A joinable thread can become detached (not vice
-versa)
-Explicitly set joinable or detached attribute
-Default attribute should be joinable
-Not all implementations adopt this default
-Detached threads may consume less resources
+When a thread is joined, the calling thread is blocked until the specified thread terminates.
+Threads can either be created as joinable or detached. 
+By default, threads are joinable. 
+Once a joinable thread terminates, its resources remain allocated until the main thread calls \texttt{pthread\_join}.
 
-\paragraph*{Barriers}
-We can use barriers for join operations: 
+\subsection{Barriers}
+Barriers synchronize multiple threads at a specific point. 
+All threads in a group wait for others to reach the barrier before continuing execution. 
+This is useful when you want all threads to perform a specific task before moving to the next stage of execution. 
+To use barriers:
 \begin{lstlisting}[style=C]
-    int pthread_barrier_init(pthread_barrier_t * barrier, pthread_barrierattr_t * attr, unsigned int count)
-
-    int pthread_barrier_wait(pthread_barrier_t * barrier)
+int pthread_barrier_init(pthread_barrier_t * barrier, pthread_barrierattr_t * attr, unsigned int count)
+int pthread_barrier_wait(pthread_barrier_t * barrier)
 \end{lstlisting}
-pthread_join requires to wait for a specific
-thread exit
-Several threads can be synchronized among them
-through barriers
-all the threads of the group need to wait for all
-the other threads, then they can resume
-working
-count is the number of threads to be waited
-Not all implementations include barriers!
+Here's what each parameter means:
+\begin{itemize}
+    \item \texttt{barrier}: the barrier object to synchronize threads.
+    \item \texttt{count}: the number of threads that must reach the barrier before they can continue.
+\end{itemize}
+Not all implementations of Pthreads include barrier support.
 
 \subsection{Thread mutex}
-Mutex (mutual exclusion) variables are the basic
-method to protect shared data when multiple
-writes occur
-Only one thread can lock a mutex variable at any
-given time
-If several threads try to lock a mutex only one
-thread will be successful
+Mutexes (mutual exclusion) are used to protect shared data from concurrent modification. 
+Only one thread can lock a mutex at a time, and other threads that attempt to lock the mutex will be blocked until it is unlocked. 
+Here's an example of using a mutex:
 \begin{lstlisting}[style=C]
-    pthread_mutex_lock(&my_lock);
-    /* critical section */
-    pthread_mutex_unlock(&my_lock);
+pthread_mutex_lock(&my_lock);
+/* critical section */
+pthread_mutex_unlock(&my_lock);
 \end{lstlisting}
-Threads that could not acquire the mutex are
-blocked
-Less blocking overhead: trylock
-The thread can keep on working while the lock
-is not available
-Multiple mutexes can lead to deadlocks
-Three types of mutexes:
-Normal
-Recursive
-Error check
+If a thread fails to acquire a mutex, it will be blocked. 
+Alternatively, \texttt{pthread\_mutex\_trylock} can be used to attempt locking the mutex without blocking, allowing the thread to continue if the mutex is not available.
 
-\paragraph*{Condition variables}
-Mutexes implement synchronization by serializing
-data accesses
-Condition variables allow threads to synchronize
-explicitly by signaling the meeting of a condition
-Without condition variables, the programmer
-would need to poll to check if the condition is met
+\noindent There are three types of mutexes:
+\begin{itemize}
+    \item \textit{Normal}: basic mutex with no special properties.
+    \item \textit{Recursive}: allows the same thread to lock the mutex multiple times without blocking.
+    \item \textit{Error-check}: provides error checking to ensure proper mutex usage.
+\end{itemize}
+
+\subsection{Condition variables}
+While mutexes serialize data access, condition variables allow threads to synchronize based on specific conditions. 
+They are used to signal that a condition has been met, allowing waiting threads to proceed.
+
+Without condition variables, a thread would have to continuously poll for a condition, wasting CPU resources.
+With condition variables, threads can be made to wait until the condition is met and can be notified by another thread when that happens.
+
+Condition variables are often used in conjunction with mutexes to implement producer-consumer scenarios, where threads must wait for a certain state before proceeding.

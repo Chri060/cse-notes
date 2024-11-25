@@ -1,0 +1,315 @@
+\section{Message Passing Interface}
+
+Shared memory systems are typically easier to program but harder to build. 
+In these systems, all threads have access to the same address space, enabling efficient communication between threads within a single node. 
+However, they face limitations when extending across multiple nodes.
+The main limitations of shared memory architectures are: 
+\begin{itemize}
+    \item \textit{Execution across multiple nodes}: shared memory systems struggle to efficiently scale across several nodes in a distributed environment.
+    \item \textit{Communication across nodes}: data transfer between nodes requires specialized communication mechanisms, such as send/receive operations and synchronization, to coordinate and manage the process.
+\end{itemize}
+
+MPI is a standardized framework designed for communication in distributed memory systems, addressing the challenges of multi-node communication in high-performance computing (HPC) environments.
+It defines a set of interfaces for sending and receiving data between processes on different nodes, focusing on performance optimization in parallel and distributed systems.
+MPI is widely used in scenarios where performance is critical, especially in parallel computing environments, assuming a predictable setup based on prior experience with hardware configurations.
+
+It is essential to write code that is independent of a specific MPI implementation. 
+Programs should only rely on behaviors defined in the MPI standard, ensuring portability across various systems and implementations.
+The essential elements are: 
+\begin{itemize}
+    \item \texttt{libmpo.so}: the core library that implements the MPI standard.
+    \item \textit{Compiler wrappers}: wrappers around Fortran, C, and C++ compilers, designed to simplify the build process for MPI programs.
+    \item \texttt{mpiexec}: a command-line tool used to launch MPI applications. 
+        It can spawn multiple instances of the application, potentially across different nodes, and manage process execution. 
+        Additionally, it can coordinate with thread libraries like OpenMP for hybrid parallelization.
+\end{itemize}
+
+To run an MPI application we perform the following steps: 
+\begin{enumerate}
+    \item \textit{Build the application}: compile the application using the appropriate machine environment and compiler.
+    \item \textit{Create a bash}: a job script automates the interaction with the resource manager to request resources, sets up the environment used during compilation, and launches the application.
+    \item \textit{Submit the job script}: submit the job script to the resource manager's job queue for execution on the cluster.
+\end{enumerate}
+
+\subsection{Program}
+In MPI-based applications, we follow a structured process to initialize, run, and finalize MPI operations: 
+\begin{itemize}
+    \item \textit{Initializing MPI} (\texttt{MPI\_Init\_thread}): at the beginning of an MPI program, you must initialize MPI and negotiate the thread usage level. 
+        MPI was originally designed to work with processes, but modern implementations support multithreading.
+    \item \textit{Finalizing MPI} (\texttt{MPI\_Finalize}): at the end of the program, MPI must be finalized. 
+        This ensures that all operations have been completed and resources are released. 
+        After finalizing, you cannot re-initialize MPI.
+\end{itemize}
+
+\paragraph*{Multithreading}
+MPI supports several levels of thread usage, allowing you to control how multiple threads interact with the MPI library. 
+The thread level defines how many threads can concurrently make MPI calls and how they are synchronized.
+The available thread levels are:
+\begin{itemize}
+    \item \texttt{MPI\_THREAD\_SINGLE}: only the main thread is active; no other threads are involved in MPI communication.
+    \item \texttt{MPI\_THREAD\_FUNNELED}: the application is multithreaded, but only the main thread makes MPI calls. 
+        Other threads may perform computations but cannot call MPI functions.
+    \item \texttt{MPI\_THREAD\_SERIALIZED}: the application is multithreaded, but MPI functions can be called by only one thread at a time. 
+        The calls are serialized, so one thread accesses MPI at a time, though others can run concurrently.
+    \item \texttt{MPI\_THREAD\_MULTIPLE}: the application is fully multithreaded, and multiple threads can safely call MPI functions simultaneously. 
+        This level offers no restrictions on how threads interact with MPI.
+\end{itemize}
+Most modern MPI implementations support all the threading levels, ensuring flexibility for developers working in a multithreaded environment.
+If the implementation supports the desired level, all MPI functions are thread-safe and can progress independently, allowing different threads to work concurrently without interfering with each other.
+
+\subsection{Communicator}
+A communicator in MPI defines a group of processes that share a communication context. 
+It represents the environment in which processes can communicate with each other. 
+Each communicator is associated with a variable of type \texttt{MPI\_Comm}, which identifies the communication group.
+A process group within a communicator may include all, some, or just one of the processes in an MPI application.
+Two primary communicators are automatically created during MPI initialization: 
+\begin{itemize}
+    \item \texttt{MPI\_COMM\_WORLD}: represents a communicator that includes all the processes in the MPI environment.
+    \item \texttt{MPI\_COMM\_SELF}: represents a communicator that includes only the current process. 
+\end{itemize}
+
+To interact with communicators, the following functions are commonly used to obtain information about the communicator:
+\begin{lstlisting}[style=C]
+// Returns the number of processes in a communicator
+int MPI_Comm_size(MPI_Comm comm, int *size)
+
+// Returns the rank of the calling process within the specified communicator.
+int MPI_Comm_rank(MPI_Comm comm, int *rank)
+\end{lstlisting}
+The rank of a process in a communicator is important for several operations:
+\begin{itemize}
+    \item \textit{Data movement between processes}: the rank is often used to direct data from one process to another.
+    \item \textit{Partitioning computation}: you can partition tasks based on the rank, such as distributing parts of a matrix or dividing a large dataset into subsets. 
+        Each process with a different rank might handle a different part of the computation.
+    \item \textit{Assigning roles}: the rank is also useful for assigning different roles or responsibilities to processes.
+\end{itemize}
+
+\subsection{Point-to-point communications}
+Point-to-point communication in MPI involves functions to send and receive messages between two processes. 
+MPI provides both blocking and non-blocking communication primitives to suit different application needs.
+
+\paragraph*{Message}
+A message in MPI typically consists of the following elements:
+\begin{itemize}
+    \item \textit{Sender and receiver ranks}: the unique identifiers of the source and destination processes.
+    \item \textit{Tag}: an integer representing the topic of the message. 
+    \item \textit{Buffer}: the actual data being sent or received.
+    \item \textit{Communicator}: the group of processes involved in the communication.
+\end{itemize}
+\noindent MPI supports different modes for handling outgoing messages:
+\begin{enumerate}
+    \item \textit{Synchronous}: the \texttt{MPI\_Send} operation blocks until a matching \texttt{MPI\_Recv} is posted.
+    \item \textit{Buffered}: messages are stored in a buffer, allowing the \texttt{MPI\_Send} call to complete before the \texttt{MPI\_Recv} starts.
+    \item \textit{Standard}: MPI dynamically decides between synchronous and buffered modes based on implementation and runtime conditions.
+    \item \textit{Ready}: the send operation assumes a matching receive is already posted, reducing overhead from handshaking.
+\end{enumerate}
+Specialized functions like \texttt{MPI\_Bsend}, \texttt{MPI\_Ssend}, and \texttt{MPI\_Rsend} allow explicit use of these modes.
+
+\paragraph*{Data types}
+MPI defines a set of built-in Plain Old Data types via the \texttt{MPI\_Datatype} enumeration. 
+Applications can define custom derived types based on these.
+
+\subsubsection{Blocking semantic}
+\paragraph*{Message sending}
+MPI provides several functions to send messages. 
+The following are commonly used blocking send operations:
+\begin{lstlisting}[style=C]
+int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
+int MPI_Send_c(const void *buf, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
+\end{lstlisting}
+A blocking \texttt{MPI\_Send} call ensures:
+\begin{itemize}
+    \item The message buffer is safe for reuse after the call returns.
+    \item For synchronous communication, a matching \texttt{MPI\_Recv} operation has been posted.
+\end{itemize}
+
+\paragraph*{Message receiving}
+To receive messages, MPI provides blocking functions like:
+\begin{lstlisting}[style=C]
+int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status);
+int MPI_Recv_c(void *buf, MPI_Count count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status);    
+\end{lstlisting}
+A blocking \texttt{MPI\_Recv} call waits until:
+\begin{itemize}
+    \item A matching \texttt{MPI\_Send} operation is posted.
+    \item The data transfer to the buffer and status object is complete.
+\end{itemize}
+If the buffer is insufficient to hold the incoming data, an overflow error occurs.
+
+\paragraph*{Handling message information}
+The \texttt{MPI\_Status} object contains metadata about received messages. 
+The following functions help extract details like message size:
+\begin{lstlisting}[style=C]
+int MPI_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count);
+int MPI_Get_count_c(const MPI_Status *status, MPI_Datatype datatype, MPI_Count *count);
+\end{lstlisting}
+When dynamic allocation is required, you can "probe" the message to determine its size:
+\begin{lstlisting}[style=C]
+Int MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status)
+\end{lstlisting}
+
+\paragraph*{Limitations}
+Messages sent by the same source to the same destination are delivered in order.
+There is no global fairness or ordering between messages from different processes.
+Deadlocks can occur due to improper mixing of blocking and non-blocking operations.
+
+\subsubsection{Communication with non-blocking semantics}
+Non-blocking communication in MPI decouples the initiation and completion of operations, enabling concurrent computation and communication. 
+This approach improves application performance by allowing tasks to progress while waiting for communication to complete.
+
+Non-blocking operations in MPI are structured as follows:
+\begin{itemize}
+    \item \textit{Initiation}: the function initiating the communication returns immediately, allowing the program to proceed without waiting.
+    \item \textit{Completion}: a separate function ensures the operation is finalized, potentially blocking until the communication completes.
+\end{itemize}
+Accessory functions, such as \texttt{MPI\_Test}, help monitor and contribute to the progress of these operations.
+
+MPI provides functions to initiate non-blocking communication:
+\begin{lstlisting}[style=C]
+int MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)
+int MPI_Isend_c(const void *buf, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)
+int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)
+int MPI_Irecv_c(void *buf, MPI_Count count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)
+\end{lstlisting}
+The \texttt{MPI\_Request} output parameter represents the handler for the initiated operation. 
+This handler is used to track or finalize the communication.
+
+\paragraph*{Request ending}
+The following function blocks the execution flow until the corresponding non-blocking operation is complete:
+\begin{lstlisting}[style=C]
+int MPI_Wait(MPI_Request *request, MPI_Status *status)
+\end{lstlisting}
+
+\paragraph*{Request checking}
+To check the status of a non-blocking operation without blocking, you can use:
+\begin{lstlisting}[style=C]
+int MPI_Test(MPI_Request *request, int *flag, MPI_Status *status)
+\end{lstlisting}
+This function sets the \texttt{flag} variable to a nonzero value if the operation is complete, while also contributing to the progress of the operation.
+
+\paragraph*{Request cancellation}
+Non-blocking communication can be explicitly canceled:
+\begin{lstlisting}[style=C]
+int MPI_Cancel(MPI_Request *request)
+\end{lstlisting}
+This function is agnostic to the type of request and attempts to abort the ongoing operation.
+
+\subsubsection{Comparison}
+Non-blocking communication and multithreading share the goal of overlapping computation with communication. However, there are distinct differences:
+\begin{itemize}
+    \item \textit{Code clarity}: multithreading may provide a more structured approach, but requires thread-safe programming and proper synchronization.
+    \item \textit{Operation cancellation}: non-blocking operations can be explicitly canceled, which is not easily achievable with threads, as terminating threads is typically discouraged.
+    \item \textit{Legacy code}: high-performance computing (HPC) applications often use non-blocking semantics for backward compatibility and finer control.
+\end{itemize}
+Despite similarities, non-blocking operations are preferred in many HPC scenarios due to their simplicity, explicit control, and compatibility with MPI's architecture.
+
+\section{Collective communications}
+Collective communication in MPI involves operations that require the participation of all processes within a communicator. 
+These operations enable efficient data exchange and synchronization across processes. 
+
+\subsubsection{Communicator handling}
+Collective communication operations are blocking and follow these rules:
+\begin{enumerate}
+    \item All processes in the communicator must call the matching collective function.
+    \item Execution is blocked until the process's contribution is complete, and the associated buffer (if any) is safe for reuse.
+\end{enumerate}
+Completion for one process does not imply completion for others unless explicitly guaranteed by the operation.
+
+Communicators define groups of processes that can participate in collective communication. 
+Each communicator represents an independent universe (\texttt{MPI\_COMM\_WORLD}), which enables:
+\begin{itemize}
+    \item Avoidance of unintended side effects, useful for library development.
+    \item Reduction in synchronization overhead.
+    \item Better alignment with specific application algorithms.
+\end{itemize}
+
+\paragraph*{Duplicating a communicator}
+Create a copy of an existing communicator:
+\begin{lstlisting}[style=C]
+int MPI_Comm_dup(MPI_Comm comm, MPI_Comm *newcomm)
+\end{lstlisting}
+
+\paragraph*{Splitting a communicator}
+Partition a communicator into multiple sub-communicators:
+\begin{lstlisting}[style=C]
+int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
+\end{lstlisting}
+
+\paragraph*{Release a communicator}
+Obsolete communicators should be released using:
+\begin{lstlisting}[style=C]
+int MPI_Comm_free(MPI_Comm *comm)
+\end{lstlisting}
+
+\paragraph*{Advanced operations}
+Other advanced operations are: 
+\begin{enumerate}
+    \item Extract the group of processes in a communicator: 
+    \item Manipulate the group. 
+    \item Create a new communicator from the modified group: 
+\end{enumerate}
+
+\subsubsection{Synchronization}
+Synchronization in MPI ensures that processes within a communicator align their execution at specific points. 
+The most common mechanism for this is the barrier operation.
+
+A barrier enforces all processes in a communicator to reach the same point in their execution before any can proceed. 
+This is achieved using the following function:
+\begin{lstlisting}[style=C]
+int MPI_Barrier(MPI_Comm comm)
+\end{lstlisting}
+Unlike other collective operations, completion of the barrier for one process does not guarantee the same for all others. 
+The barrier completes for a process only when all processes in the communicator have reached it.
+It is primarily used to establish a clear synchronization point, ensuring that all processes are ready before proceeding to subsequent computations or communications.
+
+\subsubsection{Data transfer}
+MPI provides a collection of functions tailored to handle common data exchange patterns, combining sending and receiving operations into a single, efficient interface. 
+These collective communication routines typically outperform point-to-point communication due to optimizations in their implementation.
+
+\paragraph*{Broadcasting}
+Broadcasting allows one process (the root) to send the same data to all other processes in the communicator. The following functions implement broadcasting:
+\begin{lstlisting}[style=C]
+int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm)
+int MPI_Bcast_c(void *buffer, MPI_Count count, MPI_Datatype datatype, int root, MPI_Comm comm)
+\end{lstlisting}
+The difference between \texttt{MPI\_Bcast} and \texttt{MPI\_Bcast\_c} lies in the size of the count parameter, allowing support for larger data sizes in the \texttt{\_c} variant.
+
+\paragraph*{Gathering}
+Gathering collects data from all processes and consolidates it into a single buffer on the root process.
+This is performed using:
+\begin{lstlisting}[style=C]
+int MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
+int MPI_Gather_c(const void *sendbuf, MPI_Count sendcount, MPI_Datatype sendtype, void *recvbuf, MPI_Count recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
+\end{lstlisting}
+All processes must exchange the same amount of data. For variable-sized data, use \texttt{MPI\_Gatherv} or \texttt{MPI\_Gatherv\_c}.
+Only the root process ends up with the consolidated data. If all processes need the gathered data, consider using \texttt{MPI\_Allgather} or \texttt{MPI\_Allgather\_c}.
+
+\paragraph*{Scattering}
+Scattering is the inverse of gathering, where the root process distributes data to all other processes. 
+This is achieved through:
+\begin{lstlisting}[style=C]
+int MPI_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
+int MPI_Scatter_c(const void *sendbuf, MPI_Count sendcount, MPI_Datatype sendtype, void *recvbuf, MPI_Count recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
+\end{lstlisting}
+All processes must receive the same amount of data. 
+
+\paragraph*{Advantages}
+Optimized implementation often outperforms equivalent point-to-point communication.
+The combined sending and receiving operations reduce the need for extensive coordination.
+
+\subsubsection{Reductions}
+Reductions in MPI apply a specified operation to a set of elements across all processes in a communicator. 
+The result of the reduction is returned to a designated root process. 
+This operation is useful for computing aggregated values such as sums, products, minimums, or maximums.
+
+\paragraph*{Elementwise reduction}
+The reduction operation applies an associative function \texttt{o} to each element \texttt{e} in the buffer and produces a result \texttt{r}.
+ MPI supports a predefined set of operations (e.g., sum, product, max, min) and also allows custom, user-defined operations.
+
+The primary functions for reductions are:
+\begin{lstlisting}[style=C]
+int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm)
+int MPI_Reduce_c(const void *sendbuf, void *recvbuf, MPI_Count count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm)
+\end{lstlisting}
+The result is only available on the designated root process. 
+This can be inefficient if all processes need the reduced value.
