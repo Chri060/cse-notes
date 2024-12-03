@@ -1,0 +1,72 @@
+\section{Map pattern}
+
+The map pattern is a widely used parallel programming technique where a function is applied independently to each element in a collection. 
+The independence of each operation is key to the pattern's parallelizability, allowing for efficient computation, especially when combined with optimizations such as code fusion and cache management.
+
+\paragraph*{Optimizations}
+Applying multiple map operations in sequence can often be optimized by combining them into a single operation, reducing overhead and improving performance.
+Code fusion combines multiple map operations into a single pass over the data, eliminating unnecessary intermediate steps and reducing memory traffic.
+By optimizing memory access patterns, cache fusion reduces cache misses and ensures more efficient use of the processor cache, significantly improving performance.
+
+\paragraph*{Independence}
+The key advantage of the map pattern is its inherent independence. 
+This makes it ideal for parallelization. 
+In a map operation, there should be no shared state between iterations, meaning that each iteration operates only on its input and produces its output without interfering with other iterations.
+
+This independence allows map operations to be executed in parallel, yielding significant speedups, often in the order of $\mathcal{O}(\log n)$, particularly for large datasets.
+
+\paragraph*{Independence}
+However, maintaining independence is critical. If shared state is modified within the map function, it can lead to issues such as:
+\begin{itemize} 
+    \item \textit{Non-determinism}: different executions may produce different results due to race conditions. 
+    \item \textit{Data races}: multiple threads accessing and modifying shared data concurrently can lead to inconsistent results. 
+    \item \textit{Undefined behavior}: incorrect program execution that might result in unexpected outputs or crashes. 
+    \item \textit{Segfaults}: access violations or crashes due to improper memory handling. 
+\end{itemize}
+Thus, the map function should ideally be pure, meaning it should not modify any shared state, ensuring that each element can be processed independently.
+
+\paragraph*{Multi-maps}
+In many cases, the map pattern is extended to multiple collections, where a function is applied to elements across more than one collection simultaneously. 
+This approach is useful when operations on multiple datasets need to be performed concurrently.
+Chaining map operations is also common, where several map operations are performed in sequence.
+A naïve implementation of these multi-map operations might store intermediate results in memory, leading to unnecessary memory bandwidth consumption and cache overhead. 
+This can degrade performance, particularly on systems with limited memory bandwidth.
+
+\paragraph*{Code fusion}
+A better approach is to fuse map operations, performing them all in a single pass.
+This reduces memory traffic and improves computational efficiency by eliminating redundant memory writes.
+This optimization, known as fusion, increases arithmetic intensity and minimizes memory/cache usage, as intermediate results do not need to be written to memory.
+In ideal situations, operations can be performed directly in registers, avoiding memory accesses altogether and further boosting performance.
+However, there are cases where fusion is impractical, especially when operations cannot be combined into a single function or when it's difficult to maintain the independence of operations. 
+In such cases, the workload can be partitioned into smaller blocks, with each CPU or thread handling one block at a time. 
+This block-wise processing approach ensures that operations can still benefit from cache locality, improving performance even without full fusion.
+By understanding and applying these optimization techniques, the map pattern can be effectively utilized to achieve high-performance parallel execution for a wide range of computational tasks.
+
+\subsection{Patterns}
+The main map patterns include the following:
+\begin{itemize}
+    \item \textbf{Stencil}: in this pattern, each instance of the map function accesses neighboring elements of its input, typically offset from its usual position. 
+        This pattern is commonly used in applications like image processing and solving partial differential equations, where the value of an element depends on its surrounding neighbors.
+    \item \textbf{Workpile}: the workpile pattern allows new work items to be dynamically added to the map during its execution. 
+        As work is processed, it can generate additional tasks, which are then consumed by the map. 
+        The pattern terminates when there are no more tasks to process. 
+        This approach is useful in scenarios where work is generated dynamically during execution, such as in task scheduling or load balancing.
+    \item \textbf{Divide-and-conquer}: this pattern applies when a problem can be recursively divided into smaller subproblems, with each subproblem being solved independently. 
+        The subproblems continue to be divided until a base case is reached, which can be solved serially. 
+        Afterward, the results from the subproblems are combined to form the solution to the original problem. 
+        Divide-and-conquer is often used in sorting algorithms like quicksort and mergesort, as well as in matrix operations and tree-based computations.    
+\end{itemize}
+
+\subsection{Scaled vector addition}
+Scaled vector addition is an operation where vector $x$ is scaled by a constant factor $a$, and the result is added element-wise to vector $y$. 
+The operation modifies the input vector $y$, storing the final result in it.
+The operation can be expressed as:
+$y\leftarrow a\cdot x+y$
+This operation is a key function in the Basic Linear Algebra Subprograms library, commonly used in scientific computing and machine learning applications.
+
+The key feature of scaled vector addition is that each element of vectors $x$ and $y$ is independent of the others. 
+As a result, the operation can be easily parallelized. 
+When using more than 8 threads or processors, the performance benefits become more apparent, as the workload can be efficiently divided among multiple cores, improving execution speed.
+The parallelization is particularly effective because there are no dependencies between the operations on individual elements of the vectors, allowing for high levels of concurrency.
+
+This makes the scaled vector addition pattern well-suited for high-performance computing environments, where large vectors are processed in parallel to achieve faster computation.
