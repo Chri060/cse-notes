@@ -1,0 +1,40 @@
+\section{Camera}
+
+The homogeneous geometric coordinates of an image point are represented as:
+\[\mathbf{p} = \begin{bmatrix} U \\ V \\ 1 \end{bmatrix}\]
+
+\paragraph*{Camera Reference Frame}
+The origin is located at the optical center $\mathbf{O}$.
+The Z-axis is orthogonal to the image plane.
+The X and Y axes are parallel to the pixel rows and columns.
+The unit of measurement along the X, Y, and Z axes is the focal length $f$.
+
+\paragraph*{Image Geometric Coordinate System}
+The origin is located at the principal point $\mathbf{C}$.
+The coordinates $(U, V)$ are parallel to the pixel rows and columns but are oriented opposite to the camera frame's $(X, Y)$.
+The unit of measurement along the $U$ and $V$ axes is the focal length $f$.
+
+The homogeneous pixel coordinates for an image point are given by:
+\[\mathbf{u} = \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}\]
+To convert from image to pixel coordinates:
+\begin{itemize}
+    \item Adding 1 to $U$ corresponds to adding $fX$ pixels to $x$.
+    \item Adding 1 to $V$ corresponds to adding $fY$ pixels to $y$.
+\end{itemize}
+The pixel coordinates of the principal point $\mathbf{C}$ are $(U_0, V_0)$.
+The relationship between the pixel coordinates and the image point is given by the calibration matrix $\mathbf{K}$:
+\[\mathbf{u} = \begin{bmatrix} x \\ y \\ 1 \end{bmatrix} = \begin{bmatrix} f_x & 0 & U_0 \\ 0 & f_y & V_0 \\ 0 & 0 & 1 \end{bmatrix} \mathbf{p}\]
+Here, $\mathbf{K}$ is the calibration matrix.
+
+\subsection{World and camera}
+In general, the world reference frame is not the same as the camera reference frame. The relationship between the world coordinates and camera coordinates is:
+\[\mathbf{u} = \mathbf{K} \left( \mathbf{R} \mathbf{X}_w + \mathbf{t} \right)\]
+Here, $\mathbf{K}$ is the calibration matrix, $\mathbf{R}$ is the rotation matrix,$\mathbf{t}$ is the translation vector, $\mathbf{X}_w$ is the world coordinate point.
+
+The camera projection matrix $\mathbf{P}$ can be expressed as:
+\[\mathbf{P} = \mathbf{K} \begin{bmatrix} \mathbf{R} & \mathbf{t} \end{bmatrix}\]
+Thus, the camera's projection of a world point $\mathbf{X}_w$ is:
+\[\mathbf{u} = \mathbf{P} \mathbf{X}_w = \mathbf{K} \begin{bmatrix} \mathbf{R} & \mathbf{t} \end{bmatrix} \mathbf{X}_w\]
+This can also be written as:
+\[\mathbf{u} = \mathbf{M} \mathbf{X}_w + \mathbf{m}\]
+Here, $\mathbf{M} = \mathbf{K} \mathbf{R}$, and $\mathbf{m} = \mathbf{K} \mathbf{t}$.

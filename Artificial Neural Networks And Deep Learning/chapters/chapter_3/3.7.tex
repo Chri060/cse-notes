@@ -1,0 +1,239 @@
+\section{Localization}
+
+\subsection{Preprocessing}
+in general, normalization is useful in gradient-based optimizers.
+Normalization is meant tobring training data “around the origin” and
+possibly further rescale the data
+in practice, optimization on pre-processed data is made easier and
+results are less sensitive to perturbations in the parameters
+There are several options: 
+\begin{itemize}
+    \item PCA — based preprocessing: this is performed after having «zero-centered» the data
+    \item mean subtraction
+    PCA/Whitening preprocessing are not commonly used with CNN
+    The most frequent option is to zero-center the data, and it is common
+    to normalize every pixel as well
+\end{itemize}
+Normalization statistics are parameters ofyour ML model: Any
+preprocessing statistics (e.g. the data mean) must be computed on
+training data, and applied to the validation test data.
+Do not normalize first and then split in training, validation, test
+When asing pretrained model, remember to import (and use!) their
+pre-processing functions
+
+\subsection{Batch normalization}
+Considera batch of activations $\{x_i\}$, the following transformation bring these to unit variance and zero mean: 
+\[x_i^\prime=\dfrac{x_i-\mathbb{E}[x_i]}{\sqrt{\text{Var}[x_i]}}\]
+Here, $\mathbb{E}[x_i]$ and $\text{Var}[x_i]$ are computed from each batch and separately for each channel
+a furthera parametric transformation
+\[y_{i,j}=\gamma_jx_i^\prime+\beta_j\]
+Here, the parameters $\gamma$ and $\beta$ are learnable scale and shift parameters. 
+We have $\gamma$ and $\beta$ for each channel of the input activation. 
+The expected value and variance are non trainable parameters. 
+
+During testing batch normalization becomesa linear operator! Can be
+fused with the previous fully-connected or conv layer.
+in practice networks that use Batch Normalization are significantly more
+robust to bad initialization.
+Typically Batch Normalization is ased in between FC layers of deep CNN,
+but sometimes also between Conv Layers.
+
+Pros:
+Makes deep networks much easier to train!
+improves gradient flow
+Allows higher learning rates, faster convergence
+Networks become more robast to initialization
+Acts as regularization during training
+Zero overhead at test-time: can be fused with conv!
+Watch out:
+Behaves differently during training and testing: this isa very
+common source of bugs!
+
+\subsection{Bounding box estimation}
+The inpat image containsa single relevant object to be classified ina
+fixed set of categories
+The tasks are:
+1) assign the object class to the image
+2) locate the object in the image by its bounding box
+A training set of annotated images with label and
+a bounding box around each object is required
+Extended localization problems involve regression over
+more complicated geometries (e.g. human skeleton)ù
+
+Assign to an input image $I\in \mathbb{R}^{R\times C \times 3}$ the coordinates $(x,y, h, w)$ of the bounding box enclosing the object
+\[I\rightarrow(x,y, h, w)\]
+Sim lest So ution
+Traina regression network to predict the bounding box
+
+
+\subsection{Localization}
+Assign to an input image $I\in \mathbb{R}^{R\times C \times 3}$ a labelf froma fixed set of categories $\Lambda$ the coordinates $(x,y, h, w)$ of the bounding box enclosing the object
+\[I\rightarrow(x,y, h, w)\]
+This isa multi-task learning problem, as the two outputs have
+different nature
+Traina network to predict both the class label and the bounding box
+The training loss has to bea single scalar since we compute gradient
+a scalar function with respect to network parameters.
+Minimizea multitask loss to merge two losses:
+\[\mathcal{L}(x)=\alpha\mathcal{S}(x)+(1-\alpha)\mathcal{R}(x)\]
+Here, $\alpha\in[0,1]$ is an hyper parameter ofthe network.
+Watch outthat $\alpha$ directly influences the loss definition, tuning might be
+difficult. Better to do cross-validation looking at some other loss (loss
+value for different values of might be meaningless).
+it is also possible to adopta pre-trained model and then train the two
+FC separately... however it is always better to perform at least some
+fine taning to train the two jointly.
+However, this solution is not:
+Able to handle multi-class classification
+Predict bounding boxes outside the image
+To implementa multi-task loss it is necessary to modify the training loop
+
+\subsection{Human pose estimation}
+Pose estimation is formulated asa CNN-regression problem towards body
+joints. This isa localization task. 
+
+The network receives as input the whole image, capturing the fullcontext of each body joints.
+The approach is very simple to design and train. Training problems can
+be alleviated by transfer learning of existing classification networks
+Pose is defined asa vector of $k$ joints location for the human body,
+possibly normalized w.r.t. the bounding box enclosing the human.
+Traina CNN to predicta vector  $2k$ as oatpat by using an Alexnet-like
+architecture.
+Adopta regression loss of the estimated pose parameters over the
+annotations.
+• The network always providea fixed whena fewjoints are not visible.
+Redace overlitting by augmentation (translation and flips).
+Multiple networks have been trained to improve localization by refining
+joint position ina crop around the initial detection.
+
+
+\subsection{Saliency maps and weakly supervised localization}
+In supervised learninga model \mathcal{M} performing inference in $Y$
+\[\mathcal{M}:X\rightarrow Y\]
+Requires a training set $\text{TR}\subset X \times Y$, namely training couples are of the same type as classifier input-output.
+For some tasks (e.g. segmentation) these type ofannotations are very expensive to gateher.
+
+In weak supervision we obtain a model able to solvea task in $Y$, but asing labels that are easier to gather ina different domain $K$. Therefore, $\mathcal{M}$ after training perform inference as
+\[\mathcal{M}:X \rightarrow Y\]
+but it is trained using $\text{TR}\subset X \times K$, where $K \neq Y$. 
+
+\paragraph*{Weakly supervised localization}
+Perform a localization $\mathcal{M}:X\rightarrow\mathbf{R}^4$ without images training images annotated bounding box.
+The training set is typically annotated for classification, thus $\text{TR}\subset X \times \Lambda$ with image-label pairs $\{(I,\ell)\}$ whith no localization information provided.
+Basically, yoa traina classifier and you get also localization estimates.
+
+\paragraph*{GAP revisited}
+The advantages ofGAP layer extend beyond simply acting asa structural
+regalarizer that prevents overfitting (as shown in the NiN paper)
+in fact, CNNs canretaina remarkable localization ability until the final
+layer. Bya simple tweak it is possible to easily identify the discriminative
+image regions leading toa prediction.
+A CNR traineb ono*i•
+cl categorization is success/u//y able to localize the
+biscriminative regions |or action cIassi|ication as the objects that the
+humans areinteracting w/t// rather than thehumans themselves
+
+\paragraph*{Class Activation apping}
+Identifying exactly which regions of an image arebeing used for
+discrimination.
+CAm needs a classifier trained with a GAP layer, FC layer after the GAP and a minor tweak to obtain saliency maps. 
+
+\paragraph*{The GAP layer}
+Assume yoa have traineda CNN
+architecture having atthe end ofthe
+convolutional block: $n$ feature maps $f_k(\cdot,\cdot)$ having
+resolution “similar” to the inpat
+image and a GAP layer that competes $n$ averages $F_k,k=1,\dots,n$. 
+Add (and train)a single FC layer after the GAP.
+The FC computes $S_c$ for each class $c$ as the weighted sum of $\{F_k\}$, where weights are defined during training.
+Then the class probability $\Pr_c$ via softmax. 
+Wehn computing
+\[S_c\sum_{k}w_k^cF_k\]
+Here, $w^c_k$ encodes the importance of $F_k$ for the class $c$, $\{w_k^c\}_{k,c}$ are all the parameters of the last FC layer. 
+Perpective change in core interpretation
+\[S_c=\sum_kw_k^c\sum_{x,y}f_k(x,y)=\sum_{x,y}\sum_kw_k^cf_k(x,y)\]
+And CAM is defined as
+\[M_c(x,y)=\sum_kw_k^cf_k(x,y)\]
+Here, $M_c(x,y)$ directly indicates the importance of the activations ar $(x,y)$ for predicting the class $c$. 
+Last layer weights $\{w_k^c\}$ encode how relevant each feature map is to yield the final prediction.
+
+\paragraph*{Remarks}
+CAM canbeincluded in any pre-trained network, as long as all the FC
+layers at the end are removed
+The FC ased forCAM is simple, few neurons and no hidden layers
+Classification performance might drop (in VCC removing FC means
+loosing go'/o of parameters)
+CAM resolution (localization accuracy) can improve by «anticipating»
+GAP to larger convolutional feature maps (bat this reduces the
+semantic information within these layers)
+GAP: encourages the identification of the whole object, as all the parts
+of the values in the activation map concurs to the classification
+GMP (Global Max Pooling): it is enough tohavea high maximum, thas
+promotes specific discriminative features
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{CNN visualization}
+For the first layer we can quite easily extract the filter. 
+
+The first layer seems tomatch low-level features such as edges
+and simple patterns that
+are discriminative to describe the data
+
+Difficult to interpret deeper layers
+
+Another way to determine «what thedeepest layer see» is
+required
+
+We can do the following: 
+1. Selecta neuron ina deep layer ofa pretrained CNN onl mageNet
+2. Perform inference and store the activations
+for each input image.
+z. Select the image yielding the maximum
+activation.
+4. Showtheregions (patches) corresponding to
+the receptive field of the neuron.
+5. Iterate for many neurons.
+
+
+
+Computing Images maximally activating softmax neuron
+Adopt gradient descent to maximally activatea neuron before the
+softmax, thus the network «score»: the higher the most likely the
+network predicts that class
+\[\hat{I}=\argmax_I S_c(I)+\lambda{\left\lVert I\right\rVert}_2^2 \]
+Here $\lambda> 0$ regularization parameter, $c$ isa given oatpat class.
+To improve the smoothness ofacquired imags is necessary to adda
+regularization term
+Maximize this function through gradient ascent over the network inpat.
+Repeat this operation for neurons corresponding to different classes $c$. 
+
+
+
+\subsection{Explanations}
+Deep Neural Networks have
+Million parameters: their inner
+functioning is totally obscure.
+Healthy scepticism to resort to NN
+decision in critical tasks (e.g.
+medical domain) oreven services
+(e.g., blocking credit cards).
+Vivid research activity around
+gaining an understanding of
+Neural Network decision.
+Saliency aps to nderstan Model istakes
+Saliency aps to Discover Systematic rrors
+We may use Grand CAM and CAM based tecniques
