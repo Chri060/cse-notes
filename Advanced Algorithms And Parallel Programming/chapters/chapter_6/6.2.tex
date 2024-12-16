@@ -23,8 +23,8 @@ OpenMP is based on the fork-join parallel model:
 
 \paragraph*{Directives}
 The core component of OpenMP is its use of pragmas, which are preprocessor directives that provide the compiler with instructions about parallel execution. 
-Pragmas are used to define parallel tasks, control synchronization, and manage the execution flow. T
-he basic syntax for an OpenMP directive is:
+Pragmas are used to define parallel tasks, control synchronization, and manage the execution flow. 
+The basic syntax for an OpenMP directive is:
 \begin{lstlisting}[style=C]
 #pragma omp <name> [list of clauses]
 \end{lstlisting}
@@ -49,16 +49,6 @@ Several clauses can be added to control the behavior of the parallel region:
     \item \textit{Data scope clauses}: these clauses control the visibility and lifetime of variables within the parallel region, and we'll cover them in more detail in later sections.
 \end{itemize}
 Under the hood, the compiler may replace the OpenMP parallel directive with a Pthreads-based implementation for thread management.
-
-\paragraph*{Number of threads}
-The number of threads spawned in a parallel region is determined by several factors, in order of precedence:
-\begin{itemize}
-    \item \textit{Evaluation of the \texttt{if} condition}: if the \texttt{if} clause is used, its condition is evaluated to determine whether the parallel region should execute with multiple threads.
-    \item \textit{\texttt{num\_threads} clause}: if specified, this clause sets the exact number of threads to be used in the parallel region.
-    \item \textit{\texttt{omp\_set\_num\_threads} function}: this library function can be used to specify the number of threads programmatically before entering a parallel region.
-    \item \textit{\texttt{OMP\_NUM\_THREADS} environment variable}: this environment variable can be set outside the program to control the number of threads OpenMP uses.
-    \item \textit{Implementation default}: if none of the above settings are provided, the default number of threads is determined by the OpenMP implementation, often based on the number of available CPU cores on the system.
-\end{itemize}
 
 \subsection{Work sharing}
 Work-sharing constructs in OpenMP allow the division of execution across multiple threads within a parallel region. 
@@ -111,7 +101,7 @@ This is an example of functional parallelism where the work is divided into disc
         {
             /* code section 1 */
         }
-        #pragma omp master 
+        #pragma omp section 
         {
             /* code section 2 */
         }
@@ -280,26 +270,26 @@ Therefore, the global thread IDs from \texttt{omp\_get\_thread\_num} are not suf
 
 To manage nested parallelism more effectively, OpenMP provides several runtime functions:
 \begin{lstlisting}[style=C]
-\\ Returns the maximum number of threads that can be used in the current parallel region
+// Returns the maximum number of threads that can be used in the current parallel region
 int omp_get_thread_limit()
 
-\\ Returns the maximum number of active parallel regions in the current nested parallel execution
+// Returns the maximum number of active parallel regions in the current nested parallel execution
 int omp_get_max_active_levels()
 
-\\ Sets the maximum number of active parallel regions that can be nested
+// Sets the maximum number of active parallel regions that can be nested
 void omp_set_max_active_levels(int max_levels)
 
-\\ Returns the current level of nesting within parallel regions. It returns the depth of the current parallel region
+// Returns the current level of nesting within parallel regions. It returns the depth of the current parallel region
 int omp_get_level()
 
-\\ Returns the level of the current active parallel region
+// Returns the level of the current active parallel region
 int omp_get_active_level()
 
-\\ Returns the thread ID of the ancestor thread at a specific level of nesting. 
-\\ The level argument specifies the ancestor level.
+// Returns the thread ID of the ancestor thread at a specific level of nesting. 
+// The level argument specifies the ancestor level.
 int omp_get_ancestor_thread_num(int level)
 
-\\ Returns the size of the thread team for a specified nesting level
+// Returns the size of the thread team for a specified nesting level
 int omp_get_team_size(int level)
 \end{lstlisting}
 
@@ -437,7 +427,7 @@ The code inside the target region will be executed on the device if available; o
 \begin{lstlisting}[style=C]
 #pragma omp target
 {
-    // Code region to be offloaded to the target device (GPU, FPGA, etc.)
+    // Code region to be offloaded to the target device
 }
 \end{lstlisting}
 By default, execution is synchronous, meaning that the host thread will block until the device finishes executing the offloaded region.

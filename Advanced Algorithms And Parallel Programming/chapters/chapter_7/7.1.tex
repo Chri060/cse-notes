@@ -1,7 +1,7 @@
-\section{Introduction}
+\section{Dependencies}
 
 Parallel execution is inherently constrained by the sequence of operations required to ensure a correct result. 
-To achieve efficient parallelism, it is crucial to address control, data, and system dependencies. 
+To achieve efficient parallelism, it is crucial to address dependencies. 
 A dependency occurs when one operation must complete and produce a result before a subsequent operation can proceed.
 
 In addition to the traditional dependencies among operations, we extend this concept to resource dependencies, where certain operations may rely on the availability of specific resources to execute.
@@ -12,9 +12,7 @@ There are no assumptions regarding the speed of execution between processors, me
 \paragraph*{Sequential consistency}
 Sequential consistency ensures that the execution of statements does not interfere with one another, and the computation results remain consistent, regardless of the order in which the operations are executed.
 When this condition holds true, we can conclude that the two statements are independent of each other. 
-However, if the execution order impacts the result, the statements are considered dependent.
 
-\paragraph*{Dependencies}
 \begin{definition}[\textit{True dependence}]
     A statement $S_2$ has a true (flow) dependence on $S_1$ if and only if $S_2$ reads a value that was written by $S_1$.
 \end{definition}
@@ -24,18 +22,6 @@ However, if the execution order impacts the result, the statements are considere
 \begin{definition}[\textit{Output dependence}]
     A statement $S_2$ has an output dependence on $S_1$ if and only if $S_2$ writes a value that was also written by $S_1$.
 \end{definition}
-Both anti-dependences and output dependences are referred to as name dependencies, where the dependence arises due to the reuse of variable names, rather than the actual values.
-
-Two statements $S_1$ and $S_2$ can be executed in parallel only if there are no dependencies between them. 
-Some dependencies can be eliminated by modifying the program, such as by rearranging or eliminating certain statements.
-
-Data dependence relations can be analyzed by comparing the $\text{in}$ and $\text{out}$ sets for each statement. 
-The $\text{in}(S)$ and $\text{out}(S)$ sets of a statement $S$ are defined as follows:
-\begin{itemize}
-    \item $\text{in}(S)$: the set of memory locations (variables) that may be read by $S$.
-    \item $\text{out}(S)$: the set of memory locations (variables) that may be modified by $S$.
-\end{itemize}
-
 \renewcommand*{\arraystretch}{2}
 \begin{table}[H]
     \centering
@@ -52,150 +38,17 @@ The $\text{in}(S)$ and $\text{out}(S)$ sets of a statement $S$ are defined as fo
     \end{tabular}
 \end{table}
 \renewcommand*{\arraystretch}{1}
+Both anti-dependences and output dependences are referred to as name dependencies, where the dependence arises due to the reuse of variable names, rather than the actual values.
+Two statements $S_1$ and $S_2$ can be executed in parallel only if there are no dependencies between them. 
+
+Dependencies relations can be analyzed by comparing the $\text{in}$ and $\text{out}$ sets for each statement:
+\begin{itemize}
+    \item $\text{in}(S)$: the set of memory locations (variables) that may be read by $S$.
+    \item $\text{out}(S)$: the set of memory locations (variables) that may be modified by $S$.
+\end{itemize}
 
 \paragraph*{Loops}
-Significant opportunities for parallelism often exist within loops. A loop-carried dependence is a dependence that occurs only when the statements are part of a loop's execution. 
+Significant opportunities for parallelism often exist within loops. 
+A loop-carried dependence is a dependence that occurs only when the statements are part of a loop's execution. 
 In contrast, dependencies between two instances of a statement in the same iteration are loop-independent.
 Loop-carried dependencies can limit the parallelization of loop iterations, as they require that certain operations occur in sequence.
-These dependences are lexically forward if the source of the dependence occurs before the target, and lexically backward if the source occurs after the target. 
-To better visualize and address these dependencies, techniques such as loop unrolling can be applied.
-
-\paragraph*{Dependencies resolution}
-To achieve parallelism, it is essential to identify which parts of the execution are independent and can run concurrently, and which parts are dependent and must maintain a specific order.
-To manage these dependencies, synchronization mechanisms are employed to ensure that dependent operations are executed in the correct order, while independent operations can run concurrently. 
-Maintaining a partial order of execution is critical to achieving correct and efficient concurrent execution.
-
-\subsection{Parallel patterns}
-Parallel patterns refer to recurring combinations of task distribution and data access strategies that address specific challenges in parallel algorithm design. 
-Comparing parallel patterns with serial patterns can be useful in understanding how parallelism enhances algorithm efficiency and performance.
-One of the key strengths of parallel patterns is their universality (can be applied across a wide range of parallel programming systems, making them adaptable and reusable in various contexts).
-
-\subsubsection{Nesting pattern}
-Nesting refers to the ability to hierarchically combine patterns within a parallel or serial algorithm. 
-This pattern is prevalent in both serial and parallel algorithm design, providing a flexible way to structure complex tasks.
-
-In the context of the nesting pattern, pattern diagrams are often used to visually represent the pattern.
-Each task block in these diagrams corresponds to a general segment of code in the algorithm.
-Notably, each task block can itself be replaced by another pattern, allowing for recursive or layered composition within the overall structure.
-
-The nesting pattern is fundamentally compositional: it enables other patterns to be organized in a hierarchy. 
-This means that any task block within a nested structure can be substituted with a pattern that maintains the same input/output and dependency relationships, facilitating modular and scalable algorithm design.
-
-\subsubsection{Serial control patterns}
-Structured serial programming relies on four fundamental control patterns:
-\begin{itemize}
-    \item \textit{Sequence}: a sequence is an ordered list of tasks executed in a specific order. 
-        The assumption is that the program text will be executed in the order written, which is a simple yet crucial point when parallelizing the algorithm. 
-        Maintaining this order in parallel execution can introduce dependencies that must be managed.
-    \item \textit{Selection}: in a selection pattern, a condition $c$ is evaluated first. 
-        Depending on whether the result of $c$ is true or false, either task $a$ or task $b$ is executed. 
-        The assumptions are that neither task $a$ nor task $b$ can be executed before $c$, and only one of them is executed—never both.
-    \item \textit{Iteration}: an iteration involves evaluating a condition $c$. 
-        If $c$ is true, task $a$ is executed, and the condition is evaluated again. 
-        This cycle repeats until $c$ becomes false. 
-        A complication when parallelizing iterations is the potential for dependencies to exist between iterations, which can limit parallel execution.
-    \item \textit{Recursion}: recursion is a dynamic form of nesting where functions can call themselves. 
-        A special form of recursion, called tail recursion, can be converted into an iterative process, which is particularly important in functional programming languages for optimizing performance.
-\end{itemize}
-These patterns provide a foundation for algorithm design, and the nesting pattern can be used to hierarchically compose these structures.
-
-\subsubsection{Parallel control pattern}
-Parallel control patterns extend the serial control patterns, building on the same principles but relaxing some of the assumptions inherent in serial execution. 
-Each parallel control pattern corresponds to at least one serial control pattern but allows for concurrent execution, enabling parallelism.
-The key parallel control patterns are:
-\begin{itemize}
-    \item \textit{Fork-join}: This pattern enables the control flow to fork into multiple parallel flows, which later rejoin. 
-        The call tree in this case is a parallel call tree, where functions are spawned instead of called. 
-        Functions that spawn another function call continue to execute, while the caller synchronizes with the spawned function to join both paths. 
-
-        A sync operation (join) allows only one thread to continue, whereas a barrier ensures that all threads synchronize and proceed together.
-    \item \textit{Map}: this pattern applies a function to every element of a collection. 
-        It replicates a serial iteration pattern where each iteration is independent, the number of iterations is known in advance, and the computation depends only on the iteration index and input data from the collection. 
-        The function applied to each element is called an elemental function.
-    \item \textit{Stencil}: an elemental function accesses a set of neighbors.
-        Stencil is a generalization of the map pattern and is commonly used in iterative solvers or to evolve a system over time. 
-        It is often combined with iteration. 
-        Special care must be taken with boundary conditions in the stencil pattern.
-    \item \textit{Reduction}: combines every element in a collection using an associative combiner function.
-        The associativity of the combiner function allows different orderings of the reduction, making the process parallelizable. 
-    \item \textit{Scan}: computes all partial reductions of a collection. 
-        For each output in the collection, a reduction of the input up to that point is computed. 
-        If the function used in the scan is associative, the operation can be parallelized. 
-        However, parallelizing a scan can be challenging due to dependencies that exist in the serial version, which must be handled carefully.
-        A parallel scan generally requires more operations than a serial version.
-    \item \textit{Recurrence}: a more complex version of the map pattern, the recurrence pattern allows loop iterations to depend on one another. 
-        Similar to the map pattern, but with dependencies between elements, where elements may use the outputs of adjacent elements as inputs. 
-        For a recurrence to be computed in parallel, there must be a serial ordering of the recurrence elements, ensuring that each element is computed using previously computed outputs.
-\end{itemize}
-
-\subsubsection{Serial data management patterns}
-Serial programs manage data in various ways depending on how it is allocated, shared, read, written, and copied.
-Data management is essential for ensuring that data is handled correctly and efficiently, especially when transitioning from serial to parallel execution.
-The following are key serial data management patterns:
-\begin{itemize}
-    \item \textit{Random read and write}: this pattern involves accessing memory locations indexed by addresses. 
-        However, aliasing, or the uncertainty of whether two pointers refer to the same memory object, can cause issues when serial code is parallelized.
-        Managing aliasing is crucial in parallel environments to avoid data races and inconsistencies.
-    \item \textit{Stack allocation}: stack allocation is used for dynamically allocating data in a LIFO manner. 
-        It is efficient, as an arbitrary amount of data can be allocated in constant time. 
-        Stack allocation also preserves locality, making it beneficial for performance. 
-        When parallelized, each thread typically receives its own stack, ensuring thread locality is preserved and minimizing contention for memory.
-    \item \textit{Heap allocation}: heap allocation is useful when data cannot be allocated in a LIFO manner. 
-        While more flexible than stack allocation, heap allocation is slower and more complex due to the dynamic nature of memory management. 
-        In parallelized programs, using a parallelized heap allocator is essential. This type of allocator maintains separate memory pools for each parallel worker, reducing contention and improving performance.
-    \item \textit{Objects}: objects are constructs in object-oriented languages that associate data with functions to manipulate and manage that data.
-        Objects may have member functions and belong to specific classes. 
-        In parallel programming models, objects are often generalized in various ways to optimize parallelism, such as distributing object instances across multiple threads or processes to prevent contention.
-\end{itemize}
-
-\subsubsection{Parallel data management patterns}
-To avoid issues such as race conditions, it is crucial to understand when data is potentially shared among multiple parallel workers. 
-Effective data management is essential for ensuring correct and efficient parallel execution. Some parallel data management patterns help improve data locality and prevent conflicts.
-The following are key parallel data management patterns:
-\begin{itemize}
-    \item \textit{Pack}: the pack pattern is used to eliminate unused space in a collection. 
-        Elements marked as false are discarded, and the remaining elements are placed in a contiguous sequence, preserving their original order. 
-        This pattern is particularly useful when combined with the map pattern. 
-        The inverse of this operation is \texttt{unpack}, which restores elements to their original locations in the collection.
-    \item \textit{Pipeline}: connects tasks in a producer-consumer fashion, where one task produces data that is consumed by another. 
-        A simple linear pipeline is a basic form of this pattern, but it can also be implemented in a DAG for more complex dependencies. 
-        Pipelines are highly effective when used in combination with other parallel patterns, as they can significantly increase available parallelism.
-    \item \textit{Geometric decomposition}: divides data into subcollections, which can be either overlapping or non-overlapping. 
-        This pattern provides a new way of organizing data and does not necessarily require moving data, but instead offers an alternative view of the data to improve parallel processing.
-    \item \textit{Gather}: reads a collection of data based on a set of indices. 
-        It combines elements of the map pattern with random serial reads. 
-        The output collection shares the same type as the input collection but takes the shape of the indices collection, which defines how data is gathered.
-    \item \textit{Scatter}: inverse of gather. It requires a set of input data and corresponding indices. 
-        Each element of the input data is written to the output collection at the specified index. 
-        A potential issue with scatter is race conditions, which occur if multiple workers attempt to write to the same location in the output.
-\end{itemize}
-These parallel data management patterns help manage data effectively in parallel algorithms. 
-They allow for better data locality, prevent conflicts, and provide ways to structure data access, thereby improving the performance and correctness of parallel executions.
-
-\subsubsection{Other parallel patterns}
-In addition to the common parallel patterns, there are several other patterns that can be used to address specific parallelism scenarios. 
-These patterns provide more flexible ways to manage tasks and data, enabling efficient parallel execution in a variety of contexts.
-The following are some of these additional parallel patterns:
-\begin{itemize}
-    \item \textit{Superscalar sequences}: this pattern involves executing a sequence of tasks that are ordered solely by their dependencies, rather than by their position in the sequence. 
-        It allows for multiple tasks to be executed simultaneously as long as they do not depend on each other, maximizing parallelism.
-    \item \textit{Futures}: similar to the fork-join pattern, futures allow tasks to be executed in parallel. 
-        However, unlike fork-join, the tasks do not need to be nested hierarchically. 
-        A future is a placeholder for a result that will be computed asynchronously, enabling other tasks to proceed while waiting for the result of the future.
-    \item \textit{Speculative selection}: this is a generalization of the serial selection pattern, where both possible outcomes of a conditional can run in parallel. 
-        The condition and both branches of the selection are speculatively executed, and the correct outcome is chosen once the condition is resolved.
-    \item \textit{Workpile}: this is a variation of the map pattern, where each instance of an elemental function can generate additional tasks that are added to a pile of work. 
-        This dynamic expansion of tasks allows for greater flexibility and parallelism, as new work can be generated during execution.
-    \item \textit{Search}: this pattern is used to find data in a collection that meets a specific criterion. 
-        It can be implemented in parallel by dividing the search space and processing multiple parts of the collection simultaneously.
-    \item \textit{Segmentation}: in segmentation, operations are performed on subdivided, non-overlapping, and non-uniformly sized partitions of one-dimensional collections. 
-        This pattern is useful when working with collections that cannot be evenly divided but still require parallel processing.
-    \item \textit{Expand}: the expand pattern combines the pack and map patterns.
-        It involves transforming a collection by first packing the elements (eliminating unused space) and then applying a map function to the packed collection. 
-        This pattern is useful for managing sparse data or when elements need to be processed in parallel after removal of unnecessary data.
-    \item \textit{Category reduction}: given a collection of elements, each with a label, the category reduction pattern involves reducing elements that share the same label. 
-        This pattern can be used to group and perform operations on elements based on their category, such as summing all elements within the same group.
-\end{itemize}
-These additional parallel patterns offer greater flexibility for designing parallel algorithms. 
-They are particularly useful for managing complex dependencies, dynamically generating work, and processing data in ways that may not fit traditional parallel patterns like map or reduce. 
-By applying the appropriate parallel pattern to a specific problem, developers can optimize parallel execution and improve performance.

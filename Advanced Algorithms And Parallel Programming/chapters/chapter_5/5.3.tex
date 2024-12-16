@@ -4,25 +4,11 @@ Designing an effective parallel algorithm involves more than simply extracting a
 Not all parallelism is usable on a given architecture, as certain types may introduce overhead or be limited by the hardware. 
 To create a practical and efficient parallel solution, designers must consider the architecture's specific parallel capabilities and communicate this parallelism to the compilation tools effectively.
 
-Translation from pseudo-code to high-level languages is generally straightforward, as most sequential architectures conform to a von Neumann model. 
-While real processors vary widely in design, modern compilers can typically bridge these differences, optimizing applications for specific hardware.
-
-\paragraph*{New programming languages}
 New languages developed specifically for parallel programming offer advanced features for expressing parallelism, but their adoption has been limited: since they tend to have immature compilers, and developers must invest time in learning new syntax and semantics.
 In contrast, extensions to established languages are easier to adopt and integrate with existing compilers but have limitations. 
 These extensions typically only support certain forms of parallelism, making it challenging to represent more complex structures like pipeline parallelism.
 
-\paragraph*{Design guidelines}
-Designing parallel algorithms is complex, with no universal algorithmic approach to follow. 
-However, some general guidelines can help streamline the process: 
-\begin{itemize}
-    \item Machine-independent design: focus first on identifying concurrency in the problem rather than specific hardware requirements. 
-    \item Aim to delay machine-specific decisions to keep the design flexible.
-    \item Parallel program structure: while there are broad principles, parallel program structure often depends on the specific language or architecture used. 
-        Most problems can be solved using multiple parallel approaches, so a good starting point is to explore various solutions and select the most promising.
-\end{itemize}
-For designing an algorithm, we usually understand the problem to be solved, analyze the dependencies, partition the solution, and use the PCAM methodology to define other aspects. 
-Instead, if we want to create an entire parallel program, we have to: analyze the target architecture, select the best parallel programming architecture, and analyze the communications. 
+To design an algorithm, we usually understand the problem to be solved, analyze the dependencies, partition the solution, and use the PCAM methodology to define other aspects. 
 
 \subsection{PCAM mehod}
 The Partitioning-Communication-Agglomeration-Mapping (PCAM) methodology is a structured approach to designing efficient parallel algorithms, consisting of four interrelated phases:
@@ -37,18 +23,20 @@ The Partitioning-Communication-Agglomeration-Mapping (PCAM) methodology is a str
         \end{itemize}
         A combination of functional and domain partitioning may sometimes be effective to optimize parallelization.
     \item \textit{Communication}: once partitioned, tasks must interact to exchange necessary information. 
-        This phase addresses the nature and management of communication between tasks, aiming to minimize overhead and maximize efficiency.
-        
-        The communication can be classified as: local or global (limited to a small set of neighboring tasks or involve many tasks simultaneously), structured or unstructured (follow regular patterns or arbitrary, dynamic connections), statyc or dynamic (communication partners may be fixed in advance or determined at runtime), and synchronous or asynchronous (tasks may synchronize their communication or communicate independently).
-        The communication modes are: point-to-point (direct data transfer between two tasks) or collective (multiple tasks within a group). 
-
-        Communication is a critical aspect in parallel computing since excessive or poorly managed communication can negate the benefits of parallelism. 
-    \item \textit{Agglomeration}: this phase transitions from theoretical task partitioning to a more practical implementation by grouping tasks into larger units to improve efficiency on the target parallel architecture.
+        This phase addresses the nature and management of communication between tasks, aiming to minimize overhead and maximize efficiency.        
+        The communication can be classified as: 
+        \begin{itemize}
+            \item \textit{Local or global}: limited to a small set of neighboring tasks or involve many tasks simultaneously. 
+            \item \textit{Structured or unstructured}: follow regular patterns or arbitrary, dynamic connections. 
+            \item \textit{Static or dynamic}: communication partners may be fixed in advance or determined at runtime.
+            \item \textit{Synchronous or asynchronous}: tasks may synchronize their communication or communicate independently. 
+            \item \textit{Point-to-point or collective}: direct data transfer between two tasks or between multiple tasks within a group. 
+        \end{itemize} 
+    \item \textit{Agglomeration}: this phase transitions from theoretical task partitioning to a more practical implementation by grouping tasks into larger units to improve efficiency on the target parallel architecture: 
         \begin{itemize}
             \item \textit{Task consolidation}: combines smaller tasks into larger ones to increase computational granularity and reduce communication needs.
             \item \textit{Data and computation replication}: may replicate data or computation selectively to reduce dependency on frequent communication.
             \item \textit{Load balancing and overlapping}: ensures an even distribution of workload, overlapping communication with computation when possible.
-            
         \end{itemize}
         Agglomeration often changes key performance ratios, increasing task size to reduce communication demands, thereby enhancing efficiency but potentially decreasing parallelism. 
         This phase must balance the reduction of communication overhead with maintaining adequate parallelism.
@@ -57,4 +45,3 @@ The Partitioning-Communication-Agglomeration-Mapping (PCAM) methodology is a str
         Mapping is an $\mathcal{NP}$-complete problem, so heuristic algorithms are used to approximate optimal solutions.
         Mapping can be complex due to resource limitations and the potential for conflicting goals between maximizing concurrency and minimizing communication costs.
 \end{enumerate}
-In practice, the phases of the PCAM methodology are often interdependent and may overlap, requiring iterative refinement to optimize parallel algorithm performance.

@@ -1,0 +1,23 @@
+\section{Scan pattern}
+
+The scan pattern produces partial reductions of an input sequence and generates a new sequence. 
+Unlike reduce, scan computes all intermediate results, making it trickier to parallelize effectively.
+The scan may be: 
+\begin{itemize}
+    \item \textit{Inclusive}: an inclusive scan includes the current element in its partial reduction. 
+    \item \textit{Exclusive}: an exclusive scan excludes the current element, producing a partial reduction of all prior elements.
+\end{itemize}
+One algorithm for parallelizing scan involves two main phases:
+\begin{enumerate}
+  \item \textit{Up sweep}: perform a reduction operation on the input sequence to aggregate partial results.
+  \item \textit{Down sweep}: use the results of the up sweep to generate intermediate values for the scan.
+\end{enumerate}
+
+\paragraph*{Tiling}
+Similar to reduce, tiling can be applied to divide the work into manageable chunks for individual workers. 
+This approach involves:
+\begin{enumerate}
+  \item Breaking the input sequence into tiles.
+  \item Performing partial scans within each tile.
+  \item Combining the results to produce the final output.
+\end{enumerate}

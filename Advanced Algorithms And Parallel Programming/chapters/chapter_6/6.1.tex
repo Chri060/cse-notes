@@ -1,94 +1,95 @@
 \section{POSIX Threads}
 
-Pthreads (POSIX Threads) provide a standardized API for thread management in multi-threaded programming. 
-They offer mechanisms for thread creation, synchronization, and management, enabling concurrent execution of tasks.
+\paragraph*{Threads}
+A thread is an independent unit of execution within a process, capable of running concurrently with other threads. 
+Each thread has its own local data, but can access the resources shared by the parent process. 
+Unlike a full process, which includes information about resources and execution state, a thread is more lightweight. 
+A single process can spawn multiple threads, each of which operates as an independent stream of instructions.
 
-Threads are peers, meaning that once they are created, there is no inherent hierarchy between them. 
-Threads can also create additional threads, with no dependencies or constraints between them. 
-The maximum number of threads depends on the system's implementation.
+Threads are managed by the operating system, which schedules them for execution. 
+They can run in parallel, allowing for more efficient use of resources. 
 
-Pthreads offer several tools for synchronization and thread management, including mutexes for controlling access to shared resources and condition variables for inter-thread communication.
+In this sense, threads provide a form of implicit communication, as they can read and write shared variables. 
+However, because multiple threads can access the same memory location, this requires explicit synchronization to prevent conflicts. 
+Without proper synchronization, concurrent threads may cause unpredictable behavior, particularly when they attempt to modify the same data simultaneously.
 
-\subsection{Thread creation}
-To create a new thread in Pthreads, the \texttt{pthread\_create} function is used:
+Threads can be created dynamically during execution, and are generally more efficient than creating multiple processes since they share resources, avoiding the overhead associated with full process management. 
+Since threads operate independently but share the same memory space, synchronization mechanisms such as locks or semaphores must be used to prevent conflicting operations.
+
+\paragraph*{Race condition}
+A race condition occurs when two or more threads access the same variable concurrently, and at least one of them performs a write operation. 
+Since these accesses are not synchronized, there is a risk that the threads may interfere with each other, leading to inconsistent or incorrect results. 
+To prevent race conditions, synchronization mechanisms are required, which ensure that only one thread can modify the shared resource at a time.
+This can be achieved through various methods, such as using mutexes, locks, or atomic operations. 
+The programmer is responsible for managing the synchronization of threads, often using libraries, compiler directives, or other tools designed to handle parallelism and ensure the integrity of shared data.
+
+\paragraph*{PThreads}
+POSIX Threads provide a standardized API for managing threads in multi-threaded programming, enabling developers to efficiently execute tasks concurrently.
+
+Threads are peers, meaning that once created, they operate independently without any inherent hierarchy. 
+Threads can also create additional threads without any dependencies or constraints. 
+The maximum number of threads is determined by the system's implementation.
+
+\paragraph*{Creation}
+Threads are created using the \texttt{pthread\_create} function:
 \begin{lstlisting}[style=C]
-int pthread_create(pthread_t * thread, const pthread_attr_t * attr, void * (* start_routine) (void *), void *arg)
+int pthread_create()
 \end{lstlisting}
-Here's what each parameter means:
-\begin{itemize}
-    \item \texttt{thread}: a pointer to a \texttt{pthread\_t} variable, which will hold the identifier of the new thread.
-    \item \texttt{attr}: a pointer to a \texttt{pthread\_attr\_t} structure that can be used to set thread attributes such as scheduling policies, stack size, and whether the thread is joinable or detached.
-    \item \texttt{start\_routine}: the function that the new thread will execute once created.
-    \item \texttt{arg}: a pointer to the argument passed to \texttt{start\_routine}. 
-        It must be passed as a \texttt{void*}.
-\end{itemize}
+This function initializes a new thread that begins execution with the specified start routine.
 
-\subsection{Thread elimination}
-A thread can be terminated in several ways:
-\begin{itemize}
-    \item By returning from its start routine.
-    \item By calling \texttt{pthread\_exit}.
-    \item If it is canceled by another thread using \texttt{pthread\_cancel}.
-    \item When the entire process is terminated.
-\end{itemize}
-If the main thread calls \texttt{pthread\_exit}, any threads created by it will remain running until they complete or are canceled.
-
-\subsection{Threads join}
-To wait for a thread to finish execution, use the \texttt{pthread\_join} function:
+\paragraph*{Termination}
+A thread terminates naturally when its start routine returns or the process in which it resides exits. 
+Threads can also be explicitly terminated using the following functions:
 \begin{lstlisting}[style=C]
-int pthread_join(pthread_t thread, void ** retval)
+// Exit the calling thread
+int pthread_exit()
+// Exit a specific thread
+int pthread_cancel()
 \end{lstlisting}
-Here's what each parameter means:
-\begin{itemize}
-    \item \texttt{pthread}: the thread whose execution is being waited on.
-    \item \texttt{retval}: a pointer to store the return value of the terminated thread (if any). 
-        This is the value passed to \texttt{pthread\_exit} by the thread.
-\end{itemize}
-When a thread is joined, the calling thread is blocked until the specified thread terminates.
-Threads can either be created as joinable or detached. 
-By default, threads are joinable. 
-Once a joinable thread terminates, its resources remain allocated until the main thread calls \texttt{pthread\_join}.
 
-\subsection{Barriers}
-Barriers synchronize multiple threads at a specific point. 
-All threads in a group wait for others to reach the barrier before continuing execution. 
-This is useful when you want all threads to perform a specific task before moving to the next stage of execution. 
-To use barriers:
+\paragraph*{Joining}
+To wait for a thread to finish execution, the \texttt{pthread\_join} function is used:
 \begin{lstlisting}[style=C]
-int pthread_barrier_init(pthread_barrier_t * barrier, pthread_barrierattr_t * attr, unsigned int count)
-int pthread_barrier_wait(pthread_barrier_t * barrier)
+int pthread_join()
 \end{lstlisting}
-Here's what each parameter means:
-\begin{itemize}
-    \item \texttt{barrier}: the barrier object to synchronize threads.
-    \item \texttt{count}: the number of threads that must reach the barrier before they can continue.
-\end{itemize}
-Not all implementations of Pthreads include barrier support.
+When a thread is joined, the calling thread is blocked until the specified thread terminates. 
+Threads can be created as joinable (default) or detached. 
+Joinable threads must be joined to release their resources, while detached threads release their resources automatically upon termination.
 
-\subsection{Thread mutex}
-Mutexes (mutual exclusion) are used to protect shared data from concurrent modification. 
-Only one thread can lock a mutex at a time, and other threads that attempt to lock the mutex will be blocked until it is unlocked. 
-Here's an example of using a mutex:
+\subsection{Synchronization mechanisms}
+Synchronization is essential in multi-threaded programming to coordinate the execution of threads and protect shared resources. 
+
+\paragraph*{Barriers}
+Barriers synchronize multiple threads at a specific point in their execution. 
+All threads in a group must reach the barrier before any can proceed:
+\begin{lstlisting}[style=C]
+// Initialize a barrier
+int pthread_barrier_init()
+// Wait at a barrier
+int pthread_barrier_wait()
+\end{lstlisting}
+
+\paragraph*{Mutex}
+Mutexes (mutual exclusion locks) ensure that only one thread accesses a critical section at a time.
 \begin{lstlisting}[style=C]
 pthread_mutex_lock(&my_lock);
 /* critical section */
 pthread_mutex_unlock(&my_lock);
 \end{lstlisting}
-If a thread fails to acquire a mutex, it will be blocked. 
-Alternatively, \texttt{pthread\_mutex\_trylock} can be used to attempt locking the mutex without blocking, allowing the thread to continue if the mutex is not available.
+If a thread attempts to lock a mutex that is already locked, it will block until the mutex becomes available. 
+Alternatively, \texttt{pthread\_mutex\_trylock} can be used to attempt locking without blocking.
 
-\noindent There are three types of mutexes:
-\begin{itemize}
-    \item \textit{Normal}: basic mutex with no special properties.
-    \item \textit{Recursive}: allows the same thread to lock the mutex multiple times without blocking.
-    \item \textit{Error-check}: provides error checking to ensure proper mutex usage.
-\end{itemize}
+\paragraph*{Condition variables}
+Condition variables allow threads to wait for specific conditions to be met. 
+They are typically used in conjunction with a mutex to signal state changes between threads:
+\begin{lstlisting}[style=C]
+pthread_mutex_lock(&my_mutex);
+while (!condition_met) pthread_cond_wait(&my_cond, &my_mutex);
+/* condition is now met */
+pthread_mutex_unlock(&my_mutex);
 
-\subsection{Condition variables}
-While mutexes serialize data access, condition variables allow threads to synchronize based on specific conditions. 
-They are used to signal that a condition has been met, allowing waiting threads to proceed.
-
-Without condition variables, a thread would have to continuously poll for a condition, wasting CPU resources.
-With condition variables, threads can be made to wait until the condition is met and can be notified by another thread when that happens.
-
-Condition variables are often used in conjunction with mutexes to implement producer-consumer scenarios, where threads must wait for a certain state before proceeding.
+// Signal or broadcast to waiting threads
+pthread_cond_signal(&my_cond);
+pthread_cond_broadcast(&my_cond);
+\end{lstlisting}
+Condition variables provide a powerful mechanism for coordinating thread activities based on dynamic conditions.

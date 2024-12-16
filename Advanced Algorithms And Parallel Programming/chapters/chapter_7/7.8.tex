@@ -1,0 +1,23 @@
+\section{Scatter pattern}
+
+The scatter pattern involves distributing data from an input collection to specific locations in an output collection based on a set of write locations. 
+The output collection size may need to be larger to accommodate all write locations without overlap.
+
+\paragraph*{Scatter-gather conversion}
+Scatter operations are generally more expensive than gather operations due to cache-related challenges. 
+These issues can be mitigated by converting scatter operations into gather operations when the write addresses are known in advance. 
+This allows optimizations to be applied, particularly when the scatter pattern is repeated, amortizing the conversion cost.
+
+\subsection{Collisions}
+Writes to the same location are possible, leading to potential collisions.
+Race conditions occur when two or more values are written to the same location in the output collection. 
+This results in undefined behavior unless specific rules are enforced to resolve these collisions.
+
+\paragraph*{Collision rules}
+Several strategies can be applied to resolve collisions in scatter operations:
+\begin{itemize}
+    \item \textit{Atomic}: a non-deterministic approach where one and only one of the colliding values is written.
+    \item \textit{Permutation}: collisions are detected in advance. 
+    \item \textit{Merge}: associative and commutative operators are used to combine colliding elements.
+    \item \textit{Priority}: each input element is assigned a priority based on its position.
+\end{itemize}

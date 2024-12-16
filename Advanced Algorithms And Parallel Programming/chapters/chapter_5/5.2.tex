@@ -1,8 +1,5 @@
 \section{Algorithms parallelization}
 
-Parallelization can be approached in two main ways: automatic and manual.
-Each method has its own strengths and limitations, impacting how efficiently parallelism can be integrated into a program.
-
 \paragraph*{Automatic parallelization}
 In automatic parallelization, developers write algorithms and implement them with sequential code, relying on automated tools to handle all parallelization. 
 This approach allows developers to work with familiar, sequential algorithms without having to restructure them for parallel execution.
@@ -12,17 +9,14 @@ The primary limitation is that these tools struggle to extract all potential par
 Consequently, the performance gains from automatic parallelization are often limited, especially for complex or intricate tasks.
 
 \paragraph*{Manual parallelization}
-Manual parallelization, on the other hand, requires the programmer to play an active role in the parallelization process. 
+Manual parallelization requires the programmer to play an active role in the parallelization process. 
 Developers must design parallel algorithms and implement them using high-level parallel programming constructs. 
 By providing targeted information to the tools, the programmer assists in optimizing the parallel execution, leaving only the compilation of code to automated tools.
-
 When using manual parallelization, there are three critical aspects to consider:
 \begin{itemize} 
-    \item \textit{Type of parallelism}: determine which type of parallelism (e.g., data parallelism, task parallelism) is most suitable for the application. 
-    \item \textit{Algorithm design}: decide whether to adapt an existing sequential algorithm for parallel execution or design a parallel algorithm from scratch. 
+    \item \textit{Parallelism type}: determine which type of parallelism is most suitable for the application. 
     \item \textit{Tool communication}: effectively communicate information about the parallelism to tools so that they can optimize performance during compilation. 
 \end{itemize}
-Through careful consideration of these aspects, manual parallelization can often achieve higher performance and flexibility than automatic parallelization alone.
 
 \subsection{Taxonomy}
 Parallelism comes in various forms, each offering different ways to execute instructions and process data simultaneously. 
@@ -40,12 +34,11 @@ This classification, proposed in 1966, helps categorize computer architectures b
     \end{tabular}
 \end{table}
 
-\paragraph*{Parallelism level}
+\paragraph*{Parallelism classification}
 Parallelism can also be categorized by the level at which it occurs:
 \begin{enumerate}
     \item \textit{Bit-level parallelism}: bits within data words can represent distinct data elements, allowing a single instruction to manipulate multiple data bits at once.
-        This is relevant in hardware and, increasingly, in software.
-    \item \textit{Instruction-level parallelism}: multiple instructions are executed simultaneously on a single core, enabled by technologies like pipelining, vector processing, and SIMD units.
+    \item \textit{Instruction-level parallelism}: multiple instructions are executed simultaneously on a single core.
         Compilers can often extract this type of parallelism automatically.
     \item \textit{Task-level parallelism}: tasks are discrete units of computational work, typically composed of program-like sets of instructions.
         Multiple tasks can be executed on multiple processors, supported by shared memory and cache coherence mechanisms, though this parallelism is challenging to automate fully.
@@ -53,50 +46,15 @@ Parallelism can also be categorized by the level at which it occurs:
         Task-level parallelism can be represented with a parallel task graph in whick tasks are represented by graph vertices, while edges indicate dependencies or data communications.
         Each task is ideally executed once, following the directed acyclic structure.
 
-        Alternatively, we may use a classic pipeline, in which each task represents a stage in the pipeline.
+        Alternatively, we may use a classic pipeline, in which each processor represents a stage in the pipeline.
         Edges denote data passing between stages, making this model well-suited for stream processing tasks like audio and video encoding, where each stage processes data continuously.
 \end{enumerate}
 
-\paragraph*{Communication models}
+\paragraph*{Communication classification}
 Effective communication between tasks is essential in parallel systems, with two primary models:
 \begin{itemize}
     \item \textit{Shared memory}: all tasks have access to a global memory space, allowing them to read from and write to common memory locations. 
         Any modification is visible across all processors.
-    \item \textit{Message passing}: each task has its own private memory, and communication is achieved through explicit message exchanges. 
+    \item \textit{Private memory}: each task has its own private memory, and communication is achieved through explicit message exchanges. 
         This model offers high modularity and isolation between tasks, reducing shared memory conflicts.
-\end{itemize}
-Both models support different applications depending on their specific memory and communication requirements.
-
-\subsection{Performance}
-The speedup of a parallel program can be estimated by Amdahl's Law:
-\[\text{SU}(p)=\dfrac{1}{1-f+\frac{f}{p}}\]
-Here, $p$ is the number of processors and $f$ is the fraction of the program that can be parallelized.
-Amdahl's Law illustrates a fundamental limit to scalability: as the number of processors increases, the speedup is constrained by the portion of the program that remains sequential. 
-This limitation highlights that performance gains taper off as $p$ grows, particularly when the parallelizable fraction $f$ is low.
-
-However, in some problems, performance scales more effectively with increasing problem size. 
-Problems that increase the proportion of parallelizable work as they scale tend to achieve better performance improvements than those with fixed parallel workloads.
-
-\paragraph*{Scalability}
-The scalability of a parallel program depends on several interrelated factors:
-\begin{itemize}
-    \item \textit{Algorithmic limitations}: some algorithms have intrinsic scalability limits, where increasing resources eventually leads to diminishing returns or even performance degradation.
-    \item \textit{Hardware factors}: the underlying hardware, including processor architecture and memory bandwidth, can significantly influence scalability.
-    \item \textit{Software dependencies}: parallel libraries and subsystem software can impose additional constraints on scalability that may be independent of the application's own design.
-\end{itemize}
-Thus, scalable parallel solutions require careful consideration of both hardware and software elements alongside algorithm design.
-
-\paragraph*{Resource utilization}
-Parallel programming reduces execution time by leveraging multiple cores, but it also demands more resources:
-\begin{itemize}
-    \item \textit{Memory}: the memory footprint can be larger due to data replication across cores and additional overhead from parallel support libraries.
-    \item \textit{Power consumption}: running multiple cores concurrently increases power consumption, often requiring a trade-off between achieving high performance and managing power usage effectively.
-\end{itemize}
-
-\paragraph*{Portability}
-Standardization in APIs has helped improve the portability of parallel programs across different platforms. 
-However, parallel programs still face many of the same portability challenges as serial programs:
-\begin{itemize}
-    \item \textit{Operating systems}: different OSs may impact code portability, especially when it comes to process and thread management.
-    \item \textit{Hardware variability}: differences in hardware architecture, such as the availability of SIMD units or cache coherence protocols, can affect portability and necessitate adaptation across systems.
 \end{itemize}

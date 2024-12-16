@@ -71,10 +71,10 @@ Two primary communicators are automatically created during MPI initialization:
 To interact with communicators, the following functions are commonly used to obtain information about the communicator:
 \begin{lstlisting}[style=C]
 // Returns the number of processes in a communicator
-int MPI_Comm_size(MPI_Comm comm, int *size)
+int MPI_Comm_size()
 
-// Returns the rank of the calling process within the specified communicator.
-int MPI_Comm_rank(MPI_Comm comm, int *rank)
+// Returns the rank of the calling process within the specified communicator
+int MPI_Comm_rank()
 \end{lstlisting}
 The rank of a process in a communicator is important for several operations:
 \begin{itemize}
@@ -114,8 +114,8 @@ Applications can define custom derived types based on these.
 MPI provides several functions to send messages. 
 The following are commonly used blocking send operations:
 \begin{lstlisting}[style=C]
-int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
-int MPI_Send_c(const void *buf, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
+int MPI_Send()
+int MPI_Send_c()
 \end{lstlisting}
 A blocking \texttt{MPI\_Send} call ensures:
 \begin{itemize}
@@ -126,8 +126,8 @@ A blocking \texttt{MPI\_Send} call ensures:
 \paragraph*{Message receiving}
 To receive messages, MPI provides blocking functions like:
 \begin{lstlisting}[style=C]
-int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status);
-int MPI_Recv_c(void *buf, MPI_Count count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status);    
+int MPI_Recv();
+int MPI_Recv_c();    
 \end{lstlisting}
 A blocking \texttt{MPI\_Recv} call waits until:
 \begin{itemize}
@@ -140,12 +140,12 @@ If the buffer is insufficient to hold the incoming data, an overflow error occur
 The \texttt{MPI\_Status} object contains metadata about received messages. 
 The following functions help extract details like message size:
 \begin{lstlisting}[style=C]
-int MPI_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count);
-int MPI_Get_count_c(const MPI_Status *status, MPI_Datatype datatype, MPI_Count *count);
+int MPI_Get_count();
+int MPI_Get_count_c();
 \end{lstlisting}
 When dynamic allocation is required, you can "probe" the message to determine its size:
 \begin{lstlisting}[style=C]
-Int MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status)
+Int MPI_Probe()
 \end{lstlisting}
 
 \paragraph*{Limitations}
@@ -166,10 +166,10 @@ Accessory functions, such as \texttt{MPI\_Test}, help monitor and contribute to 
 
 MPI provides functions to initiate non-blocking communication:
 \begin{lstlisting}[style=C]
-int MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)
-int MPI_Isend_c(const void *buf, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)
-int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)
-int MPI_Irecv_c(void *buf, MPI_Count count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)
+int MPI_Isend()
+int MPI_Isend_c()
+int MPI_Irecv()
+int MPI_Irecv_c()
 \end{lstlisting}
 The \texttt{MPI\_Request} output parameter represents the handler for the initiated operation. 
 This handler is used to track or finalize the communication.
@@ -177,20 +177,20 @@ This handler is used to track or finalize the communication.
 \paragraph*{Request ending}
 The following function blocks the execution flow until the corresponding non-blocking operation is complete:
 \begin{lstlisting}[style=C]
-int MPI_Wait(MPI_Request *request, MPI_Status *status)
+int MPI_Wait()
 \end{lstlisting}
 
 \paragraph*{Request checking}
 To check the status of a non-blocking operation without blocking, you can use:
 \begin{lstlisting}[style=C]
-int MPI_Test(MPI_Request *request, int *flag, MPI_Status *status)
+int MPI_Test()
 \end{lstlisting}
 This function sets the \texttt{flag} variable to a nonzero value if the operation is complete, while also contributing to the progress of the operation.
 
 \paragraph*{Request cancellation}
 Non-blocking communication can be explicitly canceled:
 \begin{lstlisting}[style=C]
-int MPI_Cancel(MPI_Request *request)
+int MPI_Cancel()
 \end{lstlisting}
 This function is agnostic to the type of request and attempts to abort the ongoing operation.
 
@@ -226,19 +226,19 @@ Each communicator represents an independent universe (\texttt{MPI\_COMM\_WORLD})
 \paragraph*{Duplicating a communicator}
 Create a copy of an existing communicator:
 \begin{lstlisting}[style=C]
-int MPI_Comm_dup(MPI_Comm comm, MPI_Comm *newcomm)
+int MPI_Comm_dup()
 \end{lstlisting}
 
 \paragraph*{Splitting a communicator}
 Partition a communicator into multiple sub-communicators:
 \begin{lstlisting}[style=C]
-int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
+int MPI_Comm_split()
 \end{lstlisting}
 
 \paragraph*{Release a communicator}
 Obsolete communicators should be released using:
 \begin{lstlisting}[style=C]
-int MPI_Comm_free(MPI_Comm *comm)
+int MPI_Comm_free()
 \end{lstlisting}
 
 \paragraph*{Advanced operations}
@@ -256,7 +256,7 @@ The most common mechanism for this is the barrier operation.
 A barrier enforces all processes in a communicator to reach the same point in their execution before any can proceed. 
 This is achieved using the following function:
 \begin{lstlisting}[style=C]
-int MPI_Barrier(MPI_Comm comm)
+int MPI_Barrier()
 \end{lstlisting}
 Unlike other collective operations, completion of the barrier for one process does not guarantee the same for all others. 
 The barrier completes for a process only when all processes in the communicator have reached it.
@@ -269,8 +269,8 @@ These collective communication routines typically outperform point-to-point comm
 \paragraph*{Broadcasting}
 Broadcasting allows one process (the root) to send the same data to all other processes in the communicator. The following functions implement broadcasting:
 \begin{lstlisting}[style=C]
-int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm)
-int MPI_Bcast_c(void *buffer, MPI_Count count, MPI_Datatype datatype, int root, MPI_Comm comm)
+int MPI_Bcast()
+int MPI_Bcast_c()
 \end{lstlisting}
 The difference between \texttt{MPI\_Bcast} and \texttt{MPI\_Bcast\_c} lies in the size of the count parameter, allowing support for larger data sizes in the \texttt{\_c} variant.
 
@@ -278,8 +278,8 @@ The difference between \texttt{MPI\_Bcast} and \texttt{MPI\_Bcast\_c} lies in th
 Gathering collects data from all processes and consolidates it into a single buffer on the root process.
 This is performed using:
 \begin{lstlisting}[style=C]
-int MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
-int MPI_Gather_c(const void *sendbuf, MPI_Count sendcount, MPI_Datatype sendtype, void *recvbuf, MPI_Count recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
+int MPI_Gather()
+int MPI_Gather_c()
 \end{lstlisting}
 All processes must exchange the same amount of data. For variable-sized data, use \texttt{MPI\_Gatherv} or \texttt{MPI\_Gatherv\_c}.
 Only the root process ends up with the consolidated data. If all processes need the gathered data, consider using \texttt{MPI\_Allgather} or \texttt{MPI\_Allgather\_c}.
@@ -288,28 +288,7 @@ Only the root process ends up with the consolidated data. If all processes need 
 Scattering is the inverse of gathering, where the root process distributes data to all other processes. 
 This is achieved through:
 \begin{lstlisting}[style=C]
-int MPI_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
-int MPI_Scatter_c(const void *sendbuf, MPI_Count sendcount, MPI_Datatype sendtype, void *recvbuf, MPI_Count recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
+int MPI_Scatter()
+int MPI_Scatter_c()
 \end{lstlisting}
 All processes must receive the same amount of data. 
-
-\paragraph*{Advantages}
-Optimized implementation often outperforms equivalent point-to-point communication.
-The combined sending and receiving operations reduce the need for extensive coordination.
-
-\subsubsection{Reductions}
-Reductions in MPI apply a specified operation to a set of elements across all processes in a communicator. 
-The result of the reduction is returned to a designated root process. 
-This operation is useful for computing aggregated values such as sums, products, minimums, or maximums.
-
-\paragraph*{Elementwise reduction}
-The reduction operation applies an associative function \texttt{o} to each element \texttt{e} in the buffer and produces a result \texttt{r}.
- MPI supports a predefined set of operations (e.g., sum, product, max, min) and also allows custom, user-defined operations.
-
-The primary functions for reductions are:
-\begin{lstlisting}[style=C]
-int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm)
-int MPI_Reduce_c(const void *sendbuf, void *recvbuf, MPI_Count count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm)
-\end{lstlisting}
-The result is only available on the designated root process. 
-This can be inefficient if all processes need the reduced value.
