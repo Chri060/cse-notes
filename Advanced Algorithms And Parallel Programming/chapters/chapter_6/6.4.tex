@@ -1,0 +1,136 @@
+\section{Heterogeneous computing}
+
+General-purpose processors are often inefficient in terms of energy consumption. 
+In contrast, the circuitry needed to perform specific computations can be relatively simple and optimized for efficiency. 
+Selecting the appropriate tool for a task is crucial for achieving the best balance between performance and energy consumption:
+\begin{itemize}
+    \item \textit{CPU}: control-oriented, easy to program but less energy-efficient.
+    \item \textit{GPU}: throughput-oriented, up to 10x more energy-efficient than CPUs.
+    \item \textit{FPGA}: can be up to 100x more energy-efficient, though programming is more complex (active research aims to simplify this).
+    \item \textit{ASIC}: fixed-function, up to 100-1000x more efficient but not programmable and costly. 
+\end{itemize}
+To further reduce energy consumption, consider these two strategies:
+\begin{enumerate}
+    \item \textit{Use specialized processors}: these are more energy-efficient as they perform more operations per joule.
+    \item \textit{Minimize data movement}: reducing communication overhead not only boosts performance but also cuts down on energy usage.
+\end{enumerate}
+The ideal parallel programming language should balance performance, productivity, and generality. 
+Achieving this balance allows for effective development while maintaining high efficiency and flexibility across different computing environments.
+
+\subsection{Domain-Specific Languages}
+Domain-specific languages (DSLs) aim to bridge the gap between performance and productivity by offering specialized solutions for specific domains.
+These languages are designed with restricted expressiveness, focusing on particular problem sets to provide more efficient and intuitive approaches. 
+Typically, they have a high-level, often declarative syntax and are deterministic in nature. 
+DSLs can be external or embedded within another general-purpose language, such as SQL, MATLAB, or Halide, allowing developers to work at a higher abstraction level while still benefiting from specialized optimizations.
+
+\paragraph*{Image processing}
+Image processing is a prime example of a data-intensive domain where significant optimization is needed. 
+Imaging applications are pervasive in our daily lives, and almost every imaging sensor is coupled with a powerful compute unit to process the captured data. 
+The demand for optimization in image processing is immense, driven by the need to maximize performance while minimizing power consumption.
+
+The key challenges in this area revolve around two core concepts: parallelism and locality.
+Parallelism refers to the ability to split computations into smaller tasks that can be performed simultaneously across multiple processors. 
+Locality, on the other hand, focuses on efficient memory access patterns that reduce latency and energy consumption. 
+
+There are several approaches to improving performance in image processing. 
+First, faster algorithms are necessary, and sometimes approximate computing methods are employed, where precision is sacrificed for faster results. 
+Second, advancements in hardware can significantly impact performance. 
+Faster CPUs, with higher frequencies and increased memory bandwidth, along with SIMD vector operations, can process data more rapidly. 
+Additionally, leveraging the parallel processing capabilities of GPUs offers substantial improvements in throughput for tasks that are well-suited to parallel execution.
+
+However, hardware efficiency goes beyond just having faster processors. 
+The key lies in utilizing the hardware as effectively as possible, which can be achieved through parallelism, better cache management, and optimized memory usage. 
+All of these factors contribute to faster and more energy-efficient image processing.
+
+To achieve these goals, it is often necessary to reorganize computation, restructuring both the program and data to exploit parallelism and locality effectively.
+Common approaches in existing solutions include using C++ with multithreading and SIMD operations, as well as utilizing CUDA or OpenCL for GPU acceleration. 
+Optimized libraries such as BLAS, IPP, MKL, and OpenCV also provide specialized functions to improve performance.
+
+\subsubsection{Halide}
+Halide proposes a radically different approach: decoupling the algorithm from the schedule. 
+This allows for flexibility in optimization decisions, creating a choice space for improving performance. 
+The performance of an image processing pipeline requires complex trade-offs and frequent reorganization of computation. 
+Halide simplifies this iterative process, enabling easier exploration of optimization options.
+\renewcommand*{\arraystretch}{2}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Strategy}  \\ \hline
+    Compute and store producer, then compute consumer \\ \hline
+    Compute producer values when needed by consumer, then throw them away \\ \hline
+    Compute producer values when needed by consumer, then keep the old values for reuse  \\ \hline
+    Compute producer values when needed by consumer, then throw them away  \\ \hline
+    Compute a subset of producer values all at once, then pass them to the consumer  \\ \hline
+    \end{tabular}
+\end{table}
+
+Achieving optimal performance involves navigating complex trade-offs and frequently reorganizing computations. 
+Halide simplifies this iterative process, providing a more efficient and flexible framework for exploring and implementing optimizations.
+
+\subsection{High-Level Synthesis}
+\paragraph*{Traditional design flow}
+The Register-Transfer Level (RTL) design approach involves specifying both the behavior and structure of a system, including components like multiplexers and registers, using hardware description languages like Verilog or VHDL. 
+This method provides precise, fine-grained control over the design but is time-consuming and error-prone, requiring significant expertise and effort from hardware designers.
+
+\paragraph*{Behavioral design flow}
+In contrast, the Behavioral Design Flow automates the translation of high-level descriptions into RTL code, akin to how compilers translate software code into machine instructions.
+
+\paragraph*{FSMD model}
+The FSMD (Finite State Machine with Datapath) model is a key framework for designing digital systems. 
+It consists of two main components: the Datapath and the Controller.
+
+The datapath is responsible for handling data operations and storage.
+The controller governs the operation of the datapath using a finite state machine (FSM).
+
+The process of converting high-level code to hardware circuits involves several steps:
+\begin{enumerate}
+    \item \textit{Build the FSM for the controller}: this step defines the sequence of states and actions.
+    \item \textit{Build the datapath}: this includes designing the functional, memory, and interconnection resources.
+\end{enumerate}
+In High-Level Synthesis (HLS), these steps are typically performed automatically, streamlining the design process. The key tasks involved include:
+\begin{enumerate}
+    \item \textit{Scheduling}: determining the order in which operations will be performed.
+    \item \textit{Resource allocation}: allocating the necessary hardware resources for each operation.
+    \item \textit{Binding}: mapping operations to specific resources in the datapath.
+\end{enumerate}
+One potential optimization in the FSMD model is reducing the number of operations required. 
+
+\subsubsection{Scheduling}
+Scheduling refers to the assignment of operations to specific time steps or control steps in the execution process, often constrained by hardware resources and timing requirements. 
+It aims to exploit parallelism wherever possible to optimize the overall system performance.
+The possible solutions are: 
+\begin{itemize}
+    \item \textit{Minimum latency unconstrained scheduling}: operations have bounded delays that are expressed as the number of clock cycles, but there are no area constraints.
+        The possible solutions are: 
+        \begin{itemize}
+            \item ASAP scheduling: this method schedules each operation as early as possible, subject to dependency constraints.
+            \item ALAP scheduling: this method schedules operations as late as possible without violating dependencies.
+        \end{itemize}
+        The mobility is the difference between the ASAP and ALAP start times.
+        Operations with zero mobility are critical and must occur on the critical path, meaning any delay in their execution would directly increase the overall latency.
+    \item \textit{Constrained scheduling}: in more complex scenarios, scheduling must also consider constraints on resources or latency. 
+        The possible solutions are: 
+        \begin{itemize}
+            \item \textit{Minimize latency with resource constraints} (ML-RCS): the goal is to reduce latency while respecting the hardware resource limits.
+            \item \textit{Minimize resources with latency constraints} (MR-LCS): this approach aims to reduce resource usage while ensuring the latency does not exceed a predefined limit.
+        \end{itemize}
+        Both these problems are $\mathcal{NP}$-hard. 
+\end{itemize}
+
+\paragraph*{List-based scheduling}
+List-based scheduling is a heuristic method used for both ML-RCS and MR-LCS. 
+It does not guarantee an optimal solution but uses a greedy strategy to provide a quick, approximate solution. 
+The time complexity is $\mathcal{O}(n)$, where n is the number of operations.
+\begin{algorithm}[H]
+    \caption{List-based scheduling}
+        \begin{algorithmic}[1]
+            \State Construct a priority list based on factors such as operation mobility.
+            \While{not all operations have been scheduled} 
+                \State For each available resource, select an operation from the ready list, following the descending priority order.
+                \State Assign the selected operations to the current clock cycle.
+                \State Update the ready list to reflect the remaining operations.
+                \State Increment the clock cycle.
+            \EndWhile
+        \end{algorithmic}
+\end{algorithm} 
