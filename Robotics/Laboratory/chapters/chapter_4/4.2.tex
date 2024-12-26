@@ -1,0 +1,40 @@
+\section{ActionLib}
+
+Node A sends a request to Node B to perform a task. 
+There are two primary methods for handling these requests: 
+\begin{itemize}
+    \item \textit{Services}: 
+        \begin{itemize}
+            \item Designed for tasks with small execution times.
+            \item The requesting node can wait for the task to complete.
+            \item  No status updates or cancellation options are available.
+        \end{itemize}
+    \item \textit{Actions}:
+        \begin{itemize}
+            \item Suitable for tasks with long execution times.
+            \item The requesting node cannot wait for the task to complete.
+            \item Provides status monitoring and cancellation options.
+        \end{itemize}
+\end{itemize}
+The \texttt{actionlib} package in ROS serves as an implementation similar to threads, based on a client/server paradigm. 
+It provides tools to:
+\begin{itemize}
+    \item Create servers that execute long-running tasks, which can be preempted.
+    \item Create clients that interact with these servers.
+    \item The ActionClient and ActionServer communicate using the ROS Action Protocol, which is built on top of ROS messages.
+\end{itemize}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\linewidth]{images/cs.png}
+\caption{Client-server interaction}
+\end{figure}
+The main functions of the actionlib package include:
+\begin{itemize}
+    \item \textit{Goal}: Sends new goals to the server.
+    \item \textit{Cancel}: Sends cancellation requests to the server.
+    \item \textit{Status}: Notifies clients of the current state of every goal in the system.
+    \item \textit{Feedback}: Sends clients periodic auxiliary information for a goal.
+    \item \textit{Result}: Sends clients one-time auxiliary information upon completion of a goal.
+\end{itemize}
+Action templates are defined by a name and additional properties through a .action structure in ROS. 
+Each instance of an action has a unique Goal ID, which provides a robust way for the action server and action client to monitor the execution of a particular instance of an action.

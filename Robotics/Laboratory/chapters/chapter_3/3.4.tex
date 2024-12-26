@@ -1,0 +1,30 @@
+\section{Subscriber}
+
+The structure of a subscriber is as follows: 
+\begin{verbatim}
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+
+// code executed when we received a message
+void chatterCallback(const std_msgs::String::ConstPtr& msg) {
+    ROS_INFO("I heard: [%s]", msg->data.c_str());
+}
+
+int main(int argc, char **argv) {
+
+    // initialize the node with the name "listener"
+    ros::init(argc, argv, "listener");
+
+    // handle used to call all the ros releated functions
+    ros::NodeHandle n;
+
+    // create the subsriber called "sub" with the topic "chatter"
+    // the function "chatterCallback" is called when something is published
+    ros::Subscriber sub = n.subscribe("chatter", 1, chatterCallback);
+
+    // standard used outside a loop when the code is executed
+    ros::spin();
+
+    return 0;
+}
+\end{verbatim}

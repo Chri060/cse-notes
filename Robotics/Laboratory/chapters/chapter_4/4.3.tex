@@ -1,0 +1,44 @@
+\section{Rosbag tools}
+
+Rosbag tools allow for various operations directly on bag files, including converting, extracting data, and editing. 
+These tools are accessible via both Python and C++ APIs.
+
+\paragraph*{Bag to CSV}
+To transform a bag file into a CSV file, use the following code:
+\begin{verbatim}
+import rosbag
+import csv
+from turtlesim.msg import Pose
+
+bag = rosbag.Bag('/home/airlab/robotics/bags/pose.bag')
+f = open('/home/airlab/robotics/bags/pose.csv', 'w')
+writer = csv.writer(f)
+header = ['timestamp', 'x','y','theta' ]
+writer.writerow(header)
+\end{verbatim}
+
+\paragraph*{CSV to bag}
+To transform a CSV file into a bag file, use the following code:
+\begin{verbatim}
+for topic, msg, t in bag.read_messages(topics=['/turtle1/pose']):
+    writer.writerow ([t,msg.x, msg.y,msg.theta])
+bag.close()
+f.close()
+\end{verbatim}
+
+\paragraph*{Edit a bag}
+To edit a bag file, use the following code:
+\begin{verbatim}
+import rosbag
+import csv
+from turtlesim.msg import Pose
+
+bag_in = rosbag.Bag('/home/airlab/robotics/bags/pose.bag')
+bag_out = rosbag.Bag('/home/airlab/robotics/bags/pose_shifted.bag', 'w')
+for topic, msg, t in bag_in.read_messages(topics=['/turtle1/pose']):
+    msg.x +=2
+    t.secs += 30
+    bag_out.write ('/turtleS/pose',msg, t)
+bag_in.close()
+bag_out.close()
+\end{verbatim}

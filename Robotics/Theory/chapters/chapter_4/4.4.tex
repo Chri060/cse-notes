@@ -1,0 +1,23 @@
+\section{Landmark model}
+
+Landmark sensors provide information on distance, bearing, or both. 
+These measurements can be obtained through active beacons such as radio or GPS, or passive methods like visual or retro-reflective techniques.
+The standard approach for utilizing this data is triangulation.
+
+Explicitly incorporating uncertainty into sensing processes is crucial for ensuring robustness:
+\begin{enumerate}
+    \item Establish a parametric model for noise-free measurements.
+    \item Analyze sources of noise, such as distance and angle.
+    \item Introduce appropriate noise to parameters, possibly incorporating densities for noise distribution.
+    \item Learn and verify parameters by fitting the model to empirical data.
+\end{enumerate}
+The likelihood of a measurement is determined by probabilistically comparing actual measurements with expected ones.
+
+\subsection{Landmark detection}
+The measurement $z = (i, d, \alpha)$ for a robot positioned at $(x, y, \theta)$, relative to landmark $i$ on map $m$ (denoted as $m_i$), is expressed as follows:
+\[\hat{d}=\sqrt{{\left(m_x(i)-x\right)}^2+{\left(m_y(i)-y\right)}^2}\]
+\[\hat{\alpha}=\arctan\left[2(m_y(i)-y,m_x(i)-x)-\theta\right]\]
+The detection probability of a particular landmark may rely on either the distance or the bearing:
+\[\Pr_{\text{det}}=\Pr(\hat{d}-d,\varepsilon_d)\Pr(\hat{\alpha}-\alpha,\varepsilon_\alpha)\]
+Additionally, consideration for false positives is necessary:
+\[z_{\text{det}}\Pr_{\text{det}}+z_{\text{fp}}\Pr_{\text{uniform}}(z|x,m)\]

@@ -1,0 +1,56 @@
+\section{ROS distributed}
+
+ROS can function as a distributed system across multiple devices interconnected on the same network. 
+Large projects typically leverage distributed systems for scalability and efficiency. 
+Remote monitoring of robots becomes straightforward with a single ROS network.
+
+To utilize ROS across multiple devices, it's essential to designate one device to run the ROS master, achieved by executing the command \texttt{roscore} on that device exclusively. 
+For all other nodes, specifying the IP address of the master is necessary. 
+To find your IP, use the \texttt{ifconfig} command and look for \texttt{inet addr}.
+
+To ensure proper configuration, export all required variables, and append them to your \texttt{~/.bashrc} file to apply them automatically for every new terminal session:
+\begin{verbatim}
+$ gedit ~/.bashrc
+\end{verbatim}
+\paragraph*{Master configuration}
+Begin by setting the master's IP:
+\begin{verbatim}
+export ROS_MASTER_URI=http://master_ip:11311
+\end{verbatim}
+Next, inform the ROS master of your IP:
+\begin{verbatim}
+export ROS_IP=master_ip
+\end{verbatim}
+\paragraph*{Client configuration}
+Similarly, configure the client by setting the master's IP:
+\begin{verbatim}
+export ROS_MASTER_URI=http://master_ip:11311
+\end{verbatim}
+And specifying the client's IP to the ROS master:
+\begin{verbatim}
+export ROS_IP=master_ip
+\end{verbatim}
+
+On the master PC, initiate the ROS core with the command \texttt{roscore}. 
+To verify proper functionality on the clients, open a new terminal and execute \texttt{rostopic list} without initiating \texttt{roscore} previously. 
+You should observe topics on the ROS network. 
+Now, all clients are interconnected and capable of communication and node initiation on the distributed ROS network.
+\paragraph*{Time synchronization}
+Recording high-throughput bags often necessitates splitting recordings across different ROS devices. 
+To utilize these bags collectively, timestamp coherence is crucial. 
+Hence, synchronizing the clocks of all devices on the ROS network is necessary.
+
+The standard method involves employing an NTP server on the master device and configuring chrony clients on all other devices.
+\begin{enumerate}
+    \item Install the NTP server on the master and chrony on other nodes.
+    \item Modify the chrony configuration file located at \texttt{/etc/chrony/chrony.conf}.
+    \item After making changes, stop and restart chrony for them to take effect:
+\begin{verbatim}
+$ sudo service chrony stop
+$ sudo service chrony start
+\end{verbatim}
+    \item Monitor synchronization progress:
+\begin{verbatim}
+$ chronyc tracking
+\end{verbatim}
+\end{enumerate}
