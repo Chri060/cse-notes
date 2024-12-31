@@ -12,7 +12,7 @@ Kernel methods address this by sidestepping explicit computation of the feature 
 
 \subsection{Kernel function design}
 The kernel function measures the similarity between two data samples and is defined as the inner product of their feature vectors:
-\[k(\mathbf{x},\mathbf{x}^\prime)=\boldsymbol{\phi}{(\mathbf{x})}^T\boldsymbol{\phi}(\mathbf{x})\]
+\[k(\mathbf{x},\mathbf{x}^\prime)=\boldsymbol{\phi}{(\mathbf{x})}^T\boldsymbol{\phi}(\mathbf{x}^\prime)\]
 This function allows us to assess similarity without explicitly calculating the high-dimensional feature vectors. 
 Large feature vectors can make the kernel function computationally practical, as kernel methods only require pairwise similarities, avoiding direct computation in the higher-dimensional space.
 
@@ -28,8 +28,8 @@ According to Mercer's theorem, a valid kernel function must be continuous, symme
 \begin{theorem}[Mercer]
     Any continuous, symmetric, positive semi-definite kernel function $k(\mathbf{x},\mathbf{x}^\prime)$ can be expressed as a dot product in a high-dimensional space. 
 \end{theorem}
-To satisfy Mercer's conditions, the Gram matrix $\mathbf{K}=\boldsymbol{\Phi}{(\mathbf{x})}^T\boldsymbol{\Phi}(\mathbf{x})$, formed by evaluating the kernel on data pairs, must be positive semi-definite:
-\[\mathbf{x}^T\mathbf{K}\mathbf{x}>0\qquad\forall\mathbf{x}\neq\mathbf{0}\]
+To satisfy Mercer's conditions, the Gram matrix $\mathbf{K}=\boldsymbol{\Phi}{(\mathbf{x})}^T\boldsymbol{\Phi}(\mathbf{x}^\prime)$, formed by evaluating the kernel on data pairs, must be positive semi-definite:
+\[\mathbf{x}^T\mathbf{K}\mathbf{x}^\prime>0\qquad\forall\mathbf{x},\mathbf{x}^\prime\neq\mathbf{0}\]
 
 Given valid kernels $k_1(\mathbf{x},\mathbf{x}^\prime)$ and $k_2(\mathbf{x},\mathbf{x}^\prime)$ the following rules can be applied to design a new valid kernel:
 \renewcommand*{\arraystretch}{2}
@@ -65,7 +65,7 @@ Given valid kernels $k_1(\mathbf{x},\mathbf{x}^\prime)$ and $k_2(\mathbf{x},\mat
 
 \paragraph*{Kernel trick}
 A key aspect of kernel methods is the kernel trick, where we replace terms involving $\phi(\mathbf{x})$ with equivalent expressions that rely only on $k(\mathbf{x},\cdot)$.
-This allows models to compute outputs based solely on pairwise similarities between data points, making kernel methods versatile across a range of algorithms, including ridge regression, kNN regression, the perceptron, nonlinear PCA, and Support Vector Machines.
+This allows models to compute outputs based solely on pairwise similarities between data points, making kernel methods versatile across a range of algorithms, including Ridge regression, kNN regression, the Perceptron, nonlinear Principal Component Analysis, and Support Vector Machines.
 
 \paragraph*{Symbolic kernels}
 Kernel methods are not limited to real-valued vectors; they can be applied to more complex data types, such as graphs, sets, strings, and text. In such cases, the kernel function adapts to measure similarity in non-numeric data structures, enabling kernel methods to support a wide array of applications.
@@ -76,8 +76,8 @@ For example, in a generative modeling context where $\Pr(\mathbf{x})$ denotes a 
 \[k(\mathbf{x},\mathbf{x}^\prime)=\Pr(\mathbf{x})\Pr(\mathbf{x}^\prime)\]
 This kernel is valid because it represents an inner product in a one-dimensional feature space where each data point $\mathbf{x}$ to $\Pr(\mathbf{x})$. 
 
-\subsection{Kernel ridge regression}
-In kernel ridge regression, we aim to minimize a loss function that combines the Residual Sum of Squares with a regularization term to control the model complexity.
+\subsection{Kernel Ridge regression}
+In kernel Ridge regression, we aim to minimize a loss function that combines the Residual Sum of Squares with a regularization term to control the model complexity.
 The loss function, $\mathcal{L}(\mathbf{w})$, is defined as:
 \[\mathcal{L}(\mathbf{w})=\dfrac{1}{2}\text{RSS}+\dfrac{\lambda}{2}{\left\lVert \mathbf{w}\right\rVert}_2^2\]
 Here, $\lambda$ is the regularization parameter, controlling the trade-off between the fit to the data and the penalty on the magnitude of the weights $\mathbf{w}$. 
@@ -92,20 +92,20 @@ The Gram matrix is an $N\times N$ matrix representing the inner products of feat
 \paragraph*{Prediction}
 With this formulation, predictions for a new input $\mathbf{x}$ can be computed as:
 \[y(\mathbf{x})=\mathbf{k}{(\mathbf{x})}^T{(\mathbf{K}+\lambda\mathbf{I})}^{-1}\mathbf{t}\]
-Here, $\mathbf{k}(\mathbf{x})$ is a vector with elements $k_n(\mathbf{x})=k(\mathbf{x}_n,\mathbf{x})$ for aeachll $\mathbf{x}_n$ in the training set $\mathcal{D}$. 
+Here, $\mathbf{k}(\mathbf{x})$ is a vector with elements $k_n(\mathbf{x})=k(\mathbf{x}_n,\mathbf{x})$ for all $\mathbf{x}_n$ in the training set $\mathcal{D}$. 
 This formulation expresses predictions as a linear combination of the target values of the training samples, weighted by the kernel-based similarities to the new input.
 
 \paragraph*{Comparison}
-In traditional ridge regression, finding $\mathbf{w}$ requires inverting an $M \times M$ matrix $(\boldsymbol{\Phi}\boldsymbol{\Phi}^T+\lambda\mathbf{I}_M)$ which is efficient when $M$, the number of features, is relatively small.
+In traditional Ridge regression, finding $\mathbf{w}$ requires inverting an $M \times M$ matrix $(\boldsymbol{\Phi}\boldsymbol{\Phi}^T+\lambda\mathbf{I}_M)$ which is efficient when $M$, the number of features, is relatively small.
 
-In kernel ridge regression, we invert an $N \times N$ matrix $(\mathbf{K}+\lambda\mathbf{I}_N)$, which is preferable when $N$ the number of samples, is relatively large.
+In kernel Ridge regression, we invert an $N \times N$ matrix $(\mathbf{K}+\lambda\mathbf{I}_N)$, which is preferable when $N$ the number of samples, is relatively large.
 This approach also avoids explicit computation of the feature map $\boldsymbol{\Phi}$, as the kernel function directly captures similarities between samples, resulting in a more efficient and flexible implementation.
 
 \subsection{Kernel k-NN regression}
 The $k$-Nearest Neighbors algorithm algorithm can be adapted for regression by predicting the output as the average of the target values of the $k$ nearest samples in the training data. 
 Specifically, the prediction $\hat{f}(\mathbf{x})$ for a new input $\mathbf{x}$ is given by:
 \[\hat{f}(\mathbf{x})=\dfrac{1}{k}\sum_{\mathbf{x}_i\in N_k(\mathbf{x})}t_i\]
-Here, $N_k(\mathbf{x})$ represents the set of the $k$ nearest neighbors of $\mathbf{x}$, and $t_i$ is the target value associated with $\mathbf{x}_i$. 
+Here, $N_k(\mathbf{x})$ represents the set of the $k$ Nearest Neighbors of $\mathbf{x}$, and $t_i$ is the target value associated with $\mathbf{x}_i$. 
 
 While $k$-NN regression is simple and intuitive, it often produces noisy predictions due to the abrupt changes in neighborhood averages as the test point moves across different sample regions.
 
@@ -116,7 +116,7 @@ This results in a continuous, weighted average of the target values:
 Here, $k(\mathbf{x},\mathbf{x}_i)$ is a kernel function that assigns larger weights to samples closer to $\mathbf{x}$ and smaller weights to those further away.
 This approach reduces the discontinuity of predictions, offering a smoother and often more accurate regression output compared to traditional $k$-NN regression.
 
-\subsection{Gaussian processes}
+\subsection{Gaussian Processes}
 A Gaussian Process defines a probability distribution over functions $y(\mathbf{x})$  such that, for any set of input points $\{\mathbf{x}_i\}_{i=1}^{N}$, the function value $\{y(\mathbf{x}_i)\}_{i=1}^{N}$ are jointly Gaussian.
 This property enables GPs to serve as a powerful tool for regression tasks, where the relationship between input data and output predictions is modeled probabilistically.
  
@@ -130,10 +130,10 @@ The target variable $\mathbf{t}$ is modeled as the true process output $\mathbf{
 \[\mathbf{t}_N=\mathbf{y}_N+\epsilon\]
 Here, $\epsilon\sim\mathcal{N}(0,\sigma^2)$. 
 Thus, the conditional distribution of the observed targets given the latent function values is:
-\[\Pr(\mathbf{t}_n|\mathbf{y}_n)=\mathcal{N}(\mathbf{t}_N|\mathbf{y}_N,\sigma^2\mathbf{I}_N)\]
+\[\Pr(\mathbf{t}_n\mid\mathbf{y}_n)=\mathcal{N}(\mathbf{t}_N\mid\mathbf{y}_N,\sigma^2\mathbf{I}_N)\]
 The prior distribution over the latent function values $\mathbf{y}_N$ is a Gaussian $\mathcal{N}(\mathbf{0},\mathbf{K}_n)$. 
 Therefore, the marginal distribution of the targets $\mathbf{t}_N$ is also Gaussian:
-\[\Pr(\mathbf{t}_N)=\mathcal{N}(\mathbf{t}_N|\mathbf{0},\mathbf{C}_N)\]
+\[\Pr(\mathbf{t}_N)=\mathcal{N}(\mathbf{t}_N\mid\mathbf{0},\mathbf{C}_N)\]
 Here, $\mathbf{C}_N=\mathbf{K}_N+\sigma^2\mathbf{I}_N$ represents the combined effect of the kernel-based covariance and noise.
 
 \paragraph*{Gaussian kernel}
@@ -146,7 +146,7 @@ Additionally, the Gaussian kernel can be generalized by replacing the Euclidean 
 
 \paragraph*{Prediction}
 To predict the target $t_{N+1}$ at a new, unseen input $\mathbf{x}_{N+1}$, we use the GP framework to define the conditional predictive distribution:
-\[\Pr(\mathbf{t}_{N+1})=\mathcal{N}(\mathbf{t}_{N+1}|\mathbf{0},\mathbf{C}_{N+1})=\mathcal{N}(m(\mathbf{x}_{N+1}),\sigma^2(\mathbf{x}_{N+1}))\]
+\[\Pr(\mathbf{t}_{N+1})=\mathcal{N}(\mathbf{t}_{N+1}\mid\mathbf{0},\mathbf{C}_{N+1})=\mathcal{N}(m(\mathbf{x}_{N+1}),\sigma^2(\mathbf{x}_{N+1}))\]
 Here, $m(\mathbf{x}_{N+1})=\mathbf{k}^T\mathbf{C}_N^{-1}\mathbf{t}$ is the predictive mean, and $\sigma^2(\mathbf{x}_{N+1})=c-\mathbf{k}^T\mathbf{C}_N^{-1}\mathbf{k}$ is the predictive variance, providing a measure of uncertainty.
 The parameter $\mathbf{k}$ is the covariance vector between $\mathbf{x}_{N+1}$ and the training data points, and $c=k(\mathbf{x}_{N+1},\mathbf{x}_{N+1})$ is the self-covariance.
 
@@ -161,10 +161,10 @@ Although GPs are non-parametric, hyperparameters such as $\sigma^2$ (noise level
 \subsection{Support Vector Machines}
 Kernel methods are a powerful tool in Machine Learning, yet they have a significant limitation: calculating the kernel function for every sample in a large training set can be computationally prohibitive.
 Sparse kernel methods address this by selecting a subset of the training samples, focusing only on those critical for defining decision boundaries.
-Two prominent examples of sparse kernel methods are Support Vector Machines (SVMs) and Relevance Vector Machines (RVMs).
+Two prominent examples of sparse kernel methods are Support Vector Machines (Support Vector Machines) and Relevance Vector Machines (RVMs).
 
 \paragraph*{Linearly separable problems}
-To achieve optimal separation in linearly separable cases, SVMs aim to find a hyperplane that maximizes the margin. 
+To achieve optimal separation in linearly separable cases, Support Vector Machines aim to find a hyperplane that maximizes the margin. 
 This can be formulated as:
 \[\argmax_{\mathbf{w},b}\left\{\min_n\left[\dfrac{t_n\left(\mathbf{w}^T\boldsymbol{\phi}(\mathbf{x}_n)+b\right)}{\left\lVert \mathbf{w}\right\rVert }\right]\right\}\]
 The optimization problem is often simplified by establishing a canonical hyperplane where only solutions satisfying:
@@ -183,12 +183,12 @@ Using Lagrange multipliers, we derive the dual form of this problem:
 \end{align*}  
 The resulting classifier is represented as:
 \[y(\mathbf{x})=\sum_{n=1}^{N}\alpha_n t_n k(\mathbf{x},\mathbf{x}_n)+b\]
-HOnly the training points with non-zero $\alpha_i$ values (support vectors) influence the decision boundary, and the bias term $b$, is computed as:
+Only the training points with non-zero $\alpha_i$ values (support vectors) influence the decision boundary, and the bias term $b$, is computed as:
 \[b=\dfrac{1}{\left\lvert \mathcal{S}\right\rvert }\sum_{\mathbf{x}_n\in\mathcal{S}} \left(t_n-\sum_{\mathbf{x}_m\in\mathcal{S}}\alpha_m t_m k(\mathbf{x}_n,\mathbf{x}_m)\right)\]
 
 \paragraph*{Linearly non-separable problems}
 In real-world applications, data is often not perfectly separable. 
-To accommodate such cases, SVMs introduce slack variables, $\xi_n \geq 0$, which allow some margin violations. 
+To accommodate such cases, Support Vector Machines introduce slack variables, $\xi_n \geq 0$, which allow some margin violations. 
 This leads to the soft-margin formulation:
 \begin{align*}
     \min                      \:&\: \dfrac{1}{2}{\left\lVert \mathbf{w} \right\rVert}_2^2+C\sum_{n=1}^{N}\xi_n         \\
@@ -218,22 +218,22 @@ In this case, $0\leq\nu<1$ is a user-defined parameter, enabling control over bo
 
 \paragraph*{Training}
 Solving the optimization problem to determine the values of $\alpha_i$ and $b$ can be computationally demanding, especially for large datasets.
-Directly solving the SVM optimization problem typically requires $\mathcal{O}(n^3)$ operations, where $n$ is the number of training samples. 
+Directly solving the Support Vector Machine optimization problem typically requires $\mathcal{O}(n^3)$ operations, where $n$ is the number of training samples. 
 To address this, various methods have been developed to improve efficiency:
 \begin{enumerate}
     \item \textit{Chunking}: this approach divides the problem into smaller, more manageable chunks. 
         Each chunk, or working set, consists of the current support vectors and a subset of samples with the highest error rates (the worst set). 
         As iterations proceed, the size of the working set may adjust dynamically. 
         While chunking expands the working set as necessary, it converges to the optimal solution.
-    \item \textit{Osuna's methods}: a variant of chunking designed specifically for SVM optimization, Osuna's method also employs an iterative approach but maintains a fixed working set size. 
+    \item \textit{Osuna's methods}: a variant of chunking designed specifically for Support Vector Machine optimization, Osuna's method also employs an iterative approach but maintains a fixed working set size. 
         Misclassified samples from the dataset replace samples in the working set during iterations, ensuring convergence while keeping the working set stable.
-    \item \textit{Sequential Minimal Optimization}: SMO further reduces computational demands by iteratively optimizing only two variables at a time. 
+    \item \textit{Sequential Minimal Optimization}: reduces computational demands by iteratively optimizing only two variables at a time. 
         This minimal working set size allows analytical solutions for each iteration, resulting in a faster convergence to the optimal solution.
 \end{enumerate}
 For situations requiring online learning, incremental or chunking-based methods can be used to update the model continuously as new data arrives, bypassing the need for full retraining.
 
 \paragraph*{Multi-class}
-While SVMs are naturally binary classifiers, they can be adapted to handle multi-class problems through the following techniques:
+While Support Vector Machines are naturally binary classifiers, they can be adapted to handle multi-class problems through the following techniques:
 \begin{itemize}
     \item \textit{One against all}: for a $k$-class problem, one against all creates $k$ binary classifiers, each distinguishing a single class from the others.
         During testing, the classifier with the highest margin determines the predicted class.
@@ -241,7 +241,7 @@ While SVMs are naturally binary classifiers, they can be adapted to handle multi
     \item \textit{One against one}: decomposes a $k$-class problem into  $\frac{k(k-1)}{2}$ binary classifiers, each trained on a pair of classes. 
         In testing, each classifier votes, and the label with the most votes is chosen. 
         One against one offers higher performance and often yields better results.
-    \item \textit{Directed Acyclic Graph SVM}: like one against one, DAGSVM creates $\frac{k(k-1)}{2}$ classifiers but uses a Directed Acyclic Graph during testing, reducing the number of classifiers needed to $k-1$. 
+    \item \textit{Directed Acyclic Graph Support Vector Machine}: like one against one, it creates $\frac{k(k-1)}{2}$ classifiers but uses a Directed Acyclic Graph during testing, reducing the number of classifiers needed to $k-1$. 
         This approach reduces test time while maintaining classification accuracy.
 \end{itemize}
-Among these methods, one against one is widely considered to perform best due to its robust pairwise decomposition, while DAGSVM is often preferred for faster testing due to its reduced computational complexity.
+Among these methods, one against one is widely considered to perform best due to its robust pairwise decomposition, while DAG is often preferred for faster testing due to its reduced computational complexity.

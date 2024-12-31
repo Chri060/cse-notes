@@ -1,73 +1,48 @@
-\section{Dynamic programming}
+\section{Dynamic Programming}
 
-To resolve an MDP, locating the optimal policy is essential. 
-However, employing a brute force method is impractical due to the necessity to solve $\left\lvert \mathcal{S}\right\rvert $ linear equations for each policy. 
-Dynamic Programming (DP) offers a solution by dissecting the intricate problem into more manageable sub-problems recursively. 
-Through the utilization of DP, we'll explore how to effectively tackle an MDP using the Bellman Equations.
+Dynamic Programming provides a systematic and efficient way to address this challenge by breaking down the complex problem into smaller, more manageable sub-problems. 
+It leverages the recursive nature of the Bellman equations to iteratively compute solutions.
+Dynamic Programming methods rely on two core strategies to solve Markov Decision Processes: policy iteration and value iteration.
 
-By utilizing Dynamic programming we can evaluate multiple policies and compute the corresponding state-value function. 
-Then, by using the Bellman equation we can find the optimal one again using dynamic programming. 
+\subsection{Policy iteration}
+Policy iteration is a method in Dynamic Programming that combines two alternating steps (policy evaluation and policy improvement) to iteratively refine a policy until it converges to the optimal policy, $\pi^\ast$.
 
-\subsection{Policy evaluation}
-We search the solution of the Bellman expectation equation:
-\[V_{\pi}(s)=\sum_{a\in\mathcal{A}}\pi(a|s)\left[r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}p(s^\prime|s,a)V_{\pi}(s^\prime)\right]\]
-DP solves this problem through iterative application of Bellman equation:
-\[V_{k+1}(s)=\sum_{a\in\mathcal{A}}\pi(a|s)\left[r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}p(s^\prime|s,a)V_{k}(s^\prime)\right]\]
-At each iteration $k$, the value-function $V_k$ is updated for all state $s\in\mathcal{S}$.
-It can be proved that $V_k$ converge to $V_{\pi}$ as $k$ tends to infinity for any initial value $V_0$. 
-\begin{algorithm}[H]
-    \caption{Iterative policy evaluation algorithm}
-        \begin{algorithmic}[1]
-            \State{Initialize $V(s)$ for all $s\in\mathcal{S}^+$ arbitrarily}
-            \State{$V(\text{terminal})=0$}
-            \Repeat 
-                \State{$\Delta=0$}  
-                \For{each $s\in\mathcal{S}$}
-                    \State{$v=V(s)$}
-                    \State{$V(s)=\sum_a\pi(a|s)\sum_{s^\prime,r}p(s^\prime,r|s,a)\left[r+\gamma V(s^\prime)\right]$}
-                    \State{$\Delta=\max\left(\Delta,\left\lvert v-V(s)\right\rvert \right)$}
-                \EndFor
-            \Until{$\Delta<\theta$}
-        \end{algorithmic}
-\end{algorithm}
-The input of this algorithm is the policy to be evaluated $\pi$. 
-It also has a small threshold $\theta>0$, that is a parameter used to determine the accuracy of the estimation.
+\paragraph*{Policy evaluation}
+The goal of policy evaluation is to compute the value function $V_{\pi}(s)$ for a given policy $\pi$. 
+This is done by solving the Bellman expectation equation with an iterative approach:
+\[V_{k+1}(s)=\sum_{a\in\mathcal{A}}\pi(a\mid s)\left[r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}\Pr(s^\prime\mid s,a)V_{k}(s^\prime)\right]\]
+We start with an arbitrary value function $V_0(s)$, and at each iteration $k$, we update $V_k(s)$ for all $s\in\mathcal{S}$.
 
-\subsection{Policy improvement}
-Normally, the optimal policy from optimal value functions is derived as: 
-\[\pi^\ast(s)=\argmax_a\left\{r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}p(s^\prime|s,a)V^\ast(s^\prime)\right\}=\argmax_aQ^\ast(s,a)\]
-If we act greedy with respect to non optimal value function we have: 
-\[\pi^\prime(s)=\argmax_a\left\{r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}p(s^\prime|s,a)V_{\pi}(s^\prime)\right\}=\argmax_aQ_{\pi}(s,a)\]
-We may have two outcomes: 
+This process converges to $V_\pi(s)$ as $k\rightarrow\infty$. 
+The stopping criterion is typically defined by a small threshold $\theta>0$, which ensures that updates become negligibly small.
+
+\paragraph*{Policy improvement}
+Once $V_\pi(s)$ is computed, we improve the policy by acting greedily with respect to the current value function:
+\[\pi^\prime(s)=\argmax_a\left\{r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}\Pr(s^\prime\mid s,a)V_{\pi}(s^\prime)\right\}=\argmax_aQ_{\pi}(s,a)\]
+This step determines the best action $a$ for each state $s$, based on the value function $V_\pi(s)$. 
+Two possible outcomes arise:
 \begin{itemize}
-    \item $\pi^\prime=\pi$ it means that $\pi$ is already the optimal policy $\pi^\ast$. 
-    \item $\pi^\prime\neq\pi$ it means that $\pi^\prime$ is better or as good as $\pi$. 
+    \item $\pi^\prime=\pi$: the policy is already optimal $(\pi^\ast)$. 
+    \item $\pi^\prime\neq\pi$: the new policy $\pi^\prime$ is strictly better than $\pi$. 
 \end{itemize}
-The second point is guaranteed by the following theorem. 
+The improvement step is guaranteed to yield a policy that is at least as good as the previous one, based on the policy improvement theorem. 
 \begin{theorem}
     For any pair deterministic policies $\pi^\prime$ and $\pi$ such that: 
     \[Q_\pi(s,\pi^\prime(s))\geq Q_{\pi}(s,\pi(s)) \qquad \forall s \in \mathcal{S}\]
-    Then $\pi^\prime$ is better or as good as $\pi$: 
+    We have that $\pi^\prime$ is better or as good as $\pi$: 
     \[\pi^\prime\geq\pi\]
 \end{theorem}
-\begin{corollary}
-    If exists $s\in\mathcal{S}$ such that $Q_\pi(s,\pi^\prime(s))> Q_{\pi}(s,\pi(s))$, then $\pi^\prime>\pi$.
-\end{corollary}
-\begin{proof}
-    We have that: 
-    \begin{align*}
-        V_{\pi}(s)  &\leq Q_{\pi}(s,\pi(s^\prime))=\mathbb{E}_{\pi^\prime}\left[R_{t+1}+\gamma V_{\pi}(S_{t+1})|S_t=s\right] \\
-                    &\leq \mathbb{E}_{\pi^\prime}\left[R_{t+1}+\gamma Q_{\pi}(S_{t+1},\pi^\prime(S_{t+1}))|S_t=s\right] \\
-                    &\leq \mathbb{E}_{\pi^\prime}\left[R_{t+1}+\gamma R_{t+2}+ \gamma^2Q_{\pi}(S_{t+2},\pi^\prime(S_{t+2}))|S_t=s\right] \\
-                    &\leq \mathbb{E}_{\pi^\prime}\left[R_{t+1}+\gamma R_{t+2}+ \cdots|S_t=s\right]=V_{\pi^\prime}(s)
-    \end{align*}
-\end{proof}
 
-\subsection{Policy iteration}
-We can exploit the policy improvement theorem to find the optimal policy:
-\[\pi_0\overset{E}{\rightarrow}V_{\pi_{0}}\overset{I}{\rightarrow}\pi_1\overset{E}{\rightarrow}V_{\pi_{1}}\overset{I}{\rightarrow}\pi_2\overset{E}{\rightarrow}\cdots \overset{I}{\rightarrow}\pi^\ast\overset{E}{\rightarrow}V^\ast\]
+\subsubsection{Policy iteration algorithm}
+The iterative process alternates between policy evaluation and policy improvement until the policy stabilizes: 
+\begin{enumerate}
+    \item \textit{Initialization}: start with an arbitrary policy $\pi(s)$ and initialize $V(s)$.
+    \item \textit{Policy evaluation}: iteratively compute $V_\pi(s)$ until convergence ($\Delta<\theta$).
+    \item \textit{Policy improvement}: update $\pi(s)$ by acting greedily with respect to $V_\pi(s)$.
+    \item \textit{Repeat steps 2 and 3} until the policy stabilizes.
+\end{enumerate}
 \begin{algorithm}[H]
-    \caption{Policy iteration algorithm}
+    \caption{Policy iteration}
         \begin{algorithmic}[1]
             \State{$V(s)\in\mathbb{R}$ and $\pi(s)\in\mathcal{A}(s)$ arbitrarily for all $s \in \mathcal{S}$} \Comment{Initialization}
             \Repeat
@@ -75,14 +50,14 @@ We can exploit the policy improvement theorem to find the optimal policy:
                 \State{$\Delta=0$}  
                 \For{each $s\in\mathcal{S}$}
                     \State{$v=V(s)$}
-                    \State{$V(s)=\sum_a\pi(a|s)\sum_{s^\prime,r}p(s^\prime,r|s,a)\left[r+\gamma V(s^\prime)\right]$}
+                    \State{$V(s)=\sum_a\pi(a\mid s)\sum_{s^\prime,r}\Pr(s^\prime,r\mid s,a)\left[r+\gamma V(s^\prime)\right]$}
                     \State{$\Delta=\max\left(\Delta,\left\lvert v-V(s)\right\rvert \right)$}
                 \EndFor
                 \Until{$\Delta<\theta$}
                 \State{$\text{policy-stable}=\text{true}$} \Comment{Policy improvement}
                 \For{each $s \in \mathcal{S}$}
                     \State{$\text{old-action}=\pi(s)$}
-                    \State{$\pi(s)=\argmax_a\sum_{s^\prime,r}p(s^\prime,r|s,a)[r+\gamma V(s^\prime)]$}
+                    \State{$\pi(s)=\argmax_a\sum_{s^\prime,r}\Pr(s^\prime,r\mid s,a)[r+\gamma V(s^\prime)]$}
                     \If{$\text{old-action}\neq\pi(s)$}
                         \State{$\text{policy-stable}=\text{false}$}
                     \EndIf
@@ -91,23 +66,28 @@ We can exploit the policy improvement theorem to find the optimal policy:
             \State\Return{$V\approx v^\ast$ and $\pi\approx\pi^\ast$}
         \end{algorithmic}
 \end{algorithm}
+The policy iteration algorithm is guaranteed to converge to the optimal policy $\pi^\ast$ and the corresponding value function $V^\ast(s)$ in a finite number of steps. 
+The improvement step ensures that the policy becomes progressively better, and the evaluation step refines the value function accordingly.
 
 \subsection{Value iteration}
-Policy iteration alternates complete policy evaluation and improvement up to the
-convergence
-Policy iteration framework allows also to find the optimal policy interleaving partial
-evaluation and improvement steps
-In particular, Value Iteration is one of the most popular GPI method
-In the policy evaluation step, only a single sweep of updates is performed:
-\[\pi^\prime(s)=\argmax_a\left\{r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}p(s^\prime|s,a)V_\pi(s^\prime)\right\}\qquad  \forall s \in \mathcal{S}\]
-\[V_{k+1}(s)=\sum_a\in\mathcal{A}\pi^\prime(a|s)\left(r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}p(s^\prime|s,a)V_k(s^\prime)\right)\qquad  \forall s \in \mathcal{S}\]
-Combining them, we simply need to iterate the update of the value function using
-the Bellman optimality equation:
-\[V_{k+1}(s)=\max_a\left[r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}p(s^\prime|s,a)V_k(s^\prime)\right]\qquad\forall s\in\mathcal{S}\]
-It can be proved that: 
-\[\lim_{k\rightarrow\infty}V_k=V^\ast\]
+Value iteration is an efficient algorithm that combines elements of both policy evaluation and policy improvement in a single step.
+Unlike policy iteration, where the policy is evaluated to convergence in each iteration, value iteration performs only a partial evaluation by using a single sweep of updates. 
+This allows for interleaving partial evaluation with policy improvement, making it a popular Generalized Policy Iteration (GPI) method.
+
+The value iteration algorithm repeatedly applies the Bellman optimality equation to iteratively refine the value function:
+\[V_{k+1}(s)=\max_a\left[r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}\Pr(s^\prime\mid s,a)V_k(s^\prime)\right]\]
+This recursive update simultaneously approximates the optimal value function $V^\ast(s)$ while implicitly improving the policy $\pi(s)$. 
+
+It can be shown that as the number of iterations $k\rightarrow \infty$, $V_k$ tends to the optimal value function $V^\ast(s)$. 
+
+Once $V^\ast(s)$ is computed, the optimal policy $\pi^\ast$ can be derived by acting greedily with respect to the optimal value function:
+\[\pi(s)=\argmax_a\sum_{s^\prime,r}\Pr(s^\prime,r\mid s,a)[r+\gamma V(s^\prime)]\]
+
+
+\subsubsection{Value iteration algorithm}
+The algorithm alternates between updating the value function and checking the magnitude of the updates to determine convergence.
 \begin{algorithm}[H]
-    \caption{Iterative policy evaluation algorithm}
+    \caption{Value iteration}
         \begin{algorithmic}[1]
             \State{Initialize $V(s)$ for all $s\in\mathcal{S}^+$ arbitrarily}
             \State{$V(\text{terminal})=0$}
@@ -115,32 +95,22 @@ It can be proved that:
                 \State{$\Delta=0$}  
                 \For{each $s\in\mathcal{S}$}
                     \State{$v=V(s)$}
-                    \State{$V(s)=\max_a\sum_{s^\prime,r}p(s^\prime,r|s,a)\left[r+\gamma V(s^\prime)\right]$}
+                    \State{$V(s)=\max_a\sum_{s^\prime,r}\Pr(s^\prime,r\mid s,a)\left[r+\gamma V(s^\prime)\right]$}
                     \State{$\Delta=\max\left(\Delta,\left\lvert v-V(s)\right\rvert \right)$}
                 \EndFor
             \Until{$\Delta<\theta$}
         \end{algorithmic}
 \end{algorithm}
-It also has a small threshold $\theta>0$, that is a parameter used to determine the accuracy of the estimation.
-The output is a deterministic policy $\pi\approx\pi^\ast$, such that: 
-\[\pi(s)=\argmax_a\sum_{s^\prime,r}p(s^\prime,r|s,a)[r+\gamma V(s^\prime)]\]
+Value iteration is more computationally efficient than policy iteration because it skips the full policy evaluation step.
+The algorithm is guaranteed to converge to the optimal value function $V^\ast(s)$. 
 
-\subsection{Efficiency}
-All previously described DP methods mandate exhaustive sweeps across the complete state set. 
-However, Asynchronous DP diverges from this approach by eschewing sweeps. 
-Instead, it operates by selecting a state randomly, applying the relevant backup, and iterating until a convergence criterion is satisfied.
-We can chose states for backup in a more intelligent manner by noticing that an agent's experience can serve as a valuable guide in this regard.
+\subsection{Asynchronous Dynamic Programming}
+Asynchronous Dynamic Programming  represents a more flexible alternative to classical Dynamic Programming methods, which rely on exhaustive sweeps over the entire state space.
+Instead of systematically updating all states in each iteration, Asynchronous Dynamic Programming applies backups selectively to individual states, allowing for potentially faster convergence and scalability.
+Despite its asynchronicity, this method is still guaranteed to converge to the optimal value function $V^\ast(s)$ and policy $\pi^\ast(s)$. 
 
-The complexity of finding an optimal policy is polynomial in the number of states and actions:
-\begin{itemize}
-    \item For value iteration: $O(\left\lvert \mathcal{S}\right\rvert^2\left\lvert \mathcal{A}\right\rvert )$. 
-    \item For policy iteration: 
-        \begin{itemize}
-            \item Iterative evaluation: $O\left(\dfrac{\left\lvert \mathcal{S}\right\rvert^2\log\left(\frac{1}{\epsilon}\right)}{\log\left(\frac{1}{\gamma}\right)}\right)$
-            \item Improvement: $O\left(\dfrac{\left\lvert \mathcal{A}\right\rvert}{1-\gamma}\log\left(\dfrac{\left\lvert \mathcal{S}\right\rvert}{1-\gamma}\right)\right)$
-        \end{itemize}
-\end{itemize}
-Unfortunately, the number of states can become extremely large, often growing exponentially with the number of state variables (known as the curse of dimensionality). 
-Classical DP works well for problems with a few million states, but Asynchronous DP can handle larger ones and is suitable for parallel computing. 
-However, there are MDPs where DP methods become impractical. 
-Linear programming approaches are an alternative, but they don't scale well for larger problems.
+Asynchronous Dynamic Programming extends the applicability of Dynamic Programming to larger and more complex problems by avoiding exhaustive state sweeps and leveraging selective updates. 
+While it alleviates some of the computational burden, the curse of dimensionality remains a significant challenge, requiring additional strategies such as approximation methods or alternative frameworks to tackle extremely large-scale Markov Decision Processes.
+
+When Dynamic Programming methods become impractical due to the size of the state space, alternative techniques like Linear Programming can be used to solve Markov Decision Processes. 
+However, Linear Programming scales poorly for very large problems, making it unsuitable for high-dimensional or massive state spaces where Dynamic Programming methods like Asynchronous Dynamic Programming might still perform better.

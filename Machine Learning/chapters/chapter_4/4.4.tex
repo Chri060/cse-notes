@@ -1,39 +1,55 @@
-\section{Monte Carlo methods}
+\section{Reinforcement Learning}
 
-Dynamic Programming enables us to determine the optimal value function and corresponding optimal policy. 
-However, its major limitation lies in the assumption that we have full knowledge of the problem dynamics. 
-To overcome this limitation, we seek methods that can learn the optimal policy directly from data.
+On-policy learning refers to an approach where the agent learns value functions based on the same policy it uses to select actions.
+One of the key challenges of on-policy learning is finding the right balance between exploration (trying new things) and exploitation (sticking with what works). 
+This can make it difficult for the agent to converge on an optimal deterministic policy.
 
-Monte Carlo methods rely solely on experience (data) to learn value functions and policies.
-They can be utilized in two ways:
+In contrast, off-policy learning allows the agent to use a different behavior policy, $b(a\mid s)$, to select actions while learning the value functions of a target policy, $\pi(a\mid s)$. 
+This approach offers more flexibility because the agent can explore using a behavior policy, while still learning towards an optimal deterministic policy, $\pi^\ast(a\mid s)$.
+
+However, regardless of the behavior policy used, it's impossible to learn a policy $\pi(a\mid s)$ if there are actions in that state with zero probability according to the behavior policy $b(a\mid s)$. 
+This situation arises when the behavior policy never transitions to a particular state from the current one, making it impossible to learn about that state.
+
+\paragraph*{Importance sampling}
+Importance sampling is a technique that allows us to estimate expectations of a distribution that differs from the one used to generate the samples.
+There are two main types of sampling methods for importance sampling:
 \begin{itemize}
-    \item \textit{Model-free}: no model is necessary, yet it can still achieve optimality.
-    \item \textit{Simulated}: requires only a simulation, not a complete model.
+    \item \textit{Ordinary}: this method is unbiased but has higher variance
+        \[V_{\pi}(s)\approx\dfrac{\sum_i\rho[i]\text{Return}[i]}{N(s)}\]
+    \item \textit{Weighted}: this method is biased (though the bias decreases over time) and has lower variance:
+    \[V_{\pi}(s)\approx\dfrac{\sum_i\rho[i]\text{Return}[i]}{\sum_i\rho[i]}\]
 \end{itemize}
-Monte Carlo methods learn from complete sample returns and are exclusively defined for episodic tasks.
 
-\subsection{Policy evaluation}
-The goal of Monte Carlo policy evaluation is to learn $V_{\pi}(s)$ given some number of episodes under $\pi$ which contain $s$. 
-The idea is to average the returns observed after visits to $s$: 
-\[V_{\pi}(s)\doteq\mathbb{E}_{\pi}[G_t|S_t=s]\rightarrow V_{\pi}(s)\approx\text{average}[G_t|S_t=s]\]
-We can perform Monte Carlo policy evaluation in two ways: 
+\subsection{Monte Carlo}
+Monte Carlo methods are a class of Reinforcement Learning techniques that rely purely on experience (data) to learn value functions and policies. 
+These methods do not require a model or simulation of the environment and learn from the complete returns of episodes. 
+They are specifically designed for episodic tasks, where each episode has a clear beginning and end.
+
+\subsubsection{Policy iteration}
+In Monte Carlo policy evaluation, the objective is to learn the state value function $V_{\pi}(s)$ by using episodes generated from a policy $\pi$. 
+We do this by averaging the returns observed after visiting each state $s$ during the episode.
+
+Monte Carlo policy evaluation can be implemented in two ways:
 \begin{itemize}
-    \item Every-Visit MC: average returns for every time s is visited in an episode
-    \item First-visit MC: average returns only for first time s is visited in an episode
+    \item \textit{Every visit Monte Carlo}: average returns for every visit to state $s$ during an episode.
+    \item \textit{First visit Monte Carlo}: average returns only for the first visit to state $s$ in an episode.
 \end{itemize}
-Note that Both converge asymptotically
+Both methods converge to the correct value asymptotically, estimating the value of each state based on the average return from multiple visits.
+The update rule for Monte Carlo policy evaluation is:
+\[V(s_t) = V(s_t)+\alpha(v_t-V(s_t))\]
+Here, $v_t=\sum_{l=t}^T\gamma^{l-t}r_{l+1}$ is the discounted sum of rewards, and $\alpha>0$ is the learning rate.
 \begin{algorithm}[H]
-    \caption{Monte Carlo policy evaluation algorithm}
+    \caption{Monte Carlo policy evaluation}
         \begin{algorithmic}[1]
             \State{Initialize $V(s)\in\mathbb{R}$ arbitrarily, for all $s\in\mathcal{S}$}\Comment{Initialization}
             \State{Initialize Returns$(s)$ as an empty list, for all $s\in\mathcal{S}$}
             \Repeat 
                 \For{each episode}
-                    \State{Generate an episode following $\pi:S_0,A_0,R_1S_1,A_1,R_2,\cdots,S_{T-1},A_{T-1},R_{T}$}
+                    \State{Generate an episode following $\pi:S_0,A_0,R_1S_1,A_1,R_2,\dots,S_{T-1},A_{T-1},R_{T}$}
                     \State{$G=0$}
-                    \For{each step of episode $t=T-1,T-2,\cdots,0$}
+                    \For{each step of episode $t=T-1,T-2,\dots,0$}
                         \State{$G=\gamma G+R_{t+1}$}
-                        \If{$S_t\notin\{S_0,S_1.\cdots,S_{t-1}\}$}: 
+                        \If{$S_t\notin\{S_0,S_1.\dots,S_{t-1}\}$}: 
                             \State{Append $G$ to Returns($S_t$)}
                             \State{$V(S_t)=\text{average}(\text{Returns}(S_t))$}
                         \EndIf
@@ -42,33 +58,28 @@ Note that Both converge asymptotically
             \Until{true}
         \end{algorithmic}
 \end{algorithm}
-The input of this algorithm is a policy $\pi$ to be evaluated.
-The incremental updates of lines ten and eleven can be done in the following way: 
-\[N(S_t)=N(S_t)+1\]
-\[V(S_t)=V(S_t)+\dfrac{1}{N(S_t)}(G-V(S_t)) \text{  or  } V(S_t)=V(S_t)+\alpha(G_t-V(S_t))\]
 
-\subsection{Policy iteration}
-To improve the policy we need to find a policy that maximized the q value function: 
+To improve the policy, we aim to find a policy that maximizes the action-value function $Q_{\pi}(s,a)$. 
+The policy can be improved by selecting the action $a$ that maximizes $Q_{\pi}(s,a)$ for each state $s$:
 \[\pi^\prime(s)=\argmax_a Q_{\pi}(s,a)\]
-To do so, we average return starting from state $s$ and action a following $\pi$:
-\[Q_{\pi}(s,a)\doteq\mathbb{E}_{\pi}[G_t|S_t=s,A_t=a]\rightarrow Q_{\pi}(s,a)\approx\text{average}[G_t|S_t=s,A_t=a]\]
-This method Converges asymptotically if every state-action pair is visited.  
+To achieve this, we average the return starting from a state-action pair and following the policy $\pi$. 
+This method also converges asymptotically if every state-action pair is visited.
 
-To have this full exploration in a simple way we use exploring starts. 
-We choose randomly the first state and the first action, and we perform the following algorithm. 
+To ensure full exploration of the state-action space, exploring starts can be used. 
+In this approach, both the first state and action are chosen randomly, ensuring that all state-action pairs have a nonzero probability of being explored.
 \begin{algorithm}[H]
-    \caption{Monte Carlo exploring starts}
+    \caption{Monte Carlo policy iteration}
         \begin{algorithmic}[1]
             \State{$\pi(s) \in\mathcal{A}(s)$ arbitrarily, for all $s \in\mathcal{S}$}
             \State{$Q(s, a) \in \mathbb{R}$ arbitrarily, for all $s \in \mathcal{S}$, $a \in \mathcal{A}(s)$}
             \State{Returns$(s, a)=$ empty list, for all $s 2 \mathcal{S}$, $a \in \mathcal{A}(s)$}
             \Loop 
                 \State{Choose $S_0 \in\mathcal{S}, A_0 \in \mathcal{A}(S_0)$ randomly such that all pairs have probability greater than zero}
-                \State{Generate an episode from $S_0$, $A_0$, following $\pi: S_0, A_0, R_1,\cdots,S_{T-1}, A_{T-1}, R_T$}
+                \State{Generate an episode from $S_0$, $A_0$, following $\pi: S_0, A_0, R_1,\dots,S_{T-1}, A_{T-1}, R_T$}
                 \State{$G=0$}
-                \For{each step of episode, $t = T_1, T_2,\cdots, 0$} 
+                \For{each step of episode, $t = T_1, T_2,\dots, 0$} 
                     \State{$G=\gamma G+R_{t+1}$}
-                    \If{$S_t,A_t\notin S_0, A_0, S_1, A_1,\cdots,S_{t-1}, A_{t-1}$} 
+                    \If{$S_t,A_t\notin S_0, A_0, S_1, A_1,\dots,S_{t-1}, A_{t-1}$} 
                         \State{Append $G$ to Returns($S_t, A_t$)}
                         \State{$Q(S_t, A_t)=$ average(Returns($S_t, A_t$))}
                         \State{$\pi(S_t)=\argmax_aQ(S_t,a)$}
@@ -78,22 +89,16 @@ We choose randomly the first state and the first action, and we perform the foll
         \end{algorithmic}
 \end{algorithm}
 
-\subsection{Epsilon-soft Monte Carlo policy iteration}
-Exploring starts is a simple idea but it is not always possible. 
-But, we need to keep exploring during the learning process
-This leads to a key problem in RL: the Exploration-Exploitation Dilemma
+\subsubsection{Epsilon-greedy Monte Carlo policy iteration}
+Exploring starts is a simple and effective strategy, but it is not always practical. 
+To continue exploration throughout the learning process, we introduce the exploration-exploitation dilemma.
 
-
-$\varepsilon$-Greedy Exploration is the simplest solution to the exploration-exploitation dilemma
-Instead of searching the optimal deterministic policy we search the optimal $\varepsilon$-soft
-policy, i.e., a policy that selects each action with a probability that is at least $\frac{\varepsilon}{\left\lvert \mathcal{A}\right\rvert}$. 
-
-In particular we use $\varepsilon$-greedy policy:
-\[\pi(a|s)=\begin{cases}
-    \frac{\varepsilon}{\left\lvert \mathcal{A}(s)\right\rvert}+1-\varepsilon \qquad \text{if }a^\ast=\argmax_{a\in\mathcal{A}}Q_(s,a) \\
+One of the simplest solutions to this dilemma is the $\varepsilon$-greedy exploration strategy. 
+Instead of directly optimizing the deterministic policy, we seek an optimal $\varepsilon$-soft policy:
+\[\pi(a\mid s)=\begin{cases}
+    \frac{\varepsilon}{\left\lvert \mathcal{A}(s)\right\rvert}+1-\varepsilon \qquad \text{if }a^\ast=\argmax_{a\in\mathcal{A}}Q_\pi(s,a) \\
     \frac{\varepsilon}{\left\lvert \mathcal{A}(s)\right\rvert}\qquad\qquad\quad\:\:\text{otherwise}
 \end{cases}\]
-This algorithm takes as input a small $\varepsilon>0$
 \begin{algorithm}[H]
     \caption{$\varepsilon$-soft Monte Carlo policy iteration}
     \begin{algorithmic}[1]
@@ -110,7 +115,7 @@ This algorithm takes as input a small $\varepsilon>0$
                     \State{$Q(S_t,A_t)=$average(Returns($S_t,A_t$))}
                     \State{$A^\ast=\argmax_aQ(S_t,a)$}\Comment{Ties broken arbitrarily}
                     \For{$a\in\mathcal{A}(S_t)$}
-                        \State{$\pi(a|S_t)=\begin{cases}
+                        \State{$\pi(a\mid S_t)=\begin{cases}
                             1 -\varepsilon +\frac{\varepsilon}{\left\lvert \mathcal{A}(S_t)\right\rvert } \:\:\qquad\text{if } a = A^\ast \\
                             \frac{\varepsilon}{\left\lvert \mathcal{A}(S_t)\right\rvert }\qquad\qquad\qquad \text{if } a \neq A^\ast
                         \end{cases}$}
@@ -123,68 +128,117 @@ This algorithm takes as input a small $\varepsilon>0$
 \begin{theorem}
     Any $\varepsilon$-greedy policy $\pi^\prime$ with respect to $Q_{\pi}$ is an improvement over any $\varepsilon$-soft policy $\pi$. 
 \end{theorem}
-\begin{proof}
-    We have that: 
-    \begin{align*}
-        V_{\pi}(s)  &= Q_{\pi}(s, \pi^\prime(s)) \\
-                    &= \sum_{a \in \mathcal{A}} \pi^\prime(a|s)Q_{\pi}(s, a) \\
-                    &= \varepsilon \sum_{a \in \mathcal{A}} \frac{1}{|A|} \sum_{a \in \mathcal{A}} Q_{\pi}(s, a) + (1 - \varepsilon) \max_{a \in \mathcal{A}} Q^{\pi}(s, a) \\
-                    &\geq \varepsilon \sum_{a \in \mathcal{A}} Q_{\pi}(s, a) + (1 - \varepsilon) \sum_{a \in \mathcal{A}} \frac{\pi(a|s) - \frac{\varepsilon}{|A|}}{1 - \varepsilon} \bar{Q}_{\pi}(s, a) \\
-                    &= \sum_{a \in \mathcal{A}} \pi(a|s)Q_{\pi}(s, a) = V_{\pi}(s)
-    \end{align*}
-\end{proof}
 
-\subsection{Off-policy learning}
-\paragraph*{On-policy learning}
-On-policy learning involves the agent learning the value functions based on the same policy it uses to select actions. 
-This method faces challenges in balancing exploration and exploitation, making it difficult to converge to an optimal deterministic policy.
-
-\paragraph*{Off-policy learning}
-Off-policy learning, on the other hand, allows the agent to select actions using a behavior policy $b(a|s)$, while learning the value functions of a different target policy $\pi(a|s)$. 
-This flexibility enables the agent to use an explorative behavior policy, while still learning towards an optimal deterministic policy $\pi^\ast(a|s)$.
-
-Regardless of our behavior policy, it's impossible to learn any policy $\pi(a|s)$ if there are actions in that state with zero probability according to the behavior policy $b(a|s)$. 
-This situation occurs when the behavior policy never transitions to a particular state from the current one.
-
-\paragraph*{Importance sampling}
-Importance sampling enables the estimation of expectations of a distribution that differs from the one used to draw the samples:
-\[\mathbb{E}_p[x]=\sum_{x\in X}xp(x)=\sum_{x\in X}x\dfrac{p(x)}{q(x)}q(x)=\sum_{x\in X}z\rho(x)q(x)=\mathbb{E}_q[x\rho(x)]\]
-Consequently, for sample-based estimation:
-\[\mathbb{E}_p[x]\approx\dfrac{1}{N}\sum_{i=1}^{N}x_i\text{ if }x_i\sim p(x)\rightarrow \mathbb{E}_p[x]\approx\dfrac{1}{N}\sum_{i=1}^{N}x_i\rho(x_i)\text{ if }x_i\sim q(x)\]
-
-\paragraph*{Importance sampling in policy evaluation}
-When adhering to policy $\pi$, the computation of the state value function is expressed as:
-\[V_{\pi}(s)\approx\text{average}(\text{Returns}[0],\text{Returns}[1],\text{Returns}[2],\cdots)\]
-However, under policy $b$, the value function transforms into:
-\[V_{\pi}(s)\approx\text{average}(\rho_0\text{Returns}[0],\rho_1\text{Returns}[1],\rho_2\text{Returns}[2],\cdots)\]
-Here, $\rho_i$ denotes the probability of executing the trajectory observed in episode $i$ while adhering to policy $\pi$, relative to the probability of observing the same trajectory while following policy $b$:
-\[\rho=\dfrac{\Pr(\text{trajectory under }\pi)}{\Pr(\text{trajectory under }b)}\]
-In practical terms, $\rho_{t:T-1}$ can be calculated as:
-\[\rho_{t:T-1}=\prod_{k=t}^{T-1}\dfrac{\pi(A_k|S_k)}{b(A_k|S_k)}\]
-Sampling methods include:
-\begin{itemize}
-    \item \textit{Ordinary}: unbiased with higher variance:
-        \[V_{\pi}(s)\approx\dfrac{\sum_i\rho[i]\text{Return}[i]}{N(s)}\]
-    \item \textit{Weighted}: biased (bias converges to zero) with lower variance:
-    \[V_{\pi}(s)\approx\dfrac{\sum_i\rho[i]\text{Return}[i]}{\sum_i\rho[i]}\]
-\end{itemize}
-
+\subsection{Temporal difference learning}
+Temporal Difference learning is a powerful method for updating state values through bootstrapping, which means that it updates the value of a state using the current estimate of the value for the next state. 
+This approach combines ideas from both Monte Carlo methods and Dynamic Programming, giving it a strong advantage in terms of flexibility and efficiency.
+The Temporal Difference update rule is as follows:
+\[V(s_t) = V(s_t)+\alpha(r_{t+1}+\gamma V(s_{t+1})-V(s_t))\]
 \begin{algorithm}[H]
-    \caption{Off-Policy every visit Monte Carlo prediction}
+    \caption{Temporal difference policy evaluation}
         \begin{algorithmic}[1]
-            \State{$V(s) \in\mathbb{R}$ arbitrarily, for all $s\in S$}
-            \State{Returns$(s)=$ an empty list, for all $s\in S$}
+            \State Initialize $V(s)$ arbitrarily, for all $s\in\mathcal{S}^{+}$
+            \State $V(\text{terminal})=0$
             \For{each episode}
-                \State{Generate an episode following $b:S_0, A_0, R_1, S_1, \ldots, S_{T-1}, A_{T-1}, R_T$}
-                \State{$G=0$}
-                \State{$W=1$}
-                \For{each step of episode, $t = T - 1, T - 2, \ldots, 0$}
-                    \State $G=\gamma WG + R_{t+1}$
-                    \State Append $G$ to Returns($S_t$)
-                    \State $V(S_t)=$ average(Returns($S_t$))
-                    \State $W=W \dfrac{\pi(A_t | S_t)}{b(A_t | S_t)}$
-                \EndFor
+                \State{Initialize $S$}
+                \Repeat{ for each step of episode}
+                    \State{$A = \text{action given by }\pi\text{ for }S$}
+                    \State{Take action $A$, observe $R$, $S^\prime$}
+                    \State{$V(S)=V(S)+\alpha[R+\gamma V(S^\prime)-V(S)]$}
+                    \State{$S=S^\prime$}
+                \Until{$S$ is terminal}
             \EndFor
         \end{algorithmic}
 \end{algorithm}
-The input of this algorithm is a policy $\pi$ to be evaluated.
+    
+\subsubsection{SARSA}
+SARSA is an on-policy Reinforcement Learning algorithm used for evaluating and improving a policy. 
+As an on-policy method, it means that the policy used to make decisions is the same policy that is being improved.
+
+The SARSA algorithm updates the action-value function, $Q(S_t,A_t)$, based on the observed reward and the estimated value of the next state-action pair, $Q(S_{t+1},A_{t+1})$. 
+The update rule for SARSA is given by:
+\[Q(S_t,A_t)=Q(S_t,A_t)+\alpha(R_{t+1}+\gamma Q(S_{t+1},A_{t+1})-Q(S_t,A_t))\]
+SARSA is often combined with an $\varepsilon$-greedy policy to balance exploration and exploitation. 
+In this policy, the agent mostly chooses the action with the highest estimated value, but occasionally explores other actions with probability $\varepsilon$, ensuring that the agent continues to explore the state space.
+
+The key parameters of the SARSA algorithm are the learning rate $\alpha\in(0,1]$ and the exploration rate $\varepsilon>0$, which controls the amount of exploration in the policy.
+\begin{algorithm}[H]
+    \caption{SARSA}
+        \begin{algorithmic}[1]
+            \State Initialize $Q(s,a)$ arbitrarily, for all $s\in\mathcal{S}^{+}$, $a \in \mathcal{A}(s)$
+            \State $Q(\text{terminal},\cdot)=0$
+            \Loop
+                \State {Initialize $S$}
+                \State{Choose $A$ from $S$ using policy derived from $Q$}
+                \Repeat{ for each step of episode}
+                    \State{Take action $A$, observe $R$, $S^\prime$}
+                    \State{Choose $A^\prime$ from $S^\prime$ using policy derived from $Q$}
+                    \State{$Q(S,A)=Q(S,A)+\alpha(R+\gamma Q(S^\prime,A^\prime)-Q(S,A))$}
+                    \State{$S=S^\prime$}
+                    \State{$A=A^\prime$}
+                \Until{$S$ is terminal}
+            \EndLoop
+        \end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Q-Learning}
+Q-Learning is a popular off-policy algorithm in Reinforcement Learning used to estimate the optimal action-value function $Q^\ast(s,a)$. 
+Unlike on-policy methods like SARSA, which evaluates and improves the same policy used for action selection, Q-Learning is off-policy, meaning it evaluates the optimal policy while potentially following a different policy for action selection.
+
+Q-Learning is based on the Bellman optimality equation, rather than the Bellman expectation equation used in SARSA.
+The update rule for Q-Learning is given by:
+\[Q(S_t,A_t)=Q(S_t,A_t)+\alpha\left(R_{t+1}+\gamma\max_aQ(S_{t+1},a)-Q(S_t,A_t)\right)\]
+The key difference between Q-Learning and SARSA is that, while SARSA updates $Q(S_t,A_t)$ using the next action $A_{t+1}$ chosen by the policy, Q-Learning updates $Q(S_t,A_t)$ using the maximum action value in the next state, effectively trying to find the optimal policy.
+Q-Learning is often used with an $\varepsilon$-greedy policy, where the agent mostly selects actions based on the highest action value, but occasionally explores other actions with a small probability $\varepsilon$. 
+\begin{algorithm}[H]
+    \caption{Q-Learning}
+        \begin{algorithmic}[1]
+            \State Initialize $Q(s,a)$ arbitrarily, for all $s\in\mathcal{S}^{+}$, $a \in \mathcal{A}(s)$
+            \State $Q(\text{terminal},\cdot)=0$
+            \Loop
+                \State{Initialize $S$}
+                \Repeat{ for each step of episode}
+                    \State{Choose $A$ from $S$ using policy derived from $Q$}
+                    \State{Take action $A$, observe $R$, $S^\prime$}
+                    \State{$Q(S,A)=Q(S,A)+\alpha\left(R+\gamma\max_aQ(S^\prime,a)-Q(S,A)\right)$}
+                    \State{$S=S^\prime$}
+                \Until{$S$ is terminal}
+            \EndLoop
+        \end{algorithmic}
+\end{algorithm}
+In this algorithm, the agent interacts with the environment, selects actions based on the policy derived from the current estimates of $Q$, and updates the action-value function based on the observed rewards and the maximum possible value of the next state. 
+This process continues until the agent converges to the optimal policy.
+
+\subsubsection{Eligibility traces}
+Eligibility traces are an important concept in Reinforcement Learning that enhance the efficiency of updating value estimates for states or actions. 
+They are primarily used in conjunction with Temporal Difference learning methods, such as SARSA and Q-Learning. 
+Eligibility traces enable faster and more efficient learning by assigning credit to past experiences based on their contribution to future rewards.
+The key features of eligibility traces are:
+\begin{enumerate}
+    \item \textit{Temporal credit assignment}: eligibility traces allow RL algorithms to assign credit or blame to actions taken in the past for the rewards received later.
+    \item \textit{Memory mechanism}: eligibility traces act as a form of memory, maintaining a record of recently visited state-action pairs.
+    \item \textit{Decay factor}: the decay factor controls how much influence past experiences have on the current update.
+    \item \textit{Updating value estimates}: when a reward is received, eligibility traces guide the updating of value estimates for relevant states or actions.
+    \item \textit{Efficiency and learning speed}: eligibility traces can accelerate the learning process by allowing updates to propagate through the environment more efficiently. 
+\end{enumerate}
+
+\subsection{Monte Carlo and Temporal Difference}
+Temporal Difference learning is more flexible than Monte Carlo methods, particularly when dealing with incomplete sequences or continuous tasks.
+While Monte Carlo has the advantage of providing unbiased estimates, Temporal Difference's bootstrapping mechanism generally leads to lower variance and faster learning. 
+However, Temporal Difference methods can be more sensitive to initial values and may struggle with function approximation compared to Monte Carlo. 
+Both methods, however, share the key benefit of being model-free, meaning they do not require knowledge of the environment's dynamics to update their value functions.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+    \hline
+    & \textbf{Monte Carlo} & \textbf{Temporal Difference} \\ \hline
+    \textit{Update} & End of an episode & After each step within an episode \\ \hline
+    \textit{Episodes} & Complete & Partial \\ \hline
+    \textit{Task} & Episodic & Episodic and continuous \\ \hline
+    \textit{Estimation bias} & No & Yes \\ \hline
+    \textit{Estimation variance} & Higher variance & Lower variance \\ \hline
+    \textit{Initialization} & Less sensitive & More sensitive \\ \hline
+    \textit{Model dependency} & Model-free & Model-free \\ \hline
+    \textit{Update method} & Sampling & Bootstrapping \\ \hline
+    \end{tabular}
+\end{table}

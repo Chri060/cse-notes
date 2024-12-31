@@ -1,107 +1,128 @@
 \section{Markov Decision Process}
 
-Markov Decision Processes (MDPs) are grounded in the Markov property, which asserts that:
+To model the dynamics of a process and the ability to choose among different actions in each situation, we focus on two main problems:
+\begin{enumerate}
+    \item \textit{Prediction}: given a specific behavior (policy) for each situation, estimate the expected long-term reward starting from a particular state.
+    \item \textit{Control}: learn the optimal behavior to follow in order to maximize the expected long-term reward provided by the underlying process.
+\end{enumerate}
+A Markov Decision Process is formally defined as $\mathcal{M} = (\mathcal{S}, \mathcal{A}, P, R, \mu, \gamma)$, where:
+\begin{itemize}
+    \item \textit{States} ($\mathcal{S}$): these represent the possible configurations the system can be in.
+    \item \textit{Actions} ($\mathcal{A}$): these are the choices or decisions available to the agent at each state.
+    \item \textit{Transition model} ($P$): this defines the probability distribution over the next states given the current state and action. 
+    \item \textit{Reward function} ($R$): the reward function assigns a numerical value to each state-action pair representing the immediate benefit of performing action $a$ in state $s$.
+    \item \textit{Initial distribution} ($\mu$): this describes the probability distribution over the initial states, $\mu(s)$, indicating where the process begins.
+    \item \textit{Discount factor} ($\gamma$): a scalar in the range $(0, 1]$ that determines the importance of future rewards. 
+        A lower $\gamma$ emphasizes immediate rewards, while a higher $\gamma$ values long-term rewards more heavily.
+\end{itemize}
+
+\noindent Markov Decision Processes are grounded in the Markov property. 
 \begin{property}
-    The future state $s^\prime$ and reward $r$ depend solely on the current state $s$ and action $a$: 
+    The future state $s^\prime$ and reward $r$ depend solely on the current state $s$ and action $a$. 
 \end{property}
 This assumption is not restrictive, as it can be interpreted as a property of the state itself.
 
-In a Markov Decision Process, the one-step dynamics can be described as the transition and reward distribution:
-\[\Pr(s^\prime,r\mid s,a)\]
-We have the property that the sum of all outgoing arcs from a state must be equal to one. 
+When the Markov property holds and both the state and action spaces are finite, the process is referred to as a finite Markov Decision Process.
+To formally define a finite Markov Decision Process, we specify the sets of states and actions, along with the one-step dynamics. 
 
-When the Markov Property holds and both the state and action spaces are finite, the process is termed a finite Markov Decision Process.
-To formally define a finite MDP, we need to specify the sets of states and actions, along with the one-step dynamics:
-\[\Pr(s^\prime, r \mid s, a) = \Pr\{S_{t+1}=s^\prime, R_{t+1}=r \mid S_t=s, A_t=a\}\]
-We can further deduce the distribution of the next state and the expected reward: 
+\subsection{Rewards}
+In an Markov Decision Process, an agent must prioritize long-term rewards over immediate gains to make effective decisions.
+The agent's goal is to maximize the cumulative future rewards, often referred to as the return: 
+\[G_t=f(R_{t+1}+R_{t+2}+R_{t+3}+\dots)\]
+The key to success lies in maximizing the expected return, which can take various forms such as the total reward, discounted reward, or average reward.
 
-\subsection{Expected reward}
-In an MDP, it is important for an agent to consider long-term rewards rather than focusing solely on immediate gains. 
-The agent's objective is to maximize the cumulative future rewards, which we define as the return $G_t$:
-\[G_t \doteq f\left(R_{t+1}+R_{t+2}+R_{t+3}+\dots\right)\]
-To achieve success, the agent aims to maximize the expected return. 
-Various forms of the return function can be used, such as the total reward, discounted reward, or average reward.
-
-\paragraph*{Episodic tasks}
-In episodic tasks, the agent-environment interaction naturally breaks into distinct chunks known as episodes. 
-In this case, the expected total reward is:
-\[\mathbb{E}\left[G_t\right]=\mathbb{E}\left[R_{t+1}+R_{t+2}+R_{t+3}+\cdots+R_T\right]\]
-
-\paragraph*{Continuing tasks}
-In continuing tasks, where the agent-environment interaction is continuous and there is no terminal state, the total reward is the sum of an infinite sequence, which may not be finite. 
-To address this, future rewards are discounted by a factor $\gamma$ ($0 < \gamma < 1$): 
-\[\mathbb{E}\left[G_t\right]=\mathbb{E}\left[\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}\right]\]
-The discount factor $\gamma$ plays a crucial role in determining the agent's focus on future rewards.
-Depending on the value of $\gamma$, the agent's behavior can vary:
+Based on the type of task we may have a different reward function: 
 \begin{itemize}
-    \item $\gamma = 1$: the agent considers future rewards equally as present rewards, often used when terminal states are eventually reached.
-    \item $\gamma = 0$: the agent only cares about immediate rewards, ignoring future consequences. 
+    \item \textit{Episodic tasks}: the interaction between the agent and the environment is divided into distinct episodes. 
+        Each episode has a clear starting and ending point. 
+        For such tasks, the expected total reward is given by:
+        \[\mathbb{E}\left[G_t\right]=\mathbb{E}\left[\sum_{k=0}^{T}R_{t+k+1}\right]\]
+    \item \textit{Continuing tasks}: the agent interacts with the environment indefinitely, without a terminal state. 
+        Here, the total reward involves an infinite sequence, which may diverge. 
+        To address this, future rewards are discounted by a factor $\gamma$, where $0<\gamma<1$: 
+        \[\mathbb{E}\left[G_t\right]=\mathbb{E}\left[\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}\right]\]
 \end{itemize}
-
-\paragraph*{Final objective}
-A goal in reinforcement learning should define the desired outcome, not the specific steps taken to achieve it. 
-This aligns with the Reward Hypothesis, which posits that all goals can be framed as the maximization of the expected cumulative sum of rewards.
-
-According to the Reward Hypothesis, an agent's purpose is to maximize the expected value of the cumulative rewards it receives, thereby achieving the goal defined by the environment's reward structure.
+The objective in Reinforcement Learning is to define the desired outcome rather than prescribing specific actions. 
+This principle aligns with the reward hypothesis, which states that all goals can be expressed as the maximization of the expected cumulative reward.
 
 \subsection{Policy}
-A policy defines the agent's behavior by determining the action it selects at any given moment. 
-It fully characterizes the decision-making process of the agent, mapping states to actions. 
-Policies can vary in different ways, depending on how actions are chosen.
+An agent's behavior in a Markov Decision Process is governed by its policy, which maps states to actions. 
+Mathematically, a policy is defined as:
+\[\pi:\mathcal{S}\rightarrow\Delta(\mathcal{A})\]
+\noindent  The policy determines the probabilities of selecting actions in each state.
 
-\paragraph*{Deterministic policy}
-In its simplest form, a policy is a deterministic function that maps each state to a specific action:
-\[\pi(s)=a\]
-In this case, the policy provides a direct, unambiguous mapping from states to actions.
-Such policies can be represented clearly in the form of a table, where each state corresponds to exactly one action.
+For a given policy $\pi(a \mid s)$, the following terms are derived:
+\[P_\pi(s^\prime\mid s)=\sum_{a\in\mathcal{A}}\pi(a\mid s)\Pr(s^\prime\mid s,a) \qquad R_\pi(s)=\sum_{a\in\mathcal{A}}\pi(a\mid s)R(s,a)\]
+These equations describe the transition probabilities and expected rewards under policy $\pi$. 
+A policy fully defines the agent's decision-making process and can vary based on how actions are selected.
 
-\paragraph*{Stochastic policy}
-A more general approach is a stochastic policy, which defines a probability distribution over the set of possible actions for each state:
-\[\pi(a\mid s)\]
-Here, the policy is a probability distribution, such that for each state $s$, the sum of probabilities over all possible actions equals one. 
-Stochastic policies are more flexible than deterministic ones, as they allow for randomness in action selection. 
-A deterministic policy can be seen as a special case of a stochastic policy where one action has a probability of 1 and all others have a probability of 0.
+The policy can be: 
+\begin{itemize}
+    \item \textit{Deterministic}:  maps each state $s$ to a specific action $a$:
+        \[\pi(s)=a\]
+        In this case, the policy is a simple, unambiguous function that specifies exactly one action per state. 
+        Deterministic policies are often represented as lookup tables where each state corresponds to a unique action.
+    \item \textit{Stochastic}: assigns probabilities to actions in a given state:
+        \[\pi(a\mid s)\]
+        Here, $\pi(a\mid s)$ represents the probability of taking action $a$ in state $s$, with the sum of probabilities over all actions equal to 1.
+        Stochastic policies are more flexible than deterministic ones, as they allow for random exploration. 
+        A deterministic policy can be seen as a special case of a stochastic policy where one action has probability 1 and all others have probability 0.
+    \item \textit{Markovian}: depends solely on the current state $s$, adhering to the Markov property. 
+        In this framework, the action selection process is memoryless, relying only on the present state rather than the history of previous states or actions.
+        In contrast, a non-Markovian policy incorporates past interactions (or a summary of them) into decision-making, introducing dependencies beyond the current state.
+\end{itemize}
+\noindent By modifying the policy, different strategies can be explored, such as:
+\begin{itemize}
+    \item \textit{Myopic policies}: focus on immediate rewards, often prioritizing short-term gains.
+    \item \textit{Far-sighted policies}: consider long-term rewards, optimizing for cumulative future gains.
+\end{itemize}
 
-\paragraph*{Markovian policy}
-A Markovian policy depends only on the current state $s$ and action $a$, fully adhering to the Markov property. 
-In this case, the decision-making process is memoryless, meaning that the choice of action depends solely on the current state and not on the history of past states or actions.
-\noindent In contrast, a non-Markovian policy might consider the entire history of interactions (or some function of it) to decide on actions, which introduces a dependence on past states and actions beyond the current state.
+\subsection{Reward functions}
+The state-value function $V_{\pi}(s)$ represents the expected cumulative reward starting from state $s$ and following policy $\pi$: 
+\[V_{\pi}(s) = \mathbb{E}\left[G_t\mid S_t=s\right]=\mathbb{E}_{\pi}\left[\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}\mid S_t=s\right]\]
 
-\paragraph*{State-value function}
-For a given policy $\pi$, the state-value function $V_{\pi}(s)$ represents the expected return (or cumulative reward) starting from state $s$ and following policy $\pi$ thereafter.
-It is defined as:
-\[V_{\pi}(s) \doteq \mathbb{E}\left[G_t\mid S_t=s\right]=\mathbb{E}_{\pi}\left[\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}\mid S_t=s\right]\]
-This function captures the expected total reward from state $s$ under the policy $\pi$, where $\gamma$ is the discount factor.
-
-\paragraph*{Action-value function}
-Similarly, the action-value function $Q_{\pi}(s,a)$ represents the expected return starting from state $s$ taking action $a$, and then following the policy $\pi$. 
-\[Q_{\pi}(s,a)\doteq\mathbb{E}_{\pi}\left[G_t|S_t=s,A_t=a\right]\mathbb{E}_{\pi}\left[\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}|S_t=s,A_t=a\right]\]
-This function captures the expected return from taking action $a$ in state $s$, followed by the subsequent actions determined by policy $\pi$.
+The action-value function $Q_{\pi}(s,a)$ represents the expected cumulative reward starting from state $s$, taking action $a$, and then following policy $\pi$:
+\[Q_{\pi}(s,a)=\mathbb{E}_{\pi}\left[G_t\mid S_t=s,A_t=a\right]\mathbb{E}_{\pi}\left[\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}\mid S_t=s,A_t=a\right]\]
+This function evaluates the quality of taking a specific action in a given state under a particular policy.
 
 \paragraph*{Bellman expectation equation}
-The state-value function can be recursively decomposed into the immediate reward plus the discounted value of the successor state.
-This relationship is expressed as the Bellman expectation equation for the state-value function:
+The state-value function can be expressed recursively using the Bellman expectation equation:
 \[V_{\pi}(s) = \sum_{a\in\mathcal{A}}\pi(a\mid s)\left[r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}\Pr(s^\prime\mid s,a)V_{\pi}(s^\prime)\right]\]
-Similarly, the action-value function can be decomposed as follows:
+In matrix form, this is written as:
+\[V_\pi=R_\pi+\gamma P_\pi V_\pi\]
+The solution of this equation can be found in two ways: 
+\begin{enumerate}
+    \item \textit{Closed form solution}: if $P_\pi$ is a finite stochastic matrix, the state-value function can be solved directly:
+        \[V_\pi=(I-\gamma P_\pi)^{-1}R_\pi\]
+        Since $P_\pi$ is stochastic, the eigenvalues of $(I-\gamma P_\pi)$ lie in $[1 - \gamma, 1]$, ensuring the matrix is invertible for $0 \leq \gamma <1$. 
+    \item \textit{Recursive solution}: for large state spaces where direct inversion is impractical, an iterative approach is used:
+        \[V_\pi=R_\pi+\gamma P_\pi V_\pi\]
+\end{enumerate}
+Similarly, the action-value function satisfies a recursive Bellman equation:
 \[ Q_{\pi}(s,a)= r(s,a) + \gamma \sum_{s^\prime \in \mathcal{S}} \Pr(s^\prime \mid s, a) \sum_{a^\prime \in \mathcal{A}} \pi(a^\prime \mid s^\prime) Q_{\pi}(s^\prime, a^\prime)\]
 
-\subsection{Optimality}
-We define the relationship between two policies $\pi$ and $\pi^\prime$ as $\pi\geq\pi^\prime$ if and only if the state-value function under policy $\pi$ is grater than or equal to that under $\pi^\prime$ for all states $s \in \mathcal{S}$. 
+\subsection{Policy optimality}
+The relationship between two policies, $\pi$ and $\pi^\prime$, is defined as $\pi\geq\pi^\prime$ if and only if the state-value function under $\pi$ is greater than or equal to that under $\pi^\prime$ for all states $s \in \mathcal{S}$: 
+\[\pi\geq\pi^\prime \iff V_\pi(s)\geq V_{\pi^\prime}(s)\]
+\noindent In any Markov Decision Process, there exists at least one optimal policy $\pi^\ast$, which is as good as or better than any other policy.
+This means that for every state, following $\pi^\ast$ yields the highest possible cumulative reward.
+The existence of such a policy is guaranteed because, for each state, we can identify the best action to take.
 
-In any Markov Decision Process (MDP), there always exists at least one optimal policy $\pi^\ast$ that is at least as good as all other policies. 
-This is because we can select the optimal policy for each state or interval, ensuring it consistently leads to the best possible outcomes.
-However, with $\left\lvert \mathcal{A}\right\rvert^{\left\lvert \mathcal{S}\right\rvert}$ possible deterministic policies in an MDP, performing a brute force search over all possible policies becomes computationally infeasible as the size of the state and action spaces grows.
+However, determining the optimal policy through brute force is computationally infeasible. 
+The number of deterministic policies grows exponentially with the size of the state and action spaces: $\mathcal{O}\left(\left\lvert \mathcal{A}\right\rvert^{\left\lvert \mathcal{S}\right\rvert}\right)$. 
 
-To address this computational challenge, we introduce the concept of the optimal value function. The optimal state-value function and action-value function can be defined as:
-\[ V^\ast(s) \doteq \max_{\pi} V_{\pi}(s) \quad Q^\ast(s,a) \doteq \max_{\pi} Q_{\pi}(s,a) \qquad \forall s \in \mathcal{S}, \forall a \in \mathcal{A}\]
-The corresponding Bellman Optimality Equation for $V^\ast(s)$ is: 
-\[V^\ast(s) = \max_a \left\{ r(s,a) + \gamma \sum_{s^\prime \in \mathcal{S}} \Pr(s^\prime | s, a) V^\ast(s^\prime) \right\}\]
-The Bellman Optimality Equation for $Q^\ast(s)$ is: 
-\[Q^\ast(s,a)=r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}\Pr(s^\prime|s,a)\max_{a^\prime}Q^\ast(s^\prime,a^\prime)\]
-These equations are key to finding the optimal policy. 
+To overcome this challenge, we use value functions to represent the quality of states and actions. 
+The optimal state-value function $V^\ast(s)$ and the optimal action-value function $Q^\ast(s,a)$ are defined as:
+\[V^\ast(s) = \max_{\pi} V_{\pi}(s) \qquad Q^\ast(s,a) = \max_{\pi} Q_{\pi}(s,a)\]
+These functions represent the best possible return achievable from a state or state-action pair under any policy.
 
-Given the optimal state-value function $V^\ast(s)$ or action-value function $Q^\ast(s,a)$, we can compute the optimal policy $\pi^\ast$ as: 
-\[\pi^\ast(s)=\argmax_a\left\{r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}\Pr(s^\prime|s,a)V^\ast(s^\prime)\right\}\]
-While the optimal policy $\pi^\ast$ can be determined using these functions, the main challenge lies in the fact that solving for $\pi^\ast$ directly is computationally expensive. 
-This is because it is not practical to compute $V^\ast(s)$ or $Q^\ast (s,a)$ for every possible policy, especially in large state and action spaces.
-As such, we require alternative methods for efficiently approximating or computing the optimal policy.
+\paragraph*{Functions optimality}
+The optimal value functions satisfy recursive relationships known as the Bellman optimality equations:
+\[V^\ast(s) = \max_a \left\{ r(s,a) + \gamma \sum_{s^\prime \in \mathcal{S}} \Pr(s^\prime \mid s, a) V^\ast(s^\prime) \right\}\]
+\[Q^\ast(s,a)=r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}\Pr(s^\prime\mid s,a)\max_{a^\prime}Q^\ast(s^\prime,a^\prime)\]
+
+\paragraph*{Policy optimality}
+Given the optimal value functions $V^\ast(s)$ or $Q^\ast(s,a)$, the optimal policy $\pi^\ast$ can be derived as:
+\[\pi^\ast(s)=\argmax_a\left\{r(s,a)+\gamma\sum_{s^\prime\in\mathcal{S}}\Pr(s^\prime\mid s,a)V^\ast(s^\prime)\right\}\]
+While these formulations provide a direct way to compute the optimal policy, solving for $V^\ast(s)$ or $Q^\ast (s,a)$ can be computationally expensive in large state and action spaces. 
+This is due to the need to evaluate all states, actions, and transitions, which may not be feasible in practice.

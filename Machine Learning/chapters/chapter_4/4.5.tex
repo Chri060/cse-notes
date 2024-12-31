@@ -1,114 +1,120 @@
-\section{Temporal difference learning}
+\section{Multi-Armed Bandits}
 
-Dynamic Programming (DP) necessitates knowledge of the Markov Decision Process (MDP) dynamics. 
-On the other hand, Monte Carlo (MC) learning relies on experience but mandates complete episodes for updating. 
-Consequently, it's solely applicable to episodic tasks. 
-However, even within episodic tasks, MC might encounter challenges.
-
-\subsection{Temporal-Difference Policy Evaluation with TD(0)}
-Temporal-Difference combines MC (model-free) with DP (bootstrapping):
-\[V(S_t)=V(S_t)+\alpha[G_t-V(S_t)]=V(S_t)=V(S_t)+\alpha[R_{t+1}+\gamma V(S_{t+1})-V(S_t)]\]
-Here, $R_{t+1}+\gamma V(S_{t+1})-V(S_t)$ is the Temporal-Difference Error $\delta t$. 
-\begin{algorithm}[H]
-    \caption{TD(0) Policy Evaluation}
-        \begin{algorithmic}[1]
-            \State Initialize $V(s)$ arbitrarily, for all $s\in\mathcal{S}^{+}$
-            \State $V(\text{terminal})=0$
-            \For{each episode}
-                \State{Initialize $S$}
-                \Repeat{ for each step of episode}
-                    \State{$A = \text{action given by }\pi\text{ for }S$}
-                    \State{Take action $A$, observe $R$, $S^\prime$}
-                    \State{$V(S)=V(S)+\alpha[R+\gamma V(S^\prime)-V(S)]$}
-                    \State{$S=S^\prime$}
-                \Until{$S$ is terminal}
-            \EndFor
-        \end{algorithmic}
-\end{algorithm}
-The algorithm takes as input the policy $\pi$ to be evaluated, and a parameter $\alpha\in(0,1]$ that represent the step size. 
-One main advantage is that the value function is updated during the episode and not after. 
-
-\subsection{Comparison}
-Temporal Difference (TD) learning has several advantages over Monte Carlo (MC) learning:
+The Multi-Armed Bandit problem is a simplified framework of Reinforcement Learning, often viewed as a special case of a Markov Decision Process. 
+It can be described as follows:
 \begin{itemize}
-    \item TD can learn before knowing the final outcome and can update its estimates after every step, whereas MC must wait until the end of an episode before the return is known.
-    \item TD can learn from incomplete sequences, making it more flexible than MC, which can only learn from complete sequences.
-    \item TD is suitable for both continuing (non-terminating) and episodic (terminating) environments, while MC is limited to episodic tasks.
-    \item MC returns are unbiased estimates of the value function, whereas TD targets are biased estimates due to the use of bootstrapping.
-    \item TD targets have lower variance compared to MC returns because they depend on fewer random actions, transitions, and rewards.
-    \item MC works well with function approximation and is less sensitive to initial values, while TD may face challenges with function approximation and is more sensitive to initial values.
+    \item \textit{State space} ($\mathcal{S}$): a single state, representing the lack of contextual information.
+    \item \textit{Action space} ($\mathcal{A}$): a set of $N$ actions, or arms. 
+    \item \textit{Transition probabilities} ($P$): state transitions are trivial, and the probability of remaining in the same state is always 1. 
+    \item \textit{Reward function} ($R$): rewards depend solely on the action
+    \item \textit{Discount factor} ($\gamma$): fixed to 1. 
+    \item \textit{Initial probabilities} ($\mu_0$): fixed to 1. 
 \end{itemize}
-Bootstrapping, where updates involve an estimate, is a characteristic of TD and Dynamic Programming (DP), while MC does not bootstrap.
-Monte Carlo does not rely on Markov assumption. 
-Sampling, where updates do not involve an expected value, is a feature of MC and TD, while DP does not sample.
+\noindent The only component left to define is the reward structure, which can vary depending on the nature of the problem:
+\begin{itemize}
+    \item \textit{Deterministic}: each arm yields a fixed reward. 
+        This is trivial to solve.
+    \item \textit{Stochastic}: rewards are drawn from a stationary probability distribution.
+    \item \textit{Adversarial}: rewards are chosen strategically by an adversary who knows the agent's algorithm.
+\end{itemize}
+In essence, the $k$-Armed Bandit problem requires an agent to select from $k$ actions and receive rewards based on those choices, aiming to maximize the total reward over time. 
+Unlike typical Markov Decision Processes, the Multi-Armed Bandit setting involves decisions made in isolation, without a broader state context.
 
-\subsection{SARSA}
-SARSA is an algorithm employed for policy evaluation in reinforcement learning. 
-It operates as an on-policy optimization method, meaning it evaluates and improves the same policy that is used to make decisions. 
-The update rule for SARSA is defined as follows:
-\[Q(S_t,A_t)=Q(S_t,A_t)+\alpha(R_{t+1}+\gamma Q(S_{t+1},A_{t+1})-Q(S_t,A_t))\]
-SARSA is typically paired with an $\varepsilon$-greedy policy for improvement. 
-This means that most of the time, the policy selects the action with the highest estimated value, but occasionally explores other actions with probability $\varepsilon$.
+\subsection{Expexted regret}
+The agent interacts with the environment as follows:
+\begin{itemize}
+    \item At each round $ t $, the agent selects an arm $ a_{i_t} $.
+    \item The environment generates a reward $ r_{a_{i_t}, t} $ from the distribution $ \mathcal{R}(a_{i_t}) $.
+    \item The agent updates its knowledge based on the history $ h_t $ (previous actions and rewards).
+\end{itemize}
+The optimal arm $ a^\ast $ has the highest expected reward:
+\[R^\ast=R(a^\ast)=\max_{a\in\mathcal{A}}R(a)=\max_{a\in\mathcal{A}}\mathbb{E}_{r\sim \mathcal{R}(a)}[r]\]
+When the agent selects arm $ a_{i_t} $, it incurs an instantaneous regret:
+\[\Delta_{i_t}=R^\ast-R(a_{i_t})\]
+Here, $ \Delta_i $ is known as the suboptimality gap for arm $ a_i $. 
+The goal is to minimize the expected cumulative regret over $ T $ rounds:
+\[L_T = T R^\ast - \mathbb{E}\left[\sum_{t=1}^T R(a_{i_t})\right]\]
 
-The algorithm requires two parameters: a step size $\alpha\in(0,1]$ and a small $\varepsilon>0$.
-\begin{algorithm}[H]
-    \caption{SARSA on-policy control algorithm}
-        \begin{algorithmic}[1]
-            \State Initialize $Q(s,a)$ arbitrarily, for all $s\in\mathcal{S}^{+}$, $a \in \mathcal{A}(s)$
-            \State $Q(\text{terminal},\cdot)=0$
-            \Loop
-                \State {Initialize $S$}
-                \State{Choose $A$ from $S$ using policy derived from $Q$}
-                \Repeat{ for each step of episode}
-                    \State{Take action $A$, observe $R$, $S^\prime$}
-                    \State{Choose $A^\prime$ from $S^\prime$ using policy derived from $Q$}
-                    \State{$Q(S,A)=Q(S,A)+\alpha(R+\gamma Q(S^\prime,A^\prime)-Q(S,A))$}
-                    \State{$S=S^\prime$}
-                    \State{$A=A^\prime$}
-                \Until{$S$ is terminal}
-            \EndLoop
-        \end{algorithmic}
-\end{algorithm}
+Minimizing cumulative regret is equivalent to maximizing cumulative reward. 
+A good algorithm satisfies the no-regret property, where:
+\[\frac{L_T}{T} \to 0  \text{ as } T \to \infty\]
+The difficulty of the problem depends on the similarity of the arms: the closer their rewards, the harder it is to identify the best one.
+\begin{theorem}
+    For stochastic Multi-Armed Bandit problems, any algorithm satisfies the regret bound:
+    \[L_T \geq \log T \sum_{a_i \in \mathcal{A}: \Delta_i > 0} \frac{\Delta_i}{KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast))}\]
+    as $ T \to \infty $, where $ KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast)) $ is the Kullback-Leibler divergence between the reward distributions of arm $ a_i $ and the optimal arm $ a^\ast $. High regret arises when the rewards of different arms are very similar, making it challenging to distinguish the best arm.
+\end{theorem}
 
+\paragraph*{Action values}
+In bandit problems, the agent uses action-value estimates $ Q_n $ to guide decision-making. The update rule depends on whether the problem is stationary or non-stationary:
+\begin{itemize}
+    \item \textit{Non-stationary problems}:
+    \[Q_{n+1} = Q_n + \alpha \left(R_n - Q_n\right)\]
+    Here, $ \alpha $ is a step-size parameter that adjusts over time.
+    \item \textit{Stationary problems}:
+        \[Q_{n+1} = Q_n + \dfrac{1}{n} \left(R_n - Q_n\right)\]
+        Here, $ \alpha $ is typically set to $ \frac{1}{n} $, the reciprocal of the number of times the action has been taken.
+\end{itemize}
 
-\subsection{Q-learning}
-Q-learning is an algorithm utilized for policy evaluation in reinforcement learning. 
-It operates as an off-policy optimization method, meaning it evaluates a policy while following a different policy for action selection.
+\paragraph*{Initialization}
+Action-value estimates are traditionally initialized to zero, but alternative initialization strategies can influence exploration. 
+In optimistic initialization we set high initial values encourages exploration by making all arms initially appealing. 
+However, this approach is less effective in non-stationary problems, where the environment evolves over time.
 
-As opposed to SARSA, which is a sampled version of the Bellman expectation equation, Q-learning is based on a sampled version of the Bellman optimality equation:
-\[Q(S_t,A_t)=Q(S_t,A_t)+\alpha\left(R_{t+1}+\gamma\max_aQ(S_{t+1},a)-Q(S_t,A_t)\right)\]
-The algorithm requires two parameters: a step size $\alpha\in(0,1]$ and a small $\varepsilon>0$.
-\begin{algorithm}[H]
-    \caption{Q-learning algorithm}
-        \begin{algorithmic}[1]
-            \State Initialize $Q(s,a)$ arbitrarily, for all $s\in\mathcal{S}^{+}$, $a \in \mathcal{A}(s)$
-            \State $Q(\text{terminal},\cdot)=0$
-            \Loop
-                \State {Initialize $S$}
-                \Repeat{ for each step of episode}
-                    \State{Choose $A$ from $S$ using policy derived from $Q$}
-                    \State{Take action $A$, observe $R$, $S^\prime$}
-                    \State{$Q(S,A)=Q(S,A)+\alpha\left(R+\gamma\max_aQ(S^\prime,a)-Q(S,A)\right)$}
-                    \State{$S=S^\prime$}
-                \Until{$S$ is terminal}
-            \EndLoop
-        \end{algorithmic}
-\end{algorithm}
-Q-learning updates the Q-values based on the observed rewards and transitions, aiming to find the optimal policy by maximizing the estimated action values over time.
-Since it's off-policy, it doesn't follow the policy it's evaluating, making it particularly useful in scenarios where exploration and exploitation need to be decoupled.
+The challenge is choosing appropriate optimistic values is non-trivial, as they must balance exploration and exploitation effectively.
 
-\subsection{Eligibility traces}
-Eligibility traces are a concept in reinforcement learning that play a crucial role in updating the value estimates of states or actions. 
-They are used in combination with temporal difference (TD) learning methods like SARSA (State-Action-Reward-State-Action) or Q-learning.
-The main features are:
-\begin{enumerate}
-    \item \textit{Temporal credit assignment}: eligibility traces help in assigning credit or blame to actions taken in the past for the rewards received in the future.
-    \item \textit{Memory mechanism}: eligibility traces serve as a memory mechanism that tracks the eligibility of states or actions to be updated based on future rewards. 
-        They maintain a record of recent state-action pairs that are likely to contribute to future rewards.
-    \item \textit{Decay factor}: determines how much past experiences influence the current update.
-        It helps balance between short-term and long-term credit assignment.
-    \item \textit{Updating value estimates}: when a reward is received, the eligibility traces are used to update the value estimates of relevant states or actions. 
-        This updating process is done more efficiently because the traces highlight which experiences are relevant.
-    \item \textit{Efficiency and learning speed}: By allowing updates to propagate more efficiently through the learning process, eligibility traces can speed up learning and improve the convergence of RL algorithms.
-\end{enumerate}
-Overall, eligibility traces enhance the efficiency and effectiveness of temporal difference learning methods by providing a mechanism for assigning credit over time, which is crucial for learning in complex environments with delayed rewards.
+\subsection{Action selection}
+Selecting the action with the highest value is not always optimal, as it may fail to balance immediate rewards with long-term benefits. 
+Therefore, it is essential to strike a balance between exploration and exploitation:
+\begin{itemize}
+    \item \textit{Exploitation}: the agent uses its current knowledge to maximize immediate rewards.
+    \item \textit{Exploration}: the agent seeks to gather additional information to improve decision-making for future rewards.
+\end{itemize}
+The $\varepsilon$-greedy approach balances exploration and exploitation by performing the greedy action most of the time but occasionally exploring other options. 
+Mathematically:
+\[A_t=\begin{cases}
+    \argmax_a Q_t(a) \qquad\qquad\quad\:\:\text{with probability }1-\varepsilon\\
+    \text{Uniform}(\{a_1,\dots,a_k\})\qquad\text{with probability }\varepsilon
+\end{cases}\]
+
+Two main formulations exist for Multi-Armed Bandit algorithms:
+\begin{itemize}
+    \item \textit{Frequentist}: the rewards $R(a_1), \dots, R(a_N)$ are unknown parameters. 
+        A policy selects an arm at each time step based on the observation history.
+    \item \textit{Bayesian}: the rewards $R(a_1), \dots, R(a_N)$ are treated as random variables with prior distributions $f_1, \dots, f_N$. 
+        The policy selects an arm based on the observation history and the prior information.
+\end{itemize}
+
+\paragraph*{Upper Confidence Bound (UCB)}
+The UCB algorithm is a frequentist approach to the stochastic Multi-Armed Bandit problem. 
+Instead of relying solely on empirical estimates, it computes an upper bound $U(a_i)$ for the expected reward $R(a_i)$ with high probability:
+\[U(a_i) = \hat{R}_t(a_i) + B_t(a_i)\]
+where $B_t(a_i)$ represents the uncertainty in the estimate $\hat{R}_t(a_i)$, depending on the number of times arm $a_i$ has been pulled, $N_t(a_i)$. Specifically:
+\begin{itemize}
+    \item Small $N_t(a_i)$, encouraging exploration.
+    \item Large $N_t(a_i)$, favoring exploitation.
+\end{itemize}
+The selected action at each time step is:
+\[A_t = \argmax_a \left[ Q_t(a) + c \sqrt{\frac{\ln(t)}{N_t(a)}} \right]\]
+Here, $Q_t(a)$ represents the exploitation term, $c$ is a user-defined coefficient, and $\sqrt{\frac{\ln(t)}{N_t(a)}}$ accounts for exploration.
+
+\begin{theorem}
+    At a finite time horizon $T$, the expected cumulative regret of the UCB1 algorithm for a stochastic Multi-Armed Bandit problem satisfies:
+    \[L_T \leq 8 \log T \sum_{a_i \in \mathcal{A} : \Delta_i > 0} \frac{1}{\Delta_i} + \left( 1 + \frac{\pi^2}{3} \right) \sum_{a_i \in \mathcal{A} : \Delta_i > 0} \Delta_i\]
+\end{theorem}
+
+\paragraph*{Thompson sampling}
+Thompson sampling is a Bayesian approach to stochastic Multi-Armed Bandit problems. 
+It uses Bayesian priors for each arm's reward distribution $f_1, \dots, f_N$ and updates these distributions based on observed outcomes:
+\begin{itemize}
+    \item At each round $t$, sample a reward estimate $\hat{r}_1, \dots, \hat{r}_N$ from the current posterior distributions.
+    \item Select the arm with the highest sampled value:
+        \[a_{i_t} = \argmax_i \hat{r}_i\]
+    \item Update the prior distribution for the selected arm based on the observed reward.
+\end{itemize}
+
+\begin{theorem}
+    At time $T$, the expected cumulative regret of Thompson sampling for a stochastic Multi-Armed Bandit problem satisfies:
+    \[L_T \leq \mathcal{O}\left( \sum_{a_i \in \mathcal{A} : \Delta_i > 0} \frac{\Delta_i}{KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast))} \left( \log T + \log\log T \right) \right)\]
+    Here, $KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast))$ is the Kullback-Leibler divergence between the reward distributions of arm $a_i$ and the optimal arm $a^\ast$.
+\end{theorem}
