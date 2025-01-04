@@ -1,233 +1,53 @@
-\section{Image segmentation}
+\section{Autoencoder}
 
-Semantic segmentation aims to group pixels in an image that belong together, facilitating tasks such as identifying coherent objects or regions within an image. 
-It serves to:
-\begin{itemize}
-    \item Cluster similar-looking pixels for processing efficiency.
-    \item Decompose an image into meaningful and coherent objects.
-\end{itemize}
-Conceptually, segmentation can be thought of as a clustering problem.
+Autoencoders are Neural Networks used primarily for Unsupervised Learning tasks, particularly data reconstruction. 
+Their structure consists of an input layer, an encoder $\mathcal{E}$, a decoder $\mathcal{D}$, and an output layer. 
+The objective is to minimize the reconstruction error, typically by optimizing the Mean Squared Error between the input and the output. 
 
-\paragraph*{Formal definition}
-Given an image $I\in\mathbb{R}^{3 \times C \times 3}$, defined over the domain $\mathcal{X}$, the task of segmentation involves estimating a partition $\{R_i\}$ such that:
-\[\bigcup_iR_i=\mathcal{X} \qquad R_i\cap R_j = \varnothing \quad i\neq j\]
-There are two types of sementation: Unsupervised (which we do not address here) and supervised (or Semantic)
+Autoencoders are trained to reconstruct all the data in a given training set. 
+The reconstruction loss over a batch $S$ is defined as:
+\[\mathcal{L}=\sum_{s\in S}{\left\lVert s-\mathcal{D}(\mathcal{E}(s))\right\rVert}_2 \]
+The training process uses standard backpropagation algorithms to optimize the parameters of both the encoder and decoder.
 
-There are two main types of segmentation:
-\begin{itemize}
-    \item \textit{Unsupervised segmentation}. 
-    \item \textit{Supervised segmentation} (semantic). 
-\end{itemize}
+In essence, the Autoencoder learns an identity mapping between the input and output, with the encoder producing a latent representation of the input data.
+These features $z=\mathcal{E}(s)$ are referred to as the latent representation of the data.
 
-\subsection{Semantic segmentation}
-The goal of semantic segmentation is to assign each pixel $(r, c)$ in an image $I$ a label from a predefined set of categories $\varLambda$.
-The output is a map of labels where each pixel corresponds to an estimated class.
+\paragraph*{Regularization}
+Autoencoders do not always provide exact reconstruction because the dimensionality of the latent space is typically much smaller than that of the input. 
+However, this dimensionality reduction is beneficial, as it forces the latent representation to be a compact and meaningful description of the data.
+To guide the latent representation to exhibit certain desired properties, a regularization term can be added to the loss function:
+\[\mathcal{L}=\sum_{s\in S}{\left\lVert s-\mathcal{D}(\mathcal{E}(s))\right\rVert}_2+\lambda\mathcal{R}(s) \]
+Here, $\mathcal{R}$ could enforce properties like sparsity, or smoothness and sharp edges in the case of image data.
+The use of deep Autoencoders enables the network to learn more powerful, nonlinear representations. 
+Moreover, convolutional layers and transpose convolution can be employed to create deep convolutional Autoencoders.
 
-The segmentation map does not distinguish between individual instances of the same class (e.g., multiple people in an image are labeled as the same person category). 
-This distinction is handled by instance segmentation.
+The quality of the reconstruction improves as the latent space dimension increases. 
+In the extreme case, if the latent space dimension is as large as the input, the network can perfectly reconstruct the input data, effectively learning an identity mapping.
+However, reducing the latent space dimension forces the Autoencoder to learn a more compact, meaningful representation of the input.
 
-\paragraph*{Formal definition}
-Formally, semantic segmentation involves assigning labels such that:
-\[I\rightarrow S\in\varLambda^{R\times C}\]
-Here, $S(x,y)\in \varLambda$ represents the class label for the pixel at position $(x,y)$. 
-
-\paragraph*{Training data}
-To train a semantic segmentation model, a labeled dataset is provided:
-$\mathcal{D}_{\text{training}} = \{(I, \text{GT})_i\}$
-Here, $I$ is an input image, and $\text{GT}$ is the corresponding ground-truth segmentation map, manually annotated to serve as supervision for training.
-This training data enables the model to learn pixel-to-label associations, forming the basis for accurate semantic segmentation.
-
-\subsection{Deep Neural Networks for image segmentation}
-A common approach to image segmentation involves training a classifier on small portions of the image (referred to as patches). 
-The process typically involves cropping patches from the image to be segmented, classifying each patch individually, and assigning the predicted class to the central pixel of the patch.
-However, this straightforward method has notable limitations:
-\begin{itemize}
-    \item \textit{Very small receptive field}: the model struggles to capture global context and high-level semantics.
-    \item \textit{Low efficiency}: classifying individual patches is computationally expensive and slow.
-\end{itemize}
-Semantic segmentation faces an inherent trade-off between semantic understanding and spatial localization:
-\begin{itemize}
-    \item Global information helps determine what is in the image.
-    \item Local information helps determine where objects or classes are located.
-\end{itemize}
-To balance these aspects, segmentation models must combine fine-grained layers (to preserve spatial details) with coarse layers (to extract global context). 
-This fusion allows the model to make localized predictions that respect the global structure of the image.
-
-\paragraph*{Typical segmentation network}
-A semantic segmentation network typically consists of two main components:
+\subsection{Initialization}
+Autoencoders can serve as an effective way to initialize a model, especially when dealing with limited labeled data and a large pool of unlabeled data. 
+The process involves the following steps:
 \begin{enumerate}
-    \item \textit{Encoder} (downsampling): this component is similar to a standard classification network. 
-        It uses a Convolutional Neural Network to extract high-level features from the image, progressively reducing spatial resolution while capturing semantic information.
-    \item \textit{Decoder} (upsamping): the decoder reconstructs the spatial resolution by upsampling the encoded features. 
-        This step converts the features back into pixel-level predictions while maintaining sharp contours and spatial detail. 
-        Upsampling is essential for precise localization and detailed class predictions.
-        
-        Various methods are used to reconstruct spatial resolution during the decoding process:
-        \begin{itemize}
-            \item \textit{Nearest neighbor interpolation}: a simple upsampling method that duplicates values to increase resolution, but it often lacks fine detail.
-            \item \textit{Bed of nails}: a technique where values are placed at specific positions in an expanded matrix, leaving the remaining entries as zeros.
-            \item \textit{Transpose convolution} (deconvolution): this method learns filters for upsampling, providing greater flexibility and enabling the model to reconstruct fine details.
-                Transpose convolution can be implemented as a combination of standard upsampling followed by a convolutional layer.
-                This approach provides additional degrees of freedom, as the filters used for upsampling are learned during training.
-        \end{itemize}
+    \item Train the Autoencoder in a fully unsupervised manner using the unlabeled data $S$. 
+    \item Remove the decoder and retain only the encoder's weights.
+    \item Add a Fully Connected layer for classification, using the latent representation produced by the encoder.
+    \item Fine-tune the model using the labeled data $L$.  
+        If $L$ is sufficiently large, the encoder weights can also be fine-tuned.
 \end{enumerate}
-Deep networks are necessary to extract high-level semantic features, but excessive downsampling can lead to a loss of spatial resolution. 
-To address this, semantic segmentation networks often incorporate:
-\begin{itemize}
-    \item \textit{Skip connections}: these directly pass features from the encoder to the decoder, allowing fine-grained details to be retained during reconstruction.
-    \item \textit{Layer fusion}: combining information from both shallow (local) and deep (global) layers helps the model maintain spatial precision while leveraging semantic context.
-\end{itemize}
+This approach helps prevent overfitting because the latent vector of the Autoencoder already provides a good representation of the inputs, which can be leveraged for downstream tasks.
 
-\paragraph*{Loss function}
-In semantic segmentation, the categorical cross-entropy loss is commonly used to evaluate the performance of the model at each pixel of the input image. 
-This loss is computed pixel-wise, and the overall loss function is the sum of these individual pixel losses across the entire image or a specific region of interest.
-The optimization objective can be expressed as:
-\[\hat{\theta}=\argmin_{x_j\in I}\sum_{x_j\in R}\mathcal{L}(x_j,\theta)\]
-Where $x_j$ represents a pixel in the region $R$ of the input image $I$, $\mathcal{L}(x_j,\theta)$ is the loss at pixel $x_j$, evaluated against its ground-truth label in the annotated segmentation map, and $\theta$ are the model parameters being optimized.
-
-Each pixel contributes to the total loss, ensuring that every part of the image is accounted for in the optimization process.
-When processing an image or a region $R$ within it, the corresponding pixel-wise losses provide a mini-batch estimate for gradient computation. 
-This allows for efficient training even when working with large images.
-Since the loss function aggregates contributions from all pixels, gradients are computed across the entire image or region, leading to robust updates during training.
-
-\subsection{U-net}
-The U-Net is a specialized neural network architecture for semantic segmentation, originally designed for biomedical image analysis. 
-Its name derives from its symmetric U-shaped structure, consisting of a contracting path and an expanding path: 
-\begin{itemize}
-    \item \textit{Contracting path}: responsible for extracting high-level features through a series of convolutional and pooling operations.
-    \item \textit{Expanding path}: upsamples the extracted features to reconstruct a pixel-wise prediction map, incorporating fine-grained details via skip connections.
-    \item \textit{No fully connected layers}: the network maintains spatial information and is fully convolutional, allowing it to process variable-sized input images.
-\end{itemize}
-
-\paragraph*{Contracting path}
-The contracting path is a sequence of repeated blocks, each consisting of:
+\subsection{Generative Autoencoder}
+Autoencoders can also be used as generative models, but with some modifications.
+Here's how it works:
 \begin{enumerate}
-    \item \textit{$3 \times 3$ convolution with ReLU} (no padding): operates with a valid option to avoid padding.
-    \item \textit{$3 \times 3$ convolution with ReLU} (no padding): adds non-linearity for feature extraction.
-    \item \textit{Max pooling}: reduces the spatial resolution while doubling the number of feature maps after each downsampling step.
+    \item Train the Autoencoder on a dataset $S$.
+    \item Discard the encoder.
+    \item Sample random vectors $z\sim\phi_z$ from a latent distribution to generate a new latent representation, which is then fed into the decoder.
 \end{enumerate}
+However, this approach faces challenges, particularly in estimating the correct distribution of the latent space. 
+As the dimensionality of the latent space increases, the likelihood of sampling from under-populated regions of the latent space rises. 
+This makes it harder to generate meaningful samples from the decoder. In low-dimensional latent spaces, this can work reasonably well, but as the dimension grows, it becomes difficult to estimate the latent distribution effectively.
 
-\paragraph*{Expanding path}
-The expanding path mirrors the contracting path, with upsampling and feature merging:
-\begin{itemize}
-    \item \textit{$2\times 2$ transpose convolution}: increases spatial resolution while halving the number of feature maps.
-    \item \textit{Concatenation of corresponding features}: combines cropped features from the contracting path via skip connections to integrate fine-grained details.
-    \item \textit{$3 \times 3$ convolution with ReLU} (twice): refines the upsampled features to improve spatial accuracy.
-\end{itemize}
-
-\paragraph*{Network top}
-The final layers consist of $L 1\times 1$convolutions that reduce the feature maps to the desired number of classes $N$, producing a pixel-wise class prediction map.
-The output image is smaller than the input image by a constant border due to the valid convolution operation.
-
-\paragraph*{Training}
-U-Net uses full-image training with a weighted loss function to handle imbalanced datasets and improve border classification performance.
-The optimization goal is:
-\[\hat{\theta}=\min_\theta\sum_{x_j}w(x_j)\mathcal{L}(x_j,\theta)\]
-Here, $w(x_j)$ is a weight function for pixel $x_j$, and $\mathcal{L}(x_j,\theta)$ is the pixel-wise loss.
-
-The weight function is defined as: 
-\[w(x)=w_c(x)+w_0e^{-\frac{(d_1(x)+d_2(x))^2}{2\sigma^2}}\]
-Here, $w_c$ balances class proportions to address class imbalance, $d_1(x)$ is the distance to the nearest object border, $d_2(x)$ is the distance to the second nearest object border, and $w_0$ and $\sigma$ are hyperparameters controlling the weighting.
-
-
-\subsection{Fully convolutional Neural Networks}
-Fully Convolutional Neural Networks (FCNNs) are extensions of traditional Convolutional Neural Networks (CNNs) that eliminate the constraint of fixed input size by removing fully connected (FC) layers. 
-This allows FCNNs to process inputs of arbitrary dimensions while maintaining efficiency and scalability.
-
-Unlike standard CNNs that require a fixed input size, FCNNs can handle inputs of arbitrary dimensions by leveraging the spatial nature of convolutional operations.
-Convolutional and subsampling layers operate in a sliding manner across the entire image, regardless of its size.
-This results in feature maps that scale appropriately with the input dimensions.
-The latent space is preserved in its spatial extent without requiring flattening into a 1D vector. 
-This means the network retains spatial relationships throughout its layers.
-
-With larger inputs, convolutional filters can process volumes of arbitrary size, producing proportionally larger feature maps.
-Standard CNNs rely on FC layers, which require fixed input dimensions. However, FC layers can be reinterpreted as $1\times 1$ convolutions, enabling their functionality to operate on variable input sizes.
-
-For each output class, FCNNs produce a heatmap, where: the resolution is lower than the input image (due to downsampling in earlier layers), and each position in the heatmap represents the class probabilities for the receptive field of the corresponding region in the input image, assuming a column-wise softmax normalization.
-The advantages of these networks are: 
-\begin{itemize}
-    \item \textit{Efficiency over patch-based methods}: traditional methods segment images by extracting patches, classifying them individually, and stitching predictions together. 
-        This approach involves repeated computation for overlapping patches.    
-        FCNNs eliminate this redundancy by operating directly on the entire image, treating the network as a sliding classifier across the latent space.
-    \item \textit{Heatmap-based predictions}: the output is not a single class label but a spatially structured heatmap of class probabilities, allowing for dense predictions at the pixel level.
-    \item \textit{Powerful nonlinear filters}: the stack of convolutional layers acts as a highly expressive nonlinear filter that can classify regions within the latent space efficiently.
-\end{itemize}
-
-\paragraph*{Summary}
-FCNNs generalize the functionality of CNNs by removing size constraints and replacing FC layers with convolutional equivalents. 
-They are significantly more efficient for dense prediction tasks like semantic segmentation, where the entire image is processed in a single forward pass without redundant computations. 
-FCNNs provide a foundational architecture for modern segmentation models such as U-Net and DeepLab.
-
-\subsection{From classification to segmentation}
-Starting with a pre-trained CNN designed for classification, we aim to transform it into a semantic segmentation network capable of handling input images of arbitrary size. 
-Transfer learning may have been applied to adapt the model to the task at hand, and the network has been "convolutionalized" to produce heatmaps that highlight class activations spatially. 
-However, these heatmaps are typically low-resolution, which poses challenges for pixel-wise segmentation.
-
-The goal is to achieve accurate semantic segmentation by addressing the coarse nature of predictions based on the heatmaps. 
-Assigning the predicted label from a low-resolution heatmap to the entire receptive field results in coarse and imprecise outputs. 
-Heatmaps usually involve computing the argmax along the third dimension, representing posterior probabilities for each class, but this approach lacks spatial granularity.
-
-One method to refine the segmentation output is the shift and stitch technique. 
-This approach exploits the downsampling factor $f$, defined as the ratio of the input size to the output heatmap size. 
-Heatmaps are computed for all $f^2$ possible shifts of the input, where $0 \leq r, c < f$. 
-The predictions from these heatmaps are then mapped back to the original image, with each pixel in the heatmap corresponding to the center of the receptive field. 
-By interleaving the predictions from all shifts, we reconstruct a high-resolution segmentation map.
-While this method leverages the full depth of the pre-trained network and can be efficiently implemented using algorithms such as dilated filtering, it involves rigid upsampling and is computationally intensive.
-
-An alternative approach is to eliminate strides in pooling layers, whether max-pooling or convolutional. 
-By removing strides, the network computes outputs for all shifted inputs in a single pass, effectively achieving the same result as shift and stitch but with greater flexibility. 
-Subsequent convolutional filters must be modified by upsampling and zero-padding them to accommodate the larger input size. 
-This adjustment is repeated across all channels and applied iteratively to each subsampling layer. 
-This approach supports end-to-end learning and inference directly on full-sized images and allows fine-tuning of pre-trained classification models. 
-Since segmentation tasks typically require fewer labeled examples than classification, this method is particularly effective in scenarios with limited data.
-
-Fully convolutional networks address these limitations by replacing dense layers with convolutional layers, enabling them to process input images of arbitrary size. 
-They support efficient training and inference by operating on entire images at once and achieve accurate pixel-wise predictions through learnable upsampling layers. 
-As demonstrated by state-of-the-art results in semantic segmentation, FCNs enable precise, scalable, and efficient segmentation while leveraging pre-trained classification models.
-
-\subsection{Patch or full-image training}
-When training a semantic segmentation network, two primary approaches can be adopted: patch-based training or full-image training.
-
-\paragraph*{Patch-based training}
-In the patch-based approach, a classification network is trained using patches cropped from annotated images. 
-Each patch, denoted as $x_i$, is assigned the label corresponding to the pixel at its center. 
-The training process involves the following steps:
-\begin{enumerate}
-    \item Prepare a training set by cropping multiple patches from annotated images.
-    \item Assign to each patch the label of its center pixel.
-    \item Train a classification network either from scratch or by fine-tuning a pre-trained model over the segmentation classes.
-    \item After training, convolutionalize the network by converting fully connected layers into $1 \times 1$ convolutional layers.
-    \item Optionally, design and train the upsampling portion of the network to refine predictions.
-\end{enumerate}
-
-During training, the network minimizes the classification loss over a mini-batch $B$ of patches:
-\[\hat{\theta} = \argmin_{\theta} \sum_{x_j \in B} \mathcal{L}(x_j, \theta)\]
-Here, $\mathcal{L}(x_j, \theta)$ is the classification loss for patch $x_j$.
-
-Batches of patches are randomly assembled, and resampling can be used to address class imbalance. 
-However, this approach is computationally inefficient since convolutions are redundantly computed for overlapping regions of the input.
-
-\paragraph*{Full-image training}
-When full-image annotations are available, the network can be trained directly using entire images instead of patches. 
-Here, $x_j$ represents all pixels in a region $R$ of the input image, and the loss is evaluated over the corresponding labels in the annotated segmentation mask:
-\[\hat{\theta} = \argmin_{\theta} \sum_{x_j \in R} \mathcal{L}(x_j, \theta)\]
-
-In this approach, the entire region $R$ effectively serves as a mini-batch, allowing the network to compute gradients efficiently. 
-Training a fully convolutional network (FCN) is conceptually equivalent to patch-wise training, but with the batch consisting of all receptive fields of the network units in the region $R$. 
-This avoids redundant computation of convolutional features for overlapping patches, making full-image training significantly more efficient.
-
-End-to-end training of an FCN directly minimizes the segmentation loss over all pixels in the input image. 
-Gradients are computed through backpropagation, allowing the network to learn efficiently without relying on a separate classification network.
-
-\paragraph*{Comparison}
-Patch-based training offers flexibility, particularly in addressing class imbalance by resampling patches. 
-However, its inefficiency stems from redundant convolution computations for overlapping regions. 
-On the other hand, full-image training leverages the efficiency of FCNs by avoiding redundant computations and enabling end-to-end learning. 
-
-Full-image training does, however, introduce challenges. 
-Mini-batches in patch-wise training are randomly assembled, introducing stochasticity to the loss estimates, whereas full-image training processes entire regions, which may reduce this randomness. 
-To reintroduce stochasticity, techniques such as random masking of image regions can be adopted. 
-Additionally, full-image training lacks the ability to perform patch resampling for addressing class imbalance. 
-Instead, class imbalance can be mitigated by weighting the loss function to account for different label frequencies.
-
-In summary, while patch-based training offers certain advantages in specific scenarios, full-image training is generally preferred for its efficiency and scalability, especially when annotated full-image data is available.
+Variational Autoencoders address this issue by forcing the latent space to follow a Gaussian distribution.
+This constraint not only improves reconstruction accuracy but also enables the Autoencoder to generate new data samples in a controlled manner, making Variational Autoencoders true generative models.

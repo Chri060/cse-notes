@@ -1,71 +1,92 @@
 \section{Training}
 
-Each Convolutional Neural Network can be conceptualized as a multi-layer perceptron characterized by sparse and shared connectivity. 
-In principle, CNNs can be trained using gradient descent to minimize a loss function over a batch of data.
+Convolutional Neural Networks are trained using gradient descent to minimize a loss function over a batch of data.
+The gradient of the loss function is computed using backpropagation. 
+This enables the model to adjust its weights iteratively based on the errors made in prediction.
 
-The gradient can be computed using backpropagation, which leverages the chain rule, provided that we can derive the operations for each layer of the CNN. 
-It's important to consider weight sharing during the derivative computation, as this leads to a reduction in the number of parameters that need to be accounted for.
-
-Deep learning models are often data-hungry, requiring large datasets for effective training. 
-To cope with data scarcity we can employ two main tecniques. 
+Deep Learning models are often data-hungry and require large datasets to train effectively. 
+To address the challenge of data scarcity, two common techniques can be used to augment the training process:
 \begin{itemize} 
-    \item \textit{Data augmentation}: each annotated image represents a broader set of images that are likely to belong to the same class. 
-        Data augmentation expands this set by applying transformations to the images, which can be: 
-        \begin{itemize} 
-            \item \textit{Geometric transformations}: such as shifts, rotations, affine/perspective distortions, shearing, scaling, and flipping.
-            \item \textit{Photometric transformations}: including adding noise, modifying average intensity, altering contrast, or superimposing other images.
-        \end{itemize}
-    \item \textit{Transfer Learning}: using pre-trained models can leverage existing knowledge from larger datasets, effectively reducing the need for extensive new training data.
+    \item \textit{Data augmentation}: this technique artificially expands the dataset by applying various transformations to the original images, creating variations that are still representative of the same class. 
+        These transformations can be geometric (rotations, flips) or photometric (changes in brightness or contrast).
+    \item \textit{Transfer Learning}: this method leverages knowledge gained from training a model on a large dataset. 
+        By using pre-trained models as a starting point, the model can benefit from the general features already learned, reducing the need for a large amount of new training data.
 \end{itemize} 
 
-\subsection{Image augmentation}
-To make the model more robust, the augmented images should retain the original label and promote invariance to transformations. 
-However, augmentation should be carefully chosen to avoid transformations that obscure class-distinguishing features.
+\subsection{Augmentation}
+To ensure the augmented images are useful, they should retain the original label and promote invariance to transformations. 
+However, care must be taken not to apply transformations that obscure important class-distinguishing features, which could degrade model performance.
 
-\paragraph*{Mixup augmentation}
-Mixup is a domain-agnostic data augmentation method that doesn't require knowledge of specific transformations. 
-It creates virtual samples by interpolating pairs of examples and their labels.
-Given two training samples $(I_i,y_i)$ and $(I_j,y_j)$ (possibly from different classes), virtual samples can be created as follows:
-\[\begin{cases}
-    \tilde{I}=\lambda I_i+(1-\lambda)I_j \\
-    \tilde{y}=\lambda y_i+(1-\lambda)y_j \\
-\end{cases}\]
-Here, $\lambda \in [0,1]$ and $y_i$, and $y_j$ are one-hot encoded labels.
-Mixup effectively extends the training distribution by encouraging the model to generalize through linear interpolations of features.
+Mixup is a domain-agnostic data augmentation technique that does not require prior knowledge of specific transformations. 
+It works by creating new virtual samples through linear interpolation between pairs of examples and their labels
+Mixup helps expand the training distribution, encouraging the model to generalize better by considering linear interpolations between features. 
+Although Mixup can enhance generalization, it may not fully capture all real-world variations that might occur.
 
-Augmented training pairs $\{(A_l(I),y)\}_l$ guide the model to learn invariances to selected transformations. 
-However, synthetic augmentation might not fully capture real-world variations, such as background variations, exposure issues, and other factors.
+\paragraph*{Benefits}
+Data augmentation is a powerful technique to prevent overfitting by effectively expanding the size of the training set. 
+This is especially helpful when there is limited data available. 
+Augmentation can also be integrated directly into the training pipeline as a layer within the network, ensuring that new variations are generated at each epoch. 
+Furthermore, it can address class imbalance by generating additional samples of minority classes, and class-specific transformations can help preserve relevant label information.
 
-\paragraph*{Overfitting}
-Data augmentation helps counteract overfitting by expanding the effective size of the training set. 
-This technique can even be implemented as a layer within the network to ensure varied augmentation at each epoch. 
-Additionally, data augmentation can mitigate class imbalance by generating more samples of minority classes, and in some cases, class-specific transformations can preserve relevant label information.
-If augmentation introduces hidden class-discriminative features, the model may inadvertently rely on these for classification.
-
-\paragraph*{Test time augmentation}
-TTA enhances prediction accuracy by applying augmentations during testing. 
-The process involves: 
-\begin{itemize} 
-    \item Applying random augmentations to each test image. 
-    \item Classifying all augmented versions and storing the prediction probabilities. 
-    \item Aggregating the predictions to obtain a final decision. 
-\end{itemize}
-While effective, TTA is computationally demanding and requires careful configuration of transformations to avoid excessive processing.
+\paragraph*{Test Time Augmentation}
+Test time augmentation is a technique that improves prediction accuracy by applying augmentations during the testing phase.
+The process involves:
+\begin{enumerate}
+    \item Applying random augmentations to each test image.
+    \item Classifying all augmented versions of the image.
+    \item Storing the prediction probabilities for each version.
+    \item Aggregating these predictions to obtain a final decision.
+\end{enumerate}
+While test time augmentation can improve performance, it is computationally expensive and requires careful configuration of the transformations to avoid excessive processing time. 
+The effectiveness of test time augmentation depends on the nature of the task and the transformations used during testing.
 
 \subsection{Transfer learning}
-In cases with limited data, transfer learning provides a powerful approach to leverage pre-trained models, such as ResNet, EfficientNet, or MobileNet, which have already learned general visual features. Transfer learning typically involves:
+Transfer learning offers a powerful way to leverage pre-trained models.
+Pre-trained models have already learned general visual features from large datasets.
+Transfer learning allows you to repurpose these models for a new task, minimizing the need for extensive new data. 
+The typical process for applying transfer learning involves:
 \begin{enumerate} 
-    \item Removing the final fully connected (FC) layers of the pre-trained model. 
-    \item Adding new FC layers tailored to the new problem, initialized randomly. 
-    \item Freezing the pre-trained layers and training only the new layers.
+    \item Removing the final Fully Connected layers of the pre-trained model, which are specific to the original task.
+    \item Adding new Fully Connected layers that are tailored to the new problem, initialized randomly.
+    \item Freezing the pre-trained layers and only the newly added layers are trained.
 \end{enumerate}
-There are two primary strategies in transfer learning:
-\begin{itemize}
-    \item \textit{Transfer learning}: only the newly added FC layers are trained, ideal when the pre-trained model closely matches the new problem but has limited new data.
-    \item \textit{Fine-tuning}: the entire model is retrained, but starting from the pre-trained weights. 
-        Fine-tuning works best when a substantial amount of new data is available, or when the pre-trained model doesn't directly match the new task. 
-        Lower learning rates are generally used for fine-tuning to preserve learned weights while gradually adapting them.
-\end{itemize}
-To maximize the effectiveness of a pre-trained model we can add a new output layer with minimal parameters.
-In transfer learning, train only this output layer.
-In fine-tuning, unfreeze some of the last layers and train the entire network at a reduced learning rate.
+
+\paragraph*{Fine-tuning}
+After this step, fine-tuning is needed. 
+With fine-tuning, the entire model is retrained, but starting with the pre-trained weights. 
+The key is to unfreeze some or all of the layers from the pre-trained model and train them on the new dataset. 
+Fine-tuning is typically done at lower learning rates to preserve the knowledge learned from the original task while allowing the model to adapt to the new data gradually.
+
+To maximize the effectiveness of a pre-trained model in the context of transfer learning, the new output layer should have minimal parameters. 
+This reduces the computational load and ensures that only the relevant final weights are learned for the new task.
+When performing transfer learning, the focus is typically on training only this new output layer, while fine-tuning involves unfreezing some of the later layers and retraining the entire network at a reduced learning rate.
+
+\subsubsection{Architectures}
+The main Convolutional Neural Networks that can be used for transfer learning are as follows: 
+\renewcommand*{\arraystretch}{1.5}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Architecture}    & \textbf{Description}                                                                                   \\ \hline
+    \textit{LeNet}           & Pioneering convolutional network for handwritten digit recognition                                           \\ \hline
+    \textit{AlexNet}         & \makecell[l]{Introduction of ReLU activations, dropout regularization, \\ weight decay, and max-pooling}                      \\ \hline
+    \textit{VGG16}           & \makecell[l]{Deeper architecture with smaller $3 \times 3$ filters and increased depth \\ for better feature capture}         \\ \hline
+    \textit{Network in Network} & \makecell[l]{Use of convolutional layers and Global Average Pooling to reduce \\ parameters and improve robustness}  \\ \hline
+    \textit{InceptionNet}    & \makecell[l]{Parallel convolutions of varying filter sizes, inception modules, and \\ bottleneck layers for computational efficiency} \\ \hline
+    \textit{ResNet}          & \makecell[l]{Introduction of residual learning via identity shortcut connections, \\ enabling very deep networks}             \\ \hline
+    \textit{MobileNet}       & Separable convolutions to reduce parameters and computational cost                                           \\ \hline
+    \textit{Wide ResNet}     & \makecell[l]{Increased width of residual blocks rather than depth, \\ improving efficiency and parallelization}               \\ \hline
+    \textit{ResNeXt}         & \makecell[l]{Parallel paths within each block, allowing for feature diversity while \\ maintaining efficiency}               \\ \hline
+    \textit{DenseNet}        & \makecell[l]{Dense connectivity between layers, promoting feature reuse and \\ mitigating vanishing gradients}               \\ \hline
+    \textit{EfficientNet}    & \makecell[l]{Uniform scaling of depth, width, and resolution for balanced and \\ efficient model scaling}                    \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+
+\paragraph*{Inception module} 
+The inception module is a key component of the inception architecture, designed to efficiently capture features at different scales. 
+It incorporates a combination of convolution operations with varying filter sizes within a single layer. 
+The module includes $1\times 1$ convolutions as bottleneck layers before applying larger convolutions, such as $3\times 3$ and $5\times 5$. 
+These bottleneck layers reduce the number of input channels, which in turn reduces the computational cost for each module. 
+By strategically reducing dimensionality, the inception module enables deeper networks while maintaining a manageable computational load, optimizing both depth and resource usage.

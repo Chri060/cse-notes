@@ -1,162 +1,49 @@
 \section{Perceptron}
 
-In the 1940s, computers were already proficient at executing tasks exactly as programmed and performing arithmetic operations with impressive speed. 
-However, researchers envisioned machines that could do much more. 
-They wanted computers that could handle noisy data, interact directly with their environment, function in a massively parallel and fault-tolerant way, and adapt to changing circumstances. 
-Their quest was for a new computational model, one that could surpass the constraints of the Von Neumann Machine.
+In the 1940s, computers were already excelling at executing tasks with precision and performing arithmetic operations at remarkable speeds. 
+However, researchers aspired for more than mere computational efficiency. 
+They envisioned machines capable of handling noisy data, interacting directly with their environment, operating in a massively parallel and fault-tolerant manner, and adapting to dynamic circumstances.
+Their ambition led to the quest for a new computational model
 
 \subsection{Human neurons}
-The human brain contains an enormous number of computing units, with approximately 100 billion neurons, each connected to around 7,000 other neurons through synapses. 
-In adults, this results in a total of 100 to 500 trillion synaptic connections, while in a three-year-old child, this number can reach up to 1 quadrillion synapses.
+The human brain consists of an enormous network of computing units, with each neuron connected to many others through synapses. 
+Information transmission in the brain relies on chemical processes: dendrites gather signals from synapses, which can either excite or inhibit the neuron. 
+When the cumulative signal surpasses a certain threshold, the neuron fires, releasing an electrical charge.
 
-Information in the brain is transmitted through chemical processes. 
-Dendrites gather signals from synapses, which can be either inhibitory or excitatory.
-When the cumulative charge reaches a certain threshold, the neuron fires, releasing the charge.
+This biological computational model is marked by its distributed nature, fault-tolerant redundancy, and inherent parallelism. 
+The Perceptron, inspired by these principles, became one of the first attempts to emulate the brain's computational capabilities.
 
-The brain's computational model is characterized by its distributed nature among simple, non-linear units, its redundancy which ensures fault tolerance, and its intrinsic parallelism. 
-The perceptron, a computational model inspired by the brain, reflects these principles.
+\subsection{Perceptron}
+In the mid-20th century, researchers explored various models of the brain. 
+In 1943, Warren McCulloch and Walter Pitts proposed the threshold logic unit, where the activation function operated as a threshold unit. 
+Later, in 1957, Frank Rosenblatt introduced the first Perceptron, featuring weights encoded in potentiometers and electric motors for weight adjustments during learning. 
+By 1960, Bernard Widrow introduced a critical improvement: the inclusion of a bias term to represent the threshold value.
 
-\subsection{Artificial neuron}
-The mathematical model of a neuron is represented as follows:
+The mathematical model of an artificial neuron can be expressed as:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{images/neuron.png}
     \caption{Artificial neuron}
 \end{figure}
-In this model, the output function $h_j(\mathbf{x}|\mathbf{w},b)$ is defined as:
+\noindent The output function $h_j(\mathbf{x}|\mathbf{w},b)$ is given by:
 \[h_j(\mathbf{x}|\mathbf{w},b)=h_j\left(\sum_{i=1}^Iw_ix_i-b\right)=h_j\left(\sum_{i=0}^Iw_ix_i\right)=h_j\left(\mathbf{w}^T\mathbf{x}\right)\]
-The function used in an artificial neuron can either be a step function, with values ranging from 0 to 1, or a sine function, with values ranging from -1 to 1.
+\noindent The activation function in an artificial neuron can take various forms, such as a step function (outputting values between 0 and 1) or a sine function (outputting values between -1 and 1).
 
-\paragraph*{History}
-Several researchers were actively investigating models for the brain during the mid-20th century. 
-In 1943, Warren McCulloch and Walter Pitts proposed the threshold logic unit, where the activation function was a threshold unit, equivalent to the Heaviside step function. 
-A few years later, in 1957, Frank Rosenblatt developed the first Perceptron, with weights encoded in potentiometers, and weight adjustments during learning were performed by electric motors. 
-By 1960, Bernard Widrow introduced a significant advancement by representing the threshold value as a bias term in the ADALINE (Adaptive Linear Neuron or later, Adaptive Linear Element). 
+The Perceptron computes a weighted sum of its inputs and applies a thresholding function to produce its output:
+\[h_j(\mathbf{x}\mid\mathbf{w})=h_j\left(\mathbf{w}^T\mathbf{x}\right)=\text{Sign}(\mathbf{w}^T\mathbf{x})\]
+This defines a linear classifier, where the decision boundary is a hyperplane described by:
+\[\mathbf{w}^T\mathbf{x}=0\]
+The linear decision boundary enables the Perceptron to implement Boolean logic operators. 
+However, the Perceptron struggles when data cannot be separated by a linear boundary.
+In such cases, additional strategies are necessary. 
+These challenges paved the way for more advanced models, such as Multi-Layer Perceptrons.
 
-\begin{example}
-    Consider a neuron designed to implement the OR operation:
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{ccc|c}
-        $x_0$ & $x_1$ & $x_2$ & \textbf{OR} \\ \hline
-        1     & 0     & 0     & 0           \\
-        1     & 0     & 1     & 1           \\
-        1     & 1     & 0     & 1           \\
-        1     & 1     & 1     & 1          
-        \end{tabular}
-    \end{table}
-    The corresponding neuron is illustrated below:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.5\linewidth]{images/or.png}
-        \caption{OR artificial neuron}
-    \end{figure}
-    The output function for this neuron is defined as:
-    \[h_{\text{OR}}(w_0+w_1x_1+w_2x_2)=h_{\text{OR}}\left(-\dfrac{1}{2}+x_1+x_2\right)=\begin{cases} 1\qquad\text{if }\left(-\dfrac{1}{2}+x_1+x_2\right)>0 \\ 0\qquad\text{otherwise} \end{cases}\]
-
-    Now, consider a neuron designed to implement the AND operation:
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{ccc|c}
-        $x_0$ & $x_1$ & $x_2$ & \textbf{AND} \\ \hline
-        1     & 0     & 0     & 0           \\
-        1     & 0     & 1     & 0           \\
-        1     & 1     & 0     & 0           \\
-        1     & 1     & 1     & 1          
-        \end{tabular}
-    \end{table}
-    The corresponding neuron is shown below:
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.45\linewidth]{images/and.png}
-        \caption{AND artificial neuron}
-    \end{figure}
-    The output function for this neuron is given by:
-    \[h_{\text{AND}}(w_0+w_1x_1+w_2x_2)=h_{\text{AND}}\left(-2+\dfrac{3}{2}x_1+x_2\right)=\begin{cases} 1\qquad\text{if }\left(-2+\dfrac{3}{2}x_1+x_2\right)>0 \\ 0\qquad\text{otherwise} \end{cases}\]
-\end{example}
-
-\subsection{Hebbian learning}
-The strength of a synapse increases based on the simultaneous activation of the corresponding input and the desired target. 
-Hebbian learning can be summarized as follows:
+\paragraph*{Hebbian learning}
+Hebbian learning, often summarized by the phrase cells that fire together, wire together, follows these principles:
 \begin{enumerate}
-    \item Begin with a random initialization of the weights.
-    \item Adjust the weights for each sample individually (online learning), and only when the sample is not correctly predicted.
+    \item Initialize weights randomly.
+    \item Adjust weights for each sample (online learning), but only if the sample is misclassified.
 \end{enumerate}
-Mathematically, this is expressed as:
-\[\begin{cases}
-    w_i^{k+1}=w_i^k+\Delta w_i^k \\
-    \Delta w_i^k=\eta x_i^kt^k
-\end{cases} \implies w_i^{k+1}=w_i^k+\eta x_i^kt^k\]
-Here, $\eta$ represents the leraning rate, $x_i^k$ is the $i$-th input to  the perceptron at time $k$, and $t^k$ is the desired output at time $k$.
-
-\begin{example}
-    We aim to learn the weights necessary to implement the OR operator with a sinusoidal output. 
-    The modified OR truth table is as follows:
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{ccc|c}
-        $x_0$ & $x_1$ & $x_2$ & \textbf{OR} \\ \hline
-        1     & -1     & -1     & -1           \\
-        1     & -1     & 1     & 1           \\
-        1     & 1     & -1     & 1           \\
-        1     & 1     & 1     & 1          
-        \end{tabular}
-    \end{table}
-    We begin with random weights:
-    \[\mathbf{w}=\begin{bmatrix} 0 & 0 & 0 \end{bmatrix}\]
-    The learning rate is set to $\eta=\dfrac{1}{2}$. 
-    The output function is defined as:
-    \[h(\mathbf{w}^T\mathbf{x})=\begin{cases} 1 \qquad\text{ if }\mathbf{w}^T\mathbf{x} > 0 \\ 0 \qquad\text{ if }\mathbf{w}^T\mathbf{x} = 0 \\ -1 \qquad\text{ if }\mathbf{w}^T\mathbf{x} < 0 \end{cases}\]
-
-    The training involves iterating through the data records and adjusting the weights for incorrectly classified samples until all records are correctly predicted.
-
-    Starting from the first row, we have: 
-    \[y_{\text{first row}}=x_0w_0+x_1w_1+x_2w_2=1\cdot 0+(-1)\cdot 0 + (-1)\cdot 0=0\]
-    This does not match the expected output of $-1$.
-    We adjust the weights:
-    \[w_0^{\text{new}}=w_0+\eta x_0y=0+\dfrac{1}{2}\cdot 1 \cdot (-1)=-\dfrac{1}{2}\]
-    \[w_1^{\text{new}}=w_1+\eta x_1y=0+\dfrac{1}{2}\cdot (-1) \cdot (-1)=\dfrac{1}{2}\]
-    \[w_2^{\text{new}}=w_2+\eta x_2y=0+\dfrac{1}{2}\cdot (-1) \cdot (-1)=\dfrac{1}{2}\]
-    Now, the weights vector is:
-    \[\mathbf{w}=\begin{bmatrix} -\dfrac{1}{2} & \dfrac{1}{2} & \dfrac{1}{2} \end{bmatrix}\]
-
-    For the second row, we have: 
-    \[y_{\text{second row}}x_0w_0+x_1w_1+x_2w_2=1\cdot \left(-\dfrac{1}{2}\right)+(-1)\cdot \dfrac{1}{2} + 1\cdot \dfrac{1}{2}=-\dfrac{1}{2}\]
-    This does not match the expected output of $1$.
-    We adjust the weights:
-    \[w_0^{\text{new}}=w_0+\eta x_0y=\left(-\dfrac{1}{2}\right)+\dfrac{1}{2}\cdot 1 \cdot 1=0\]
-    \[w_1^{\text{new}}=w_1+\eta x_1y=\dfrac{1}{2}+\dfrac{1}{2}\cdot (-1) \cdot 1=0\]
-    \[w_2^{\text{new}}=w_2+\eta x_2y=\dfrac{1}{2}+\dfrac{1}{2}\cdot 1 \cdot 1=1\]
-    Now, the weights vector is:
-    \[\mathbf{w}=\begin{bmatrix} 0 & 0 & 1 \end{bmatrix}\]
-
-    For the third row, we have: 
-    \[y_{\text{third row}}x_0w_0+x_1w_1+x_2w_2=1\cdot 0+1\cdot 0 + (-1)\cdot 1=-1\]
-    This does not match the expected output of $1$.
-    We adjust the weights:
-    \[w_0^{\text{new}}=w_0+\eta x_0y=0+\dfrac{1}{2}\cdot 1 \cdot 1=\dfrac{1}{2}\]
-    \[w_1^{\text{new}}=w_1+\eta x_1y=0+\dfrac{1}{2}\cdot 1 \cdot 1=\dfrac{1}{2}\]
-    \[w_2^{\text{new}}=w_2+\eta x_2y=1+\dfrac{1}{2}\cdot (-1) \cdot 1=\dfrac{1}{2}\]
-    Now, the weights vector is:
-    \[\mathbf{w}=\begin{bmatrix} \dfrac{1}{2} & \dfrac{1}{2} & \dfrac{1}{2} \end{bmatrix}\]
-
-    For the third row, we have: 
-    \[y_{\text{fourth row}}x_0w_0+x_1w_1+x_2w_2=1\cdot \dfrac{1}{2}+1\cdot \dfrac{1}{2} + 1\cdot \dfrac{1}{2}=\dfrac{3}{2}\]
-    This matches the expected output of 1.
-
-    After verifying the outputs for all rows, we recognize that further iterations (epochs) are needed for full convergence.
-    We repeat the training until all records produce the desired outputs.
-
-    After multiple epochs, the final weights vector is:
-    \[\mathbf{w}=\begin{bmatrix} -\dfrac{1}{2} & 1 & 1 \end{bmatrix}\]
-
-    The number of epochs required depends on both the initialization of the weights and the order in which the data is presented.
-\end{example}
-A perceptron computes a weighted sum and returns the sign (thresholding) of the result:
-\[h_j(\mathbf{x}|\mathbf{w})=h_j\left(\sum_{i=0}^Iw_ix_i\right)=\text{Sign}(w_0+w_1x_1+\dots+w_Ix_I)\]
-This forms a linear classifier, where the decision boundary is represented by the hyperplane:
-\[w_0+w_1x_1+\dots+w_Ix_I=0\]
-The linear boundary explains how the perceptron implements Boolean operators. 
-However, if the dataset does not have a linearly separable boundary, the perceptron fails to work. 
-In such cases, alternative approaches are needed, including non-linear boundaries or different input representations. 
-This concept forms the basis for Multi-Layer Perceptrons (MLPs).
+The weight update rule is given by:
+\[w_i^{k+1}=w_i^k+\eta x_i^kt^k\]
+Here, $\eta$ is the learning rate, $x_i^k$ represents the $i$-th input to the Perceptron at time $k$, and $t^k$ is the desired output at the same time. 

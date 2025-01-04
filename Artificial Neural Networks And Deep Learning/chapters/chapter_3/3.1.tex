@@ -1,49 +1,44 @@
 \section{Computer vision}
 
-Computer vision is an interdisciplinary field focused on enabling computers to interpret and understand the visual world from digital images or videos. 
-Initially, most computer vision techniques were based on mathematical models and statistical analysis of images.
-However, with the rise of Machine Learning, particularly Deep Learning, modern approaches have shifted towards data-driven methods, making these algorithms far more effective and adaptable to complex visual tasks.
+Computer vision is an interdisciplinary field that focuses on enabling computers to interpret and understand the visual world using digital images or videos. 
+Initially, many computer vision techniques relied on mathematical models and statistical analysis of images. 
+However, with the rise of Machine Learning modern approaches have shifted toward data-driven methods. 
+These methods have significantly enhanced the effectiveness and adaptability of algorithms for solving complex visual tasks.
 
 \subsection{Digital images}
-A digital color image is stored using three separate matrices, each corresponding to one of the primary colors: red, green, and blue (RGB). 
-Each matrix element represents a pixel's intensity and is typically encoded using 8 bits, meaning values range from 0 to 255.
-When visualized in three-dimensional space, the diagonal of the RGB cube represents different shades of gray, where all three color intensities are equal.
+A digital color image is typically represented using three separate matrices, each corresponding to one of the primary colors: red, green, and blue (RGB). 
+Each matrix element represents the intensity of a pixel and is usually encoded with values ranging from 0 to 255.
 
-Although images on disk are often stored in compressed formats to save space, such as JPEG or PNG, they need to be decompressed to be processed in memory. 
-This decompression significantly increases the size of the data, making images, especially in large quantities, a challenge to manage in terms of memory and processing power. 
-The problem grows even more pronounced when working with video, as each second of video consists of multiple image frames.
-
-When using neural networks for image processing tasks, the raw image data. 
-This results in large amounts of data that need to be handled efficiently. 
-Fortunately, visual data tends to be highly redundant and compressible, which can be leveraged to reduce memory and computational demands.
+Although images are often stored in compressed formats to save disk space, they must be decompressed for processing in memory. 
+This decompression increases the size of the data considerably, which poses challenges in terms of memory management and processing power. 
+The complexity of managing large amounts of image data becomes even more pronounced when working with video files, as they contain a vast number of frames that must be processed sequentially.
+When using Neural Networks for image processing tasks, raw image data needs to be efficiently handled, which can result in large computational and memory demands.
 
 \subsection{Local transformations}
-Local transformations play a crucial role in image processing, particularly in tasks such as classification.
-These transformations involve modifying each pixel based on the values of its neighboring pixels within a specified region, or neighborhood, $U$. 
-Mathematically, a local transformation can be expressed as:
+Local transformations involve modifying each pixel in an image based on the values of its neighboring pixels within a defined neighborhood $U$. 
+The transformation can be expressed as:
 \[\mathbf{G}(r,c)=T_U[\mathbf{I}](r,c)\]
-Here, $I$ is the input image, $G$ is the output image, $U$ defines the neighborhood around the pixel, and $T_U$ is a spatial transformation function, which can be either linear or non-linear.
+Here, $I$ is the input image, $G$ is the output image, $U$ defines the neighborhood around the pixel, and $T_U$ is a spatial transformation function. 
+This function can be either linear or non-linear, depending on the transformation.
 
-For a pixel at coordinates $(r, c)$ in the image, the neighborhood $U$ is typically a square region centered at the pixel, and is defined as:
-\[\{\mathbf{I}(u,v)\:|\:(u-r,v-c)\in U\}\]
+For a pixel at coordinates $(r, c)$, the neighborhood $U$  is typically a square region centered at the pixel and is defined as:
+\[\{\mathbf{I}(u,v)\mid(u-r,v-c)\in U\}\]
 Here, $(u, v)$ represents the displacement relative to the center of the neighborhood $(r, c)$.
-The same transformation function $T_U$ is applied repeatedly across all pixels in the image, making it a spatially invariant transformation. 
+The transformation function $T_U$ is applied repeatedly across all pixels in the image, making the transformation spatially invariant.
 
 \paragraph*{Local linear filters}
-In the case of a linear spatial transformation, the output $T_U[I](r, c)$ is a linear combination of the pixel values within the neighborhood $U$. 
-This can be described as:
-\[T_U[\mathbf{I}](r,c)=\sum_{(u,v)\in U}w_i(u,v)I(r+u,c+v)\]
-Here, $w(u, v)$ are the weights associated with the pixels in $U$.
-These weights can be thought of as defining a filter, or kernel, that is applied uniformly across the entire image. 
-In this way, the same operation is repeated for all pixels, making it a simple and efficient method for image processing.
-
-The correlation between a filter $\mathbf{w}$ (with elements $w_{ij}$) and an image $\mathbf{I}$ can be computed using:
-\[(\mathbf{I}\otimes \mathbf{w})(r,c)=\sum_{u=-L}^L\sum_{v=-L}^Lw(u,v)\mathbf{I}(r+c,c+v)\]
-Here, the filter $\mathbf{w}$ has dimensions $(2L+1)\times(2L+1)$, and acts as a kernel that defines the transformation.
-The correlation operation essentially slides the filter across the image, computing a weighted sum of pixel values in each neighborhood.
-
-This formula applies both to grayscale images:
+In the case of linear spatial transformations, the output at a given pixel $(r,c)$, denoted as $T_U[\mathbf{I}](r,c)$, is a linear combination of the pixel values within the neighborhood $U$. 
+This can be expressed as:
 \[T_U[\mathbf{I}](r,c)=\sum_{(u,v)\in U}w_i(u,v)\mathbf{I}(r+u,c+v)\]
-And to color (RGB) images, where each channel is processed separately:
+Here, $w(u, v)$ represents the weights associated with each pixel in the neighborhood $U$.
+These weights can be interpreted as defining a filter which is applied uniformly across the entire image. 
+This approach allows the same operation to be applied to all pixels, making it a simple and efficient method for image processing.
+
+This approach applies to both grayscale and color (RGB) images, where each color channel is processed separately:
 \[T_U[\mathbf{I}](r,c)=\sum_i\sum_{(u,v)\in U}w_i(u,v,i)\mathbf{I}(r+u,c+v,i)\]
-In RGB images, the filter $\mathbf{w}(u, v, i)$ applies weights not only across spatial dimensions but also across the three color channels (red, green, blue).
+
+\paragraph*{Correlation}
+The correlation between a filter $\mathbf{w}$ and an image $\mathbf{I}$ can be computed using:
+\[(\mathbf{I}\otimes \mathbf{w})(r,c)=\sum_{u=-L}^L\sum_{v=-L}^Lw(u,v)\mathbf{I}(r+c,c+v)\]
+In this formula, the filter is slid across the image, computing a weighted sum of pixel values in each neighborhood. 
+This is the core operation in many image processing tasks such as blurring, sharpening, and edge detection.

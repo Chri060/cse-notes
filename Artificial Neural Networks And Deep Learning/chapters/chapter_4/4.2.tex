@@ -1,0 +1,167 @@
+\section{Sequence to sequence learning}
+
+Sequence-to-sequence learning addresses tasks where inputs and outputs are sequences of varying lengths. 
+This framework is highly versatile and has proven effective in solving a range of problems, including:
+\begin{itemize}
+    \item \textit{Image captioning}: the input is a single fixed-size image, and the output is a sequence of words describing the image. 
+        The challenge lies in producing a sequence of varying length that captures the content of the image.
+    \item \textit{Sentiment analysis}: the input is a sequence of characters or words and the goal is to classify the sequence into predefined categories. 
+        The input sequences can have varying lengths, while the output remains fixed in type and size.
+    \item \textit{Language translation}: given a text in one language, the objective is to generate its equivalent in another language.
+        This task is particularly complex because each language has its own semantics, and the lengths of corresponding sentences often differ.
+\end{itemize}
+In these tasks, sequence modeling involves capturing the probability of a target sequence. 
+A language model predicts the probability of a sequence, such as a sentence, by analyzing patterns and dependencies between elements. 
+When conditioned on an input sequence, this becomes a conditional language model.
+
+The goal in sequence-to-sequence learning is to find the target sequence $\mathbf{y}$ hat maximizes the conditional probability $\Pr(\mathbf{y}\mid\mathbf{x})$, where $\mathbf{x}$ is the output sequence. 
+Formally, this can be expressed as:
+\[\mathbf{y}^\ast=\argmax_\mathbf{y}\Pr(\mathbf{y}\mid\mathbf{x})\]
+For tasks like human translation, this conditional probability is guided by intuition and expertise, as translators rely on their knowledge of grammar, semantics, and context to map the input sequence to the output.
+
+In Machine Learning, however, this mapping is learned from data.
+The model approximates $\Pr(\mathbf{y}\mid\mathbf{x},\boldsymbol{\theta})$, where $\boldsymbol{\theta}$ represents the parameters of the model. 
+The prediction task is then reformulated as:
+\[\mathbf{y}^\prime=\argmax_\mathbf{y}\Pr(\mathbf{y}\mid\mathbf{x},\boldsymbol{\theta})\]
+
+Sequence-to-sequence models are commonly implemented as encoder-decoder architectures, where the encoder processes the input sequence and generates a compact representation, often in the form of a vector.
+This representation encapsulates the source sequence's essential information and serves as input to the decoder. 
+The decoder then generates the target sequence by iteratively predicting the most likely subsequent token based on the encoded representation and previously generated tokens.
+
+A straightforward implementation of this approach uses Recurrent Neural Networks.
+The Recurrent Neural Network encoder updates its hidden state as it processes each word in the input sequence, producing a final state that summarizes the input. 
+The Recurrent Neural Network decoder then takes this final state and reconstructs the output sequence, predicting one word at a time.
+Importantly, both encoding and decoding processes require explicit start signals to initialize their respective operations.
+Once the model is trained, it predicts the output sequence $\mathbf{y}$ given an input sequence $\mathbf{x}$ by selecting the sequence $\mathbf{y}^\prime$ that maximizes the conditional probability:
+\[\mathbf{y}^\prime=\argmax_\mathbf{y}\prod_{t=1}^n\Pr(\mathbf{y}_t\mid\mathbf{y}_{<t},\mathbf{x},\boldsymbol{\theta})\]
+Here, $\Pr(\mathbf{y}_t\mid\mathbf{y}_{<t},\mathbf{x},\boldsymbol{\theta})$ represents the probability of predicting the token $\mathbf{y}_t$ at time step $t$, given all previously generated tokens $\mathbf{y}_{<t}$. 
+
+To compute this argmax efficiently, we can use different decoding strategies:
+\begin{itemize}
+    \item \textit{Greedy decoding}: at each step, the decoder selects the most probable token. While simple and fast, this approach is suboptimal because it cannot revise earlier decisions, often leading to subpar sequences.
+    \item \textit{Beam search}: this method maintains a set of the most probable sequence hypotheses at each step. 
+        By exploring multiple paths simultaneously, it balances computational cost with the likelihood of finding a better overall sequence.
+\end{itemize}
+These decoding strategies provide different trade-offs between computational efficiency and the quality of the generated output, with beam search being particularly useful for tasks requiring high-quality sequences.
+
+\subsection{Training}
+Given a training sample $\left\langle \mathbf{x},\mathbf{y}\right\rangle$, where $\mathbf{x}$ is the input sequence and $\mathbf{y}$ is the corresponding target sequence, the model computes a probability distribution over possible words at each time step $t$.
+Using a one-hot vector representation for $y_t$, the loss at time step $t$ can be calculated using cross-entropy:
+\[\mathcal{L}(\Pr_t,y_t)=-y_t^T\log(\Pr_t)\]
+For the entire sequence, the total cross-entropy loss becomes:
+\[\mathcal{L}(\Pr_t,y_t)=-\sum_{t=0}^ny_t^T\log(\Pr_t)\]
+During training, sequence-to-sequence models follow the classical encoder-decoder architecture. 
+The key steps differ between training and inference:
+\begin{itemize}
+    \item \textit{Training time}: the decoder does not use its own output as input for the next time step. 
+        Instead, the ground truth from the target sequence is provided as input to each time step of the decoder. 
+        This technique is called teacher forcing and helps stabilize training by reducing error propagation.
+    \item \textit{Inference time}: during inference, the decoder feeds its own output from the previous time step as input to the next time step. 
+        This allows the model to generate sequences autonomously.
+\end{itemize}
+
+\subsection{Dataset preparation}
+Sequence-to-sequence models rely on specialized tokens to standardize and preprocess data for effective training. 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|p{10cm}|}
+    \hline
+    \textbf{Token} & \textbf{Description} \\ \hline
+    $\left\langle \text{PAD}\right\rangle $ & Used during training to pad shorter input sequences in a batch to match the length of the longest sequence, ensuring uniform input width for batch processing. \\ \hline
+    $\left\langle \text{EOS}\right\rangle $ & Indicates the end of a sequence, helping the decoder identify where a sentence ends. Also used during batching to standardize sequence lengths. \\ \hline
+    $\left\langle \text{UNK}\right\rangle $ & Replaces rare or unknown words (out-of-vocabulary tokens) in the input, improving resource efficiency and reducing the vocabulary size. \\ \hline
+    $\left\langle \text{SOS}\right\rangle $ and $\left\langle \text{GO}\right\rangle$ & Marks the start of decoding. Preceded to the target input sequence to signal the decoder to begin generating output. \\ \hline
+    \end{tabular}
+\end{table}
+The dataset preparation process involves the following steps:
+\begin{enumerate}
+    \item Sample a batch of source and target sequence. 
+    \item Append $\left\langle \text{EOS}\right\rangle$ to the end of sequence token. 
+    \item Prepend $\left\langle \text{SOS}\right\rangle $ to each target sequence to create the target input sequence, and append $\left\langle\text{EOS}\right\rangle$ to create the target output sequence.
+    \item Pad both the input and target sequences to match the maximum sequence length in the batch using the $\left\langle \text{PAD}\right\rangle$ token.
+    \item Encode the tokens into numerical representations based on the vocabulary or embeddings.
+    \item Replace out of vocabulary tokens with $\left\langle \text{UNK}\right\rangle $.
+    \item Compute the lengths of each input and target sequence in the batch for dynamic processing during training.
+\end{enumerate}
+In natural language processing, words are often treated as discrete atomic symbols. 
+While this avoids sparsity and high memory dimensionality, effective input encoding is critical for improving the performance of real-world applications. 
+Proper preprocessing and encoding ensure that the model captures the essential semantic and syntactic features of the input data.
+
+\subsection{Words}
+\paragraph*{N-gram language model}
+An $N$-gram language model estimates the probability of a word sequence $S = w_1, w_2, \ldots, w_k$ within a specific domain.
+This probability is expressed as:
+\[\Pr(s_k) = \prod_{i=1}^{k} \Pr(w_i \mid w_1, w_2, \ldots, w_{i-1})\]
+However, to manage computational complexity, $N$-gram models introduce a simplifying assumption: the probability of a word depends only on the preceding $n-1$ words. 
+Thus, the probability becomes:
+\[\hat{\Pr}(s_k) = \prod_{i=1}^{k} \Pr(w_i \mid w_{i-n+1}, \ldots, w_{i-1})\]
+To compute these probabilities, frequency-based estimates are typically used, incorporating smoothing techniques to handle unseen word sequences. 
+For instance, Katz smoothing (1987) adjusts probabilities as follows:
+\[\hat{\Pr}(w_i \mid w_{i-n+1}, \ldots, w_{i-1}) = \frac{\#(w_{i-n+1}, \dots, w_{i-1}, w_i)}{\#(w_{i-n+1}, \dots, w_{i-1})}\]
+Here, $\#(w_{i-n+1}, \dots, w_{i-1}, w_i)$ counts the occurrences of the word sequence, while $\#(w_{i-n+1}, \dots, w_{i-1})$ counts the occurrences of the context.
+The main issue of $N$-gram includes:
+\begin{itemize}
+    \item \textit{Data sparsity}: probabilities are spread thinly across possible word combinations, necessitating vast datasets.
+    \item \textit{Vocabulary growth}: larger datasets introduce more unique words, exacerbating sparsity.
+\end{itemize}
+\noindent In practice, these challenges are addressed by:
+\begin{enumerate}
+    \item \textit{Limiting context size}: use shorter context windows to reduce complexity. 
+        However, this approach sacrifices the ability to model long-range dependencies.
+    \item \textit{Trade-off}: shorter contexts simplify computation but fail to capture broader linguistic patterns, leaving valuable information untapped.
+\end{enumerate}
+
+\paragraph*{Embeddings}
+Word embeddings are techniques that represent words or phrases as continuous vectors in a lower-dimensional numerical space. 
+This approach captures semantic and contextual similarities between words, where words with similar meanings are mapped closer together in the embedding space.
+
+Given a vocabulary $\mathbf{V}$, each unique word $\mathbf{w}$ is mapped to an $m$-dimensional vector, significantly reducing the high-dimensional space of discrete word representations.
+This approach helps address the curse of dimensionality by:
+\begin{itemize}
+    \item \textit{Compression}: dimensionality reduction makes models computationally efficient.
+    \item \textit{Smoothing}: transitioning from discrete word representations to continuous spaces improves generalization.
+    \item \textit{Densification}: sparse, high-dimensional vectors are replaced with dense, compact representations.
+\end{itemize}
+The primary objective of word embeddings is to ensure that similar words are positioned closer in the feature space, enabling the model to learn and leverage semantic and contextual relationships.
+
+\subsection{Neural Net language model}
+In a Neural Network Language Model, the input consists of past words represented as one-hot encoded vectors. 
+These high-dimensional sparse representations are projected into a continuous vector space using a shared matrix $\mathbf{C}$, referred to as the projection layer. 
+Each word is thus transformed into a dense, low-dimensional embedding.
+
+After projection, the embeddings of the past words are concatenated and passed through non-linear transformations to learn contextual relationships. 
+Finally, the model predicts the next word by outputting a probability distribution over the vocabulary using a softmax function.
+
+Training Neural Net language models with stochastic gradient descent is computationally expensive, especially for large vocabularies.
+Due to their complexity, Neural Net language models are not well-suited for large datasets.
+Neural Net language models often exhibit poor performance on rare or unseen words due to insufficient representation in the training data.
+
+Bengio et al. (2003) introduced Neural Net language models with the aim of improving language model accuracy. 
+Although their work demonstrated significant improvements in LM performance, the exploration of word embeddings was regarded as an area for future research.
+
+\subsection{Word2Vec}
+Mikolov et al. (2013) focused on improving word vector representations by simplifying the model while still achieving better performance. 
+Their approach aimed to enable training on much larger datasets with a simpler architecture. 
+Unlike previous models, Word2Vec eliminates the need for a hidden layer, with the projection layer being shared across the network (rather than just the weight matrix). 
+This shared projection layer helps create dense word embeddings by leveraging both past and future context in a word's definition.
+
+The key idea is that the meaning of a word can be inferred from the surrounding context.
+
+Word2Vec offers two main architectures for learning word embeddings:
+\begin{itemize}
+    \item \textit{Skip-gram model}: in this setup, the model projects a target word into multiple surrounding words as output. 
+        This model is effective for learning representations of rare words by predicting the context words based on the central target word.
+        \item \textit{Continuous Bag Of Words}: in contrast, the Continuous Bag Of Words model takes a context (usually a fixed-size window around the target word) and averages the representations of the surrounding words to predict the target word. 
+        This architecture aims to learn a word's meaning by using the surrounding context to predict it.
+\end{itemize}
+
+\paragraph*{Continuous Bag Of Words}
+In the Continuous Bag Of Words architecture, the context consists of $\frac{n}{2}$ previous words and $\frac{n}{2}$ following words, where $n$ is the size of the context window.
+These context words are projected into the projection layer using a shared matrix $\mathbf{C}$, and their embeddings are averaged to create a compact, unified representation.
+This averaged vector is then used to predict the central word in the context. 
+The goal is to maximize the probability of the target word given the surrounding context.
+
+\paragraph*{Complexity}
+Word2Vec significantly outperforms traditional Neural Network Language Models in terms of both speed and accuracy. 
+Its efficiency allows it to be trained on large datasets, and the quality of the learned word vectors is typically four times better than the embeddings produced by Neural Network Language Models. 
+This makes Word2Vec a highly scalable and effective approach for learning word representations.

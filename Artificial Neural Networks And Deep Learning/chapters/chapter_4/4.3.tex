@@ -1,0 +1,61 @@
+\section{Attention}
+
+In basic sequence-to-sequence models, the fixed source representation can become a bottleneck, as it may not capture all relevant information effectively. 
+This issue arises for both the encoder and decoder:
+\begin{itemize}
+    \item \textit{Encoder}: it may be challenging to compress the entire sentence into a single representation.
+    \item \textit{Decoder}: different parts of the input may be more relevant at various stages of the generation process.
+\end{itemize}
+Attention mechanisms address this problem by allowing the model to focus on different parts of the input sequence as needed. 
+The decoder uses attention to decide which parts of the source sequence are more relevant for generating each output token, alleviating the need for a single compressed representation. 
+Instead, the decoder checks the relevant input portions at each step, avoiding the bottleneck caused by fixed source encoding.
+Attention scores are computed at each decoding step and then passed through a softmax function to assign a probability distribution over the input tokens.
+
+Several methods have been proposed to compute attention scores, typically by combining input and output tokens before applying the softmax function:
+\begin{itemize}
+    \item \textit{Dot product attention}: the simplest attention mechanism involves computing the product of the input vector and the decoded vector:
+        \[s(\mathbf{h}_t,\mathbf{s}_k)=\mathbf{h}_t\mathbf{s}_k\]
+        This is a non-trainable function and provides a basic measure of similarity between tokens in the input and output sequences.
+    \item \textit{Bilinear attention}: a weight matrix $\mathbf{W}$  is introduced to allow for more flexible interactions between the input and decoded vectors:
+        \[s(\mathbf{h}_t,\mathbf{s}_k)=\mathbf{h}_t\mathbf{W}\mathbf{s}_k\]
+        The matrix $\mathbf{W}$ ontains trainable parameters, and its size corresponds to the number of neurons in the model. 
+        The combination of the input and attention tokens is then processed through a nonlinear function:
+        \[\tanh{\mathbf{W}_C[\mathbf{h}_t,\mathbf{s}_k]}\]
+        This attention mechanism is commonly known as Luong attention and is more expressive than the simple dot product.
+    \item \textit{Multi-Layer Perceptron attention}: Bahdanau attention mechanism uses a Multi-Layer Perceptron to calculate attention scores. 
+        The input and decoded vectors are combined and passed through a set of learned weights:
+        \[s(\mathbf{h}_t,\mathbf{s}_k)=\mathbf{w}_2^T\tanh{\mathbf{W}_1[\mathbf{h}_t,\mathbf{s}_k]}\]
+        In this model, a bidirectional Long Short-Term Memory is used instead of a unidirectional one. 
+        The combination of these tokens is referred to as the attention vector, which highlights the most relevant parts of the input for generating the output.
+\end{itemize}
+
+\subsection{Generative chatbots}
+Generative chatbots can be directly modeled using sequence-to-sequence models, where the conversation between two agents is treated as a sequence of input-output pairs. 
+
+In this setup, a Recurrent Neural Network is trained to map the input sequence to the output sequence. 
+This approach is borrowed from machine translation and is simple and general, where the chatbot  learns to generate responses by conditioning on the input context.
+Attention mechanisms can also be applied to improve performance, allowing the model to focus on different parts of the input sequence when generating responses.
+
+Chatbots can be categorized based on the context handling: 
+\begin{itemize}
+    \item \textit{Single-turn}: the input vector is built solely from the incoming question. 
+        These chatbots may struggle to maintain conversation context and can sometimes generate irrelevant responses due to the lack of historical context.
+    \item \textit{Multi-turn}: these chatbots consider the context of multiple turns of the conversation when building the input vector, which helps to maintain the flow of the conversation and improve the relevance of the response.
+\end{itemize}
+\noindent And also based on core algorithm: 
+\begin{itemize}
+    \item \textit{Generative chatbots}: these chatbots encode the input (the question) into a context vector, then generate the response word-by-word using a probability distribution over the vocabulary of the answer. 
+        A popular architecture for this approach is the encoder-decoder model.
+    \item \textit{Retrieval-based chatbots}: these chatbots rely on a knowledge base of question-answer pairs. 
+        When a new question is received, the model encodes it into a context vector and then uses a similarity measure to retrieve the most relevant question-answer pairs from the knowledge base.
+\end{itemize}
+
+\paragraph*{Challenges}
+Concatenating multiple conversation turns into a single long input sequence is a potential approach, but it often results in poor performance due to several limitations. 
+Long Short-Term Memory cells often fail to capture long-term dependencies in sequences longer than 100 tokens.
+There is no explicit representation of individual turns, which prevents the chatbot from leveraging context-specific information effectively.
+
+\paragraph*{Hierarchical attention}
+In 2017, Xing et al. extended attention mechanisms from single-turn response generation to multi-turn responses by introducing a hierarchical attention mechanism. 
+These networks process sequences at multiple levels.
+The hierarchical model generates a hidden representation of the sequence by first encoding the words, then the sentences, allowing the model to capture long-term dependencies and better understand context across multiple turns.

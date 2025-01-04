@@ -1,0 +1,80 @@
+\section{Recurrent Neural Network}
+
+Many real-world problems involve dynamic data, where patterns unfold over time. 
+To address this, various approaches can be employed depending on the need for temporal modeling: 
+\begin{itemize}
+    \item \textit{Memoryless models}: these models operate without retaining a true memory of past states. 
+        Instead, they rely on a fixed number of past observations, often referred to as delay taps, to predict future values. 
+    \item \textit{Feed Forward Neural Networks}: can extend the capabilities of traditional memoryless models by incorporating non-linear transformations. 
+\end{itemize}
+While these methods can handle certain types of sequential data, they are inherently limited because they lack a true memory mechanism to capture long-term dependencies.
+
+\subsection{Models with memory}
+Dynamic data often requires models capable of retaining information over time to capture long-term dependencies. 
+These models rely on a hidden state that evolves dynamically, often influenced by noise and external inputs, which drive state transitions.
+This hidden state, while not directly observable, must be inferred to compute outputs.
+The possible solutions are: 
+\begin{itemize}
+    \item \textit{Linear Dynamical System}: the hidden state is continuous and subject to Gaussian uncertainty. 
+        In these systems, state transitions are assumed to be linear, and inputs act as driving forces. 
+        To estimate the hidden state in an Linear Dynamical Systems, methods like Kalman filtering are used, which leverage probabilistic reasoning to model the uncertainty inherent in the system.
+    \item \textit{Hidden Markov Model}: assuming that the hidden state is discrete. 
+        State transitions are stochastic and governed by a transition matrix, while outputs are probabilistically determined by the hidden states. 
+        The process of inferring the most likely sequence of hidden states in an Hidden Markov Model is accomplished using the Viterbi algorithm. 
+        Both Linear Dynamical Systems and Hidden Markov Models demonstrate how hidden states can encapsulate temporal dependencies, though they differ in their assumptions and mathematical underpinnings.
+    \item \textit{Recurrent Neural Network}: offer a more flexible and powerful approach by leveraging distributed hidden states that evolve through non-linear dynamics. 
+        Recurrent Neural Networks are deterministic systems designed to efficiently store and process sequential information. 
+        The hidden state in a Recurrent Neural Network is updated at each time step based on the current input and the prior state, allowing the network to learn complex temporal patterns through its non-linear transformation capabilities.
+\end{itemize}
+
+\paragraph*{Backpropagation}
+The key strength of Recurrent Neural Networks lies in their recurrent connections, which allow information from prior time steps to persist and influence future computations. 
+This architecture enables Recurrent Neural Networks to model both short-term and long-term dependencies, although training them presents unique challenges. 
+One such challenge is the vanishing gradient problem, which arises during backpropagation through time.
+
+In backpropagation through time, the network is unrolled for a fixed number of time steps, and gradients are computed for each step before being averaged to update the weights.
+However, as the network propagates gradients backward through many time steps, they often shrink exponentially due to the nature of activation functions like Sigmoid and hyperbolic tangent. 
+This makes it difficult for the network to learn dependencies that span a long temporal range.
+
+\paragraph*{Vanishing gradient}
+Addressing the vanishing gradient problem is crucial for enabling Recurrent Neural Networks to capture long-term dependencies effectively. 
+One approach involves designing architectures like Long Short-Term Memory and Gated Recurrent Units. 
+These models incorporate specialized mechanisms, such as gates and memory cells, that allow them to retain information over extended time spans while avoiding the issues of vanishing or exploding gradients. 
+Another strategy is gradient clipping, which constrains gradients within a specific range to maintain stability during training.
+
+\subsubsection{Long Short-Term Memory}
+The vanishing gradient problem, which hampers the training of traditional Recurrent Neural Networks over long time sequences, was effectively addressed by Hochreiter and Schmidhuber in 1997. 
+They introduced the Long Short-Term Memory architecture, which uses memory cells designed with logistic and linear units interacting multiplicatively.
+
+A Long Short-Term Memory cell controls the flow of information through three key mechanisms:
+\begin{enumerate}
+    \item Information enters the cell when its write gate (input gate) is activated.
+    \item The information is retained in the cell as long as its keep gate (forget gate) remains active.
+    \item Information is extracted from the cell by activating its read gate (output gate).
+\end{enumerate}
+These gates allow the Long Short-Term Memory to selectively store and retrieve information, providing a mechanism for maintaining long-term dependencies in a stable manner.
+Importantly, the loop within the cell operates with fixed weights, making it possible to backpropagate gradients effectively through time.
+
+\paragraph*{Long Short-Term Memory Neural Network}
+The Long Short-Term Memory architecture inspired simpler variants, such as the Gated Recurrent Unit. 
+Gated Recurrent Units streamline the memory cell design by merging the forget and input gates into a single update gate.
+Additionally, they combine the cell state and hidden state into one, reducing complexity while retaining much of the Long Short-Term Memory's effectiveness.
+
+In recurrent neural network architectures, computation graphs can be built with continuous transformations using recurrent layers. 
+When working with full input sequences, bidirectional Recurrent Neural Networks take advantage of information in both temporal directions. 
+This involves:
+\begin{itemize}
+    \item Having one Recurrent Neural Network process the sequence from left to right, and another process it from right to left.
+    \item Concatenating the hidden layer outputs from both directions to create a richer feature representation.
+\end{itemize}
+
+Initialization plays a crucial role in training Recurrent Neural Networks effectively. 
+The initial state of the Recurrent Neural Networks must be defined before processing sequences. 
+There are several strategies for this:
+\begin{itemize}
+    \item A common approach is to initialize the states to a fixed value, such as zero.
+    \item A more effective method is to treat the initial state as a set of learnable parameters. 
+        In this case, the initial state values are randomly initialized and refined through training.
+\end{itemize}
+The training process involves backpropagating the prediction error through time, all the way to the initial state values, and computing the gradient of the error with respect to these parameters. 
+Gradient descent is then used to update the initial state values, enabling the network to learn optimal starting conditions for its sequences.
