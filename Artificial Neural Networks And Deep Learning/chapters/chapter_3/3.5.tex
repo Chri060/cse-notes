@@ -13,12 +13,12 @@ The output $\mathbf{S}$ is a grid of size $R \times C$ (the resolution of the im
 
 \subsubsection{Fully Convolutional Neural Networks}
 Fully Convolutional Neural Networks are an extension of traditional Convolutional Neural Networks, designed to overcome the constraint of fixed input sizes. 
-Unlike conventional Convolutional Neural Networkss, which rely on Fully Connected layers that require a fixed-size input, Fully Connected Convolutional Neural Networks eliminate these layers and replace them with convolutional and subsampling layers that operate across the entire image.
+Unlike conventional Convolutional Neural Networks, which rely on Fully Connected layers that require a fixed-size input, Fully Connected Convolutional Neural Networks eliminate these layers and replace them with convolutional and subsampling layers that operate across the entire image.
 
 In Fully Convolutional Neural Networks, the convolutional and pooling layers slide over the entire input image, regardless of its size, producing feature maps whose resolution scales appropriately with the input dimensions.
 Crucially, the spatial extent of the latent space is preserved throughout the network, meaning the spatial relationships between features are maintained across all layers. 
 
-For each output class, Fully Convolutional Networks generate a heatmap, where the resolution of the heatmap is typically lower than the input image, amd each position in the heatmap represents the class probabilities for the corresponding region in the input image, based on the receptive field of the convolutional layers.
+For each output class, Fully Convolutional Networks generate a heatmap, where the resolution of the heatmap is typically lower than the input image, and each position in the heatmap represents the class probabilities for the corresponding region in the input image, based on the receptive field of the convolutional layers.
 
 \paragraph*{Classification to segmentation}
 The process of transforming a pre-trained Fully Convolutional Neural Network designed for classification into a semantic segmentation network involves adapting the model to handle input images of arbitrary size while maintaining high-resolution, pixel-level predictions.
@@ -157,7 +157,7 @@ It works by highlighting the areas of the image that contribute the most to the 
 
 To apply Class Activation Mapping, a Convolutional Neural Network must meet the following criteria: a Global Average Pooling layer and a single Fully Connected layer follows the Global Average Pooling layer. 
 
-To btain the saliency maps the following steps are needed: 
+To obtain the saliency maps the following steps are needed: 
 \begin{enumerate}
     \item \textit{Feature maps and Global Average Pooling}: after the convolutional block of the Convolutional Neural Network, there are $n$ feature maps $f_k(x,y)$, each having a resolution close to that of the input image.
         The Global Average Pooling layer computes the average of each feature map, resulting in $n$ scalar values. 
@@ -301,8 +301,8 @@ Fast Region Based Convolutional Neural Network significantly improves inference 
 Most of the computational time is now spent on region proposal extraction. 
 
 \subsubsection{Region Proposal Network}
-The Region Proposal Neural Network replaces traditional region of interestextraction algorithms with a trainable network that operates on the same feature maps used for classification, improving efficiency and integration. 
-Region Proposal Neural Network is implemented as a small convolutional neural network that outputs potential bounding box proposals and objectness scores for each region.
+The Region Proposal Neural Network replaces traditional region of interest and extraction algorithms with a trainable network that operates on the same feature maps used for classification, improving efficiency and integration. 
+Region Proposal Neural Network is implemented as a small Convolutional Neural Network that outputs potential bounding box proposals and objectness scores for each region.
 
 At each spatial location in the feature map, Region Proposal Neural Network generates $k$ anchor boxes with predefined scales and aspect ratios.
 A convolutional layer reduces the feature map to a lower-dimensional vector.
@@ -352,7 +352,7 @@ Here, $N$ is the number of objects detected.
 This task combines the challenges of object detection, which involves handling multiple object instances in an image, and semantic segmentation, where each pixel is assigned a label. 
 The complexity of instance segmentation arises from the need to not only detect multiple objects but also to precisely segment each instance of the object and assign the correct label to each pixel in the scene.
 
-\subsubsection{Mask-RConvolutional Neural Network} 
+\subsubsection{Mask Region Based Convolutional Neural Network} 
 Similar to Faster Region Based Convolutional Neural Network, Mask Region Based Convolutional Neural Network performs object detection by classifying each region of interest and estimating the corresponding bounding boxes. 
 However, it extends Faster Region Based Convolutional Neural Network by adding an additional branch for predicting object masks in parallel with the existing branch for bounding box recognition. 
 
@@ -411,10 +411,8 @@ However, the original network was not specifically trained for comparison.
 In metric learning, the goal is to train the Convolutional Neural Network to measure the distance between images in a way that preserves semantic meaning. 
 Specifically, we want the network to learn the distance such that:
 \[{\left\lVert f_{\mathbf{w}}(\mathbf{I})-f_{\mathbf{w}}(\mathbf{T}_i)\right\rVert}_2<{\left\lVert f_{\mathbf{w}}(\mathbf{I})-f_{\mathbf{w}}(\mathbf{T}_j)\right\rVert}_2\]
-Here, $f_w(\mathbf{I})$ is the feature extracted from the input image $\mathbf{I}$ and $f_{\mathbf{w}}(\mathbf{T}_i)$ is the feature extracted from the template $\mathbf{T}_i$, for the same individual $i$. 
-The network should learn to minimize the distance between the input image and the correct template, while maximizing the distance to incorrect templates.
 
-his approach uses Siamese Networks, where two identical networks (sharing the same weights $\mathbf{w}$) process two images simultaneously. 
+\noindent This approach uses Siamese Networks, where two identical networks (sharing the same weights $\mathbf{w}$) process two images simultaneously. 
 The goal is to learn the weights such that the network can compare image pairs and measure their similarity.
 
 During training, the Siamese network is fed with pairs of images, which may or may not refer to the same person. A contrastive loss function is typically used to train the network:

@@ -13,19 +13,11 @@ While these methods can handle certain types of sequential data, they are inhere
 Dynamic data often requires models capable of retaining information over time to capture long-term dependencies. 
 These models rely on a hidden state that evolves dynamically, often influenced by noise and external inputs, which drive state transitions.
 This hidden state, while not directly observable, must be inferred to compute outputs.
-The possible solutions are: 
-\begin{itemize}
-    \item \textit{Linear Dynamical System}: the hidden state is continuous and subject to Gaussian uncertainty. 
-        In these systems, state transitions are assumed to be linear, and inputs act as driving forces. 
-        To estimate the hidden state in an Linear Dynamical Systems, methods like Kalman filtering are used, which leverage probabilistic reasoning to model the uncertainty inherent in the system.
-    \item \textit{Hidden Markov Model}: assuming that the hidden state is discrete. 
-        State transitions are stochastic and governed by a transition matrix, while outputs are probabilistically determined by the hidden states. 
-        The process of inferring the most likely sequence of hidden states in an Hidden Markov Model is accomplished using the Viterbi algorithm. 
-        Both Linear Dynamical Systems and Hidden Markov Models demonstrate how hidden states can encapsulate temporal dependencies, though they differ in their assumptions and mathematical underpinnings.
-    \item \textit{Recurrent Neural Network}: offer a more flexible and powerful approach by leveraging distributed hidden states that evolve through non-linear dynamics. 
-        Recurrent Neural Networks are deterministic systems designed to efficiently store and process sequential information. 
-        The hidden state in a Recurrent Neural Network is updated at each time step based on the current input and the prior state, allowing the network to learn complex temporal patterns through its non-linear transformation capabilities.
-\end{itemize}
+
+\subsubsection{Recurren Neural Networks}
+Recurrent Neural Network offer a flexible and powerful approach by leveraging distributed hidden states that evolve through non-linear dynamics. 
+Recurrent Neural Networks are deterministic systems designed to efficiently store and process sequential information. 
+The hidden state in a Recurrent Neural Network is updated at each time step based on the current input and the prior state, allowing the network to learn complex temporal patterns through its non-linear transformation capabilities.
 
 \paragraph*{Backpropagation}
 The key strength of Recurrent Neural Networks lies in their recurrent connections, which allow information from prior time steps to persist and influence future computations. 
@@ -48,14 +40,13 @@ They introduced the Long Short-Term Memory architecture, which uses memory cells
 
 A Long Short-Term Memory cell controls the flow of information through three key mechanisms:
 \begin{enumerate}
-    \item Information enters the cell when its write gate (input gate) is activated.
-    \item The information is retained in the cell as long as its keep gate (forget gate) remains active.
-    \item Information is extracted from the cell by activating its read gate (output gate).
+    \item Information enters the cell when its input gate is activated.
+    \item The information is retained in the cell as long as its forget gate remains active.
+    \item Information is extracted from the cell by activating its output gate.
 \end{enumerate}
 These gates allow the Long Short-Term Memory to selectively store and retrieve information, providing a mechanism for maintaining long-term dependencies in a stable manner.
 Importantly, the loop within the cell operates with fixed weights, making it possible to backpropagate gradients effectively through time.
 
-\paragraph*{Long Short-Term Memory Neural Network}
 The Long Short-Term Memory architecture inspired simpler variants, such as the Gated Recurrent Unit. 
 Gated Recurrent Units streamline the memory cell design by merging the forget and input gates into a single update gate.
 Additionally, they combine the cell state and hidden state into one, reducing complexity while retaining much of the Long Short-Term Memory's effectiveness.

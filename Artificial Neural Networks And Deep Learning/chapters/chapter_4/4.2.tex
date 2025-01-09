@@ -73,38 +73,22 @@ Sequence-to-sequence models rely on specialized tokens to standardize and prepro
     $\left\langle \text{SOS}\right\rangle $ and $\left\langle \text{GO}\right\rangle$ & Marks the start of decoding. Preceded to the target input sequence to signal the decoder to begin generating output. \\ \hline
     \end{tabular}
 \end{table}
-The dataset preparation process involves the following steps:
-\begin{enumerate}
-    \item Sample a batch of source and target sequence. 
-    \item Append $\left\langle \text{EOS}\right\rangle$ to the end of sequence token. 
-    \item Prepend $\left\langle \text{SOS}\right\rangle $ to each target sequence to create the target input sequence, and append $\left\langle\text{EOS}\right\rangle$ to create the target output sequence.
-    \item Pad both the input and target sequences to match the maximum sequence length in the batch using the $\left\langle \text{PAD}\right\rangle$ token.
-    \item Encode the tokens into numerical representations based on the vocabulary or embeddings.
-    \item Replace out of vocabulary tokens with $\left\langle \text{UNK}\right\rangle $.
-    \item Compute the lengths of each input and target sequence in the batch for dynamic processing during training.
-\end{enumerate}
 In natural language processing, words are often treated as discrete atomic symbols. 
 While this avoids sparsity and high memory dimensionality, effective input encoding is critical for improving the performance of real-world applications. 
 Proper preprocessing and encoding ensure that the model captures the essential semantic and syntactic features of the input data.
 
 \subsection{Words}
 \paragraph*{N-gram language model}
-An $N$-gram language model estimates the probability of a word sequence $S = w_1, w_2, \ldots, w_k$ within a specific domain.
+An $N$-gram language model estimates the probability of a word sequence $S = \mathbf{w}_1, \mathbf{w}_2, \ldots, \mathbf{w}_k$ within a specific domain.
 This probability is expressed as:
-\[\Pr(s_k) = \prod_{i=1}^{k} \Pr(w_i \mid w_1, w_2, \ldots, w_{i-1})\]
+\[\Pr(s_k) = \prod_{i=1}^{k} \Pr(\mathbf{w}_i \mid \mathbf{w}_1, \mathbf{w}_2, \ldots, \mathbf{w}_{i-1})\]
 However, to manage computational complexity, $N$-gram models introduce a simplifying assumption: the probability of a word depends only on the preceding $n-1$ words. 
 Thus, the probability becomes:
-\[\hat{\Pr}(s_k) = \prod_{i=1}^{k} \Pr(w_i \mid w_{i-n+1}, \ldots, w_{i-1})\]
+\[\hat{\Pr}(s_k) = \prod_{i=1}^{k} \Pr(\mathbf{w}_i \mid \mathbf{w}_{i-n+1}, \ldots, \mathbf{w}_{i-1})\]
 To compute these probabilities, frequency-based estimates are typically used, incorporating smoothing techniques to handle unseen word sequences. 
-For instance, Katz smoothing (1987) adjusts probabilities as follows:
-\[\hat{\Pr}(w_i \mid w_{i-n+1}, \ldots, w_{i-1}) = \frac{\#(w_{i-n+1}, \dots, w_{i-1}, w_i)}{\#(w_{i-n+1}, \dots, w_{i-1})}\]
-Here, $\#(w_{i-n+1}, \dots, w_{i-1}, w_i)$ counts the occurrences of the word sequence, while $\#(w_{i-n+1}, \dots, w_{i-1})$ counts the occurrences of the context.
-The main issue of $N$-gram includes:
-\begin{itemize}
-    \item \textit{Data sparsity}: probabilities are spread thinly across possible word combinations, necessitating vast datasets.
-    \item \textit{Vocabulary growth}: larger datasets introduce more unique words, exacerbating sparsity.
-\end{itemize}
-\noindent In practice, these challenges are addressed by:
+
+The main issue of $N$-gram includes data sparsity and vocabulary size. 
+These challenges are addressed by:
 \begin{enumerate}
     \item \textit{Limiting context size}: use shorter context windows to reduce complexity. 
         However, this approach sacrifices the ability to model long-range dependencies.
@@ -124,7 +108,7 @@ This approach helps address the curse of dimensionality by:
 \end{itemize}
 The primary objective of word embeddings is to ensure that similar words are positioned closer in the feature space, enabling the model to learn and leverage semantic and contextual relationships.
 
-\subsection{Neural Net language model}
+\subsection{Neural Network Language Model}
 In a Neural Network Language Model, the input consists of past words represented as one-hot encoded vectors. 
 These high-dimensional sparse representations are projected into a continuous vector space using a shared matrix $\mathbf{C}$, referred to as the projection layer. 
 Each word is thus transformed into a dense, low-dimensional embedding.
@@ -132,11 +116,11 @@ Each word is thus transformed into a dense, low-dimensional embedding.
 After projection, the embeddings of the past words are concatenated and passed through non-linear transformations to learn contextual relationships. 
 Finally, the model predicts the next word by outputting a probability distribution over the vocabulary using a softmax function.
 
-Training Neural Net language models with stochastic gradient descent is computationally expensive, especially for large vocabularies.
-Due to their complexity, Neural Net language models are not well-suited for large datasets.
-Neural Net language models often exhibit poor performance on rare or unseen words due to insufficient representation in the training data.
+Training Neural Network Language Models with stochastic gradient descent is computationally expensive, especially for large vocabularies.
+Due to their complexity, Neural Network Language Models are not well-suited for large datasets.
+Neural Network Language Models often exhibit poor performance on rare or unseen words due to insufficient representation in the training data.
 
-Bengio et al. (2003) introduced Neural Net language models with the aim of improving language model accuracy. 
+Bengio et al. (2003) introduced Neural Network Language Models with the aim of improving language model accuracy. 
 Although their work demonstrated significant improvements in LM performance, the exploration of word embeddings was regarded as an area for future research.
 
 \subsection{Word2Vec}
@@ -146,20 +130,17 @@ Unlike previous models, Word2Vec eliminates the need for a hidden layer, with th
 This shared projection layer helps create dense word embeddings by leveraging both past and future context in a word's definition.
 
 The key idea is that the meaning of a word can be inferred from the surrounding context.
-
 Word2Vec offers two main architectures for learning word embeddings:
 \begin{itemize}
-    \item \textit{Skip-gram model}: in this setup, the model projects a target word into multiple surrounding words as output. 
+    \item \textit{Skip-gram model}: the model projects a target word into multiple surrounding words as output. 
         This model is effective for learning representations of rare words by predicting the context words based on the central target word.
-        \item \textit{Continuous Bag Of Words}: in contrast, the Continuous Bag Of Words model takes a context (usually a fixed-size window around the target word) and averages the representations of the surrounding words to predict the target word. 
+        \item \textit{Continuous Bag Of Words}: takes a context (usually a fixed-size window around the target word) and averages the representations of the surrounding words to predict the target word. 
         This architecture aims to learn a word's meaning by using the surrounding context to predict it.
+        In the Continuous Bag Of Words architecture, the context consists of $\frac{n}{2}$ previous words and $\frac{n}{2}$ following words, where $n$ is the size of the context window.
+        These context words are projected into the projection layer using a shared matrix $\mathbf{C}$, and their embeddings are averaged to create a compact, unified representation.
+        This averaged vector is then used to predict the central word in the context. 
+        The goal is to maximize the probability of the target word given the surrounding context.
 \end{itemize}
-
-\paragraph*{Continuous Bag Of Words}
-In the Continuous Bag Of Words architecture, the context consists of $\frac{n}{2}$ previous words and $\frac{n}{2}$ following words, where $n$ is the size of the context window.
-These context words are projected into the projection layer using a shared matrix $\mathbf{C}$, and their embeddings are averaged to create a compact, unified representation.
-This averaged vector is then used to predict the central word in the context. 
-The goal is to maximize the probability of the target word given the surrounding context.
 
 \paragraph*{Complexity}
 Word2Vec significantly outperforms traditional Neural Network Language Models in terms of both speed and accuracy. 

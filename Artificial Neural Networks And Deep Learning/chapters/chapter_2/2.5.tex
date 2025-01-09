@@ -37,14 +37,8 @@ Overfitting in Neural Networks often manifests as a consistently decreasing trai
 While the model continues to improve on the training data, its ability to generalize to unseen data may start to degrade after a certain point. 
 Early stopping is a regularization technique aimed at preventing overfitting by stopping the training process once the model's performance on a validation set begins to decline.
 
-\noindent The steps involved in using early stopping are:
-\begin{enumerate}
-    \item \textit{Hold out a validation set}: set aside a portion of the data for validation, separate from the training data. 
-    \item \textit{Train on the training set}: perform gradient descent iterations using the training set, updating the model's parameters at each step.
-    \item \textit{Cross-Validate on the hold-out set}: continuously evaluate the model on the validation set throughout the training process. 
-    \item \textit{Stop training based on validation error}: if the validation error starts to increase while the training error continues to decrease, halt the training process. 
-        This is the point at which the model achieves its best generalization.
-\end{enumerate}
+\noindent In early stopping we start by holding out a validation set, nad then while we train on the training set we cross validate and if the validation error starts to increase while the training error continues to decrease, halt the training process. 
+
 Early stopping can be applied to model selection and evaluation, especially when fine-tuning hyperparameters. 
 These hyperparameters, such as learning rate or network architecture, significantly influence the model's capacity and ability to generalize.
 
@@ -58,7 +52,7 @@ However, to impose additional structure and reduce complexity, we can take a Bay
 \noindent In practice, small weights tend to improve the generalization ability of Neural Networks. 
 This can be modeled by assuming a Gaussian prior on the weights, which encourages the model to prefer smaller weights. 
 Incorporating this prior into the optimization problem results in the following objective function:
-\[\hat{\mathbf{w}}=\argmin_{\mathbf{w}}\sum_{n=1}^N(t_n-g(x_n\mid\mathbf{w})^2)+\gamma{\left\lVert \mathbf{w}\right\rVert}_2^2 \]
+\[\hat{\mathbf{w}}=\argmin_{\mathbf{w}}\sum_{n=1}^N(t_n-g(\mathbf{x}_n\mid\mathbf{w})^2)+\gamma{\left\lVert \mathbf{w}\right\rVert}_2^2 \]
 \noindent Here, $\gamma$ is the regularization parameter that controls the strength of the weight decay.
 Larger values of $\gamma$ penalize large weights more heavily, promoting smaller weights and thereby reducing the model's complexity.
 By controlling $\gamma$, we can find a balance between fitting the data well and maintaining a model that generalizes effectively. 
@@ -71,15 +65,3 @@ By randomly dropping out neurons, the model is encouraged to generalize better b
 Once training is complete, all neurons are reactivated for the full network during testing. 
 The behavior of the full network can be thought of as the averaged result of all the sub-networks trained during the dropout process. 
 To compensate for the dropouts during training, weight scaling is applied at test time, effectively averaging the outputs of all possible sub-networks.
-
-\paragraph*{Benefits}
-One of the key advantages of dropout is its ability to prevent co-adaptation among neurons. 
-By randomly deactivating certain neurons, the network is forced to distribute the learning process more evenly across all neurons, reducing its dependency on any specific unit. 
-This encourages the network to learn more robust and independent feature representations, which improves generalization.
-
-Additionally, dropout can be seen as a form of implicit ensemble learning. 
-Each time a subset of neurons is dropped, the network effectively trains a different sub-network. 
-At inference time, the full network's output can be interpreted as the average prediction of all these sub-networks, leading to a more generalizable model.
-
-Dropout can be selectively applied to specific layers, typically those with more densely connected neurons, rather than across every layer in the network. 
-This targeted regularization is often more effective in reducing overfitting while maintaining computational efficiency.

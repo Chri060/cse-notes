@@ -1,11 +1,10 @@
 \section{Training}
 
 Training a neural network involves learning a set of parameters, primarily weights $\mathbf{w}$ to approximate the target values $t_n$ as accurately as possible.
-Given a training dataset $\mathcal{D}=\left\{\left\langle x_1,t_1 \right\rangle,\dots,\left\langle x_N,t_N\right\rangle\right\}$, the goal is to determine parameters such that, for new data, the model's predictions $y_n(x_n|\theta)$ are close to the true target values $t_n$.
-In essence, the training process seeks parameters that generalize well, ensuring $g(x_n\mid\mathbf{w})\approx t_n$ even for unseen inputs.
-
+Given a training dataset $\mathcal{D}=\left\{\left\langle \mathbf{x}_1,t_1 \right\rangle,\dots,\left\langle \mathbf{x}_N,t_N\right\rangle\right\}$, the goal is to determine parameters such that, for new data, the model's predictions $y_n(\mathbf{x}_n\mid\boldsymbol{\theta})$ are close to the true target values $t_n$.
+In essence, the training process seeks parameters that generalize well, ensuring $g(\mathbf{x}_n\mid\mathbf{w})\approx t_n$ even for unseen inputs.
 In Neural Networks, the discrepancy between predictions and targets is often quantified using the Sum of Squared Errors:
-\[\mathcal{L}(\mathbf{w})=\sum_n^N\left(t_n-g(x_n\mid\mathbf{w})\right)^2\]
+\[\mathcal{L}(\mathbf{w})=\sum_n^N\left(t_n-g(\mathbf{x}_n\mid\mathbf{w})\right)^2\]
 This loss function is nonlinear with respect to the weights, making the optimization process more challenging than for simpler linear models.
 
 \paragraph*{Nonlinear optimization}
@@ -17,12 +16,12 @@ Instead, we employ iterative methods such as gradient descent, which progressive
 
 \subsection{Gradient descent}
 Gradient descent updates the weights using the formula:
-\[\mathbf{w}^{k+1}=\mathbf{w}^k-\eta\dfrac{\partial \mathcal{L}(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^k}\]
+\[\mathbf{w}^{(k+1)}=\mathbf{w}^{(k)}-\eta\dfrac{\partial \mathcal{L}(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{(k)}}\]
 Here, $\eta$ is the learning rate, controlling the step size in each iteration. 
 
 Gradient descent may struggle with local minima or oscillations in the error surface. 
 To mitigate this, a momentum term is often added:
-\[\mathbf{w}^{k+1}=\mathbf{w}^k-\eta\dfrac{\partial \mathcal{L}(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^k}-\alpha\dfrac{\partial \mathcal{L}(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^k}\]
+\[\mathbf{w}^{(k+1)}=\mathbf{w}^{(k)}-\eta\dfrac{\partial \mathcal{L}(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{(k)}}-\alpha\dfrac{\partial \mathcal{L}(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{(k)}}\]
 Here, $\alpha$ is the momentum coefficient, which determines how much past gradients influence the current update. 
 
 \paragraph*{Nestorov accelerated gradient}
@@ -33,9 +32,9 @@ This two-step process helps anticipate the trajectory of the optimization, resul
 \noindent The update process is as follows:
 \begin{enumerate}
     \item \textit{Momentum-based prediction}: the algorithm predicts the next position using the momentum term:    
-        \[\mathbf{w}^{k+\frac{1}{2}}=\mathbf{w}^k-\alpha\dfrac{\partial E(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{k-1}}\]
+        \[\mathbf{w}^{\left(k+\frac{1}{2}\right)}=\mathbf{w}^{(k)}-\alpha\dfrac{\partial E(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{\left(k-1\right)}}\]
     \item \textit{Gradient-based correction}: the weights are then updated by evaluating the gradient at the predicted position:
-        \[\mathbf{w}^{k+1}=\mathbf{w}^k-\eta\dfrac{\partial E(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{k+\frac{1}{2}}}\]
+        \[\mathbf{w}^{(k+1)}=\mathbf{w}^{(k)}-\eta\dfrac{\partial E(\mathbf{w})}{\partial \mathbf{w}}\Bigg|_{\mathbf{w}^{\left(k+\frac{1}{2}\right)}}\]
 \end{enumerate}
 
 \paragraph*{Multiple restarts}
@@ -80,36 +79,28 @@ Conversely, deeper layers might experience exploding gradients, which can destab
 These disparities highlight the need for layer-specific learning rates to optimize learning across all layers effectively.
 
 \subsection{Batch normalization}
-To achieve faster convergence in Neural Networks, it is beneficial for the inputs to be whitened. 
-This helps address covariate shift, where the input distribution changes, making learning more challenging.
-However, even within a network, the intermediate layers may experience internal covariate shift, where the distribution of inputs to each layer changes during training.
-\noindent Batch normalization is a powerful technique to combat internal covariate shift by normalizing the activations of each layer, ensuring they approximate a unit Gaussian distribution during training.
+Batch normalization is a powerful technique to combat internal covariate shift by normalizing the activations of each layer, ensuring they approximate a unit Gaussian distribution during training.
 
-Batch normalization is typically applied after Fully Connected or convolutional layers, and before the activation functions.
+\noindent Batch normalization is typically applied after Fully Connected or convolutional layers, and before the activation functions.
 
-\paragraph*{Algorithm}
-Given a mini-batch $\mathcal{B} = \{ x_1, \dots, x_m \}$, the algorithm normalizes the inputs and applies learnable parameters $\gamma, \beta$. 
+Given a mini-batch $\mathcal{B} = \{ \mathbf{x}_1, \dots, \mathbf{x}_m \}$, the algorithm normalizes the inputs and applies learnable parameters $\gamma$ and $\beta$. 
 \begin{algorithm}
     \caption{Batch normalization}
+    \setstretch{1.35}
     \begin{algorithmic}[1]
-        \State $\mu_{\mathcal{B}} \gets \frac{1}{m} \sum_{i=1}^m x_i$ \Comment{Compute mini-batch mean}
-        \State $\sigma_{\mathcal{B}}^2 \gets \frac{1}{m} \sum_{i=1}^m (x_i - \mu_{\mathcal{B}})^2$ \Comment{Compute mini-batch variance}
-        \State $\hat{x}_i \gets \frac{x_i - \mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2 + \epsilon}}$ \Comment{Normalize}
-        \State $y_i \gets \gamma \hat{x}_i + \beta$ \Comment{Scale and shift}
+        \State $\mu_{\mathcal{B}} = \frac{1}{m} \sum_{i=1}^m \mathbf{x}_i$ \Comment{Compute mini-batch mean}
+        \State $\sigma_{\mathcal{B}}^2 = \frac{1}{m} \sum_{i=1}^m (\mathbf{x}_i - \mu_{\mathcal{B}})^2$ \Comment{Compute mini-batch variance}
+        \State $\hat{\mathbf{x}}_i = \frac{\mathbf{x}_i - \mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2 + \epsilon}}$ \Comment{Normalize}
+        \State $y_i = \gamma \hat{\mathbf{x}}_i + \beta$ \Comment{Scale and shift}
     \end{algorithmic}
 \end{algorithm}
-\noindent Batch normalization has several notable benefits:
-\begin{itemize}
-    \item \textit{Improved gradient flow}: it enhances the flow of gradients through the network, making it easier to train deep architectures.
-    \item \textit{Higher learning rates}: allows for the use of higher learning rates, leading to faster convergence.
-    \item \textit{Reduced dependency on weight initialization}: the strong dependence on initial weights is mitigated, as the normalization process stabilizes the learning.
-    \item \textit{Regularization effect}: acts as a form of regularization, slightly decreasing the need for techniques like dropout.
-\end{itemize}
+
+\noindent Batch normalization improve the gradient flow, enabling the use of higher learning rates. 
+Moreover, the initialization of the weights is less crucial since it performs implicit regularization. 
 
 \subsection{Weight initialization}
 The effectiveness of gradient descent in training Neural Networks heavily depends on the initialization of weights at the start. 
-Proper weight initialization ensures stable and efficient convergence by mitigating problems like vanishing or exploding gradients. 
-Different strategies for initializing weights are summarized below:
+Different strategies for initializing weights are:
 \begin{itemize}
     \item \textit{Zero initialization}: setting all weights to zero leads to symmetric gradients, causing every neuron in the same layer to update identically, rendering the network ineffective.
     \item \textit{Large weights}: initializing with large random weights can cause gradients to explode as they propagate through the layers, destabilizing training.
