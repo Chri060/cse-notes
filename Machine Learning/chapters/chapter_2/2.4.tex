@@ -118,11 +118,11 @@ This approach reduces the discontinuity of predictions, offering a smoother and 
 
 \subsection{Gaussian Processes}
 A Gaussian Process defines a probability distribution over functions $y(\mathbf{x})$  such that, for any set of input points $\{\mathbf{x}_i\}_{i=1}^{N}$, the function value $\{y(\mathbf{x}_i)\}_{i=1}^{N}$ are jointly Gaussian.
-This property enables GPs to serve as a powerful tool for regression tasks, where the relationship between input data and output predictions is modeled probabilistically.
+This property enables Gaussian Processes to serve as a powerful tool for regression tasks, where the relationship between input data and output predictions is modeled probabilistically.
  
-In particular, a GP with inputs $\mathbf{x}$ has a prior distribution over possible functions $y(\mathbf{x})$ as:
+In particular, a Gaussian Process with inputs $\mathbf{x}$ has a prior distribution over possible functions $y(\mathbf{x})$ as:
 \[y(\mathbf{x})=\mathcal{N}(\mathbf{0},\mathbf{K})\]
-Here we commonly assume a zero mean (i.e., $\boldsymbol{\mu}=\mathbf{0}$) $y(\mathbf{x})$ unless prior information suggests otherwise.
+Here we commonly assume a zero mean $y(\mathbf{x})$ unless prior information suggests otherwise.
 The covariance matrix $\mathbf{K}$ is built from a kernel function $k(\mathbf{x}_i,\mathbf{x}_j)$, which quantifies the similarity between pairs of input points.  
 
 \paragraph*{Output}
@@ -137,21 +137,18 @@ Therefore, the marginal distribution of the targets $\mathbf{t}_N$ is also Gauss
 Here, $\mathbf{C}_N=\mathbf{K}_N+\sigma^2\mathbf{I}_N$ represents the combined effect of the kernel-based covariance and noise.
 
 \paragraph*{Gaussian kernel}
-A commonly used kernel in GPs is the Gaussian (or RBF) kernel, defined as:
+A commonly used kernel in Gaussian Processes is the Gaussian kernel, defined as:
 \[k(\mathbf{x},\mathbf{x}^\prime)=e^{-\frac{\left\lVert \mathbf{x}-\mathbf{x}^\prime\right\rVert}{2\sigma^2} }\]
 This kernel measures similarity based on Euclidean distance, where $\sigma^2$ controls the smoothness of the function.
 
-Additionally, the Gaussian kernel can be generalized by replacing the Euclidean distance with a more general kernel-based distance measure $k (\mathbf{x},\mathbf{x}^\prime)$, yielding:
-\[k(\mathbf{x},\mathbf{x}^\prime)=e^{-\frac{k (\mathbf{x},\mathbf{x})+k (\mathbf{x}^\prime,\mathbf{x}^\prime)-2k (\mathbf{x},\mathbf{x}^\prime)}{2\sigma^2} }\]
-
 \paragraph*{Prediction}
-To predict the target $t_{N+1}$ at a new, unseen input $\mathbf{x}_{N+1}$, we use the GP framework to define the conditional predictive distribution:
+To predict the target $t_{N+1}$ at a new, unseen input $\mathbf{x}_{N+1}$, we use the Gaussian Process framework to define the conditional predictive distribution:
 \[\Pr(\mathbf{t}_{N+1})=\mathcal{N}(\mathbf{t}_{N+1}\mid\mathbf{0},\mathbf{C}_{N+1})=\mathcal{N}(m(\mathbf{x}_{N+1}),\sigma^2(\mathbf{x}_{N+1}))\]
 Here, $m(\mathbf{x}_{N+1})=\mathbf{k}^T\mathbf{C}_N^{-1}\mathbf{t}$ is the predictive mean, and $\sigma^2(\mathbf{x}_{N+1})=c-\mathbf{k}^T\mathbf{C}_N^{-1}\mathbf{k}$ is the predictive variance, providing a measure of uncertainty.
 The parameter $\mathbf{k}$ is the covariance vector between $\mathbf{x}_{N+1}$ and the training data points, and $c=k(\mathbf{x}_{N+1},\mathbf{x}_{N+1})$ is the self-covariance.
 
-\paragraph*{Hyperparamtere estimation}
-Although GPs are non-parametric, hyperparameters such as $\sigma^2$ (noise level) and those governing the kernel function need to be optimized or chosen. Common approaches include:
+\paragraph*{Hyperparamter estimation}
+Although Gaussian Processes are non-parametric, hyperparameters such as $\sigma^2$ (noise level) and those governing the kernel function need to be optimized or chosen. Common approaches include:
 \begin{itemize}
     \item Incorporating prior knowledge of the problem domain.
     \item Maximizing the log-likelihood on a validation dataset.
@@ -161,7 +158,7 @@ Although GPs are non-parametric, hyperparameters such as $\sigma^2$ (noise level
 \subsection{Support Vector Machines}
 Kernel methods are a powerful tool in Machine Learning, yet they have a significant limitation: calculating the kernel function for every sample in a large training set can be computationally prohibitive.
 Sparse kernel methods address this by selecting a subset of the training samples, focusing only on those critical for defining decision boundaries.
-Two prominent examples of sparse kernel methods are Support Vector Machines (Support Vector Machines) and Relevance Vector Machines (RVMs).
+Two prominent examples of sparse kernel methods are Support Vector Machines and Relevance Vector Machines.
 
 \paragraph*{Linearly separable problems}
 To achieve optimal separation in linearly separable cases, Support Vector Machines aim to find a hyperplane that maximizes the margin. 
@@ -244,4 +241,4 @@ While Support Vector Machines are naturally binary classifiers, they can be adap
     \item \textit{Directed Acyclic Graph Support Vector Machine}: like one against one, it creates $\frac{k(k-1)}{2}$ classifiers but uses a Directed Acyclic Graph during testing, reducing the number of classifiers needed to $k-1$. 
         This approach reduces test time while maintaining classification accuracy.
 \end{itemize}
-Among these methods, one against one is widely considered to perform best due to its robust pairwise decomposition, while DAG is often preferred for faster testing due to its reduced computational complexity.
+Among these methods, one against one is widely considered to perform best due to its robust pairwise decomposition, while Directed Acyclic Graph is often preferred for faster testing due to its reduced computational complexity.

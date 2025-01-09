@@ -23,17 +23,17 @@ Unlike typical Markov Decision Processes, the Multi-Armed Bandit setting involve
 \subsection{Expexted regret}
 The agent interacts with the environment as follows:
 \begin{itemize}
-    \item At each round $ t $, the agent selects an arm $ a_{i_t} $.
-    \item The environment generates a reward $ r_{a_{i_t}, t} $ from the distribution $ \mathcal{R}(a_{i_t}) $.
-    \item The agent updates its knowledge based on the history $ h_t $ (previous actions and rewards).
+    \item At each round $ t $, the agent selects an arm $ a_{i} $.
+    \item The environment generates a reward $ r $ from the distribution $ \mathcal{R}(a_{i}) $.
+    \item The agent updates its knowledge based on the history $ h $ (previous actions and rewards).
 \end{itemize}
-The optimal arm $ a^\ast $ has the highest expected reward:
-\[R^\ast=R(a^\ast)=\max_{a\in\mathcal{A}}R(a)=\max_{a\in\mathcal{A}}\mathbb{E}_{r\sim \mathcal{R}(a)}[r]\]
+The optimal arm $ a^\ast $ has the highest expected reward. 
 When the agent selects arm $ a_{i_t} $, it incurs an instantaneous regret:
-\[\Delta_{i_t}=R^\ast-R(a_{i_t})\]
+\[\Delta_{i}=R(a^\ast)-R(a_i)\]
 Here, $ \Delta_i $ is known as the suboptimality gap for arm $ a_i $. 
 The goal is to minimize the expected cumulative regret over $ T $ rounds:
-\[L_T = T R^\ast - \mathbb{E}\left[\sum_{t=1}^T R(a_{i_t})\right]\]
+\[L_T = T \mu^\ast - \sum_{i}^I t\mu_i\]
+Here, $\mu^\ast$ is the maximum reward found, and $\mu_i$ are the rewards for each arm $i$. 
 
 Minimizing cumulative regret is equivalent to maximizing cumulative reward. 
 A good algorithm satisfies the no-regret property, where:
@@ -41,19 +41,19 @@ A good algorithm satisfies the no-regret property, where:
 The difficulty of the problem depends on the similarity of the arms: the closer their rewards, the harder it is to identify the best one.
 \begin{theorem}
     For stochastic Multi-Armed Bandit problems, any algorithm satisfies the regret bound:
-    \[L_T \geq \log T \sum_{a_i \in \mathcal{A}: \Delta_i > 0} \frac{\Delta_i}{KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast))}\]
+    \[L_T \geq \log T \sum_{i} \frac{\Delta_i}{KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast))}\]
     as $ T \to \infty $, where $ KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast)) $ is the Kullback-Leibler divergence between the reward distributions of arm $ a_i $ and the optimal arm $ a^\ast $. High regret arises when the rewards of different arms are very similar, making it challenging to distinguish the best arm.
 \end{theorem}
+The Kullback-Leibler divergence is defined as: 
+\[KL(\mu_i, \mu^\ast)=\mu_i\ln\left(\dfrac{\mu_i}{\mu^\ast}\right)+(1-\mu_i)\ln\left(\dfrac{1-\mu_i}{1-\mu^\ast}\right)\]
 
 \paragraph*{Action values}
-In bandit problems, the agent uses action-value estimates $ Q_n $ to guide decision-making. The update rule depends on whether the problem is stationary or non-stationary:
+In Multi-Armed Bandits problems, the agent uses action-value estimates $ Q_n $ to guide decision-making. The update rule depends on whether the problem is stationary or non-stationary:
 \begin{itemize}
     \item \textit{Non-stationary problems}:
     \[Q_{n+1} = Q_n + \alpha \left(R_n - Q_n\right)\]
     Here, $ \alpha $ is a step-size parameter that adjusts over time.
-    \item \textit{Stationary problems}:
-        \[Q_{n+1} = Q_n + \dfrac{1}{n} \left(R_n - Q_n\right)\]
-        Here, $ \alpha $ is typically set to $ \frac{1}{n} $, the reciprocal of the number of times the action has been taken.
+    \item \textit{Stationary problems}: $ \alpha $ is typically set to $ \frac{1}{n} $, the reciprocal of the number of times the action has been taken.
 \end{itemize}
 
 \paragraph*{Initialization}
@@ -63,44 +63,28 @@ However, this approach is less effective in non-stationary problems, where the e
 
 The challenge is choosing appropriate optimistic values is non-trivial, as they must balance exploration and exploitation effectively.
 
-\subsection{Action selection}
+\subsection{Arm selection}
 Selecting the action with the highest value is not always optimal, as it may fail to balance immediate rewards with long-term benefits. 
-Therefore, it is essential to strike a balance between exploration and exploitation:
-\begin{itemize}
-    \item \textit{Exploitation}: the agent uses its current knowledge to maximize immediate rewards.
-    \item \textit{Exploration}: the agent seeks to gather additional information to improve decision-making for future rewards.
-\end{itemize}
-The $\varepsilon$-greedy approach balances exploration and exploitation by performing the greedy action most of the time but occasionally exploring other options. 
-Mathematically:
-\[A_t=\begin{cases}
-    \argmax_a Q_t(a) \qquad\qquad\quad\:\:\text{with probability }1-\varepsilon\\
-    \text{Uniform}(\{a_1,\dots,a_k\})\qquad\text{with probability }\varepsilon
-\end{cases}\]
+Multi-Armed Bandit authomatically balance between exploration and exploitation. 
 
 Two main formulations exist for Multi-Armed Bandit algorithms:
 \begin{itemize}
-    \item \textit{Frequentist}: the rewards $R(a_1), \dots, R(a_N)$ are unknown parameters. 
+    \item \textit{Frequentist}: the rewards are unknown parameters. 
         A policy selects an arm at each time step based on the observation history.
-    \item \textit{Bayesian}: the rewards $R(a_1), \dots, R(a_N)$ are treated as random variables with prior distributions $f_1, \dots, f_N$. 
+    \item \textit{Bayesian}: the rewards are treated as random variables with prior distributions. 
         The policy selects an arm based on the observation history and the prior information.
 \end{itemize}
 
-\paragraph*{Upper Confidence Bound (UCB)}
-The UCB algorithm is a frequentist approach to the stochastic Multi-Armed Bandit problem. 
+\paragraph*{Upper Confidence Bound}
+The Upper Confidence Bound algorithm is a frequentist approach to the stochastic Multi-Armed Bandit problem. 
 Instead of relying solely on empirical estimates, it computes an upper bound $U(a_i)$ for the expected reward $R(a_i)$ with high probability:
-\[U(a_i) = \hat{R}_t(a_i) + B_t(a_i)\]
-where $B_t(a_i)$ represents the uncertainty in the estimate $\hat{R}_t(a_i)$, depending on the number of times arm $a_i$ has been pulled, $N_t(a_i)$. Specifically:
-\begin{itemize}
-    \item Small $N_t(a_i)$, encouraging exploration.
-    \item Large $N_t(a_i)$, favoring exploitation.
-\end{itemize}
+\[U(a_i) = \hat{R}_t(a_i) + B_t(a_i) =  Q_t(a) + c \sqrt{\frac{\ln(t)}{N_t(a)}} \]
+Here, $N_t(a_i)$ represents the number of times arm has been pulled, $Q_t(a)$ represents the exploitation term, $c$ is a user-defined coefficient, and $\sqrt{\frac{\ln(t)}{N_t(a)}}$ accounts for exploration. 
 The selected action at each time step is:
 \[A_t = \argmax_a \left[ Q_t(a) + c \sqrt{\frac{\ln(t)}{N_t(a)}} \right]\]
-Here, $Q_t(a)$ represents the exploitation term, $c$ is a user-defined coefficient, and $\sqrt{\frac{\ln(t)}{N_t(a)}}$ accounts for exploration.
-
 \begin{theorem}
-    At a finite time horizon $T$, the expected cumulative regret of the UCB1 algorithm for a stochastic Multi-Armed Bandit problem satisfies:
-    \[L_T \leq 8 \log T \sum_{a_i \in \mathcal{A} : \Delta_i > 0} \frac{1}{\Delta_i} + \left( 1 + \frac{\pi^2}{3} \right) \sum_{a_i \in \mathcal{A} : \Delta_i > 0} \Delta_i\]
+    At a finite time horizon $T$, the expected cumulative regret of the Upper Confidence Bound one algorithm for a stochastic Multi-Armed Bandit problem satisfies:
+    \[L_T \leq 8 \log T \sum_{i} \left[ \frac{1}{\Delta_i} + \left( 1 + \frac{\pi^2}{3} \right)\right] \Delta_i\]
 \end{theorem}
 
 \paragraph*{Thompson sampling}
@@ -115,6 +99,6 @@ It uses Bayesian priors for each arm's reward distribution $f_1, \dots, f_N$ and
 
 \begin{theorem}
     At time $T$, the expected cumulative regret of Thompson sampling for a stochastic Multi-Armed Bandit problem satisfies:
-    \[L_T \leq \mathcal{O}\left( \sum_{a_i \in \mathcal{A} : \Delta_i > 0} \frac{\Delta_i}{KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast))} \left( \log T + \log\log T \right) \right)\]
+    \[L_T \leq \left( \log T + \log\log T \right) \sum_{i} \frac{\Delta_i}{KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast))}\]
     Here, $KL(\mathcal{R}(a_i), \mathcal{R}(a^\ast))$ is the Kullback-Leibler divergence between the reward distributions of arm $a_i$ and the optimal arm $a^\ast$.
 \end{theorem}
