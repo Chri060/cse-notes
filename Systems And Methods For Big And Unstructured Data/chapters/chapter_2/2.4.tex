@@ -1,10 +1,10 @@
 \section{Columnar database}
 
-A column-oriented database, or columnar database, stores data in columns rather than rows. 
-This approach is optimized for Online Analytical Processing (OLAP) and data mining tasks, where efficient read operations over large datasets are essential.
+A columnar database stores data in columns rather than rows. 
+This approach is optimized for Online Analytical Processing and data mining tasks, where efficient read operations over large datasets are essential.
 
 In row-oriented databases, modifying a record is straightforward, but querying might involve reading unnecessary data. 
-Columnar databases, however, allow for reading only the relevant columns, making them highly efficient for read-heavy workloads. 
+Columnar databases, however, allow for reading only the relevant columns. 
 However, writing entire tuples requires multiple column accesses, making columnar databases more suitable for scenarios with high read and lower write demands.
 \begin{table}[H]
     \centering
@@ -17,10 +17,10 @@ However, writing entire tuples requires multiple column accesses, making columna
     Improved cache locality             &                                          \\ \hline
     \end{tabular}
 \end{table}
-When tuples need to be analyzed, they are often reconstructed using a large prefetch, which helps minimize the effect of disk seeks across columns.
+\noindent When tuples need to be analyzed, they are often reconstructed using a large prefetch, which helps minimize the effect of disk seeks across columns.
 
 \paragraph*{Compression}
-Columnar databases often trade I/O for CPU by leveraging compression techniques more effectively than row-based databases. 
+Columnar databases leverage compression techniques more effectively than row-based databases. 
 These databases take advantage of higher data value locality in columns, enabling advanced techniques like run-length encoding.
 Additional space can be used to store multiple copies of data in different sort orders, further optimizing query performance.
 
@@ -63,12 +63,12 @@ The operations that we can do are:
         A bloom filter is a compact and efficient data structure used to represent a set of items. 
         It allows quick membership checks to determine if an item is possibly in the set, with minimal memory overhead.
         While bloom filters can produce false positives they never produce false negatives, ensuring that if an item is in the set, it is always identified as such. 
-        This makes Bboom filters highly effective for applications where occasional false positives are acceptable, but false negatives are not.
+        This makes bloom filters highly effective for applications where occasional false positives are acceptable, but false negatives are not.
     \item \textit{Delete}: deletions are handled lazily by adding a tombstone marker rather than immediately removing the data. 
         These tombstones are processed during compaction to permanently delete the marked records, reducing overhead and improving write performance.
     \item \textit{Read}: reads often involve querying the closest replica for data, but the coordinator may contact multiple replicas to ensure consistency. 
         If discrepancies arise between replicas, the system initiates a background process called read repair to synchronize the data. 
-        While reads may be slower than writes due to consistency checks, they remain efficient through the use of memtables, commit logs, and Bloom filters to limit disk access.
+        While reads may be slower than writes due to consistency checks, they remain efficient through the use of memtables, commit logs, and bloom filters to limit disk access.
 \end{itemize}
 
 \paragraph*{Consistency levels}
@@ -84,7 +84,7 @@ Cassandra provides flexible consistency levels, allowing clients to choose based
 
 \subsubsection{Data model}
 In Cassandra, data is organized into column families, which are analogous to tables in SQL but are more flexible and can have unstructured, client-specified schemas. 
-Column Families allow the storage of sparse data, where some columns may be missing in specific rows, fitting Cassandra's NoSQL model.
+Column families allow the storage of sparse data, where some columns may be missing in specific rows, fitting Cassandra's NoSQL model.
 
 Each Cassandra keyspace functions similarly to a database, typically used per application with certain configurations set per keyspace. 
 The primary elements in Cassandra's data model include:
@@ -106,19 +106,16 @@ Additionally, Cassandra supports super columns, which group columns under a comm
 \end{figure}
 
 \subsubsection{Query language}
-Cassandra supports a unique query mechanism based on a slice predicate, allowing precise control over returned columns:
-SliceRange specifies start and end column names, direction (reverse), and count (similar to SQL LIMIT).
-
 To interact with Cassandra, developers can use the API for various read and write operations:
 \begin{lstlisting}[style=Java]
 // retrieve a specific column at the given path
-get() : Column
+get(): Column
 // retrieve a set of columns in one row specified by the slice predicate
-get_slice() : List<ColumnOrSuperColumn>
+get_slice(): List<Column>
 // retrieve slices for multiple keys based on a SlicePredicate
-multiget_slice() : Map<key, List<ColumnOrSuperColumn>>
+multiget_slice(): Map<key, List<Column>>
 // retrieve multiple columns according to a specified range
-get_range_slices() : List<KeySlice>
+get_range_slices(): List<KeySlice>
 \end{lstlisting}
 For writing operations, Cassandra provides commands such as:
 \begin{lstlisting}[style=Java]
@@ -130,20 +127,45 @@ batch_mutate()
 remove()
 \end{lstlisting}
 
-\paragraph*{SQL}
+\paragraph*{CQL}
 Cassandra also supports SQL since it is based in tables with a single column.
 The main difference is that in relational databases we have a domain-based model, while in columnar databases we have a query-based model. 
 Thus, in this case we start from the queries, and then we design the data model based on that since each column has a key that is used to filter all the elements in the column. 
 
-In case we need to use multiple keys for a family of column we may use an aggregate key, that comprises all the key that may be used in the queries: 
-\begin{lstlisting}[style=C]
-attribute1:attribute2: { user1, user2}
-\end{lstlisting}
-Queries can be performed using the first attribute or a combination of attributes, depending on the data model.
-
-Columns within a row are sorted based on the specified comparator, either through \\ \texttt{CompareWith} for primary columns or \texttt{CompareSubcolumnsWith} for subcolumns.
 Rows are distributed across the cluster based on the partitioning strategy:
 \begin{itemize}
     \item \textit{Random partitioning}: uses the hash of the row key for uniform data distribution.
     \item \textit{Order-preserving partitioning}: uses the actual row key to maintain a natural order.
 \end{itemize}
+\noindent To create a keyspace, use the following command:
+\begin{lstlisting}[style=CQL]
+CREATE KEYSPACE identifier 
+WITH properties
+\end{lstlisting}
+A table can have multiple clustering and partition keys. 
+The first set of values is called the partition key, and it determines how the data is distributed across the Cassandra nodes. 
+The second set of values is the clustering key, which defines how the data is stored within each partition, specifically the sorting order.
+\begin{lstlisting}[style=CQL]
+PRIMARY KEY ((partition_key, ...), clustering_key, ...)
+\end{lstlisting}
+When creating a table, you can use Clustering Keys to specify the order in which data is stored.
+\begin{lstlisting}[style=CQL]
+CREATE TABLE table_name (column_name column_type, ...) 
+WITH CLUSTERING ORDER BY (key ASC, ...)
+\end{lstlisting}
+To verify whether a keyspace or table has been successfully created, you can use the \texttt{describe} command. 
+t can also be applied to check other elements:
+\begin{lstlisting}[style=CQL]
+DESCRIBE keyspaces
+\end{lstlisting}
+Before performing operations on tables, you need to specify the keyspace you're working with:
+\begin{lstlisting}[style=CQL]
+USE keyspace_name
+\end{lstlisting}
+Indexes are crucial in Cassandra tables as they allow for efficient querying of columns. 
+While this advantage might not be obvious with small datasets, it becomes essential when dealing with larger datasets.
+To create a secondary index, use the following command:
+\begin{lstlisting}[style=CQL]
+CREATE INDEX identifier
+ON table_name(column_name)
+\end{lstlisting}

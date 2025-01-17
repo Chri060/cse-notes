@@ -1,158 +1,118 @@
-\section{Relational databases}
+\section{Relational database}
 
-The design levels of a database are the following: 
+Relational databases are structured systems designed to organize, store, and manage data efficiently.
+The design of a database typically occurs at three distinct levels:
 \begin{itemize}
-    \item \textit{Conceptual database design}: constructing an information model, independent from all physical consideration for an enterprise.
-        In entity relationship databases we have: entities, relationships, attributes, attribute domain, and key attributes. 
-    \item \textit{Logical database design}: building an organization database based on a specific data model
-    \item \textit{Physical database design}: implementing a database using specific data storage structure(s) and access methods,
+    \item \textit{Conceptual database design}: information model that is independent of physical implementation details, providing a high-level representation of the enterprise's data requirements.
+    \item \textit{Logical database design}: organizational database based on a specific data model ensuring logical structure and consistency.
+    \item \textit{Physical database design}: implementation of the database using specific data storage structures and access methods.
 \end{itemize}
 
-\subsection{Model characteristics}
-In entity-relationship database models, key components include entities and relationships. 
-An entity represents a distinct real-world object that can be differentiated from others, characterized by a set of attributes. 
-These entities are grouped into an entity set, which consists of similar entities that share the same attributes. 
-Each entity set is identified by a unique key made up of a set of attributes, and each attribute has a defined domain.
+\subsection{Characteristics}
+\paragraph*{Entity}
+In an entity-relationship database model, an entity represents a distinct, real-world object that can be uniquely identified. 
+Entities are characterized by attributes, which describe their properties.
+Entities that share the same attributes are grouped into an entity set, and each set is distinguished by a primary key. 
+The attributes of an entity belong to defined domains, which specify the range of valid values for each attribute.
 
-Relationships are associations among two or more entities. A relationship set is a collection of similar relationships, where an n-ary relationship set $R$ connects $n$ entity sets $E_1,\dots,E_n$. 
-Each relationship in this set involves entities from the corresponding entity sets. 
-Notably, the same entity set can participate in different relationship sets or assume various roles within the same set. 
-Additionally, relationship sets can have descriptive attributes. 
-Uniquely, a relationship is defined by the participating entities without relying on descriptive attributes, while the cardinality indicates the number of potential connections between the entities. 
-ISA hierarchies can further enhance the model by adding descriptive attributes specific to subclasses.
+\paragraph*{Relationship}
+Relationships between entities form another core aspect of relational databases. 
+A relationship is an association between two or more entities, and all relationships of the same type are grouped into relationship sets. 
+These relationships can include descriptive attributes, which provide additional context, and are defined by the participating entities. 
+The concept of cardinality further specifies the number of connections that can exist between entities in a relationship, such as one-to-one or one-to-many associations.
 
-Aggregation comes into play when modeling a relationship that involves both entity sets and a relationship set. 
-This technique allows us to treat a relationship set as an entity set, facilitating its participation in other relationships.
+\paragraph*{Hierarchies and aggregations}
+To enhance the flexibility of the model, relational databases often incorporate hierarchies and aggregations. 
+ISA hierarchies allow for subclassing, where specific subclasses of an entity set can include unique attributes that further describe the entities within them. 
+Aggregation offers a way to model more complex scenarios where a relationship itself needs to participate in another relationship. 
+By treating a relationship set as though it were an entity set, it becomes possible to incorporate that relationship into higher-level associations.
 
-\paragraph*{Conceptual design}
-Crucial design choices involve determining whether a concept should be modeled as an entity or an attribute, and deciding if it should be represented as an entity or a relationship.
-It is essential to identify the nature of relationships, considering whether they are binary or ternary, and whether aggregation is appropriate.
-In the ER model, it is important to capture a significant amount of data semantics. 
-However, some constraints cannot be represented within ER diagrams.
+\subsection{Design}
+A critical aspect of database design is determining whether a concept should be modeled as an entity or a relationship.
+This decision significantly impacts the structure and clarity of the model.
 
-\section{Relational databases}
-The SQL standard was first proposed by E. F. Codd in 1970 and became available in commercial DBMSs in 1981. It is based on a variant of the mathematical notion of a relation. 
-Relations are naturally represented by means of tables.
+The entity-relationship model is a powerful tool for capturing the semantics of data, offering a rich representation of relationships and constraints.
+However, not all constraints can be expressed within entity-relationship diagrams. Certain advanced constraints may need to be implemented in other layers.
 
-Given $n$ sets $D_1, D_2, \dots, D_n$, which are not necessarily distinct:
+\subsection{Definitions}
+Relational databases revolutionized data management by formalizing the concept of structured data organization. 
+SQL, based on this relational model, became commercially available in Database Management Systems in 1981.
+
+The relational model relies on the mathematical notion of a relation, which is naturally represented as a table.
+Each relation is defined by a Cartesian product, which forms the foundation of the relational structure.
 \begin{definition}[\textit{Cartesian product}]
-    The Cartesian product on $D_1, D_2, \dots, D_n$, denoted as $D_1 \times D_2 \times \dots \times D_n$, is the set of all ordered $n$-tuples $(d_1, d_2, \dots, d_n)$ such that $d_1 \in D_1, d_2 \in D_2, \dots, d_n \in D_n$. 
+    Given $n$ sets $D_1, D_2, \dots, D_n$, the Cartesian product, denoted as $D_1 \times D_2 \times \dots \times D_n$, is the set of all ordered $n$-tuples $(d_1, d_2, \dots, d_n)$ such that $d_1 \in D_1, d_2 \in D_2, \dots, d_n \in D_n$. 
 \end{definition}
 \begin{definition}[\textit{Mathematical relation}]
     A mathematical relation on $D_1, D_2, \dots, D_n$ is a subset of the Cartesian product $D_1 \times D_2 \times \dots \times D_n$. 
 \end{definition}
-\begin{definition}[\textit{Relation domains}]
-    The sets $D_1, D_2, \dots, D_n$ are called the domains of the relation.
+\begin{definition}[\textit{Relation}]
+    A relation is a set of ordered $n$-tuples $(d_1, d_2, \dots, d_n)$, where $d_1 \in D_1, d_2 \in D_2, \dots, d_n \in D_n$. 
+\end{definition}
+\begin{definition}[\textit{Relation domain}]
+    The sets $D_1, D_2, \dots, D_n$ are referred to as the domains of the relation.
 \end{definition}
 \begin{definition}[\textit{Relation degree}]
-    The number $n$ is referred to as the degree of the relation.
+    The number $n$ is called the degree of the relation.
 \end{definition}
-\begin{definition}[\textit{Cardinality}]
-    The number of $n$-tuples is called the cardinality of the relation.
+\begin{definition}[\textit{Relation cardinality}]
+    The number of $n$-tuples in a relation is termed its cardinality.
 \end{definition}
-In practice, cardinality is always finite.
-\begin{definition}[\textit{Ordered set}]
-    A mathematical relation is a set of ordered $n$-tuples $(d_1, d_2, \dots, d_n)$ such that $d_1 \in D_1, d_2 \in D_2, \dots, d_n \in D_n$, where:
-    \begin{itemize}
-        \item There is no specific ordering between $n$-tuples.
-        \item The $n$-tuples are distinct from one another.
-    \end{itemize}
-\end{definition}
-The $n$-tuples are ordered internally: the $i$-th value comes from the $i$-th domain.
-\begin{example}
-    Consider a simple mathematical relation:
-    \[\text{game} \subseteq \text{string} \times \text{string} \times \text{integer} \times \text{integer}\]
-    For instance:
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{|c|c|c|c|}
-        \hline
-        Juve & Lazio & 3 & 1 \\ \hline
-        Lazio & Milan & 2 & 0 \\ \hline
-        Juve & Roma  & 1 & 2 \\ \hline
-        Roma  & Milan & 0 & 1 \\ \hline
-        \end{tabular}
-    \end{table}
-    Each of the domains has two roles, which are distinguished by their position. 
-    The structure is positional.
-    
-    We can move towards a non-positional structure by associating a unique name (attribute) with each domain, which describes the role of the domain. 
-    For instance:
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{|c|c|c|c|}
-        \hline
-        \textbf{Home team} & \textbf{Visiting team} & \textbf{Home goals} & \textbf{Visitor goals} \\ \hline
-        Juve & Lazio & 3 & 1 \\ \hline
-        Lazio & Milan & 2 & 0 \\ \hline
-        Juve & Roma  & 1 & 2 \\ \hline
-        Roma  & Milan & 0 & 1 \\ \hline
-        \end{tabular}
-    \end{table}
-\end{example}
+
+\subsubsection{Schema and instances}
 \begin{definition}[\textit{Relation schema}]
-    A relation schema consists of a name (of the relation) $R$ with a set of attributes $A_1, \dots, A_n$:
-    \[R(A_1, \dots, A_n)\]
+    A relation schema consists of a relation's name $R$ and a set of attributes $A_1, \dots, A_n$, and it is denoted as $R(A_1, \dots, A_n)$. 
 \end{definition}
 \begin{definition}[\textit{Database schema}]
-    A database schema is a set of relation schemas with different names: 
-    \[R = \{R_1(X_1), \dots, R_n(X_n)\}\]
+    A database schema is a collection of relation schemas with unique names, denoted as $R = \{R_1(X_1), \dots, R_n(X_n)\}$. 
 \end{definition}
-\begin{definition}[\textit{Instance of a relation}]
+\begin{definition}[\textit{Relation's instance}]
     A relation instance on a schema $R(X)$ is a set $r$ of tuples on $X$.
 \end{definition}
-\begin{definition}[\textit{Instance of a database}]
-    A database instance on a schema $R = \{R_1(X_1), \dots, R_n(X_n)\}$ is a set of relations $r = \{r_1, \dots, r_n\}$, where $r_i$ is a relation on $R_i$.
+\begin{definition}[\textit{Database's instance}]
+    A database instance for a schema $R = \{R_1(X_1), \dots\}$ is a set of relations $r = \{r_1, \dots\}$.
 \end{definition}
-The relational model imposes a rigid structure on data:
-\begin{itemize}
-    \item Information is represented by tuples.
-    \item Tuples must conform to relation schemas.
-\end{itemize}
-There are at least three types of null values:
-\begin{itemize}
-    \item \textit{Unknown value}: there is a domain value, but it is not known.
-    \item \textit{Non-existent value}: the attribute is not applicable for the tuple.
-    \item \textit{No-information value}: we don'’'t know whether a value exists or not (logical disjunction of the above two).
-\end{itemize}
-DBMSs typically do not distinguish between these types of nulls and implicitly adopt the no-information value.
+\noindent The relational model enforces a strict structure on data to ensure consistency and logical organization. 
+In this model, all information is represented as tuples, which must conform to predefined relation schemas. 
+This rigid framework provides clarity but also imposes certain limitations on how data is modeled and stored.
 
-An integrity constraint is a property that must be satisfied by all meaningful database instances. 
-It can be seen as a predicate: a database instance is legal if it satisfies all integrity constraints. 
-Types of constraints include:
-\begin{itemize}
-    \item Intrarelational constraints (e.g., domain constraints, tuple constraints).
-    \item Interrelational constraints.
-\end{itemize}
+\paragraph*{Null values}
+Null values are used to represent missing or inapplicable information in relational databases. 
+These nulls can be categorized into three distinct types. 
+Despite these distinctions, most database management systems do not differentiate between these types of nulls. 
+Instead, they implicitly treat all nulls as"no-information values.
 
+\paragraph*{Integrity constraint}
+An integrity constraint is a condition that must hold true for all valid database instances. 
+These constraints act as predicates, ensuring that a database instance is legal only if it satisfies all specified conditions.
+
+\subsubsection{Keys}
+A key is a fundamental concept in the relational model, representing a set of attributes that uniquely identifies tuples in a relation.
+\begin{definition}[\textit{Superkey}]
+    A set of attributes $K$ is a superkey for a relation $r$ if no two distinct tuples $t_1$ and $t_2$ in $r$ share the same values for $K$.
+\end{definition}
 \begin{definition}[\textit{Key}]
-    A key is a set of attributes that uniquely identifies tuples in a relation.
+    The set of attributes $K$ is a key for $r$ if it is a minimal superkey, meaning no proper subset of $K$ is itself a superkey.
 \end{definition}
-A set of attributes $K$ is a superkey for a relation $r$ if $r$ does not contain two distinct tuples $t_1$ and $t_2$ such that $t_1[K] = t_2[K]$.
-$K$ is a key for $r$ if $K$ is a minimal superkey (i.e., there exists no other superkey $K^\prime$ of $r$ that is a proper subset of $K$).
+\noindent The keys can be classified as: 
+\begin{itemize}
+    \item \textit{Primary key}: to maintain data integrity, null values are not permitted in primary keys. 
+        Each relation must have a designated primary key, which uniquely identifies its tuples. 
+        In database schema notation, primary key attributes are underlined for clarity.
+        Primary keys also play a critical role in establishing references between relations. 
+        Through these references, data consistency is maintained across the database.
+    \item \textit{Foreign key}: enable relationships between tuples in different relations. 
+        A foreign key in one relation references the primary key in another, establishing a link between the two.
+        To ensure consistency, referential integrity constraints are imposed. 
+        These constraints guarantee that every foreign key value corresponds to an existing primary key value in the referenced relation. 
+        Violating these constraints would result in an inconsistent database state.
+\end{itemize}
 
-\paragraph*{Primary Keys}
-The presence of nulls in keys must be limited.
-A practical solution is to select a primary key for each relation, on which nulls are not allowed. 
-Primary key attributes are underlined in notation. 
-References between relations are realized through primary keys.
-
-\paragraph*{Foreign Keys}
-Data in different relations are correlated by means of values of (primary) keys. 
-Referential integrity constraints are imposed to ensure that these values correspond to actual values in the referenced relation.
-
-\subsection{ER to relational transformation}
-To transform an Entity-Relationship (ER) diagram into a relational database schema, the following steps should be performed:
+\subsection{Schema transformation}
+Transforming an entity-relationship diagram into a relational database schema involves a systematic approach to map entities and relationships into relational tables. 
+The process consists of the following key steps:
 \begin{enumerate}
-    \item \textit{Create a separate table for each entity}:
-        \begin{itemize}
-            \item Each attribute of the entity becomes a column in the corresponding relational table.
-            \item Each instance of the entity set becomes a row in the relational table.
-        \end{itemize}
-    \item \textit{Handle relationships}:
-        \begin{itemize}
-            \item For each relationship in the ER diagram, decide whether to represent it as a separate table or as a foreign key in an existing table.
-            \item Binary relationships with a one-to-many or many-to-one cardinality can often be handled by adding a foreign key to the table corresponding to the many side.
-            \item Many-to-many relationships typically require the creation of a separate relationship table, where foreign keys from the related entities form the primary key of the new table.
-        \end{itemize}
+    \item \textit{Mapping entities to tables}: each entity in the ER diagram is represented as a separate table in the relational schema. 
+        The attributes of the entity become the columns of the table, while each instance of the entity set corresponds to a row in the table.
+    \item \textit{Handle relationships}: relationships between entities are incorporated into the schema based on their cardinality and complexity. 
 \end{enumerate}

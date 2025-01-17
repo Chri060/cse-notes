@@ -1,0 +1,66 @@
+\section{Machine Learning operations}
+
+A feature store is a centralized repository designed to store, manage, and serve features for Machine Learning models.
+Features are the input variables that describe the data objects used by models to make predictions. 
+The main goal of a feature store is to simplify the process of creating, sharing, and using these features across various Machine Learning models. 
+This ensures that features are easily accessible, consistent, and reusable, making it easier to develop, maintain, and deploy Machine Learning systems. 
+Feature stores are a key component of Machine Learning operations.
+
+Machine Learning operations refers to a set of practices and tools that streamline the development, deployment, and maintenance of Machine Learning models in production. 
+It extends DevOps principles to the Machine Learning world, focusing on the unique challenges of building, deploying, and monitoring Machine Learning systems at scale. 
+Machine Learning operations brings together data scientists, Machine Learning engineers, and operations teams, enabling them to collaborate effectively to ensure reliable and efficient deployment of Machine Learning models.
+The Machine Learning operations lifecycle includes the following: 
+\begin{enumerate}
+    \item \textit{Development}: data scientists experiment with models, algorithms, and feature sets. 
+        Automation ensures proper versioning of code, models, and datasets.
+    \item \textit{Training and validation}: the model is trained and validated using test datasets. 
+        Machine Learning operations automates this process, ensuring reproducibility.
+    \item \textit{Deployment}: once validated, the model is deployed into production using automated practices.
+    \item \textit{Monitoring}: post-deployment, the model's performance is continuously monitored for accuracy, data drift, and concept drift.
+    \item \textit{Retraining}: when performance drops or new data is available, models are retrained automatically to stay current.
+\end{enumerate}
+\noindent Machine Learning operations is essential for transitioning Machine Learning from research to scalable production systems. 
+By automating workflows, ensuring consistency, and enhancing collaboration, Machine Learning operations helps organizations efficiently manage and operationalize Machine Learning models at scale.
+
+\subsection{Feature stores}
+A feature store is a centralized repository used to manage, store, and serve features for Machine Learning models. Features are the input variables that help Machine Learning models make predictions. 
+The feature store's main goal is to streamline the process of creating, sharing, and using these features across various models, ensuring they are consistent, reusable, and easily accessible.
+This is particularly important for maintaining high-quality data and enabling collaboration between data scientists, Machine Learning engineers, and data engineers.
+
+A feature store offers consistency, ensuring that features used for training and inference are aligned, which helps improve model accuracy. 
+It also boosts efficiency by enabling feature reuse across models and teams, reducing redundant work and accelerating model development.
+
+\begin{definition}[\textit{Feature engineering}]
+    Feature engineering is the process of transforming raw data into meaningful features that improve the performance of Machine Learning models. 
+\end{definition}
+\noindent This can range from simple transformations, like aggregations, to more complex methods, such as Machine Learning-generated features like word embeddings. 
+Feature engineering's ultimate goal is to create a better dataset that enhances the performance of Machine Learning algorithms.
+
+The role of a feature store is to act as a centralized repository where curated features are stored. 
+It serves as a data management layer, enabling collaboration between teams, and provides an interface that converts raw data into features used in model training and inference. 
+By ensuring consistency across features used in both training and deployment phases, a feature store eliminates discrepancies and reduces the risk of errors. 
+It also prevents duplication of code, making the process more efficient and maintaining alignment between model development and deployment.
+
+Feature stores are essential when deploying models at scale and in production, as they provide consistency and enable teams to collaborate and reuse features. 
+However, for small teams or proof-of-concept projects, the overhead of using a feature store might not be necessary, as simpler workflows can often suffice.
+
+\subsection{Feast}
+Feast is an open-source feature store that provides isolation for feature stores at the infrastructure level using resource namespacing. 
+This means that different projects or teams can work with their own feature stores without interfering with each other, allowing for more organized and secure management of features.
+
+For offline use cases that only rely on batch data, Feast does not need to ingest data itself.
+Instead, it can query existing data directly, making it easy to integrate with other data sources. 
+For online use cases, Feast supports a process called materialization, where features from batch sources are ingested and made available for real-time use. 
+It also supports pushing streaming features to make them available both offline and online.
+
+In Feast, an entity is a group of semantically related features, typically defined to map to the specific domain of a use case. 
+Each feature view is a collection of features, and the entity key is the collection of entities for that view. 
+It is important to reuse entities across feature views to ensure consistency and avoid duplication.
+
+A data source in Feast refers to the raw data that users own, such as a table in BigQuery. 
+Feast does not manage the raw data itself but rather loads this data and performs various operations to retrieve and serve features. 
+Feast uses a time-series data model to interpret data in the underlying data sources. This model is used to build training datasets or materialize features into an online store for real-time use.
+
+Feast utilizes a registry to store all the applied Feast objects, such as feature views and entities.
+The registry offers methods to manage these objects, including applying, listing, retrieving, and deleting them. 
+This centralized registry allows for better organization and management of features across different projects.

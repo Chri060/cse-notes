@@ -88,7 +88,7 @@ PUT /index_name
 \end{lstlisting} 
 We can define a mapping in the following way: 
 \begin{lstlisting}[style=C]
-PUT index_name/_mapping
+PUT /index_name/_mapping
 \end{lstlisting} 
 Common field types include:
 \begin{itemize}
@@ -107,7 +107,7 @@ POST /_analyze
     text
 }
 \end{lstlisting} 
-his returns a JSON structure optimized for the given input.
+This returns a JSON structure optimized for the given input.
 
 \paragraph*{Search}
 To retrieve a document:
@@ -158,9 +158,12 @@ Aggregations can be defined as follows:
 \begin{lstlisting}[style=C]
 GET /index_name/_search
 {
-    "aggs": {
-        "aggregation_name": {
-            "type": { "field": "field_name" }
+    "query": {
+        "size": 0,
+        "aggs": {
+            "aggregation_name": {
+                "type": { "field": "field_name" }
+            }
         }
     }
 }
@@ -174,7 +177,7 @@ Supported types of aggregations include:
 \end{itemize}
 By combining queries, filters, and aggregations, Elasticsearch enables powerful data retrieval and analysis.
 
-\subsection{Logstash and Beats}
+\subsection{Logstash}
 Beats is a lightweight platform designed to serve as a data shipper, collecting and sending logs and metrics from hosts or containers to systems like Logstash or Elasticsearch. 
 It includes several specialized modules, such as Filebeat for log file collection, Metricbeat for system and service metrics, Packetbeat for network data capture, and Heartbeat for monitoring service availability. 
 These modules focus on data collection and shipping, while Logstash handles the more complex tasks of processing, structuring, normalizing, and enriching the data.
@@ -217,7 +220,7 @@ Codecs are applied during data input or output, enabling flexibility in how data
 
 Logstash also employs an at least once message delivery strategy, which ensures that messages are generally delivered exactly once.
 However, in the case of an unclean shutdown, duplicates may occur. 
-To prevent data loss, Logstash utilizes a Dead Letter Queue (DLQ) for events that fail to be processed. 
+To prevent data loss, Logstash utilizes a Dead Letter Queue for events that fail to be processed. 
 This mechanism allows undeliverable events to be stored temporarily, freeing resources in the pipeline and ensuring that subsequent events are processed without delay.
 
 \subsection{Kibana}
@@ -227,4 +230,3 @@ While Kibana is intuitive and easy to use at first, it also offers a high degree
 Regardless of the subscription level, Kibana provides robust capabilities to aggregate, organize, filter, and visualize data in various formats.
 Kibana supports a wide array of visualizations, including charts, graphs, maps, and more. 
 One of Kibana's most powerful features is the ability to create custom dashboards that integrate multiple data types and representations.
-These dashboards can combine basic visualizations with location-based analyses, time series, machine learning insights, and graph/network visualizations, making it an invaluable tool for exploring and understanding complex data.

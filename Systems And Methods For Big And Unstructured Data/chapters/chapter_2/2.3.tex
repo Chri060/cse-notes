@@ -1,24 +1,14 @@
 \section{Key-value database}
 
-Key-value databases store data as a collection of key-value pairs, where each key acts as a unique identifier that points to a corresponding value. 
-This structure allows for efficient retrieval of data, making key-value databases particularly useful in scenarios that require fast lookups by key. 
+Key-value databases store data as a collection of key-value pairs. 
+This structure allows for efficient retrieval of data. 
 Conceptually, the key-value approach is analogous to indexing in relational databases, where a key serves as a reference to access the associated data object.
 
-Key-value databases are often used as the foundation for applications requiring high performance in terms of speed and scalability, and they form the backbone for search operations by id.
-
 \subsection{Redis}
-Key features of Redis include:
-\begin{itemize} 
-    \item \textit{Advanced data structures}: Redis values can be more than just simple strings or numbers—they can represent data structures like lists, sets, or even geospatial indexes. 
-    \item \textit{Atomic operations}: Redis supports atomic operations on its native data structures, ensuring that operations on a specific data type can be completed without interference from other operations. 
-    \item \textit{Versatility}: Redis can be used as a persistent database, a fast in-memory cache, or a message broker, making it a multi-purpose tool in modern architectures. 
-\end{itemize}
-Redis follows a unique path in the evolution of key-value databases, as it directly exposes complex data types as part of its interface, without adding extra abstraction layers. 
-This makes Redis particularly well-suited for use cases where performance and simplicity are critical.
+Redis supports atomic operations on its native data structures, ensuring that operations on a specific data type can be completed without interference from other operations. 
+Redis can be used as a persistent database, a fast in-memory cache, or a message broker, making it a multi-purpose tool in modern architectures. 
 
 While Redis is not a direct replacement for relational databases or document stores, it complements them well. 
-Redis can be used alongside SQL databases for fast access to frequently queried data, or alongside NoSQL databases to provide rapid access to specific data sets.
-
 Best use cases for Redis are: 
 \begin{itemize} 
     \item Applications that require real-time data processing and fast access.
@@ -26,9 +16,7 @@ Best use cases for Redis are:
     \item Situations where the dataset fits within memory, allowing for fast in-memory data retrieval.
     \item Non-critical datasets, as Redis persistence mechanisms can introduce some latency, which may be unsuitable for mission-critical applications.
 \end{itemize}
-
-\paragraph*{Advantages}
-The advantages of Redis are: 
+\noindent The advantages of Redis are: 
 \begin{itemize}
     \item \textit{Performance}: Redis offers high-speed data access, ideal for real-time applications.
     \item \textit{Availability}: replication and partitioning enhance data availability and fault tolerance.
@@ -37,7 +25,7 @@ The advantages of Redis are:
 \end{itemize}
 
 \subsubsection{Architecture}
-Redis, written in ANSI C, runs on most POSIX-compliant systems, with Linux recommended for production environments. 
+Redis, written in C, runs on most POSIX-compliant systems, with Linux recommended for production environments. 
 Although Redis is single-threaded, it achieves scalability across multiple CPU cores by allowing multiple Redis instances to run in parallel. 
 With constant-time complexity for many commands, Redis remains efficient even with high data volumes.
 \begin{figure}[H]
@@ -45,10 +33,10 @@ With constant-time complexity for many commands, Redis remains efficient even wi
     \includegraphics[width=0.75\linewidth]{images/redis.png}
     \caption{Redis architecture}
 \end{figure}
-Redis offers two persistence mechanisms:
+\noindent Redis offers two persistence mechanisms:
 \begin{itemize}
-    \item \textit{Redis Database Snapshots} (RDB): captures a snapshot of the dataset at specified intervals.
-    \item \textit{Append-Only File} (AOF): logs every write operation, ensuring recovery by replaying commands if Redis restarts.
+    \item \textit{Redis Database Snapshots}: captures a snapshot of the dataset at specified intervals.
+    \item \textit{Append-Only File}: logs every write operation, ensuring recovery by replaying commands if Redis restarts.
 \end{itemize}
 Redis enables master-slave replication, where one master Redis instance can synchronize with multiple read-only slave instances. 
 Clients can read data from both master and slave nodes, but only write to the master by default. 
@@ -59,7 +47,7 @@ Redis also supports data partitioning across multiple hosts through:
     \item \textit{Query router partitioning}: Redis Cluster automatically routes requests to the appropriate node.
 \end{itemize}
 
-\paragraph*{Topologies}
+\paragraph*{Cofigurations}
 Redis can be deployed in various configurations:
 \begin{itemize}
     \item \textit{Standalone}: basic setup with optional master-slave replication for read offloading and redundancy. 
@@ -76,15 +64,15 @@ The Redis data model is centered around key-value pairs, with additional data ty
     \centering
     \begin{tabular}{|c|l|}
     \hline
-    \textbf{Data Type} & \textbf{Description} \\ \hline
-    Strings            & Basic key-value pairs, suitable for caching and counters. \\ \hline
-    Lists              & Ordered collections, useful for queues. \\ \hline
-    Sets               & Unordered unique collections, great for tags and unique items. \\ \hline
-    Sorted Sets        & Sets with key, ideal for rankings. \\ \hline
-    Hashes             & Field-value pairs within a key, good for storing objects. \\ \hline
-    Bitmaps            & Bit-level data, useful for flags and tracking events. \\ \hline
-    HyperLogLogs       & Probabilistic unique counters with low memory usage. \\ \hline
-    Streams            & Log-like data for real-time processing and event sourcing. \\ \hline
+    \textbf{Data type} & \textbf{Description} \\ \hline
+    \textit{Strings}            & Basic key-value pairs, suitable for caching and counters \\ \hline
+    \textit{Lists}              & Ordered collections, useful for queues \\ \hline
+    \textit{Sets}               & Unordered unique collections, great for tags and unique items \\ \hline
+    \textit{Sorted sets}        & Sets with key, ideal for rankings \\ \hline
+    \textit{Hashes}             & Field-value pairs within a key, good for storing objects \\ \hline
+    \textit{Bitmaps}            & Bit-level data, useful for flags and tracking events \\ \hline
+    \textit{HyperLogLogs}       & Probabilistic unique counters with low memory usage \\ \hline
+    \textit{Streams}            & Log-like data for real-time processing and event sourcing \\ \hline
     \end{tabular}
 \end{table}
 
@@ -94,120 +82,105 @@ Commands are specific to the type of data being manipulated, ensuring efficient 
 
 \paragraph*{Strings}
 The basic commands on strings are: 
-\begin{lstlisting}[style=Java]
-// get and set strings
-SET string_field string_value
-GET string_field
-// set or increment numbers values
-SET (int)string_field 1
-INCRBY (int)string_field 1
-// get multiple keys at once
-MGET string_field (int)string_field
-// set multiple keys at once
-MSET string_field string_value (int)string_field 1223
-// get the length of a string 
-STRLEN string_field 
-// update a value retrieving the old one
-GETSET string_field string_value
+\begin{lstlisting}[style=Redis]
+/* get and set strings */
+SET string_key string_value
+GET string_key 
+/* set or increment numbers values */
+SET string_key 1
+INCRBY string_key 1
+/* get and set multiple keys at once */
+MGET string_key string_key
+MSET string_key string_value
+/* get the length of a string */
+STRLEN string_key 
+/* update a value retrieving the old one */
+GETSET string_key string_value
 \end{lstlisting}
 
 \paragraph*{Keys}
 The basic commands on keys are: 
-\begin{lstlisting}[style=Java]
-// key removal
+\begin{lstlisting}[style=Redis]
+/* key removal */
 DEL key_value
-// test for existence 
+/* test for existence */
 EXISTS key_value
-// get the type of a key
+/* get the type of a key */
 TYPE key_value
-// refield a key
-REfield bar new_bar
-// set an expiration time to a key 
+/* set an expiration time to a key */
 EXPIRE key_value 10 
-// get key time-to-live 
+/* get key time-to-live */
 TTL key_value
 \end{lstlisting}
 
 \paragraph*{List}
 The basic commands on list are: 
-\begin{lstlisting}[style=Java]
-// push on either end
+\begin{lstlisting}[style=Redis]
+/* push on either end */
 RPUSH key_value string
 LPUSH key_value string
-// pop from either end
+/* pop from either end */
 RPOP key_value
 LPOP key_value
-// blocking pop on either end
+/* blocking pop on either end */
 BRPOP key_value
 BLPOP key_value
-// pop and Push to another list 
+/* pop and Push to another list */
 RPOPLPUSH src_key_value dst_key_value
-// get an element by index on either end
-RINDEX key_value
+/* get an element by index on either end */
 LINDEX key_value
-// get a range of elements
-RRANGE key_value 0-1
+/* get all list elements */
 LRANGE key_value 0-1
 \end{lstlisting}
 
 \paragraph*{Hash}
 The basic commands on hash are: 
-\begin{lstlisting}[style=Java]
-// set a hashed value
+\begin{lstlisting}[style=Redis]
+/* set a hashed value */
 HSET key:key_value field value 
-// set multiple fields
+/* set multiple fields */
 HMSET key:key_value lastfield Smith visits 1
-// get a hashed value
+/* get a hashed value */
 HGET key:key_value field
-// get all the values in a hash 
+/* get all the values in a hash */
 HGETALL key:key_value
-// increment a hashed value
+/* increment a hashed value */
 HINCRBY key:key_value visits 1
 \end{lstlisting}
 
 \paragraph*{Sets}
 The basic commands on sets are: 
-\begin{lstlisting}[style=Java]
-// add member to a set
+\begin{lstlisting}[style=Redis]
+/* add member to a set */
 SADD key value
-// pop a random element 
+/* pop a random element */
 SPOP key
-// get all elements
+/* get all elements */
 SMEMBERS key
-// intersect multiple sets
+/* intersect multiple sets */
 SINTER key key
-// union multiple sets
+/* union multiple sets */
 SUNION key key
-// differentiate multiple sets
+/* differentiate multiple sets */
 SDIFF key key
 \end{lstlisting}
 
 \paragraph*{Sorted sets}
 The basic commands on sorted sets are: 
-\begin{lstlisting}[style=Java]
-    // add member to a sorted set
-    ZADD key key_value value
-    // get the rank of a member 
-    ZRANK key value
-    // get elements by score range 
-    ZRANGEBYSCORE key 200 +inf WITHSCORES
-    // increment score of member
-    ZINCRBY key 10 value 
-    // remove range by score 
-    ZREMRANGEBYSCORE key 0 key_value
+\begin{lstlisting}[style=Redis]
+/* add member to a sorted set */
+ZADD key key_value value
+/* get the rank of a member */
+ZRANK key value
+/* get elements by score range */
+ZRANGEBYSCORE key 200 +inf WITHSCORES
+/* increment score of member */
+ZINCRBY key 10 value 
+/* remove range by score */
+ZREMRANGEBYSCORE key 0 key_value
 \end{lstlisting}
 
 \subsection{Memcached}
-
-\paragraph*{Cache}
-A cache is a collection of stored data duplicates, designed to quickly provide values that are either difficult or time-consuming to retrieve or compute. 
-Caching enhances performance by making frequently requested data readily available, saving time compared to re-fetching or recalculating. 
-Caches use a simple key-value storage model, typically involving operations to save, retrieve, and delete values. 
-Cache systems often incorporate replacement policies to manage limited storage space efficiently. 
-A cold cache holds no stored data, while a warm cache has useful data loaded, resulting in higher cache hits. 
-The effectiveness of caching depends on the balance between cache hits and misses, with a high hit ratio indicating efficient performance.
-
-\paragraph*{Memcached}
 Memcached is an open-source, distributed memory caching system created in 2003 by Brad Fitzpatrick to boost the performance of dynamic web applications by reducing database load. 
 Using a key-value dictionary model, Memcached is particularly useful for storing frequently accessed, computationally expensive, or commonly shared data in memory, allowing applications to access it quickly. 
 Originally intended to speed up dynamic websites like LiveJournal, Memcached is now widely used to cache data temporarily, ensuring faster response times without putting undue strain on databases.
@@ -226,7 +199,6 @@ Memcached employs a simple invalidation strategy by setting expiration times on 
 This approach can result in slightly outdated data, which is acceptable for summaries, overviews, and other low-criticality pages. 
 For high-sensitivity data, however, it's possible to set up conditional expiration.
 
-Optimization is key to maximizing Memcached's benefits. 
 Although it reduces database requests, each Memcached call still has a performance cost.
 To mitigate this, techniques like multi-get can retrieve multiple keys in a single call, reducing response time by returning an array of items. 
 Security is another consideration, as early versions of Memcached had no built-in authentication. With the addition of the SASL Auth Protocol, securing access to Memcached has become easier.

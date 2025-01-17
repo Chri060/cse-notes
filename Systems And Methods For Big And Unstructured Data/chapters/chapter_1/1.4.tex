@@ -1,84 +1,73 @@
-\section{NoSQL Databases}
+\section{NoSQL databases}
 
-NoSQL databases are designed to offer greater flexibility and scalability, making them well-suited for dynamic data structures in modern applications. 
-Unlike traditional relational databases that rely on fixed schemas, NoSQL databases often operate without an explicit schema, or they use flexible schemas that can evolve over time. 
-This adaptability allows them to accommodate various types of data, including unstructured and semi-structured formats such as JSON, XML, or key-value pairs.
+NoSQL databases emerged as an alternative to traditional relational databases, offering greater flexibility and scalability.
 
-The lack of a rigid schema enables NoSQL databases to manage large-scale, constantly changing datasets efficiently. 
-This characteristic makes them ideal for applications where data formats are unpredictable or subject to frequent changes, such as social media platforms, IoT systems, and real-time analytics.
+\begin{chronology}[10]{1960}{2020}{0.9\textwidth}
+    \event{1965}{Multivalue databases}
+    \event{1979}{DBM database}
+    \event{2000}{Modern NoSQL databases}
+    \event{2009}{NoSQL cathegorization}
+\end{chronology}
 
-\paragraph*{Paradigmatic shift}
-The rise of Big Data has led to a fundamental shift in how databases are designed and used. 
-Traditional databases typically follow a schema on write approach, where a well-defined schema must be agreed upon before data can be stored. 
-This model is limiting in fast-changing environments where the data structure may not be fully known at the time of ingestion, resulting in the potential loss of valuable information.
-NoSQL databases adopt a schema on read approach, allowing data to be ingested without predefined structure. 
-The minimal schema necessary for analysis is applied only when the data is read or queried. 
-This flexibility allows for more comprehensive data retention and analysis, enabling new types of queries and insights to be derived as the requirements evolve.
+\noindent NoSQL databases are designed to manage dynamic and unstructured data, often without requiring an explicit schema.
+This flexibility allows NoSQL databases to efficiently handle large-scale, constantly changing datasets.
 
-\paragraph*{Object-Relational Mapping}
-In traditional databases, Object-Relational Mapping (ORM) is used to bridge the gap between object-oriented programming languages and relational databases, a problem known as the impedance mismatch.
-Despite the existence of ORM solutions, this process is often complex and can hinder performance and flexibility. 
-NoSQL databases, particularly object-oriented and document-based databases, can eliminate or reduce the impedance mismatch by storing data in formats that align more naturally with the objects in application code. 
-While early object-oriented database systems were commercially unsuccessful, modern NoSQL systems provide a more pragmatic solution to these challenges.
+The rise of Big Data has influenced a major shift in database design. 
+NoSQL databases adopt a schema on read approach, meaning that data can be ingested without a predefined structure. 
+The schema is only applied when the data is read or queried, offering more adaptability and scalability compared to traditional systems.
+
+\paragraph*{Object-relational mapping}
+In traditional databases, object-relational mapping is used to bridge the gap between object-oriented programming languages and relational databases. 
+Object-relational mapping helps overcome the impedance mismatch that arises when translating objects in code to rows in a relational database. 
+NoSQL databases mitigate or even eliminate this issue by storing data in formats that align more naturally with the objects in application code.
 
 \paragraph*{Data lake}
-NoSQL databases often serve as the backbone of data lakes, where raw, unstructured, and structured data is stored in its native format. 
-Data lakes are designed to allow for future analysis, without requiring immediate transformation into a rigid schema, making them highly compatible with NoSQL databases.
+NoSQL databases are often at the core of data lakes, which serve as large, centralized repositories for raw, unstructured, and structured data. 
+Data lakes are designed to store data in its native format, allowing for future analysis without requiring immediate transformation into a rigid schema. 
+This approach makes NoSQL databases highly compatible with data lakes, as they can efficiently store and manage vast amounts of diverse data that can be used for analysis at a later time.
 
 \paragraph*{Scalability}
-Traditional SQL databases scale vertically, meaning performance improvements come from upgrading to more powerful hardware with better memory, processing power, or storage capacity. 
-However, vertical scaling has physical and financial limits, and adding data to a traditional SQL system can degrade its performance over time.
-In contrast, NoSQL databases are designed to scale horizontally. 
-This means that when the system needs more capacity, additional machines (nodes) can be added to the cluster, allowing the database to distribute both data and computational load across multiple nodes. 
-This architecture is especially effective for handling the vast datasets and high-throughput demands characteristic of Big Data applications.
+One of the key strengths of NoSQL databases is their ability to scale horizontally. 
+This approach is particularly effective for handling the massive datasets and high-throughput demands often found in Big Data applications. 
+By scaling out across multiple machines, NoSQL databases can meet the increasing demands of modern applications without sacrificing performance or reliability.
 
 \subsection{CAP theorem}
-The CAP theorem highlights the trade-offs inherent in distributed systems.
+The CAP theorem describes the inherent trade-offs faced by distributed systems.
 \begin{theorem}
-A distributed system cannot simultaneously guarantee all three of the following properties:
+    A distributed system cannot simultaneously guarantee all three of the following properties:
 \end{theorem}
 \begin{itemize}
-    \item \textit{Consistency: all nodes see the same data at the same time.}
-    \item \textit{Availability: every request receives a response, whether it is successful or not.}
-    \item \textit{Partition tolerance: the system continues to operate even if communication between nodes is interrupted due to network failures.}
+    \item \textit{Consistency: every node in the system has the same view of data at the same time.}
+    \item \textit{Availability: every request receives a response, regardless of success or failure.}
+    \item \textit{Partition tolerance: the system remains operational even if communication between nodes is disrupted due to network failures.}
 \end{itemize}
-NoSQL databases typically sacrifice either consistency or availability, depending on the specific use case. 
-Systems can be categorized as:
+In practice, distributed systems must make compromises. 
+NoSQL databases often trade either consistency or availability depending on their specific use case. 
+Based on the CAP theorem, systems are typically classified as follows:
 \begin{itemize}
-    \item \textit{CP} (Consistency, Partition tolerance): prioritize data correctness at the cost of availability during network failures.
-    \item \textit{AP} (Availability, Partition tolerance): prioritize availability, potentially returning stale or outdated data during partition events.
+    \item \textit{CP}: these systems ensure data accuracy and integrity but may sacrifice availability during network failures.
+    \item \textit{AP}: these systems prioritize availability, allowing responses even if the data might be stale or inconsistent during partition events.
 \end{itemize}
-Understanding this trade-off is crucial for designing systems that balance performance, reliability, and scalability based on specific application requirements.
+Choosing the right balance of these properties is essential for designing systems that align with performance, reliability, and scalability goals.
 
 \paragraph*{BASE properties}
-While traditional databases follow the ACID (Atomicity, Consistency, Isolation, Durability) principles, many NoSQL databases adhere to the BASE model:
+Traditional databases adhere to the ACID principles (atomicity, consistency, isolation, durability) to ensure strict data reliability. 
+In contrast, many NoSQL databases follow the BASE model, which offers a more flexible approach to consistency:
 \begin{itemize}
-    \item \textit{Basically Available}: the system guarantees availability, even if data is not fully consistent.
-    \item \textit{Soft state}: the state of the system may change over time, even without input (due to eventual consistency).
-    \item \textit{Eventual consistency}: The system will eventually become consistent, but intermediate states may be inconsistent.
+    \item \textit{Basically Available}: the system prioritizes availability, even if it temporarily sacrifices consistency.
+    \item \textit{Soft state}: the system's state may evolve over time without new input, reflecting eventual changes.
+    \item \textit{Eventual consistency}: the system guarantees consistency over time, but intermediate states may remain inconsistent.
 \end{itemize}
-This model is particularly useful in environments where high availability and scalability are prioritized over strict consistency, such as in distributed systems that can tolerate temporary inconsistencies.
-
-\subsection{NoSQL history}
-NoSQL databases have a rich history, beginning as early as the 1960s. 
-xKey milestones include:
-\begin{itemize}
-    \item 1965: multiValue databases developed by TRW.
-    \item 1979: AT\&T releases DBM, an early precursor to NoSQL systems.
-    \item 2000s: modern NoSQL databases emerge, including Google BigTable (2004), CouchDB (2005), Amazon Dynamo (2007), and MongoDB (2009).
-    \item 2009: the term NoSQL is reintroduced to describe a new generation of non-relational databases optimized for scalability and flexibility.
-\end{itemize}
+The BASE model is particularly suited to scenarios where high availability and scalability are critical. 
+It enables systems to handle network partitions and high traffic volumes effectively while still converging to a consistent state.
 
 \subsection{NoSQL taxonomy}
-NoSQL databases can be categorized into several types:
+NoSQL databases can be classified into several types, each designed to address different data management needs, scalability, and performance requirements:
 \begin{itemize}
-    \item \textit{Key-value stores}: data is stored as key-value pairs. 
-        Examples include Redis and Azure Table Storage.
-    \item \textit{Column stores}: data is stored in columns, making them highly efficient for analytical queries. 
-        Examples include Cassandra and Hadoop.
-    \item \textit{Document stores}: these databases store data as documents, often in formats like JSON or BSON. 
-        Examples include MongoDB and CouchDB.
-    \item \textit{Graph databases}: these databases represent data in terms of nodes and relationships (edges), ideal for complex relationship mapping. 
-        An example is Neo4j.
+    \item \textit{Graph databases}: these databases model data as nodes and relationships (edges), which is optimal for scenarios that involve complex relationships.
+    \item \textit{Documental databases}: data is stored as documents, typically in flexible formats like JSON, making them suitable for semi-structured or unstructured data. 
+        This type is ideal for applications requiring rich data models.
+    \item \textit{Key-value databases}: data is stored as simple key-value pairs, making these databases highly efficient for lookups based on keys.
+    \item \textit{Column stores}: data is stored in columns rather than rows, which is particularly useful for analytical queries and big data applications. 
+        Column stores excel at reading and processing large datasets quickly.
 \end{itemize}
-Each type of NoSQL database has its strengths and is designed to meet different kinds of scalability, flexibility, and performance needs.

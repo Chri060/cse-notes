@@ -1,20 +1,20 @@
 \section{Vector database}
 
-Vector databases are gaining significant traction, driven by the rise of artificial intelligence (AI) and machine learning (ML) applications, particularly those leveraging large language models (LLMs) in combination with retrieval-augmented generation (RAG). 
+Vector databases are gaining significant traction, driven by the rise of artificial intelligence and Machine Learning applications, particularly those leveraging large language models in combination with retrieval-augmented generation. 
 These technologies enable more sophisticated data retrieval methods, providing powerful enhancements to search, recommendation, and discovery systems. 
 
 By storing and processing data as high-dimensional vector representations, vector databases facilitate more efficient and context-aware data retrieval. 
 Unlike traditional databases that rely on keyword-based search, vector databases allow AI systems to interpret the semantic similarity and context between data points. 
 This capability is especially valuable for applications that require understanding the meaning and relationships between large datasets, such as personalized search, content recommendations, and natural language understanding.
 
-\subsection{Vectors}
+\paragraph*{Vectors}
 A vector database organizes data as high-dimensional vector representations, which allows for contextual search and discovery that goes beyond simple keyword matching. 
 Vectors are grouped according to their semantic similarity, meaning the database can retrieve data based on the inherent meaning or context, rather than exact matches. 
 This makes data retrieval more efficient and meaningful, particularly for tasks that involve understanding the relationship between data points.
 
 In the fields of mathematics and physics, a vector is a quantity characterized by both magnitude and direction. 
 Similarly, in vector databases, vectors represent various attributes or features of an object, capturing key characteristics in a structured, multidimensional space. 
-These vector representations form the foundation of information processing in many AI and ML applications, enabling machines to understand and interpret complex data patterns.
+These vector representations form the foundation of information processing in many AI and Machine Learning applications, enabling machines to understand and interpret complex data patterns.
 
 One common technique used to create these vectors is embedding, which transforms data into vector format. 
 For textual data, pre-trained models map words and phrases into a multidimensional space, effectively capturing their meanings and relationships in context. 
@@ -25,7 +25,7 @@ o measure the similarity between vectors, metrics like Cosine similarity and Euc
 Cosine similarity is particularly popular due to its computational efficiency and ability to capture the orientation of vectors in space, making it ideal for comparing the semantic similarity between high-dimensional vectors. 
 These similarity measures enable the database to determine how closely related two data points are, helping AI systems retrieve the most contextually relevant information based on the vector representations.
 
-\subsection{Vectors matching}
+\paragraph*{Vectors matching}
 Vector databases excel not only in efficiently storing high-dimensional vectors but also in enabling fast and accurate matching of vectors. 
 Searching for nearest neighbors in an unindexed database involves calculating the distance from the query vector to each point in the dataset, which can be highly computationally expensive for large datasets.
 Therefore, using indexing techniques to speed up this process is essential for efficient vector matching.
@@ -63,5 +63,110 @@ To address this challenge, vector databases use Approximate Nearest Neighbor (AN
         The search begins at the top layer, which contains a few representative nodes, and moves downward through more detailed layers, progressively refining the result. 
         HNSW sacrifices some accuracy for faster search times, making it highly scalable, fast, and adaptable to large datasets. 
         It is also memory efficient, suitable for real-time applications with dynamic data.
-    \item \textit{Inverted File with Product Quantization} (IVFPQ):
+    \item \textit{Inverted File with Product Quantization} (IVFPQ): algorithm designed for efficient 
+        Approximate Nearest Neighbor (ANN) search in high-dimensional vector spaces, particularly for large datasets. 
+        It balances speed and memory efficiency by combining two key techniques: coarse quantization and product quantization.
+
+        At its core, IVFPQ organizes the dataset using an inverted index, a structure that maps data points to representative clusters. 
+        This organization enables the algorithm to limit its search to specific regions of the vector space, significantly reducing the computational workload. 
+        The process begins with coarse quantization, where a clustering algorithm such as $k$-means divides the dataset into clusters. 
+        Each vector is assigned to the nearest cluster center, known as a coarse centroid. 
+        These centroids serve as bins, grouping similar vectors together. When a query is presented, the algorithm identifies the relevant clusters instead of searching the entire dataset.
+
+        Once the clusters are narrowed down, product quantization comes into play. 
+        This technique compresses the vectors within each cluster by dividing them into smaller sub-vectors, each of which is quantized separately. 
+        This compression dramatically reduces storage requirements while maintaining the ability to approximate vector similarities. 
+        The query vector is then compared to these compressed representations, allowing the algorithm to estimate distances efficiently.
+        However, as with any compression method, the reconstructed vectors differ slightly from the originals, introducing a small loss in accuracy.
+
+        The IVFPQ search process operates in two stages: a coarse search to locate relevant clusters and a refined search within those clusters to approximate the nearest neighbors using product quantization. 
+        While this method doesn't guarantee finding the exact nearest neighbors, it offers a highly efficient and scalable solution for ANN searches, especially in scenarios involving massive datasets.
 \end{itemize}
+
+\subsection{FAISS}
+Faiss, developed by Facebook AI, is a powerful library designed for efficient similarity search and clustering in high-dimensional vector spaces. 
+It excels at Approximate Nearest Neighbor search, enabling users to find vectors similar to a query vector within an indexed dataset. 
+Highly optimized for performance and accuracy, Faiss is a popular choice for applications involving large-scale data.
+
+Faiss provides various indexing structures to optimize searches for datasets of different sizes and complexities. 
+These include:
+\begin{itemize}
+    \item \textit{Flat index}: stores all vectors directly for exact nearest neighbor searches.
+    \item \textit{Inverted File Index}: clusters vectors to narrow down search space, often used with product quantization to handle larger datasets.
+    \item \textit{FHierarchical Navigable Small World}: a graph-based structure that enables fast ANN searches through hierarchical relationships between vectors.
+\end{itemize}
+\noindent In addition to indexing, Faiss supports clustering, allowing users to group high-dimensional data efficiently. 
+This is useful for tasks like vector quantization, document clustering, and unsupervised learning.
+
+\paragraph*{Search}
+The workflow in Faiss typically follows three steps:
+\begin{enumerate}
+    \item \textit{Indexing}: users create an index tailored to their dataset and performance requirements, choosing from various structures like Flat, IVF, or HNSW.
+    \item \textit{Quantization}: for large datasets, Faiss can apply compression techniques like product quantization, reducing memory usage and speeding up searches.
+    \item \textit{Search}: once indexed, query vectors are compared against the stored vectors to find the nearest neighbors.
+        Faiss supports approximate searches that prioritize speed while maintaining reasonable accuracy.
+\end{enumerate}
+\noindent Faiss is designed for scalability, capable of handling millions or even billions of vectors. 
+It leverages GPU acceleration and advanced indexing to perform searches in milliseconds, even on massive datasets. 
+The library is highly flexible, offering numerous customization options for indexing and search algorithms. As an open-source and cross-platform tool, it integrates easily with popular programming languages like Python and C++.
+
+\paragraph*{Implementation}
+Faiss works with collections of fixed-dimensional vectors, typically in the range of tens to hundreds of dimensions.
+Data is stored in 32-bit floating-point matrices with row-major order, where each row corresponds to a vector. 
+This format ensures compatibility and consistency during indexing and search operations.
+
+\subsection{Pinecone}
+Pinecone is a vector database designed for efficient similarity search and large-scale production environments. 
+Unlike standalone vector indexes, Pinecone combines indexing, querying, and post-processing with advanced features like distribution, scalability, and fault tolerance to handle complex workflows in real-world applications.
+
+Pinecone organizes vectors using algorithms such as Product Quantization, Locality-Sensitive Hashing, or Hierarchical Navigable Small World. 
+These algorithms structure the data for fast retrieval, enabling efficient nearest neighbor searches.
+When a query vector is submitted, Pinecone compares it against the indexed vectors in the database using a similarity metric associated with the chosen indexing algorithm.
+ This step quickly identifies the most relevant vectors.
+After the initial search, Pinecone applies additional processing to refine the results. 
+This could include re-ranking the nearest neighbors using a different similarity measure or applying custom filters to meet specific requirements.
+
+Pinecone excels in handling large-scale vector search tasks by offering a distributed, fault-tolerant architecture that ensures reliability and performance. 
+Its sharding and replication strategies enable efficient query handling and high availability.
+Additionally, its integration of advanced indexing techniques with post-processing makes it ideal for applications that demand precision and scalability.
+
+\subsection{Zilliz}
+Zilliz is a technology company specializing in unstructured data management and AI-powered analytics. 
+Its mission is to revolutionize how enterprises handle large, high-dimensional datasets such as images, audio, video, and text. 
+By providing scalable and efficient data processing solutions, Zilliz empowers organizations to leverage AI and Machine Learning for smarter, data-driven decision-making.
+
+Through innovative technologies and tools, Zilliz addresses the challenges of managing and analyzing unstructured data at scale, enabling businesses to unlock the full potential of their data assets in AI and advanced analytics workflows.
+
+\subsubsection{Milvus}
+Milvus, developed by Zilliz, is an open-source vector database designed to handle large-scale, high-dimensional data for similarity search and unstructured data retrieval. It integrates seamlessly with AI models and applications, making it ideal for industries such as e-commerce, healthcare, and finance, where large datasets and rapid processing are critical.
+
+Milvus is optimized for scalability, offering performance that can range from small projects to large, enterprise-level deployments. 
+The architecture of Milvus is built around several key principles, including disaggregated storage and computation, microservices, and separation of streaming and historical data. 
+This flexible design allows Milvus to scale efficiently based on specific use cases and workloads.
+
+One of Milvus' standout features is its disaggregated architecture, which uses separate components for storage and computation, making it adaptable to various deployment environments. 
+It supports pluggable engines, storage solutions, and indexing techniques, allowing users to select configurations that best suit their needs. 
+Milvus also relies on a logging mechanism called Log As Data, ensuring that all data changes are tracked in real-time, facilitating efficient updates and retrieval.
+
+In terms of data management, Milvus uses a shard-based system. 
+Each shard is overseen by a supervisor, known as the shard leader, who ensures that new data is added, stored safely in object storage, and kept up to date for search requests. 
+When historical data is needed, the supervisor forwards the request to other query nodes, ensuring seamless access to both current and past information.
+
+Milvus uses two types of data segments to manage the flow of information. 
+The Growing Segment handles in-memory data, replaying information from the Log Broker, and ensures that data is fresh and appendable through a flat indexing method.
+Meanwhile, the Sealed Segment is immutable and uses alternative indexing methods for optimized search and retrieval, making it more efficient for large-scale data storage.
+
+To maintain data integrity, Milvus utilizes a Write-Ahead Log, which temporarily holds new data before it is fully integrated into the system. 
+This log functions like a to-do list for the database, ensuring that all new data is processed and recorded efficiently before being committed to the permanent storage.
+
+With its combination of flexible architecture, scalable components, and advanced data management techniques, Milvus is an effective solution for organizations that need to store, search, and retrieve massive amounts of unstructured data with high efficiency.
+
+
+
+\subsection{Neo4j}
+Neo4j has integrated native vector search into its core capabilities, enabling powerful semantic graph search. 
+This integration paves the way for neurosymbolic AI, where the strengths of symbolic reasoning and Machine Learning are combined to produce more intelligent systems.
+By combining vector search with traditional graph-based querying, Neo4j enhances the ability to extract richer insights from data, which is especially useful in applications involving generative AI and semantic search.
+
+The inclusion of vector search allows Neo4j to serve as a robust foundation for long-term memory in large language models, helping to reduce errors like hallucinations that can occur in AI-generated outputs. 
+This integration not only improves the accuracy of results but also supports more advanced AI applications by enabling a deeper, context-aware understanding of data relationships.
