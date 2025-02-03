@@ -1,0 +1,33 @@
+\section{Asymptotic solution of the Kalman Filter}
+
+In this section, we delve into the asymptotic or steady-state solution of the Kalman Filter.
+
+It's important to note that although the system $\mathcal{S}$ may be linear time-invariant, the Kalman Filter itself is a linear time-variant system due to the presence of the gain $\mathbf{K}(t)$. 
+This introduces two significant challenges:
+\begin{enumerate}
+    \item Ensuring and verifying the asymptotic stability of the Kalman Filter becomes notably intricate. 
+        Even when all eigenvalues of the matrix $\mathbf{F}(t)$ remain strictly inside the unit circle at any given time $t$, stability isn't guaranteed. 
+        Consequently, assessing stability, especially for higher-order systems, can be exceptionally complex.
+    \item There's a computational challenge. 
+        With each sampling instance, we need to update the computations for $\mathbf{K}(t)$ and $\mathbf{P}(t)$. 
+        Notably, solving the Differential Riccati Equation necessitates inverting a $p \times p$ matrix.
+\end{enumerate}
+These inherent difficulties often lead to the adoption and implementation of the asymptotic version of the Kalman Filter in practical applications.
+
+\subsection{Time invariant Kalman Filter}
+In this simplified version, the fundamental concept is that if: $\mathbf{P}(t)\rightarrow \bar{\mathbf{P}}$, then: 
+\[\mathbf{K}(t)\rightarrow \bar{\mathbf{K}}\]
+Thus, we can utilize this constant correction gain $\bar{\mathbf{K}}$ to convert the Kalman Filter into a linear time-invariant system.
+
+Before delving into the existence of $\bar{\mathbf{K}}$, let's examine the asymptotic stability of the Kalman Filter, assuming the existence of $\bar{\mathbf{K}}$.
+
+Consider the core state equation of the Kalman Filter:
+\[\hat{\mathbf{x}}(t+1\mid t)  =\left(\mathbf{F}-\bar{\mathbf{K}}\mathbf{H}\right)\hat{\mathbf{x}}(t\mid t-1)+\bar{\mathbf{K}}\mathbf{y}(t)\]
+Here, the state matrix of the Kalman Filter is $\mathbf{F}-\bar{\mathbf{K}}\mathbf{H}$. 
+Hence, the Kalman Filter is asymptotically stable if and only if all eigenvalues of $\mathbf{F}-\bar{\mathbf{K}}\mathbf{H}$ lie strictly within the unit circle. 
+Particularly:
+\begin{itemize}
+    \item The stability of the system $\mathcal{S}$ is contingent upon the matrix $\mathbf{F}$.
+    \item The stability of the Kalman Filter hinges on $\mathbf{F}-\bar{\mathbf{K}}\mathbf{H}$.
+\end{itemize}
+Thus, the Kalman Filter can achieve asymptotic stability even if the system $\mathcal{S}$ itself is unstable.

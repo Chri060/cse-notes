@@ -1,0 +1,42 @@
+\section{Differential Riccati Equation equilibrium}
+
+Since $\mathbf{K}(t)=\left(\mathbf{FP}(t)\mathbf{H}^T+V_{12}\right)\left(\mathbf{HP}(t)\mathbf{H}^T+V_2\right)^{-1}$, then a constant gain $\bar{\mathbf{K}}$ is attainable only if the Differential Riccati Equation possesses an equilibrium point $\bar{\mathbf{P}}$.
+In addressing the equilibrium of the Differential Riccati Equation, let's delve into the Algebraic Riccati Equation given by:
+\[\bar{\mathbf{P}}=\left(\mathbf{F}\bar{\mathbf{P}}\mathbf{F}^T+V_1\right)-\left(\mathbf{F}\bar{\mathbf{P}}\mathbf{H}^T+V_{12}\right)\left(\mathbf{H}\bar{\mathbf{P}}\mathbf{H}^T+V_{2}\right)^{-1}\left(\mathbf{F}\bar{\mathbf{P}}\mathbf{H}^T+V_{12}\right)^T\]
+This nonlinear matrix static equation, known as Algebraic Riccati Equation, is crucial for determining the existence of a steady-state solution for the Differential Riccati Equation.
+
+To address the equilibrium of the Algebraic Riccati Equation and subsequently the Differential Riccati Equation, we need to prove three critical aspects:
+\begin{enumerate}
+    \item \textit{Existence}: demonstrating that the Algebraic Riccati Equation possesses semi-definite positive solutions.
+    \item \textit{Convergence}: proving the convergence of the Discrete Differential Riccati Equation to $\bar{\mathbf{P}}$.
+    \item \textit{Stability}: verifying the asymptotic stability of the corresponding Kalman Filter, which is equivalent to ensuring all eigenvalues of $\mathbf{F}-\bar{\mathbf{K}}\mathbf{H}$ lie strictly inside the unit circle.
+\end{enumerate}
+Although these proofs are challenging, we can rely on two key theorems that provide sufficient conditions for the requested proofs:
+\begin{theorem}[First asymptotic Kalman Filter]
+    If $V_{12}=0$ and the system is asymptotically stable, then:
+\end{theorem}  
+\begin{itemize}
+    \item \textit{Algebraic Riccati Equation possesses one and only one semi-positive solution $\bar{\mathbf{P}}\geq 0$}.
+    \item \textit{The corresponding $\bar{\mathbf{K}}$ ensures the asymptotic stability of the Kalman Filter}. 
+    \item \textit{Differential Riccati Equation converges to $\bar{\mathbf{P}}$ for all $\mathbf{P}_0\geq 0$}.
+\end{itemize}
+
+In the equation for the state:
+\[\mathbf{x}(t+1)=\mathbf{Fx}(t)+\mathbf{Gu}(t)+\mathbf{v}_1(t) \qquad \mathbf{v}_1(t)\sim WN(0,V_1)\]
+to introduce another noise source, we require a special type of controllability from the noise $\mathbf{v}_1(t)$ since it serves as an input for the states $\mathbf{x}(t)$. 
+We can reformulate the same equation as:
+\[\mathbf{x}(t+1)=\mathbf{Fx}(t)+\mathbf{Gu}(t)+\boldsymbol{\Gamma}_\omega(t) \qquad \omega\sim WN(0,\mathbf{I})\]
+Here, $\boldsymbol{\Gamma}_\omega(t)$ represents the factorization of $V_1$, such that $\boldsymbol{\Gamma\Gamma}^T=V_1$.
+
+We can assert that the state is controllable from noise $\mathbf{v}_1(t)$ if and only if the controllability matrix is full rank:
+\[\text{rank}(\mathbf{R})=\text{rank}\left(\begin{bmatrix} \boldsymbol{\Gamma} & F\boldsymbol{\Gamma} & \mathbf{F}^2\boldsymbol{\Gamma} & \cdots & \mathbf{F}^n\boldsymbol{\Gamma} \end{bmatrix} \right)=n\]
+Here, $n$ denotes the dimension of the state space.
+\begin{theorem}[Second asymptotic Kalman Filter]
+    If $V_{12}=0$, the pair $(\mathbf{F},\mathbf{H})$ is fully observable, and the pair $(\mathbf{F},\boldsymbol{\Gamma})$ is fully controllable, then:
+\end{theorem}  
+\begin{itemize}
+    \item \textit{Algebraic Riccati Equation possesses one and only one solution $\bar{\mathbf{P}}\geq 0$}. 
+    \item \textit{The corresponding $\bar{\mathbf{K}}$ ensures the asymptotic stability of the Kalman Filter}. 
+    \item \textit{Differential Riccati Equation converges to $\bar{\mathbf{P}}$ for all $\mathbf{P}_0\geq 0$}. 
+\end{itemize}
+These theorems are particularly valuable in practice as they allow us to bypass the intricate convergence analysis of the Differential Riccati Equation for systems with $n>1$.

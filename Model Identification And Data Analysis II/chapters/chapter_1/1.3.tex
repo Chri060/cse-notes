@@ -1,0 +1,27 @@
+\section{Constructive noise-free 4SID algorithm}
+
+The 4SID algorithm is utilized to derive an estimated state-space model based on a truncated impulse response acquired from system measurements.
+
+Beginning with a finite dataset of impulse response values, the algorithm operates under the assumption of a flawless, noise-free measurement of the impulse response. 
+While the initial discussion centers on the algorithm's application to impulse response experiments for clarity, it's important to note its versatility to accommodate various types of input excitations.
+
+The algorithm operates as follows:
+\begin{enumerate}
+    \item Construct the Hankel matrix in increasing order and assess its rank. 
+        Cease increasing the order when encountering the first matrix lacking full rank.
+        At this point,  the rank value denotes the system's order, denoted as $n$.
+    \item Select $\mathbf{H}_{n+1}$ (the first non-full rank matrix with a rank of $n$). 
+        Decompose $\mathbf{H}_{n+1}$  into two rectangular matrices of dimensions $(n+1) \times n$ and $n \times (n+1)$.
+        The former matrix becomes $\mathbf{O}_{n+1}$, while the latter becomes $\mathbf{R}_{n+1}$, signifying the extended $(n+1)$ observability and reachability matrices, respectively.
+    \item Derive $\hat{\mathbf{H}}$, $\hat{\mathbf{G}}$, and $\hat{\mathbf{F}}$ from $\mathbf{O}_{n+1}$ and $\mathbf{R}_{n+1}$: 
+        \[\mathbf{O}_{n+1}=\begin{bmatrix} \mathbf{H} \\ \mathbf{HF} \\ \mathbf{HF}^2 \\ \vdots \\ \mathbf{HF}^{n-1} \\ \mathbf{HF}^{n} \end{bmatrix} \qquad \mathbf{R}_{n+1}=\begin{bmatrix} \mathbf{G} \\ \mathbf{FG} \\ \mathbf{F}^2\mathbf{G} \\ \vdots \\ \mathbf{F}^{n-1}\mathbf{G} \\ \mathbf{F}^{n}\mathbf{G} \end{bmatrix}\]
+        Form this, $\mathbf{H}$ and $\mathbf{G}$ are directly extracted as the first row of $\mathbf{O}_{n+1}$ and the first column of $\mathbf{R}_{n+1}$, respectively. 
+        To estimate $\hat{\mathbf{F}}$, focus on $\mathbf{O}_{n+1}$ (the same can be applied to $\mathbf{R}_{n+1}$). 
+        Formulate two submatrices, $\mathbf{O}_1$ and $\mathbf{O}_2$, by excluding the last and first rows of $\mathbf{O}$, respectively:
+        \[\mathbf{O}_{1}=\begin{bmatrix} \mathbf{H} \\ \mathbf{HF} \\ \mathbf{HF}^2 \\ \vdots \\ \mathbf{HF}^{n-1} \end{bmatrix} \qquad \mathbf{O}_{2}=\begin{bmatrix} \mathbf{HF} \\ \mathbf{HF}^2 \\ \vdots \\ \mathbf{HF}^{n-1} \\ \mathbf{HF}^{n} \end{bmatrix}\]
+        Notably, $\mathbf{O}_1$ and $\mathbf{O}_2$ are square matrices owing to the shift invariance property.
+        Consequently, $\mathbf{O}_2=\mathbf{O}_1\cdot \mathbf{F}$.
+        As $\mathbf{O}_1$ is square and invertible (due to the full rank of $\mathbf{H}_n$ with a row removed), $\hat{\mathbf{F}}$ is determined as:
+        \[\hat{\mathbf{F}}=(\mathbf{O}_1)^{-1}(\mathbf{O}_2)\]
+\end{enumerate}
+It's important to note that we've derived the state space matrices by commencing with a noise-free impulse response experiment.
