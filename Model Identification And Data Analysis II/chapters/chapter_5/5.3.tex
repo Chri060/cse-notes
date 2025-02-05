@@ -1,26 +1,53 @@
-\section{Input-output systems estimation methods summary}
+\section{Offline grey box identification}
 
-Consider a generic nonlinear dynamic system:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{images/sys1.png}
-\end{figure}
-In general, the process involves:
+In many applications, we have some prior knowledge of a possible model for a system, denoted as $\mathcal{M}(\boldsymbol{\theta})$, which depends on certain physical parameters. 
+The model, expressed in state-space representation, is given by:
+\[\mathcal{M}(\boldsymbol{\theta}):\begin{cases}
+    \dot{\mathbf{x}}(t)=\mathbf{F}(\boldsymbol{\theta})\mathbf{x}(t)+\mathbf{G}(\boldsymbol{\theta})\mathbf{u}(t) \\
+    \mathbf{y}(t)=\mathbf{H}(\boldsymbol{\theta})\mathbf{x}(t)+\mathbf{D}(\boldsymbol{\theta})\mathbf{u}(t)
+\end{cases}\]
+Our objective is to estimate the parameters $\boldsymbol{\theta}$ based on input and output data.
+
+\subsection{Simulation Error Method}
+One approach to parameter estimation is the Simulation Error Method. 
+We select an initial estimate $\bar{\boldsymbol{\theta}}$ and simulate the model $\mathcal{M}\left(\bar{\boldsymbol{\theta}}\right)$. 
+The accuracy of the estimate is assessed by comparing the simulated output $\mathbf{y}_{\text{sim}}(t)$ with the actual measured output $\mathbf{y}(t)$. 
+This comparison is formulated mathematically as:
+\[\boldsymbol{\theta}_{\text{opt}}=\argmin_{\boldsymbol{\theta}\in\boldsymbol{\Theta}}\text{RMS}(\mathbf{y}(t)-\mathbf{y}_{\text{sim}}(t,\boldsymbol{\theta}))=\argmin_{\boldsymbol{\theta}\in\boldsymbol{\Theta}}\text{RMS}(\mathbf{y}(t)-\mathcal{M}(\boldsymbol{\theta})u(t))\]
+Here, $\text{RMS}(\cdot)$ denotes the Root Mean Square error, and $\boldsymbol{\Theta}$ represents the set of all possible parameter values.
+Since the optimization problem is generally non-convex and does not have a linear relationship with the parameter vector $\boldsymbol{\theta}$, finding an optimal solution requires specialized numerical techniques.
+
+\paragraph*{Data quality}
+For effective identification, the dataset $\mathcal{D}$ must be informative. 
+The length of the dataset is less important than ensuring it excites all relevant system dynamics. 
+The quality of the identified parameters directly depends on the richness of the data.
+
+Common signal types used for system identification include:
 \begin{itemize}
-    \item Collecting a dataset for training or model construction, which can be a natural collection or a designed experiment.
-    \item Choosing a model framework (linear static, linear dynamic, nonlinear static, nonlinear dynamic) and the type of modeling (gray-box or black-box).
-    \item Selecting an estimation approach (constructive 4SID, parametric optimization, and filtering).
+    \item \textit{Sine sweep or multiple sine experiments}: these signals cover a broad frequency range, providing useful information in both time and frequency domains. 
+        The frequency sweeps from an initial value $f_{\text{init}}$ to a final value $f_{\text{end}}$.
+    \item \textit{Pseudo-Random Binary Signal}: a two-level signal that switches values at random intervals.
+        PRBS provides a nearly flat frequency spectrum up to a specified cutoff frequency $f_{\text{max}}$, making it effective for system identification.
 \end{itemize}
+Typically, the optimization process is performed on at least one dataset and validated on a separate dataset to ensure robustness. 
+The validation must be conducted in both the time and frequency domains.
 
-\subsection{Black-box versus white-box}
-The choice between black-box and white-box modeling depends on the context.
+\paragraph*{Optimization}
+The grey-box identification optimization follows these steps:
+\begin{algorithm}
+    \caption{Grey-box optimization}
+    \begin{algorithmic}[1]
+        \State $\mathbf{F}=f(\boldsymbol{\theta})$
+        \State $\mathbf{G}=f(\boldsymbol{\theta})$
+        \State $\mathbf{H}=f(\boldsymbol{\theta})$
+        \State $\mathbf{D}=f(\boldsymbol{\theta})$
+        \State $\text{sys}=\text{ss}(\textbf{F},\textbf{G},\textbf{H},\textbf{D})$ \Comment{Construct the state-space system}
+        \State $\text{y}\_\text{sim}=\text{lsim}(\text{sys}, \text{id\_data.u}, \text{id\_data.time})$ \Comment{Simulate system response}
+        \State $\text{cost} = \text{rms}(\text{id}\_\text{data}\_\text{y}-\text{y}\_\text{sim})$ \Comment{Compute cost function}
+        \State \Return $\text{cost}$
+    \end{algorithmic}
+\end{algorithm}
 
-The black-box approach, utilized by Machine Learning, leverages all available data. 
-It offers versatility, flexibility, and fully exploits data without requiring specific knowledge of the system's physics. 
-However, incorporating physical knowledge can enhance the effectiveness of the black-box approach.
-The popularity of black-box modeling has surged due to:
-\begin{itemize}
-    \item The ease of collecting and storing digital data.
-    \item Advances in computational power.
-\end{itemize}
-However, white-box modeling remains valuable for system designers, providing deeper insights into the system's inner workings.
+\noindent Since the optimization is non-convex, it requires specialized solvers.
+We implement the optimization in MATLAB, using two different solvers: \texttt{fmincon} (a gradient-based solver) and \texttt{particleswarm} (a global optimization method). 
+These solvers offer different advantages, and their performance is compared to determine the best approach for parameter estimation.

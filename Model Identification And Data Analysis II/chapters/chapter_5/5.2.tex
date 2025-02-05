@@ -1,43 +1,43 @@
-\section{Gray box system identification}
+\section{Online gray box system identification}
 
 In gray-box system identification, we begin with a model constructed using a white-box approach, which relies on first principles:
 \[\mathcal{S}:\begin{cases}
-    x(t+1)=f(x(t),u(t),\vartheta)+v_1(t) \\
-    y(t)=h(x(t),\vartheta)+v_2(t)
+    \mathbf{x}(t+1)=f(\mathbf{x}(t),\mathbf{u}(t),{\boldsymbol{\theta}})+\mathbf{v}_1(t) \\
+    \mathbf{y}(t)=h(\mathbf{x}(t),{\boldsymbol{\theta}})+\mathbf{v}_2(t)
 \end{cases}\]
-Here, $f(\cdot)$ and $h(\cdot)$ represent known equations with some parameters unknown, denoted by the parameter vector $\vartheta$ having physical significance.
+Here, $f(\cdot)$ and $h(\cdot)$ represent known equations with some parameters unknown, denoted by the parameter vector ${\boldsymbol{\theta}}$ having physical significance.
 
-The objective is to estimate the parameters of $\vartheta$ from a given dataset. This task can be tackled using the Kalman Filter technique along with a state extension trick. 
+The objective is to estimate the parameters of ${\boldsymbol{\theta}}$ from a given dataset. This task can be tackled using the Kalman Filter technique along with a state extension trick. 
 Consequently, the new system becomes:
 \[\mathcal{S}:\begin{cases}
-    x(t+1)=f(x(t),u(t),\vartheta(t))+v_1(t) \\
-    \vartheta(t+1)=\vartheta(t)+v_{\vartheta}(t) \\
-    y(t)=h(x(t),\vartheta(t))+v_2(t)
+    \mathbf{x}(t+1)=f(\mathbf{x}(t),\mathbf{u}(t),{\boldsymbol{\theta}}(t))+\mathbf{v}_1(t) \\
+    {\boldsymbol{\theta}}(t+1)={\boldsymbol{\theta}}(t)+\mathbf{v}_{{\boldsymbol{\theta}}}(t) \\
+    \mathbf{y}(t)=h(\mathbf{x}(t),{\boldsymbol{\theta}}(t))+\mathbf{v}_2(t)
 \end{cases}\]
-The extended state vector $x_E(t)$ comprises the previous states along with the value of $\vartheta(t)$: 
-\[x_E(t)=\begin{bmatrix} x(t) \\ \vartheta(t) \end{bmatrix}\]
+The extended state vector $\mathbf{x}_E(t)$ comprises the previous states along with the value of ${\boldsymbol{\theta}}(t)$: 
+\[\mathbf{x}_E(t)=\begin{bmatrix} \mathbf{x}(t) \\ {\boldsymbol{\theta}}(t) \end{bmatrix}\]
 
-\subsection{The new equation} 
-The equation $\vartheta(t+1)=\vartheta(t)+v_{\vartheta}(t)$ is a fictitious equation necessitated by the state extension.
-The fundamental dynamical relationship remains $\vartheta(t+1)=\vartheta(t)$, representing the equation of a constant quantity.
+\subsection{Parameters equation} 
+The equation ${\boldsymbol{\theta}}(t+1)={\boldsymbol{\theta}}(t)+\mathbf{v}_{{\boldsymbol{\theta}}}(t)$ is a fictitious equation necessitated by the state extension.
+The fundamental dynamical relationship remains ${\boldsymbol{\theta}}(t+1)={\boldsymbol{\theta}}(t)$, representing the equation of a constant quantity.
 This is appropriate since our objective is to estimate a constant parameter.
 Notably, this equation represents a trivially unstable system (non-asymptotically stable). 
 However, this instability poses no issue as the Kalman Filter is capable of handling non-asymptotically stable systems.
 
-The inclusion of the noise $v_{\vartheta}(t)$ is crucial; without it, the equation becomes steady-state, and the Kalman Filter does not alter the initial condition.
-By introducing $v_{\vartheta}(t)$, we instruct the Kalman Filter to iteratively converge to the correct value of $\vartheta$, without overly relying on the initial condition.
+The inclusion of the noise $\mathbf{v}_{{\boldsymbol{\theta}}}(t)$ is crucial; without it, the equation becomes steady-state, and the Kalman Filter does not alter the initial condition.
+By introducing $\mathbf{v}_{{\boldsymbol{\theta}}}(t)$, we instruct the Kalman Filter to iteratively converge to the correct value of ${\boldsymbol{\theta}}$, without overly relying on the initial condition.
 
 \paragraph*{Noise definition}
 The primary challenge lies in defining the noise. 
 Typically, the following assumption is made:
-\[v_\vartheta\sim WN(0,V_\vartheta)\]
+\[\mathbf{v}_{\boldsymbol{\theta}}\sim WN(0,\mathbf{V}_{\boldsymbol{\theta}})\]
 This noise is assumed to be independent of other noises.
 
 A common simplifying assumption is often made:
-\[V_{\vartheta}=\begin{bmatrix} \lambda_\vartheta^2 & 0 & 0 & 0 \\ 0 & \lambda_\vartheta^2 & 0 & 0 \\ \vdots &  \vdots & \ddots & \vdots \\ 0 & 0 & 0 & \lambda_\vartheta^2 \end{bmatrix}\]
-In practice, all noise characteristics are condensed into a single parameter $\lambda_\vartheta^2$. 
+\[\mathbf{V}_{{\boldsymbol{\theta}}}=\begin{bmatrix} \lambda_{\boldsymbol{\theta}}^2 & 0 & 0 & 0 \\ 0 & \lambda_{\boldsymbol{\theta}}^2 & 0 & 0 \\ \vdots &  \vdots & \ddots & \vdots \\ 0 & 0 & 0 & \lambda_{\boldsymbol{\theta}}^2 \end{bmatrix}\]
+In practice, all noise characteristics are condensed into a single parameter $\lambda_{\boldsymbol{\theta}}^2$. 
 This parameter is empirically tuned, serving as a tuning parameter.
-A large value of  $\lambda_\vartheta^2$ yields rapid convergence but substantial post-convergence oscillation, while a small value results in slower convergence but minimal post-convergence oscillation.
+A large value of  $\lambda_{\boldsymbol{\theta}}^2$ yields rapid convergence but substantial post-convergence oscillation, while a small value results in slower convergence but minimal post-convergence oscillation.
 
-This approach is particularly useful when $\vartheta$ varies, as the algorithm remains active. 
+This approach is particularly useful when ${\boldsymbol{\theta}}$ varies, as the algorithm remains active. 
 Applying the Kalman Filter to the extended system facilitates simultaneous estimation of the state vector (software sensing) and the unknown parameters (system identification).
