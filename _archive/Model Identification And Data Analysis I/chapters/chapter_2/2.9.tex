@@ -1,0 +1,78 @@
+\section{Processes with non-zero mean}
+
+Consider an ARMA($m,n$) process:
+\[y(t)=a_1y(t-1)+a_2y(t-2)+\dots+a_m y(t-m)+c_0e(t)+c_1e(t-1)+\dots+c_n e(t-n) \]
+Here, $e(t)\sim WN(\mu,\lambda^2)$.
+In operatorial representation, this process can be expressed as:
+\[y(t)=\dfrac{c_0+c_1z^{-1}+\dots+c_n z^{-n}}{1- a_1z^{-1}-a_2z^{-2}-\dots-a_m z^{-m}}e(t)=\dfrac{C(z)}{A(z)}e(t)\]
+
+\paragraph*{Mean value}
+The mean is computed as:
+\begin{align*}
+    m_y=    &= \mathbb{E}\left[y(t)\right]  \\
+            &= \mathbb{E}\left[a_1y(t-1)+\dots+a_m y(t-m)+c_0e(t)+\dots+c_n e(t-n)\right] \\
+            &= a_1\mathbb{E}\left[y(t-1)\right]+\dots+a_m\mathbb{E}\left[y(t-m)\right]+c_0\underbrace{\mathbb{E}\left[e(t)\right]}_{m_e} +\dots+c_n\underbrace{\mathbb{E}\left[e(t-n)\right]}_{m_e} \\
+            &= a_1\mathbb{E}\left[y(t-1)\right]+\dots+a_m\mathbb{E}\left[y(t-m)\right]+\left(c_0 +\dots+c_n\right)m_e 
+\end{align*}
+Assuming that $a_1,a_2,\dots,a_m$ are chosen such that $y(t)$ is a stationary stochastic process with constant mean value, we can rewrite the previous formulation as:
+\[m_y=\left(a_1+a_2+\dots+a_m\right)m_y+\left(c_0 +c_1 +\dots+c_n\right)m_e \rightarrow m_y =\dfrac{c_0 +c_1 +\dots+c_n}{1-a_1-a_2-\dots-a_m}m_e\]
+Note that the transfer function is computed at $z=1$ (the DC gain of $W(z)$), so we have:
+\[m_y=W(1)\mathbb{E}\left[e(t)\right]\]
+
+\paragraph*{Covariance function}
+The covariance with a generic $\tau$ is computed as:
+\[\gamma_y(\tau)  = \mathbb{E}\left[\left(y(t)-m_y\right)\left(y(t-\tau)-m_y\right)\right]\]
+In this case, where $m_y \neq 0$, we have:
+\[\mathbb{E}\left[{e(t)}^2\right]=\mathbb{E}\left[{\left(e(t)-\mu\right)}^2\right]= \lambda^2\]
+and 
+\[\mathbb{E}\left[e(t)e(t-1)\right]=\mathbb{E}\left[\left(e(t)-\mu\right)\left(e(t-1)-\mu\right)\right]= 0\]
+
+Therefore,
+\begin{align*}
+    \lambda^2   &=\mathbb{E}\left[ {\left( e(t)-\mu \right)}^2 \right] \\
+                &=\mathbb{E}\left[ {e(t)}^2\right] +\mathbb{E}\left[\mu^2\right]-\mathbb{E}\left[2\mu e(t)  \right] \\
+                &=\mathbb{E}\left[ {e(t)}^2\right] +\mu^2-2\mu \mathbb{E}\left[e(t)  \right] \\   
+                &=\mathbb{E}\left[ {e(t)}^2\right] +\mu^2-2\mu^2
+\end{align*}
+Hence: 
+\[\mathbb{E}\left[{e(t)}^2\right]=\lambda^2-\mu^2\]
+
+Similarly, we have:
+\[0=\mathbb{E}\left[\left(e(t)-\mu\right)\left(e(t-1)-\mu\right)\right] =\mathbb{E}\left[e(t)e(t-1)\right] -\mu^2\]
+Therefore,
+\[\mathbb{E}\left[e(t)e(t-1)\right]=\mu^2\]
+
+\subsection{Simplification}
+To simplify the computation, we define two new unbiased processes:
+\[\begin{cases}
+    \tilde{y}(t)=y(t)-m_y \\ 
+    \tilde{e}(t)=e(t)-m_e
+\end{cases}\]
+In this case, the expected values become:
+\[\begin{cases}
+    \mathbb{E}\left[\tilde{y}(t)\right]=\mathbb{E}\left[y(t)-m_y\right]=m_y-m_y=0 \\ 
+    \mathbb{E}\left[\tilde{e}(t)\right]=\mathbb{E}\left[e(t)-m_e\right]=m_e-m_e=0
+\end{cases}\]
+
+\begin{proof}
+    We aim to demonstrate the equivalence between the two processes:
+    \begin{align*}
+        \tilde{y}(t)    &= y(t)-m_y \\
+                        &= a_1y(t-1)+\dots+a_m y(t-m)+c_0e(t)+\dots+c_n e(t-n) - m_y \\ 
+                        &= a_1\left(\tilde{y}(t-1)+m_y\right)+\dots+a_m\left(\tilde{y}(t-m)+m_y\right)+c_0\left(\tilde{e}(t)+m_e\right)+\dots - m_y \\ 
+                        &= a_1\tilde{y}(t-1) +\dots +c_0\tilde{e}(t)+\dots -\left(1 - a_1-\dots-a_m\right)m_y+\left(c_0+\dots+c_n\right)m_e   
+    \end{align*}
+    However, we know that:
+    \[m_y =\dfrac{c_0 +c_1 +\dots+c_n}{1-a_1-a_2-\dots-a_m}m_e\]
+    By substitution, we find:
+    \begin{align*}
+        \tilde{y}(t)    &= a_1\tilde{y}(t-1)  +\dots +c_0\tilde{e}(t)+\dots -\left(1 - a_1-\dots-a_m\right)m_y+\left(c_0+\dots+c_n\right)m_e \\ 
+                        &= a_1\tilde{y}(t-1)  +\dots +c_0\tilde{e}(t)+\dots -\left(c_0 +\dots+c_n\right)m_e+\left(c_0+\dots+c_n\right)m_e \\ 
+                        &= a_1\tilde{y}(t-1)  +\dots +c_0\tilde{e}(t)+\dots     
+    \end{align*}
+    Thus, we have shown that the two processes are equivalent.
+\end{proof}
+Ultimately, we arrive at:
+\[ \tilde{y}(t)=a_1\tilde{y}(t-1) +\dots + a_m\tilde{y}(t-m)  +c_0\tilde{e}(t)+c_n\tilde{e}(t-n)+\dots  \qquad \tilde{e}\sim WN(0,\lambda^2)\]
+Subsequently, we can compute the covariance as follows:
+\[\gamma_{\tilde{y}}(\tau)=\mathbb{E}\left[ \tilde{y}(t)\tilde{y}(t-\tau) \right]=\mathbb{E}\left[ \left(y(t)-m_y\right)\left(y(t-\tau)-m_y\right) \right] =\gamma_y(\tau)\]

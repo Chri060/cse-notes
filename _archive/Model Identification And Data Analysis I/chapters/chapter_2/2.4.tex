@@ -1,0 +1,80 @@
+\section{Moving Average process}
+
+Let $e(t)\sim WN(0,\lambda^2)$, and consider the process defined as:
+\[y(t)=c_0e(t)+c_1e(t-1)+c_2e(t-2)+\dots+c_n e(t-n)\]
+The process $y(t)$ is termed a Moving Average process of order $n$, denoted as MA($n$).
+
+\subsection{Mean value}
+We begin by investigating the mean of the considered process:
+\begin{align*}
+    m_y(t)  &=\mathbb{E}\left[y(t)\right] \\
+            &=\mathbb{E}\left[c_0e(t)+c_1e(t-1)+c_2e(t-2)+\dots+c_n e(t-n)\right] \\
+            &=c_0\underbrace{\mathbb{E}\left[e(t)\right]}_0  + c_1\underbrace{\mathbb{E}\left[e(t-1)\right]}_0  + c_2\underbrace{\mathbb{E}\left[e(t-2)\right]}_0  + \dots + c_n\underbrace{\mathbb{E}\left[e(t-n)\right]}_0 \\
+            &=0
+\end{align*}
+Thus, it is constant.
+
+\subsection{Covariance function}
+The covariance must be a function of only $\tau$: 
+\begin{align*}
+    \gamma_y(t,t)   &=\mathbb{E}\left[{\left(y(t)-m(t)\right)}^2\right] \\
+                    &=\mathbb{E}\left[{\left(y(t)\right)}^2\right] \\
+                    &=\mathbb{E}\left[{\left(c_0e(t)+c_1e(t-1)+c_2e(t-2)+\dots+c_n e(t-n)\right)}^2\right] 
+\end{align*}
+Upon computation, we obtain some square terms and some cross terms. 
+However, the cross terms comprise a constant part and the correlation between the  White Noise at two time instants, which is zero. 
+Consequently, the only non-null terms are the squares:
+\begin{align*}
+    \gamma_y(t,t)   &=\mathbb{E}\left[\left(c_0^2{e(t)}^2+c_1^2{e(t-1)}^2+c_2^2{e(t-2)}^2+\dots+c_n^2{e(t-n)}^2\right)\right] \\
+                    &=\mathbb{E}\left[c_0^2{e(t)}^2\right]+\mathbb{E}\left[c_1^2{e(t-1)}^2\right]+\mathbb{E}\left[c_2^2{e(t-2)}^2\right]+\dots+\mathbb{E}\left[c_n^2{e(t-n)}^2\right] \\
+                    &=c_0^2\mathbb{E}\left[{e(t)}^2\right]+c_1^2\mathbb{E}\left[{e(t-1)}^2\right]+c_2^2\mathbb{E}\left[{e(t-2)}^2\right]+\dots+c_n^2\mathbb{E}\left[{e(t-n)}^2\right]
+\end{align*}
+Since $\mathbb{E}\left[{\left(e(t)-\mu\right)}^2\right]=\mathbb{E}\left[{\left(e(t)\right)}^2\right]=\lambda^2$, we have:
+\[\gamma_y(t,t)=\left(c_0^2+c_1^2+c_2^2+\dots+c_n^2\right)\lambda^2\]
+
+If $y(t)$ is an MA($n$) process, it is a stationary stochastic process, and its covariance function is given by:
+\[\gamma_y(\tau)\begin{cases}
+    \left(c_0^2+c_1^2+\dots+c_n^2\right)\lambda^2 \qquad\qquad\quad\:\: \text{if }\tau = 0 \\
+    \left(c_0c_1+c_1c_2+\dots+c_{n-1}c_n\right)\lambda^2 \qquad \text{if }\tau = \pm 1 \\
+    \left(c_0c_2+c_1c_3+\dots+c_{n-2}c_n\right)\lambda^2 \qquad \text{if }\tau = \pm 2\\
+    \vdots \\
+    c_0c_n\lambda^2 \qquad\qquad\qquad\qquad\qquad\qquad\: \text{if }\tau = \pm n\\
+    0 \qquad\qquad\qquad\qquad\qquad\qquad\qquad\:\:\: \text{if }\left\lvert \tau\right\rvert >n
+\end{cases}\]
+By combining different samples of $e(t)$, we can create a process with $n$ non-zero components on the positive $\tau$-axis. 
+Importantly, these components do not depend on time $t$, ensuring the process remains stationary.
+
+\subsection{Infinite order Moving Average}
+We can extend the concept of MA($n$) processes by considering an infinite order:
+\[y(t)=\sum_{i=0}^{+\infty}c_i e(t-i)\qquad e(t)\sim WN(0,\lambda^2)\]
+To define this process, we need to assume that:
+\[\sum_{i=0}^{+\infty}c_i^2<+\infty\]
+
+\paragraph*{Mean value}
+We can calculate the mean as follows:
+\[m_y(t)=\mathbb{E}\left[y(t)\right]=\mathbb{E}\left[\sum_{i=0}^{+\infty}c_i e(t-i)\right]=\sum_{i=0}^{+\infty}c_i\underbrace{\mathbb{E}\left[e(t-i)\right]}_0=0\]
+
+\paragraph*{Variance function}
+We can compute the variance $\gamma_y(t,t)$ as follows:
+\begin{align*}
+    \gamma_y(t,t)   &=\mathbb{E}\left[{\left(y(t)-m_y(t)\right)}^2\right] \\
+                    &=\mathbb{E}\left[{\left(y(t)\right)}^2\right] \\
+                    &=\mathbb{E}\left[\left(\sum_{i=0}^{+\infty}c_i e(t-i)\right)\left(\sum_{j=0}^{+\infty}c_j e(t-j)\right)\right] \\
+                    &=\mathbb{E}\left[\sum_{i=0,j=0}^{+\infty}c_i c_j e(t-i)e(t-j)\right] \\
+                    &=\sum_{i=0,j=0}^{+\infty}c_i c_j\mathbb{E}\left[e(t-i)e(t-j)\right] \\  
+                    &=\sum_{i=0}^{+\infty}c_i^2\lambda^2
+\end{align*}
+Similarly, we can compute the covariance $\gamma_y(t,t-\tau)$ as:
+\begin{align*}
+    \gamma_y(t,t-\tau)  &=\mathbb{E}\left[\left(y(t)-m_y(t)\right)\left(y(t-\tau)-m_y(-\tau)\right)\right] \\
+                        &=\mathbb{E}\left[y(t)y(t-\tau)\right] \\
+                        &=\mathbb{E}\left[\left(\sum_{i=0}^{+\infty}c_i e(t-i)\right)\left(\sum_{j=0}^{+\infty}c_j e(t-j-\tau)\right)\right] \\
+                        &=\mathbb{E}\left[\sum_{i=0,j=0}^{+\infty}c_i c_j e(t-i)e(t-j-\tau)\right] \\
+                        &=\sum_{i=0,j=0}^{+\infty}c_i c_j\mathbb{E}\left[e(t-i)e(t-j-\tau)\right] \\  
+                        &=\sum_{i=0}^{+\infty}c_i c_{i+\tau}\lambda^2
+\end{align*}
+
+Given that the mean value is constant, and the covariance does not vary with time $t$, we conclude that the Moving Average process with an infinite order is also a stationary stochastic process.
+
+This model can be applied to represent almost all stationary processes, with a few exceptions.
+However, such models pose challenges due to their infinite degrees of freedom and the computation of covariances, which necessitates handling infinite series.
