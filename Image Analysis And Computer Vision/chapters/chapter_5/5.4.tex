@@ -1,0 +1,38 @@
+\section{Calibrated camera rectification}
+
+Consider a calibrated camera capturing a single image of a planar object. 
+If two vanishing points can be identified, the line at infinity $\mathbf{l}_{\infty}^{\prime}$ passing through them can also be determined.
+The plane-to-image homography $\mathbf{H}$ describes the mapping of points from the plane to the image. 
+The inverse transformation maps image points back onto the plane:
+\[\mathbf{H}_R=\mathbf{H}^{-1}\]
+Given that the homography is expressed as:
+\[\mathbf{H}=\mathbf{K}\begin{bmatrix}\mathbf{r}_{\boldsymbol{\pi}\mathbf{1}} & \mathbf{r}_{\boldsymbol{\pi}\mathbf{2}} & \mathbf{o}_{\boldsymbol{\pi}}\end{bmatrix}\]
+It follows that $\mathbf{H}$ depends on both the camera calibration matrix $\mathbf{K}$ and the relative pose of the plane $\boldsymbol{\pi}$ with respect to the camera.
+
+Since the only constrained element is the normal direction $\mathbf{n}_{\boldsymbol{\pi}}$ of the plane, we are free to define a convenient reference frame on $\boldsymbol{\pi}$.
+The normal is given by:
+\[\mathbf{n}_{\boldsymbol{\pi}}=\mathbf{K}^T\mathbf{l}_{\infty}^{\prime}\]
+To simplify rectification, we choose $\mathbf{r}_{\boldsymbol{\pi}\mathbf{1}}$ and $\mathbf{r}_{\boldsymbol{\pi}\mathbf{2}}$ as orthogonal vectors, both perpendicular to $\mathbf{n}_{\boldsymbol{\pi}}$ and normalize them.
+Setting $\mathbf{o}_{\boldsymbol{\pi}}=\mathbf{n}_{\boldsymbol{\pi}}$, the rectifying homography becomes:
+\[\mathbf{H}_R=\mathbf{R}_{\boldsymbol{\pi}}^T\mathbf{K}^{-1}\]
+
+\subsection{Rectification with unknown planar scene}
+In the case of reconstructing an unknown planar scene from two calibrated images, image-to-image homographies are utilized. 
+The following constraints hold:
+\[\begin{cases}\mathbf{I}^{\prime T}\boldsymbol{\omega}\mathbf{I}^{\prime}=\mathbf{0} \\ \mathbf{I}^{\prime T}\mathbf{H}^{\prime T}\boldsymbol{\omega}\mathbf{H}^{\prime}\mathbf{I}^{\prime}=\mathbf{0}\end{cases}\]
+Here, $\boldsymbol{\omega}$ is known, and the unknowns are the complex coordinates $\mathbf{I}^{\prime}$. 
+At least two images are required, as each equation provides two constraints (real and imaginary parts).
+Geometrically, this corresponds to the intersection of two conics, resulting in two pairs of imaged circular points. 
+The selection of the correct solution can be guided by reprojection error minimization or an additional third image.
+
+\noindent The steps for the rectification are:
+\begin{enumerate}
+    \item Extract the image of circular points and compute the conic dual to the circular points:
+        \[\mathbf{C}_{\infty}^{\ast\prime}=\mathbf{I}^{\prime}\mathbf{J}^{\prime T}+\mathbf{J}^{\prime}\mathbf{I}^{\prime T}\]
+    \item Apply Singular Value Decomposition to $\mathbf{C}_{\infty}^{\ast\prime}$:
+        \[\text{SVD}(\mathbf{C}_{\infty}^{\ast\prime})=\mathbf{U}\begin{bmatrix} a & 0 & 0 \\ 0 & b & 0 \\ 0 & 0 & 0 \end{bmatrix}\mathbf{U}^T\]
+    \item Construct the rectification matrix from SVD output $\mathbf{U}$:
+        \[\mathbf{H}_{SR}=\begin{bmatrix} \frac{1}{\sqrt{a}} & 0 & 0 \\ 0 & \frac{1}{\sqrt{b}} & 0 \\ 0 & 0 & 1 \end{bmatrix}\mathbf{U}^T\]
+    \item Apply the rectification transformation to the image: 
+        \[\mathbf{M}_S = \mathbf{H}_{SR} \cdot \text{image}\]
+\end{enumerate}
