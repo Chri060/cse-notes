@@ -1,0 +1,110 @@
+\section{Text analysis}
+
+Before applying any NLP algorithm, it is important to standardize and clean the text. 
+Preprocessing ensures consistency and improves the accuracy of downstream tasks.
+Common cleaning steps include:
+\begin{itemize}
+    \item Before tokenization, removing non-content information such as HTML tags, converting text to lowercase, and eliminating punctuation.
+    \item After tokenization, filtering out stopwords (extremely common words that add little meaning), removing low-frequency words, and applying stemming or lemmatization to reduce vocabulary size. 
+\end{itemize}
+
+\subsection{Text mining}
+Text may need to be extracted from various sources, each with its own challenges: 
+\begin{itemize}
+    \item Textual documents, HTML pages, and emails often contain formatting elements that should be removed. 
+    \item Binary documents are more complex to process. 
+        In PDFs, text may be laid out in multiple columns, requiring careful reconstruction. 
+        If all PDFs follow a consistent format, handwritten rules may suffice; otherwise, Machine Learning techniques may be needed.
+    \item Scanned documents require Optical Character Recognition, which relies on Deep Learning to convert images to text. 
+        However, Optical Character Recognition is not flawless and can introduce recognition errors.
+\end{itemize}
+
+\subsection{Characters encoding}
+When storing and processing text, different character encodings must be considered.
+
+ASCII encoding represents only 128 characters, mapping letters and symbols to numerical values. 
+While sufficient for basic English text, it cannot handle many linguistic symbols.
+
+UTF-8 encoding supports over 149,000 Unicode characters, covering more than 160 languages. 
+Unicode is essential for processing texts that use non-Latin scripts. 
+It also preserves special characters, such as diacritical marks in Italian and English.
+
+\subsection{Tokens}
+In many languages, spaces serve as natural boundaries between words, making tokenization straightforward. 
+However, if spaces weren't available, we would need alternative methods to segment text. 
+Since they do exist in most languages, they are commonly used for tokenization.
+
+Despite this, tokenizing text isn't always simple. 
+Hyphenated words can pose challenges, as some languages construct long, compound words that may need to be split for effective processing. 
+In other cases, meaningful units are spread across multiple non-hyphenated words in multiword expressions. 
+Additionally, punctuation cannot always be blindly removed, as certain clitics (words that don't stand alone) depend on them for meaning.
+
+For languages like Chinese, tokenization is even more complex since it does not use spaces to separate words.
+Deciding what constitutes a word is non-trivial, and a common approach is to treat each character as an individual token.
+Other languages, such as Thai and Japanese, require sophisticated segmentation techniques beyond simple whitespace or character-based tokenization.
+
+A more advanced method, sub-word tokenization, can be useful for handling long words and capturing morphological patterns within a language. 
+Instead of relying purely on spaces, data-driven techniques determine the optimal way to segment text. 
+This is particularly important for Machine Learning applications, where models benefit from explicit knowledge of a language's structure. 
+A common approach is byte-pair encoding.
+
+In some tasks, text must be split into sentences rather than just words. 
+Sentence segmentation often relies on punctuation marks, which typically indicate sentence boundaries.
+However, periods are more ambiguous, as they also appear in abbreviations, numbers, and initials. 
+A common approach is to tokenize first and then use rule-based or Machine Learning models to classify periods as either part of a word or a sentence boundary.
+
+\subsection{Text normalization}
+In many applications, such as web search, all letters are converted to lowercase. 
+This process significantly reduces the vocabulary size and improves recall by ensuring that variations in capitalization do not affect search results. 
+Since users often type queries in lowercase, this normalization helps retrieve more relevant documents.
+
+For classification tasks, removing case can simplify the learning process by reducing the number of distinct tokens. 
+With fewer parameters to learn, models can generalize better even with limited training data.
+
+However, case folding is not always beneficial. 
+In some contexts, capitalization carries meaningful information.
+Machine translation and information extraction may also benefit from preserving case distinctions.
+
+Beyond case folding, word normalization involves converting words or tokens into a standard format, ensuring consistency in text processing. 
+This step is particularly crucial in applications like web search, where variations in word forms should not hinder retrieval performance. 
+
+\paragraph*{Stopwords}
+Stopwords are the most frequently occurring words in a language. 
+They typically have extremely high document frequency scores but carry little discriminative power, meaning they do not contribute much to understanding the main topic of a text.
+Removing stopwords can sometimes improve the performance of retrieval and classification models, mainly by reducing computational and memory overhead. 
+Eliminating common words can also speed up indexing by preventing the creation of excessively long posting lists.
+However, stopword removal is not always beneficial. 
+In some cases, stopwords play an important role in understanding meaning and context.
+
+\subsection{Morphology and lemmatization}
+Morphology, a fundamental concept in linguistics, refers to the analysis of word structure.
+At its core, it involves breaking words down into their smallest meaningful units, known as morphemes.
+\begin{definition}[\textit{Morpheme}]
+    A morpheme is the smallest linguistic unit that carries meaning.
+\end{definition}
+\noindent A morpheme can be a root (base form) or an affix, which can appear as a prefix, infix, or suffix.
+\begin{definition}[\textit{Lexeme}]
+    A lexeme is unit of lexical meaning that exists regardless of inflectional endings or variations.
+\end{definition}
+\begin{definition}[\textit{Lemma}]
+    A lemma is the canonical form of a lexeme.
+\end{definition}
+\begin{definition}[\textit{Lexicon}]
+   A lexicon is the set of all lexemes in a language.
+\end{definition}
+\begin{definition}[\textit{Word}]
+    A word is an inflected form of a lexeme.
+\end{definition}
+
+\paragraph*{Lemmatization}
+Lemmatization is the process of reducing words to their lemma, or base form. 
+By normalizing words to a common root, it helps deal with complex morphology, which is essential for many languages with rich inflectional systems.
+
+\paragraph*{Stemming}
+Stemming is a simpler approach that removes affixes based on predefined rules, often without considering the actual meaning or structure of the word. 
+Unlike lemmatization, stemming does not require a lexicon.
+
+Porter stemming algorithm (1980) is one of the most widely used stemming algorithms, it applies a set of rewriting rules to reduce words to their stems. 
+While computationally efficient, stemming can introduce errors such as collisions (different words may be reduced to the same stem) and over-stemming (some words may be shortened excessively, losing meaning).
+
+While stemming is computationally cheaper, lemmatization provides more linguistically accurate results, making it preferable for tasks requiring precise language understanding.
