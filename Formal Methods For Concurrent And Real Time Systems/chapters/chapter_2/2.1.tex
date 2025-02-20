@@ -1,0 +1,46 @@
+\section{Introduction}
+
+A transition system is a fundamental model used to describe the behavior of dynamic systems. 
+It consists of a set of states and transitions, which define how the system evolves in response to actions.
+\begin{definition}
+    A transition system is a tuple $\left\langle S, \text{Act}, \rightarrow, I,\text{AP}, L\right\rangle$, where:
+    \begin{itemize}
+        \item $S$ is a set of states.
+        \item $\text{Act}$ is a set of input symbols (also called actions).
+        \item $\rightarrow \subseteq \times \text{Act}\times S$ is a transition relation defining how states evolve.
+        \item $I \subseteq S$ is a nonempty set of initial states.
+        \item $\text{AP}$ is a set of atomic propositions, used to label states.
+        \item $L: S \rightarrow 2^{\text{AP}}$ is a labeling function, assigning each state a subset of atomic propositions.
+    \end{itemize}
+\end{definition}
+The sets of states, actions, and atomic propositions may be finite or infinite. 
+Additionally, a special action, denoted $\tau$, represents an internal (silent) event.
+
+\subsection{Determinism}
+A transition system can be either deterministic or nondeterministic, depending on how transitions are defined.
+\begin{definition}[\textit{Deterministic transition system}]
+    A transition system is deterministic if, for every state $s$ and input $i$, there is at most one state $s^\prime$ such that $\left\langle s, i, s^\prime\right\rangle \in\rightarrow$. 
+\end{definition}
+If multiple successor states exist for the same state and input, the system is nondeterministic.
+
+\subsection{Run}
+The execution of a transition system is captured through runs, which describe sequences of state transitions in response to input actions.
+\begin{definition}[\textit{Run}]
+    Given a (possibly infinite) sequence $\sigma = i_1i_2i_3, \dots$ of input symbols from $\text{Act}$, a run $r_\sigma$ of a transition system $\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$ is a sequence: 
+    \[s_0i_1s_1i_2s_2\dots\] 
+    Here, $s_0\in I$, each $s_j \in S$ and for all $k \geq 0$, the transition $\left\langle s_k, i_{k+1}, s_{k+1}\right\rangle\in\rightarrow$ holds.
+\end{definition}
+\noindent If the transition system is nondeterministic, multiple runs may exist for the same input sequence.
+\begin{definition}[\textit{Reachable state}]
+    A state $s^\prime$ is reachable if there exists an input sequence $\sigma = i_1i_2\dots i_k$ and a finite run $r_\sigma = s_0 i_1 s_1 i_2 s_2 \dots i_k s^\prime$.
+\end{definition}
+
+\noindent A key aspect of transition systems is the trace, which records the sequence of state labels encountered during a run.
+\begin{definition}
+    Given a run $r_\sigma$, its trace is the sequence of atomic proposition subsets:
+    \[L(s_0) L(s_1) L(s_2)\dots\]
+\end{definition}
+\noindent Sometimes, the term trace is also used to refer to the input sequence $\sigma$ that generates a run $r_\sigma$, in which case it is called an input trace.
+
+A run may be finite if it reaches a terminal state (a state with no outgoing transitions).
+However, many systems, particularly reactive systems, are modeled using infinite runs, as they are designed to operate indefinitely rather than terminate.
