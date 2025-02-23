@@ -1,0 +1,48 @@
+\section{Nano Promela}
+
+Transition Systems provide a mathematical foundation for modeling and verifying reactive systems. 
+However, in practice, we need more user-friendly specification languages.
+
+One such language is Promela, designed for the SPIN model checker to describe transition systems. 
+We will focus on a simplified subset of Promela called Nano-Promela.
+
+\subsection{Syntax}
+A Promela program consists of a set of interleaving processes that communicate either synchronously or through finite FIFO channels.
+The syntax of statements in Nano-Promela is as follows:
+\begin{verbatim}
+stmt ::= skip | x := expr | c?x | c!expr |
+         stmt1; stmt2 | atomic{assignments} |
+         if :: g1 => stmt1 ... :: gn => stmtn fi |
+         do :: g1 => stmt1 ... :: gn => stmtn do
+\end{verbatim}
+Here: 
+\begin{itemize}
+    \item \texttt{expr} represents an expression.
+    \item \texttt{skip} represents a process that terminates in one step, without modifying any variables or channels.
+    \item \texttt{stmt1; stmt2} denotes sequential execution: \texttt{stmt1} runs first, followed by \texttt{stmt2}.
+    \item \texttt{atomic{assignments}} defines an atomic region, meaning \texttt{stmt} executes as a single, indivisible step. 
+        This prevents interference from other processes and helps reduce verification complexity by avoiding unnecessary interleavings.
+\end{itemize}
+
+\paragraph*{Conditional statement}
+The conditional statement is expressed as: 
+\begin{verbatim}
+if :: g1 => stmt1 ... :: gn => stmtn fi
+\end{verbatim}
+This represents a nondeterministic choice between multiple guarded statements.
+The system chooses one of the \texttt{stmti} for which \texttt{gi} holds in the current state.
+The selection and the first execution step are performed atomically, meaning no other process can interfere.
+If none of the guards hold, the process blocks.
+However, other processes may unblock it by changing shared variables, causing one of the guards to become true.
+
+\paragraph*{Loop}
+The loop is expressed as: 
+\begin{verbatim}
+do :: g1 => stmt1 ... :: gn => stmtn do
+\end{verbatim}
+This represents a loop that repeatedly executes a nondeterministic choice among the guarded statements.
+If a guard \texttt{gi} holds, the corresponding \texttt{stmti} executes.
+Unlike \texttt{if-fi}, \texttt{do-od} does not block when all guards fail; instead, the loop simply terminates.
+
+\subsection{Features}
+Nano-Promela can be formally defined using Program Graphs, but full Promela provides additional powerful features, including: more complex atomic regions (beyond just assignments), a rrays and richer data types, and dynamic process creation.
