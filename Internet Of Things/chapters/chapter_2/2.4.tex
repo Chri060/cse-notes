@@ -30,20 +30,20 @@ In MQTT, each client establishes a single connection to the MQTT broker for comm
 This connection supports push capabilities, making it efficient for IoT applications where devices need to receive updates in real-time.
 
 MQTT can also work even through firewalls or NAT devices, thanks to its use of TCP and well-defined protocols, allowing messages to pass with minimal restrictions.
-When a client connects to the broker, it sends a CONNECT message with several fields:
+When a client connects to the broker, it sends a connect message with several fields:
 \begin{itemize}
     \item \texttt{clientId}: a unique identifier for the client.
     \item \texttt{cleanSession}: if true, the broker will not retain any session state when the client disconnects. 
         If false, it retains the session state for later reconnect.
     \item \texttt{username} (optional): a username for authentication.
     \item \texttt{password} (optional): a password for authentication
-    \item \texttt{lastWillTopic} (optional): a topic where the broker will send a Last Will message if the client unexpectedly disconnects.
+    \item \texttt{lastWillTopic} (optional): a topic where the broker will send a last will message if the client unexpectedly disconnects.
     \item \texttt{lastWillQoS} (optional): the QoS level for the last will message.
     \item \texttt{lastWillMessage} (optional): the actual last will message.
     \item \texttt{keepAlive}: the time (in seconds) the client allows the connection to remain idle before the broker expects a message to maintain the session.
 \end{itemize}
 \noindent
-When the broker responds to the CONNECT message, it sends a CONNACK message with the following fields:
+When the broker responds to the connect message, it sends a connack message with the following fields:
 \begin{itemize}
     \item \texttt{sessionPresent}: indicates whether the client's session was retained.
     \item \texttt{returnCode}: the status code that tells the client the result of the connection attempt:
@@ -79,10 +79,11 @@ The publish message includes the following fields:
 
     \item \textit{2} (exactly once): ensures that the message is delivered exactly once, and involves a 4-step handshake:
         \begin{enumerate}
-            \item \textit{Publish reception} (broker): the MQTT broker processes the packet and sends a PUBREC message back. The packetId is stored locally to avoid duplicate processing.
-            \item \textit{Pubrec reception} (client): upon receiving the PUBREC message, the client discards the original packet and sends a PUBREL message to the broker.
-            \item \textit{Pubrel reception} (broker): the broker clears any current state and sends a PUBCOMP message to confirm the delivery of the message.
-            \item \textit{Pubcomp reception} (broker): the client receives the PUBCOMP message.
+            \item \textit{Publish reception} (broker): the MQTT broker processes the packet and sends a pubrec message back. 
+                The packetId is stored locally to avoid duplicate processing.
+            \item \textit{Pubrec reception} (client): upon receiving the pubrec message, the client discards the original packet and sends a pubrel message to the broker.
+            \item \textit{Pubrel reception} (broker): the broker clears any current state and sends a pubcomp message to confirm the delivery of the message.
+            \item \textit{Pubcomp reception} (broker): the client receives the pubcomp message.
         \end{enumerate}
 \end{itemize}
 
@@ -152,7 +153,7 @@ Here's how it works:
 \end{itemize}
 
 \subsection{MQTT for Sensor Networks}
-MQTT-SN (MQTT for Sensor Networks) is a variation of the standard MQTT protocol designed to better suit the constraints of sensor networks and environments with limited resources. 
+MQTT for Sensor Networks is a variation of the standard MQTT protocol designed to better suit the constraints of sensor networks and environments with limited resources. 
 Here are the main differences compared to the standard MQTT protocol:
 \begin{itemize}
     \item \textit{Extended architecture}: MQTT-SN introduces the concept of Gateways and Forwarders. 
