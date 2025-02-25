@@ -1,0 +1,111 @@
+\section{Linear classifier}
+
+In text classification, where documents are often represented with a bag-of-words model, linear classifiers are commonly used due to the high dimensionality of the feature space.
+Linear models work by assigning a parameter to each word in the vocabulary, making them highly interpretable.
+This approach allows us to understand which terms have the greatest impact on the prediction and the extent of their influence.
+
+\paragraph*{Decision boundaries}
+Linear classifiers create decision boundaries that are represented as hyperplanes in an $n$-dimensional vector space.
+The model includes a weight vector, which is the same size as the feature vector, along with a bias term.
+
+\subsection{Multinomial Naïve Bayes}
+Naïve Bayes is one of the oldest and simplest text classification algorithms.
+It is called naïve because it makes a simplifying assumption: that word occurrences are statistically independent of each other given the class label.
+
+This assumption means that each word contributes independent information about the class.
+It simplifies the process of calculating the model's parameters, making the algorithm easy to implement.
+However, in practice, this assumption doesn't hold since words are often correlated with each other. 
+Despite this, Naïve Bayes still produces effective predictions, though the assumption can make the model seem overly confident in certain cases.
+
+If all instances of a word appear exclusively in one class, we can have issues with probability estimation.
+To avoid this problem, we use smoothing, which consists in adding a small pseudo-count $\alpha$ for each feature.
+This helps prevent zero probabilities for unseen word-class combinations. 
+The value of $\alpha$ can be selected to optimize performance or set to a default value (if $\alpha = 1$, this technique is known as Laplace smoothing).
+
+\paragraph*{Independence assumption}
+The independence assumption is not necessarily a big problem. 
+the assumption simplifies both model estimation and prediction, which, in turn, makes the process more efficient. 
+While this theoretically reduces the model's accuracy slightly, in practice, Naïve Bayes often works well for some tasks.
+
+\renewcommand*{\arraystretch}{1.5}
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|c|p{10cm}|}
+    \hline
+    \multicolumn{2}{|c|}{\textbf{Advantages}} \\ \hline
+    Speed                       & Naïve Bayes is incredibly fast to train, requiring just one pass over the training data. No need for complex optimization routines like gradient descent   \\ \hline
+    Stability                   & It's a reliable model even with limited data. If the conditional independence assumption holds, it provides the best possible performance  \\ \hline
+    \multicolumn{2}{|c|}{\textbf{Disadvantages}} \\ \hline
+    Scalability                 & Naïve Bayes doesn't perform as well on large datasets compared to other classifiers because redundant features are counted multiple times \\ \hline
+    Calibrating probabilities   & The predicted probabilities are not well calibrated, meaning they can be less reliable for certain applications \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+
+\subsection{Logistic regression}
+The farther a point is from the decision boundary, the more confident we are in our prediction.
+The signed distance of a point from the hyperplane is given by:
+\[s(\textbf{x}) = \boldsymbol{\theta}\textbf{x}-b\]
+\noindent To convert the signed distance $s(x)$ into a probability, we need a function that maps the entire range of real values $\mathbb{R}$ to the probability range $[0,1]$. 
+The standard function used for this purpose is the logistic curve (also known as the sigmoid function):
+\[\sigma(s)=\dfrac{1}{1+e^{-s}}\]
+This function outputs a probability of $0.5$ at the decision boundary ($s=0$).
+The slope, or the speed of probability change, depends on the magnitude of $\boldsymbol{\theta}$
+
+\renewcommand*{\arraystretch}{1.5}
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|c|p{10cm}|}
+    \hline
+    \multicolumn{2}{|c|}{\textbf{Advantages}} \\ \hline
+    Well-calibrated probabilities   & Logistic regression produces well-calibrated probability estimates  \\ \hline
+    Scalability                     & It can be trained efficiently and scales well to large numbers of features \\ \hline
+    Interpretability                & The model is explainable, since each feature's contribution to the final score is additive \\ \hline
+    \multicolumn{2}{|c|}{\textbf{Disadvantages}} \\ \hline
+    Linearity assumption            & Logistic regression assumes feature values are linearly related to log-odds \\ \hline
+    Sensitivity to assumptions      & If the linearity assumption is strongly violated, the model will perform poorly \\ \hline
+    \end{tabular}
+\end{table}
+\renewcommand*{\arraystretch}{1}
+
+\subsection{Support Vector Machines}
+Imagine a dataset where two classes are clearly separable into two groups.
+There are many possible positions for the linear decision boundary.
+We want to select a boundary that generalizes well to new, unseen data, avoiding overfitting.
+
+The SVM approach finds the maximum margin hyperplane that separates the two classes. 
+The margin, denoted $\gamma$, is the distance from the hyperplane to the closest points on either side.
+These closest points are called support vectors.
+Support vectors are the points that lie exactly on the margin.
+They prevent the margin from expanding and thus help define the location of the boundary.
+In a $d$-dimensional space, you need at least $d+1$ support vectors to define the hyperplane.
+
+In contrast to logistic regression, where the position of the hyperplane depends on the entire dataset, the SVM hyperplane's position is determined only by the closest points.
+The convex hull of the data points helps define the boundary, and moving internal points does not affect the hyperplane.
+
+\paragraph*{Hard margin SVM}
+A basic SVM is also a linear classifier that finds a hyperplane in feature space that best separates the two classes. 
+While logistic regression and Naïve Bayes also find linear decision boundaries, the difference lies in the loss function used to find the model parameters:
+\begin{itemize}
+    \item Logistic regression uses negative log-likelihood, which penalizes points based on the probability of incorrect predictions, even if they are correctly classified.
+    \item SVM uses hinge loss, which only penalizes points that are on the wrong side of the margin (or very close to it).
+\end{itemize}
+\noindent Mathematically, the loss function for SVM is:
+\[\mathcal{L}(\mathbf{w})=\sum_iw_i^2+\sum_j\varepsilon_j\]
+\noindent Here, $\varepsilon_j$ is the error for a prediction $(x_j,y_j)$, and it is defined as:
+\[\varepsilon_j =\max(0,1-y_j\mathbf{w}x_j)\] 
+\noindent This formulation reflects the hinge loss, which penalizes misclassified points or those close to the margin.
+
+\paragraph*{Soft margin SVM}
+In the case of non linearly separable dataset, SVMs still aim to separate the classes by penalizing points that are on the wrong side of the margin, based on their distance from the hyperplane.
+Support vectors are now the points that are either misclassified or very close to the margin, contributing a non-zero amount to the loss function.
+
+\noindent The objective function to minimize remains similar to the hard margin case, but it includes a penalty for misclassified points:
+\[\mathcal{L}(\mathbf{w})=\dfrac{1}{2}\sum_iw_i^2+C\sum_j\varepsilon_j\]
+Here, $\varepsilon_j$ is the distance from the $j$-th support vector to the margin and $C$ is a hyperparameter that controls the trade-off between minimizing the margin size and penalizing errors.
+A large $C$ places more emphasis on minimizing misclassifications, while a smaller $C$ allows a larger margin even at the cost of more misclassifications.
+
+\paragraph*{SVM and logistic regression}
+Both SVM and logistic regression are linear classifiers, but they differ in the loss functions they use:
+Logistic regression uses log-likelihood, which penalizes points based on the probability of incorrect predictions, including those correctly classified.
+SVM uses hinge loss, which only penalizes points on the wrong side of the margin or those very close to it.

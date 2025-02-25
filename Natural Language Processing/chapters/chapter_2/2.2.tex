@@ -1,0 +1,95 @@
+\section{Text classification}
+
+Text classification involves training a model to assign documents to specific categories. 
+It's a widely-used task across various fields. Classification problems can take different forms, including:
+\begin{itemize}
+    \item \textit{Binary classification}: where the output is either one of two possible labels.
+    \item \textit{Ordinal regression}: where the output is an ordered value, representing categories with a natural rank.
+    \item \textit{Multi-class classification}: where the output corresponds to one category from a set of predefined options.
+    \item \textit{Multi-label classification}: where the output is a set of categories that can overlap or be chosen simultaneously.
+\end{itemize}
+
+\subsection{Feature extraction}
+Text can be arbitrarily long, so it can't be fed directly into a model.
+To make text usable for machine learning, we first need to extract meaningful features.
+Features are the useful signals in the document that help predict its category. 
+To do this, we need to convert text data into a vector of features that a classifier can process.
+
+When training data is limited (with only a few documents available), some approaches to feature extraction include:
+\begin{itemize}
+    \item \textit{Syntax-based features}: such as the number of capitalized words.
+    \item \textit{Part-of-speech features}: like the count of verbs versus proper nouns.
+    \item \textit{Reading difficulty features}: such as average word or sentence length
+\end{itemize}
+\noindent However, the most common and effective features to extract are the words themselves. 
+The vocabulary of the document provides significant signals.
+The frequency of word occurrences offers additional context.
+
+One popular method is the Bag-of-Words (BoW) model.
+This model represents documents as vectors of word counts.
+It results in a sparse representation (long vectors with many zero entries).
+
+\paragraph*{One-hot encoding}
+One-hot encoding could be an option to create fixed-dimensional feature vectors. 
+However, there are practical limitations: represents each word as a binary feature, creating a vector where each dimension corresponds to a word in the vocabulary.
+To solve this, we often sum the one-hot encodings. 
+This reduces the number of features to the size of the vocabulary.
+While this discards word order, it retains the critical information about the vocabulary and word occurrences.
+
+\subsection{Word frequencies}
+In text data, certain statistical laws describe how term frequencies behave across documents and collections:
+\begin{itemize}
+    \item \textit{Heap's law}: this law states that the vocabulary size grows with the square root of the document or collection length:
+        \[V(l)\propto l^{\beta}\]
+        Here, $\beta \approx 0.5$. 
+        This means the number of unique words in a document or collection increases slowly as the length of the document or the size of the collection grows.
+    \item \textit{Zipf's law}: this law describes the frequency of a token being inversely proportional to its rank:
+        \[\text{ctf}_t\propto\dfrac{1}{\text{rank}(t)^s}\]
+        Here, $s\approx 1$. 
+        In simple terms, a small number of words (the most frequent ones) appear very often, while a large number of words appear very rarely. 
+\end{itemize}
+\noindent Heap's Law is derived from Zipf's Law and can be understood through models like random typing, showing how the vocabulary of a document or collection grows more slowly compared to its length.
+
+\paragraph*{Bag of Words}
+The Bag of Words model represents a document as a collection of its terms, ignoring grammar and word order but keeping track of the frequency of each word. 
+In this model:
+\begin{itemize}
+    \item The vocabulary of a document is much smaller than the vocabulary of the entire collection, so the terms in the document generally give a good representation of its content.
+    \item The BoW representation typically includes the count of occurrences of each term, although a binary representation (indicating presence or absence of words) can also be used with minimal loss of information.
+\end{itemize}
+\noindent However, the BoW model has limitations. 
+It produces a sparse representation of the text, meaning most of the values in the vector are zero.
+The model completely ignores word order, which means it cannot capture the sequence or context in which words appear.
+
+To improve this, we can extend BoW to include $n$-grams, which capture sequences of words. 
+This can enhance performance, but it significantly increases the number of features, requiring more data to avoid overfitting.
+
+\subsection{Preprocessing}
+In natural language processing, preprocessing is a critical step to prepare the text data for machine learning. 
+Common preprocessing tasks include tokenization, spelling correction, and other forms of cleaning the text.
+
+\paragraph*{Tokenization}
+The default tokenizer in the scikit-learn toolkit for machine learning in Python is simple and efficient. 
+However, for more complex tokenization, the NLTK (Natural Language Toolkit) offers a tokenizer that uses advanced regular expressions to identify different types of tokens, such as words, numbers, punctuation.
+
+\paragraph*{Spelling correction}
+When dealing with text data, misspellings can often occur, especially with user-generated content. 
+Correcting these misspellings can improve model performance. One way to approach spelling correction is by using a probabilistic model.
+
+If we had an enormous corpus of misspellings and their correct versions, we could estimate the probability of a misspelling being corrected in a certain way by using string edit distance, which measures how much one string differs from another.
+The edit distance counts the minimum number of operations (insertions, deletions, substitutions, or transpositions) needed to convert one string into another.
+
+To apply this to spelling correction, we use Bayes' Rule to reverse the conditional probability:
+\begin{itemize}
+    \item The likelihood of a misspelling being corrected to a particular word can be computed using the edit distance between the misspelled word and the candidate correction.
+    \item The prior $\Pr(\text{correct})$ represents the popularity or frequency of the word in a large corpus. 
+        This can be estimated by counting how often the candidate correction appears in a corpus.
+        \item The likelihood $\Pr(\text{observed}\mid\text{correct})$ represents the probability of observing the misspelled word given the correct word.
+\end{itemize}
+In practical terms, the prior shows how often a word appears in a large corpus, while the likelihood shows how likely it is that the observed misspelling corresponds to a particular correction, based on string edit distance.
+Since the denominator in Bayes' Rule is the same for all candidate corrections, we can ignore it during the calculation and normalize probabilities later.
+
+To improve spelling correction, we can incorporate contextual information.
+This can be done by considering bigrams (pairs of consecutive words) instead of just individual words (unigrams).
+By calculating the bigram probabilities $\Pr(\text{bigram})$, the model can use both the misspelled word and the previous word in the sentence as features.
+This approach turns the spelling correction process into a Naïve Bayes model with two features: the misspelled word and the previous word in the sentence.

@@ -1,0 +1,46 @@
+\section{Model Evaluation}
+
+When evaluating a classification model, a common starting point is the confusion matrix, which summarizes the true positives (TP), true negatives (TN), false positives (FP), and false negatives (FN). 
+Several metrics are derived from the confusion matrix to assess the performance of a model.
+
+\paragraph*{Accuracy}
+Accuracy is the proportion of correct predictions, and it can be calculated as:
+\[\text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}\]
+
+\paragraph*{Precision}
+Precision measures the proportion of positive predictions that were actually correct. 
+It is defined as:
+\[\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}\]
+A high precision indicates that when the model predicts positive, it is likely to be correct.
+
+\paragraph*{Recall}
+Recall, also known as sensitivity or true positive rate, measures the proportion of actual positives that were correctly identified by the model. 
+It is calculated as:
+\[\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}\]
+High recall means the model is good at identifying positive instances, though it might also include more false positives.
+
+\paragraph*{F-measure}
+The F1 score combines precision and recall into a single metric by taking the harmonic mean of the two:
+\[\text{F1} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}\]
+The F1 score is particularly useful when you need a balance between precision and recall, especially when the class distribution is imbalanced.
+
+\paragraph*{Area under the ROC curve}
+The Area under the ROC Curve (AuC) is another important metric, often used when dealing with different thresholds for making predictions. 
+It measures the area under the Receiver Operating Characteristic (ROC) curve, which plots the true positive rate against the false positive rate at various thresholds. 
+A higher area under the curve indicates better model performance, as it signifies that the model is better at distinguishing between classes regardless of the threshold.
+
+\subsection{Multi-class classifiers}
+When working with multi-class classifiers, the confusion matrix expands to an $n \times n$ matrix, where $n$ is the number of classes. 
+In this case, precision and recall are calculated for each class, treating each class as the positive class in a one-vs-all fashion.
+
+For a given class $i$, precision is the ratio of true positives for that class to the sum of true positives and false positives.
+Similarly, recall for class $i$ is the ratio of true positives for that class to the sum of true positives and false negatives.
+
+To combine the precision and recall across all classes, two methods are commonly used:
+\begin{itemize}
+    \item \textit{Macro-average}: takes the average of the precision and recall across all classes, treating each class equally, regardless of how many instances belong to that class. 
+        This method gives equal importance to all classes, which can be useful when the classes are imbalanced.
+    \item \textit{Micro-average}: aggregates the true positives, false positives, and false negatives across all classes before calculating precision and recall. 
+        This method gives more weight to classes with more data points. 
+        The micro-average is useful when the number of data points varies significantly between classes.
+\end{itemize}
