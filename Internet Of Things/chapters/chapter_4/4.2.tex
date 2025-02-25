@@ -1,0 +1,124 @@
+\section{Zigbee}
+
+Zigbee is a widely used wireless communication technology designed for low-power, low-data-rate applications. 
+Its main features include:
+\begin{itemize}
+    \item \textit{Low-cost hardware and software}: devices typically cost around \$2, making Zigbee an affordable option.
+    \item \textit{Short transmission range}: around 10 meters, which is suitable for local communication.
+    \item \textit{Low latency}: ensures quick response times.
+    \item \textit{High energy efficiency}: optimized for battery-powered devices, making it ideal for IoT applications.
+\end{itemize}
+
+\paragraph*{History}
+In the mid-1990s, IoT solutions were highly fragmented, with numerous proprietary protocols leading to major compatibility and interoperability challenges. 
+This also drove up costs, making large-scale adoption difficult.
+To address this, IEEE launched Working Group 4 in 2001 to develop a standardized reference technology. 
+This effort resulted in the IEEE 802.15.4 standard, which was officially published in March 2003.
+
+Zigbee communication stack is composed as follows.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/zig.png}
+    \caption{Zigbee communication stack}
+\end{figure}
+
+\paragraph*{Devices}
+Zigbee networks consist of different types of devices, each playing a specific role:
+\begin{itemize}
+    \item \textit{Full function device}: can send beacons to manage network communication, communicate with other FFDs, route network frames, and act as a PAN coordinator. 
+        Typically powered by an external power supply.
+    \item \textit{Reduced function device}: cannot route frames or communicate with other RFDs.
+        Communicates only with an FFD.
+        Designed for low-power, battery-operated applications.
+    \item \textit{PAN coordinator}: handles device association and de-association.
+\end{itemize}
+
+\paragraph*{Network topologies}
+Zigbee networks support three different topologies, each suited for specific use cases:
+\begin{itemize}
+    \item \textit{Star topology}: all devices connect to a central coordinator.
+        Simple, but limited in scalability.
+        Common in home automation and industrial monitoring.
+    \item \textit{Mesh topology}: devices communicate with multiple neighboring nodes.
+        Highly reliable and scalable, as data can take multiple paths.
+        Used in large-scale IoT deployments.
+    \item \textit{Cluster-tree topology}: an hybrid between star and mesh.
+        Devices are organized in clusters, with a coordinator managing each cluster.
+        Efficient for applications requiring structured hierarchies, such as industrial automation.
+\end{itemize}
+
+\subsection{Physical layer}
+The physical layer (PHY) of Zigbee, based on IEEE 802.15.4, is responsible for managing radio communication and ensuring reliable data transmission. 
+Its main functions include:
+\begin{itemize}
+    \item \textit{Radio transceiver control}: activates and deactivates the radio module as needed.
+    \item \textit{Energy Detection}: measures signal strength within the current channel, useful for scanning and channel selection.
+    \item \textit{Link Quality Indicator}: evaluates the quality of received packets.
+    \item \textit{Clear Channel Assessment}: determines if a channel is free before transmitting, enabling Carrier Sense Multiple Access with Collision Avoidance.
+    \item \textit{Channel frequency selection}: supports multiple frequency bands to reduce interference.
+    \item \textit{Data transmission and reception}: handles the actual exchange of data between devices
+\end{itemize}
+\noindent Zigbee operates across multiple frequency bands, offering flexibility based on regional regulations and application requirements: 868 MHz, 915 MHz, and 2.4 GHz. 
+
+\paragraph*{Packet}
+The physical layer defines the structure of transmitted data packets, ensuring synchronization and proper interpretation of information. 
+The key components of a PDU (Packet Data Unit) are:
+\begin{itemize}
+    \item \textit{Preamble}: helps receivers synchronize with the incoming signal.
+    \item \textit{Start frame delimiter} (SFD): marks the beginning of a valid frame.
+    \item \textit{Frame length}: specifies the size of the PHY payload (in octets).
+        For MAC data frames, the payload length ranges between 9 and 127 octets.
+\end{itemize}
+
+\subsection{Medium Access Control layer}
+The MAC sublayer in IEEE 802.15.4 plays a crucial role in managing communication between devices in a Zigbee network. 
+It provides key functionalities such as:
+\begin{itemize}
+    \item \textit{Beacon management}: synchronizes devices and schedules transmissions.
+    \item \textit{Channel access management}: determines how devices share the communication medium.
+    \item \textit{Guaranteed Time Slot management}: allocates dedicated transmission slots for time-sensitive data.
+    \item \textit{Frame validation}: ensures data integrity and discards invalid frames.
+    \item \textit{Acknowledged frame delivery}: confirms successful message reception.
+    \item \textit{Association and disassociation}: manages device connections within a network.
+    \item \textit{Security hooks}: provides mechanisms for implementing encryption and authentication.
+\end{itemize}
+\noindent Zigbee defines two operation modes to balance power efficiency and communication reliability:
+\begin{enumerate}
+    \item \textit{Beacon-enabled mode}: the PAN Coordinator periodically transmits beacons to synchronize devices.
+        Commonly used in star topologies.
+        Uses a combination of slotted CSMA-CA and scheduled transmissions to manage channel access.
+    \item \textit{Non beacon-enabled mode}: devices communicate using unslotted CSMA-CA, meaning no predefined transmission schedule.
+        Provides uncoordinated access, reducing overhead but increasing the risk of collisions.
+\end{enumerate}
+
+\paragraph*{Channel access mechanism}
+Since multiple devices share the same frequency, Zigbee uses a mix of scheduled and random access to prevent interference:
+\begin{itemize}
+    \item \textit{Scheduled Access}: managed by the PAN Coordinator (only in beacon-enabled mode).
+    \item \textit{Random Access}: used for communication between RFDs or between RFD/FFD and the PAN Coordinator.
+        Allowed in both operation modes.
+\end{itemize}
+
+\paragraph*{CSMA-CA}
+Zigbee devices rely on CSMA/CA to reduce transmission conflicts. 
+Each device tracks key variables to manage communication: the number of backoffs, which counts transmission delays; the contention window, controlling how long the channel must remain clear before transmission; and the backoff exponent, determining the wait time before attempting access.
+The CSMA/CA process begins with the transmitting node waiting for a random backoff period. 
+If the channel remains clear for the required CW duration, the device proceeds with transmission and awaits an acknowledgment. 
+However, if the channel is busy, the node increases both BE and NB, repeating the process until either a successful transmission occurs or the retry limit is reached, at which point the packet is discarded.
+Additional factors influence this process. 
+All transmissions, including ACKs, must complete within the Contention Access Period. 
+While slotted CSMA/CA requires synchronization, unslotted CSMA/CA operates without it. 
+Certain packets, such as beacons and ACKs, bypass CSMA entirely and transmit immediately. 
+If a collision occurs—evident when no ACK is received—the device restarts the procedure.
+
+\paragraph*{Network formation}
+To join a network, Zigbee devices scan for available PANs. 
+Active scanning, used by full-function devices, involves sending a beacon request, prompting nearby PAN coordinators to respond with beacons. 
+After scanning, the device selects a PAN ID and joins. 
+Passive scanning, available to both FFDs and reduced-function devices, operates similarly but without actively requesting beacons.
+Instead, the device listens for beacon transmissions from coordinators.
+
+\paragraph*{Extensions}
+Enhancements to the IEEE 802.15.4 standard have expanded Zigbee's capabilities for specialized applications.
+IEEE 802.15.4e introduces slotted channel access for improved efficiency. 
+IEEE 802.15.4g targets smart utility applications, such as smart meters, while IEEE 802.15.4k optimizes communication for critical infrastructure monitoring, including power grids and industrial control systems.
