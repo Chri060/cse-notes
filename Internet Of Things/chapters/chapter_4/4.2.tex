@@ -122,3 +122,95 @@ Instead, the device listens for beacon transmissions from coordinators.
 Enhancements to the IEEE 802.15.4 standard have expanded Zigbee's capabilities for specialized applications.
 IEEE 802.15.4e introduces slotted channel access for improved efficiency. 
 IEEE 802.15.4g targets smart utility applications, such as smart meters, while IEEE 802.15.4k optimizes communication for critical infrastructure monitoring, including power grids and industrial control systems.
+
+\subsection{Network layer}
+The network layer provides the following key functionalities:
+\begin{itemize}
+    \item \textit{Configuring a new device}: this involves setting up the device and configuring the stack to operate as required.
+    \item \textit{Starting a network}: establishing a new network from scratch.
+    \item \textit{Joining, rejoining, and leaving a network}: devices can join, rejoin, or leave a network. ZigBee coordinators or routers can also request devices to leave the network.
+    \item \textit{Addressing}: ZigBee coordinators and routers have the responsibility of assigning unique addresses to devices joining the network.
+    \item \textit{Neighbor discovery}: the ability to discover and report information about the device's one-hop neighbors.
+    \item \textit{Route discovery}: the process of finding and recording paths within the network, allowing messages to be routed efficiently.
+    \item \textit{Reception control}: the device can manage when the receiver is activated and for how long, supporting MAC synchronization and direct reception.
+    \item \textit{Routing}: this encompasses various routing mechanisms, such as unicast, broadcast, multicast, and many-to-one, to efficiently exchange data within the network.
+\end{itemize}
+\noindent In ZigBee, there are three types of devices:
+\begin{itemize}
+    \item \textit{ZB coordinator} (FFD): the central coordinator that initiates and manages the network.
+    \item \textit{ZB router} (FFD): routers that relay messages and allow other devices to join the network.
+    \item \textit{ZB end-device} (RFD or FFD): end devices, which may either be reduced-function devices (RFDs) or full-function devices (FFDs).
+\end{itemize}
+\noindent ZigBee routing integrates two primary protocols: ad-hoc on-demand distance vector and cluster tree algorithm. 
+
+\subsubsection{Cluster tree algorithm}
+The Cluster Tree Algorithm defines how a ZigBee network organizes itself into a tree structure for efficient data routing.
+The most important operations are: 
+\begin{itemize}
+    \item \textit{Tree initialization by FFD}: a ZigBee Full-Function Device (FFD) begins the tree formation by scanning available channels and selecting one with minimal interference. 
+        It sets its PAN identifier and assigns itself the network address 0, indicating its role as the coordinator.
+    \item \textit{Association of devices}: other devices can then join the network by associating with the coordinator through standard association procedures. 
+        These devices may include routers (only FFDs) and end-devices.
+    \item \textit{Address assignment}: during the association process, devices are assigned 16-bit short addresses. 
+        The parent device (either the PAN coordinator or a ZB router) assigns address ranges to its child devices. 
+        Each router receives a consecutive block of addresses based on its depth in the tree, while the first address in this block is used as the node's address, and the remaining addresses are available for its child devices.
+        Address assignment follows a hierarchical structure. 
+        The size of the address range $A(d)$ assigned to a router node at depth is calculated using the following formula:
+        \[A(d)=\begin{cases} 1+D_m+R_m\qquad\text{if }d=L_m-1 \\ 1+D_m+R_mA(d+1)\qquad\text{if }0 \leq d <L_m-1 \end{cases}\]
+        For each device, addresses are assigned in a range determined by its depth in the tree. 
+        Devices further from the coordinator receive a larger range of addresses for their child devices.
+    \item \textit{Coordinator constraints}: the ZigBee coordinator also defines key network parameters, such as the maximum number of routers ($R_m$) and end-devices ($D_m$) each router can support, as well as the maximum depth ($L_m$) of the tree.
+\end{itemize}
+
+\paragraph*{Tree routing}
+Routing within a ZigBee network follows the tree structure formed by the coordinator and its child devices. 
+Messages are routed through the tree in the following manner:
+\begin{itemize}
+    \item If the destination address belongs to one of the child end-devices, the message is routed directly to the destination.
+    \item If the destination address corresponds to a child router, the message is sent to that router for further forwarding.
+    \item If the destination address is not found among the children, the message is forwarded to the parent node for further routing.
+\end{itemize}
+This tree-based routing system is simple and works efficiently, although it may not always provide the most optimized routes. 
+It is also quality-agnostic, meaning the routing decisions do not take into account the quality of the link.
+
+\subsubsection{Ad-hoc on demand distance vector}
+In contrast to tree routing, Ad-hoc On-demand Distance Vector (AODV) is a reactive routing protocol used when a device needs to send data to an unknown destination. 
+Here's how AODV works:
+\begin{enumerate}
+    \item \textit{Route request} (RREQ): when a device wants to communicate with a destination, it broadcasts a Route Request (RREQ) message.
+    \item \textit{Flooding}: the RREQ message is flooded across the network, and each node that relays the request stores the address of the node that forwarded it, setting up a reverse path to the source.
+    \item \textit{Route reply} (RREP): when the destination node receives the RREQ, it sends a Route Reply (RREP) message back to the source, traveling along the reverse path set up during the flooding process.
+\end{enumerate}
+\noindent Routing tables are updated as nodes process these RREQ and RREP messages. 
+A node's routing table contains the following entries:
+\begin{itemize}
+    \item \textit{Destination address}: the address of the destination.
+    \item \textit{Next-hop address}: the address of the next hop toward the destination.
+    \item \textit{Entry status}: whether the entry is active, in discovery, or inactive.
+\end{itemize}
+\noindent Additionally, a Routing Discovery Table (RDT) keeps track of RREQ messages, storing information like the source address, the sender's address, and the accumulated path cost.
+
+\paragraph*{Routing cost}
+The cost of a path $P$ is the sum of the individual costs of the links that make up the path. 
+The cost for each link $l$ is determined by factors like the packet reception rate $p_l$ and follows a standard cost function, which suggests a value of 7 for a link with poor reception and a function based on the reception rate for links with better performance: 
+\[C(l)=\begin{cases}
+    7 \\ 
+    \min\left(7,\text{round}\left(\dfrac{1}{p_l^4}\right)\right)
+\end{cases}\]
+
+\paragraph*{Application profiles}
+ZigBee also provides predefined application profiles that ensure interoperability across different devices and manufacturers. 
+These profiles define the following:
+\begin{itemize}
+    \item A common language for data exchange.
+    \item A well-defined set of processing actions for devices.
+    \item Device interoperability across manufacturers.
+    \item Simplicity and reliability for end users.
+\end{itemize}
+\noindent Each profile is made up of:
+\begin{itemize}
+    \item A set of devices needed for the application.
+    \item A set of clusters that implement the required functionality.
+    \item A set of attributes representing device state.
+    \item A set of commands enabling communication between devices.
+\end{itemize}

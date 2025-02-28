@@ -1,0 +1,389 @@
+\section{Bluetooth}
+
+1. Bluetooth is an industrial specification for
+WPANs
+2. The WG 802.15.1 adapted the industrial
+specifications of Bluetooth for the levels 1
+and 2
+3. ’96-’97: Ericsson internal project
+4. ’98: Bluetooth SIG created (Ericsson, IBM,
+Intel, Toshiba, Nokia)
+5. ’99: new members join the SIG (3Com,
+Lucent Technologies, Microsoft, Motorola)
+
+
+BluetoothTM
+o Radio technology
+o Low cost
+o Small range (10-20 m)
+o Low complexity
+o Small size
+o ISM 2.4 GHz band
+o Created by an industrial
+consortium
+o Only the first two levels
+have then been
+standardized by IEEE
+802.15.1
+
+\subsection{Physical layer}
+o ISM band at 2.4 GHz
+o 79 (23 in France and Japan) channels
+spaced of 1 MHz (2402-2480 MHz)
+o Modulation G-FSK (1 Mb/s)
+o Device classes
+Frequency Hopping (FH)
+o 1600 hops/s (625 µs per hop)
+o The FH sequence is pseudo random
+and determined by the clock and the
+address of the ‘master’ device that
+regulates the access to the channel
+o The other devices are ‘slaves’ and
+follows the sequence fk defined by the
+master
+It is possible to transmit packet
+with duration of 1, 3 or 5 intervals
+
+\subsection{Piconet}
+The simplest network architecture defined in
+Bluetooth is called piconet
+o The piconet is an ad hoc network composed
+of 2 or more devices
+o A device acts as master and the other as
+slaves
+o Communication can take place only between
+master and slave and not directly between
+slaves
+o Up to 7 slaves can be active in a piconet
+o The others can be in
+n Stand-by (not part of the piconet)
+n Parked (part of the piconet but not active, up to a
+maximum of 256 devices)
+Addresses
+n MAC address of 48 bits
+n AMA (Active Member Address) 3 bits
+n PMA (Parked Member Address) 8 bits
+
+\subsection{Connections}
+Bluetooth considers two types of connections
+o SCO (Synchronous Connection Oriented)
+n Fixed rate bi-directional connection (circuit)
+n FEC for improving quality
+n Rate of 64 Kbit/s
+o ACL (Asynchronous ConnectionLess)
+n Packet switched connection shared between
+master and active slaves based on a polling access
+scheme
+n Several options for packet formats and physical
+layer codes (1, 3, 5 slots)
+n Rate up to 433.9 Kbit/s symmetric (using 5-slot
+packets in both directions) and 723.2/57.6 Kbit/s
+asymmetric (using 5-slot packets in one direction and 1-slot packets in the other)
+
+\subsection{Architecture}
+o Original protocol
+architecture not
+compliant with IEEE
+802 structure
+o Later adapted by
+IEEE for 802.15.1
+specifications
+o RF + Baseband
+equivalent to PHY +
+MAC
+o Control plane for the
+network and
+RF connections creation
+
+\subsection{Packet format}
+BT packet includes three parts:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/blue.png}
+    \caption{Packet format}
+\end{figure}
+n The access code used for the synchronization
+and the piconet identification
+n The header used for the Link Control (LC) which
+includes also the retransmission scheme
+n The payload whose format depends on the type
+of connection and the type of packet (number of
+slots, PHY protection, etc.)
+Access code:
+n There are three types of access code
+n Channel Access Code (CAC): It defines the piconet,
+the synchronization word is derived from the MAC
+address of the master
+n Device Access Code (DAC): it is used to address a
+specific device during the page procedure, it also
+derives from the device MAC address
+n Inquiry Access Code (IAC): it is used to discover all
+the device in range during the inquiry procedure
+Header:
+n Active Member Address (AMA)
+n Type of packet: there are 16 types of packets
+which differs based on length, type of physical
+layer protection, and connection
+n Flow: flow control
+n ARQ: retransmission
+n SQN: sequence number
+n HEC: checksum
+states
+o Stand-by: the devices is not active and the
+radio is off
+o Connection: the device is connected with
+other devices. This state includes other
+sub-states
+o Inquiry: the device is looking for other devices in range
+o Inquiry Scan: the device is listening for inquiry requests during small time intervals
+(low duty cycle).
+Page: the device is trying to create a piconet
+connecting to another specific device with
+known address
+o Page Scan: the device is listening to the
+channel for page requests for small internal of
+time
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/blue1.png}
+    \caption{Link controller states}
+\end{figure}
+
+\subsection{Page procedure}
+o If a device wants to connect to another
+device of which it knows the address, it runs
+the page procedure
+o From the address, it calculate the Device
+Access Code (DAC)
+o A stand-by device enters periodically into a page scan mode e starts listening for its DAC
+on the channels
+o Due to ISM band usage rule, the page
+procedure cannot be executed on a fixed
+channel
+o The device in page scan mode follows a
+pseudo random sequence on 32 channels
+(frequencies)
+In order to limit the energy consumption, the
+page scan is executed for 10 ms on a channel
+and then the device enters sleep mode for a
+period of the order of few seconds (from
+1.28 to 3.85 s)
+o At each new scan period, a new channel is
+selected according to the pseudo random
+sequence
+o The device in page can calculate the sequence
+but it usually does not know the phase (clock)
+o Therefore, it transmits the DAC sequentially on
+all channels
+In 10 ms the device in page can transmit on 16 out of 32 channels
+o The transmission on the 16 channels is repeated
+until a reply is received
+o If after a sleep period no reply is received, the
+other 16 channels are used for the sequential
+transmissions
+The reply is actually the transmission of the DAC
+itself
+o In most of the cases the connection is established
+within 2 sleep periods
+o A third packet is sent by the device in page
+o It is the FHS packet which includes all the
+information on the device, including the clock
+o The connection is now active
+o The device that was paging takes the role of
+master and the device that was scanning takes
+the role of Slave
+o An AMA is assigned to the Slave
+
+\subsection{Inquiry}
+The inquiry procedure is used to discover
+other devices in range
+o It is very similar to the page procedure, but
+the access code used is a universal one
+named Inquiry Access Code (IAC)
+o Also the inquiry scan sequence is pseudo
+random
+o The reply to a inquiry request is a FHS packet
+o There may be a collision in the reply
+o If after an inquiry, a device goes to page
+mode it can quickly calculate the page scan
+sequence and its phase for all the other
+devices. Therefore the connection delay is
+usually very short
+
+\subsection{Bluetooth low power}
+In the connection state, a slave device can
+enter into low power modes
+o Hold: in this state the slave stops listening to the channel for a period of time negotiated
+with the master (the AMA is kept)
+o Sniff: in this state the slave listens to the
+channel at regular internals (the AMA is
+kept)
+o Park: in this state the AMA is released and a
+PMA is assigned. The slave device listens to
+the channel regularly (very low duty cycle)
+and it comes active again after receiving an
+unpark message from the master
+
+
+
+Protocols: Link Management
+o The link management protocol is in
+charge of connection setup messages,
+security and connection control
+o Creation of ACL and SCO connections
+o Management of security procedures
+o Adding and removal of slaves from a
+piconet
+o LMP messages have priority over all
+the others
+Protocols: L2CAP
+o Logical Link Control and Adaptation Protocol
+(L2CAP)
+o Adaptation functions (segmentation and
+reassembly) and multiplexing
+
+\subsection{Profiles}
+Profiles
+o Basic operation modes characteristic of different
+applications
+o Used to guaranteed interoperability at application
+layer
+
+
+
+
+
+
+\subsection{Bluetooth new versions}
+Bluetooth v2.0
+o v2.0 in 2004, v2.1 in 2007
+o Adaptive Frequency Hopping (AFH) –
+v1.2
+o extended Synchronous Connections
+(eSCO)
+o Multicast/Broadcast
+o Enhanced Data Rate (EDR) – rates up
+to 3 Mb/s using Differential encoded
+Phase Shift Keying (DPSK) with 4 and
+8 symbols (same band)
+
+Bluetooth v3.0
+o v3.0 in 2009
+o Rate up to 24 Mb/s
+o … but using a different MAC/PHY,
+which is actually WiFi
+o BT is basically used only for the
+negotiation of the connection
+parameters among the two devices
+
+Bluetooth v4.0
+o v4.0 in 2010
+o New revised version of
+n Classic BT (Basic Rate, BR)
+n BT high speed (EDR)
+n And new BT low energy (BLE)
+o It’s a new stack that incorporates the work
+of the WiBree working group; New
+commercial name is Bluetooth Smart
+o Low rate (260 kb/s), short range, low
+power for sensor and small devices
+o Potential competitor of ZigBee
+
+
+
+
+
+\section{Bluetooth Low Energy}
+ (BLE)
+o Not replacing, but sitting alongside
+Bluetooth BR/EDR
+o Designed to be energy efficient
+o Tailored to IoT applications
+
+BLE stack
+o “Simpler” than Bluetooth
+
+BLE Physical Layer
+o Same ISM band used in BR/EDR, but:
+n 40 2MHz channels
+o 3 channels for advertisement/broadcast
+o 37 for data transfer via adaptive frequency
+hopping
+o Not compatible with BR/EDR!
+n GFSK modulation
+n Three PHY types:
+o LE 1M (1Mbps), no FEC, mandatory
+o LE 2M (2Mbps), no FEC, optional
+o LE Coded (0.5/0.125Mbps), FEC, optional.
+Used for extending range 2x or 4x
+
+BLE Link Layer
+o Governed by a state machine
+o Duties:
+n Manage packet types
+n Addressing
+o Public / Random
+n Channel management
+o Adaptive Frequency hopping
+n Logical link management
+o LE ACL
+o Packet ordering/ACK through SN/NESN
+
+BLE error control
+o SN = sequence number
+o NESN = next expected sequence
+number
+Retransmissions
+Central/Peripheral nodes
+o Similar concept to master/slave
+o Peripheral nodes transmit
+advertisments periodically (20ms –
+10s)
+o Centrals scan the adv channels for
+advertisements
+n scan window: for how long to scan
+n scan interval: how often to scan
+BLE AFH
+o BLE uses Adaptive Frequency Hopping
+on the 37 data channels
+o Central node selects:
+n Channels to use (avoiding the ones with
+interference). Channel map is shared
+with peripheral node.
+n Hopping algorithm
+o Algorithm #1: sequential selection with a
+fixed hop interval passed during connection
+o Algorithm #2: semi-random sequence
+calculated from address/internal counters
+Advertising types and
+connections
+o Directed/undirected: accepts
+connections only from known
+devices/all
+o Connectable/not-Connectable: allows
+connections or not
+o Scannable/non-Scannable: allows to
+receive Scan requests and reply
+BLE Connections
+o A central can issue a Connection
+Request to a peripheral sending
+connectable advertisements
+o The peripheral replies with a
+Connection Reply. Now the two BLE
+devices are connected and can
+exchange data
+BLE Data exchange
+o Two connected devices (client/server)
+use the Attribute Protocol (ATT)
+o The ATT protocol allows to:
+n Discovery attributes (resources)
+available on the server
+n Read / Write operations on such
+attributes
+
+Bluetooth v5.0
+o Main improvements over BLE
+n 4x range (up to 200m) using lower
+transmission rates (250 or 125 kbps)
+n Max speed 2Mbps
+n Mesh topology

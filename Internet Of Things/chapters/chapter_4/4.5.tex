@@ -1,0 +1,229 @@
+\section{RFID}
+
+A primer on radio frequency identification
+To Enhance the concept of “bar-codes” for faster identification of assets
+(goods, people, animals)
+Ingredients:
+• Transition to electronic bar codes with wireless communication
+capabilities
+• Transition form optical to wireless “readers”
+
+\subsection{History}
+WW2 –
+First passive RFID system:“roll plane” by Lufwaffe
+First active RFID system: “Friend or Foe” systems by RAF
+Theremin Bug (1945)
+H. Stockman Paper (1948) – Communication by means of reflected power
+60s/70s: commercial deployment starts, Electronic Article Surveillance
+(EAS) in retail, LF identification of animals
+First RFID Patent - 1973
+80s: mass deployment starts, first read/write active systems with
+processors
+90s: first passive systems with EEPROM, automatic toll systems
+Auto-ID center founded at MIT – 1999: Standardization effort taken over
+by EPC Global (Electronic Product Code)
+2000: conductive inks, low-power processors
+2004: Walmart use case
+
+\subsection{Building blocks}
+Reader 
+Memory
+Processing Unit
+Control Logic/Collision Arbitration
+Mechanism
+Battery or Power Supply
+Other Interfaces (Ethernet, WiFi)
+
+Tag
+Battery Scavenging circuitry
+(active or passive)
+(E2PROM to store ID)
+(Control Logic/Collision
+Arbitration Mechanism)
+(sensors)
+(processing unit)
+(RF antennas)
+
+Types of Tags by power supply
+Passive
+Operational power scavenged from
+reader radiated power Short range (<1m), Low cost
+Self sustaining
+Semi-passive
+Operational power provided by battery Medium range (tens of meters),
+need battery, avarage cost,
+long life
+ùActive
+Operational power provided by battery -
+transmitter built into tag high range (hundreds of
+meteres), need battery, Limited
+lifetime
+
+Types of Tags by power storage
+1-bit tags: used in EAS systems
+• realized with magnetic material
+• when tag gets close to reader, current variation is
+perceived at the reader
+• multple detection impossible
+Tags with storage space
+• Read only
+• Read/write
+RX/TX/modulation/demodulation circuitry
+Unique Identifier
+
+\subsection{Implementation}
+Tags can be attached to
+anything:
+• pallets or cases of product
+• Vehicles
+• company assets or personnel
+• People or animals
+• Electronic appliances
+The Tags
+10
+Implementation challenges
+Effective Energy Scavenging
+Miniaturization/customization
+Cost
+Reader must deliver enough power from RF field to power the tag
+Reader must discriminate backscatter modulation in presence of carrier at
+same frequency
+High magnitude difference between transmitted and received signals
+Integration with enterprise solutions
+RFID Backend Middleware solutions to:
+• manage high data volume produced by readers
+• filter the data produced by the readers (remove redundancy, eliminate
+unwanted data, etc.)
+• Store the data in a way that is meaningful for the specific application
+• Let different readers be interoperable
+
+\subsection{Performance measures}
+Reading range
+«how far we can read»
+Throughput
+«how fast we can read»
+Robustness
+«how robust the reading process»
+Performance depends on:
+• Carrier frequency
+• Emitted power
+• Environment (propagation conditions)
+• Concurrency (# of tags to be read simultaneously)
+Standard Different standards available in the flields of:
+• animal identification
+• cards and personal identification
+• containers ID
+Standards dedicated to item management application developed by
+ISO/IEC
+GS1 – EPCGlobal initiative, UHF C1 Gen 2 (900MHz) ref standards (ISO
+18000-6)
+
+
+RFID: Physical Communication  Near Field Model (HF) Far Field Model (UHF)
+RFID HF – Inductive coupling
+Inductive Coupling between two circuits (reader and tag)
+Frequency Range 125kHz o 13,56 MHz
+Reading range comparable to coil diameter
+Functioning modes:
+Duplex (concurrent charging and transmission)
+sequential (charging and transmission decoupled)
+
+Tag modulates its resistive load with the info to be sent
+Voltage changes (modulated by the tag information) are triggered at the
+reade
+
+Tag activation voltage (reading range) depends on
+• Size of coil antennas (the larger the better)
+• Tag/reader orientation
+• Tag/reader chip hardware
+In LF/HF magnetic field is scarcely affected by dielectric materials
+RFID HF – Qualitative performance overview
+26
+Limited reading range
+Very sensitive to orientation
+Almost immune to the environment
+Moderate cost
+
+RFID UHF/SHF – Electromagnetic coupling
+Far field operation model
+Energy/power is scavanged by the tag through EM waves emitted by
+reader
+Transmission happens via backscattering by modulating the impedence
+Tens of meters of read range
+Bipolar antennas (few centimeters)
+High reading range
+High bit rate
+High impact of the environment
+
+
+Tag Arbitration Peculiarities
+Multiple Answers: Arbitration Required Similar to classical Access Control but:
+• Fixed unknown population size
+• Tags cannot implement complex protocols (E.g., carrier sense is out)
+• Often reader-driven algorithms
+Collision Arbitration Mechanisms: A Classification
+Vertical Classification
+ALOHA-like access mechanism
+• Slotted ALOHA
+• Dynamic Frame ALOHA
+Tree-based access mechanisms
+• Binary Tree
+Horizontal Classification
+• Centralized/Distributed
+• Type of Channel Feedback (S,C,0)
+The efficiency is commonly defined as the tag population size, N, over the
+length of the arbitration period L(N)
+\[\eta=\dfrac{N}{L_N}\]
+
+The Frame ALOHA Extension of the ALOHA protocol where nodes are allowed to transmit
+once every frame
+Frame composed of r slots
+Every tag chooses a slot in the frame
+If transmission is failed, retry at next frame
+
+Frame ALOHA: Single Frame
+The average throughput is:
+\[E[S]=n\left(1-\dfrac{1}{r}\right)^{n-1}\]
+Thus, the efficiency is:
+\[\eta=\dfrac{E[S]}{r}=\dfrac{n}{r}\left(1-\dfrac{1}{r}\right)^{n-1}\]
+Which is maximum for: r=n
+Frame Aloha: Multiple frames
+The FA efficiency depends on the initial tag population (N), the current
+backlog (n) and the frame size (r).
+Current Frame size r is dynamically set to the current backlog n ->
+Dynamic Frame Alohaefficiency: 
+\[\eta=\dfrac{N}{L_N}\]
+The average tag resolution process can be recursively calculated as:
+\[L_n=r+\sum_{i=0}^{n-1}\Pr(S=i)L_{n-i}\]
+which leads to: 
+\[L_n=\dfrac{r+\sum_{i=0}^{n-1}\Pr(S=i)L_{n-i}}{1-\Pr(S=0)}\]
+Problem
+Initial population N and backlogs n are not known
+Tag arbitration is actually composed of two modules:
+Backlog Estimation Module: to provide and estimate of the backlog nest
+Collision Resolution: run Frame Aloha with r= nest
+Schoute’Estimate
+Assume that any procedure is able to keep the frame size r equal to the
+current backlog n
+Under this assumption, the number of terminals transmitting in a slot is
+approximated by a Poisson process with intensity 1 [terminal/slot]
+The average number of terminals in a collided slot can be consequently
+calculated as: 
+\[H=\dfrac{1-e^{-1}}{1-2e^{-1}}=2.39\]
+The backlog is estimated as:
+nest=round(Hc), being c the number of collided slots
+
+\paragraph*{Binary tree}
+Random Numbers are used to partition the set of colliding tags
+Tags have counters set to 1
+The reader broadcasts
+Trigger command: sent at the beginning and after successful/empty slots
+tags decrease their counter and transmit if counter is 0
+Split commands: sent after collided slots
+tags with counter equal to 0 randomly choose a new counter value in [0,1]
+Tags with counter greater than 0 increase their counter
+Optimizations
+More refined feedbacks can be used to steer the splitting
+Leverage tag population estimates to steer splitting
+In some slots collisions are certain, use Split command other than Trigger
+one

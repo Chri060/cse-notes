@@ -1,0 +1,232 @@
+\section{IP-based networking}
+
+A low-power and lowlatency wireless mesh
+networking protocol built
+using open and proven
+standards.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/lowpan.png}
+    \caption{6LowPAN protocol stack}
+\end{figure}
+
+\subsection{Thread}
+THREAD Devices – types and roles
+Full Thread Device
+n Routing full thread DEVIces
+o Router: Routers also provide joining and security services for devices trying to join
+the network. Routers are not designed to sleep. Routers can downgrade their
+functionality and become REEDs (Router-eligible End Devices).
+o Leader elected role of one Router, which takes certain decisions in the Thread
+network such as allowing REEDs to upgrade to Routers. If the Leader of a Thread
+Network fails, another Router will be dynamically selected to resume the role. All
+Routers have the required Thread Network Data to seamlessly assume this role.
+n Non-routing full thread devices
+o Routing-eligible End Device (REED)
+o Full End Device (FED)
+o Minimal Thread Device
+n Non routing minimal end device
+o Minimal End Device (MED)
+o Sleepy End Device
+o Synchronized Sleepy End Device
+o Bluetooth End Device
+o Boarder Router
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/lowpan1.png}
+    \caption{Thread network structure}
+\end{figure}
+ACKs 
+Slide/Figures Sources
+n IPSO Alliance Webinar “6LowPAN for IP Smart
+Objects”
+n 6LoWPAN: The Wireless Embedded Internet,
+Shelby & Bormann, ISBN: 978-0-470-74799-5,
+(c) 2009 John Wiley & Sons Ltd
+
+\subsection{6LowPAN}
+What is 6LoWPAN?
+An Adaptation Layer to fit IPv6 over
+Low-Power wireless Area Networks
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/lowpan2.png}
+    \caption{6LowPAN architecture}
+\end{figure}
+LoWPANs are stub networks
+o Simple LoWPAN
+n Single Edge Router
+o Extended LoWPAN
+n Multiple Edge Routers with common backbone link
+o Ad-hoc LoWPAN
+n No route outside the LoWPAN
+o Internet Integration issues
+n Maximum transmission unit
+n Application protocols
+n IPv4 interconnectivity
+n Firewalls and NATs
+n Security
+Efficient header compression
+n IPv6 base and extension headers, UDP header
+o Fragmentation
+n 1280 byte IPv6 MTU -> 127 byte 802.15.4
+frames
+Support for e.g. 64-bit and 16-bit 802.15.4
+addressing
+o Useful with low-power link layers such as IEEE
+802.15.4, narrowband ISM and power-line
+communications
+o Network auto-configuration using neighbor
+discovery
+o Unicast, multicast and broadcast support
+n Multicast is compressed and mapped to broadcast
+o Support for IP routing (e.g. IETF RPL)
+o Support for use of link-layer mesh (e.g. 802.15.5)
+IPv6 (RFC 2460) = the next generation Internet Protocol
+n Complete redesign of IP addressing
+n Hierarchical 128-bit address with decoupled host identifier
+n Stateless auto-configuration
+n Simple routing and address management
+o Majority of traffic not yet IPv6 but...
+n Most PC operating systems already have IPv6
+n Governments are starting to require IPv6
+n Most routers already have IPv6 support
+n So the IPv6 transition is coming
+o 1400% annual growth in IPv6 traffic (2009)
+The 6LoWPAN Format
+
+6LoWPAN is an adaptation header format
+n Enables the use of IPv6 over low-power wireless links
+n IPv6 header compression
+n UDP header compression
+o Format initially defined in RFC4944
+o Updated by draft-ietf-6lowpan-hc (work in progress)
+
+\paragraph*{Header compression}
+Stateless compression
+o Flow-independent compression
+o Simple tricks on IPv6/UDP
+header
+n Common values for header
+fields => compact forms
+n Version is always 6
+n Traffic Class and Flow Label
+are zero
+n Payload Length always derived
+from L2 header
+n Source and Destination
+Addresses can be elided (link- local) and/or compressed
+depending on the “context” of
+the transmission
+
+\paragraph*{Addressing}
+IPv6 addresses are compressed in 6LoWPAN
+o Prefix
+n Addresses within 6LoWPAN typically contain common prefix
+n Nodes typically communicate with one or few central devices
+n Establish state (contexts) for such prefixes – only state
+maintenance
+n Support for up to 16 contexts 6LoWPAN compresses IPv6
+addresses by
+o Interface ID
+n Typically derived from L2 addr during autoconfiguration
+n Elide when Interface Identifier can be derived from L2 header
+
+\subsection{Ideal routing protocols for WSN}
+o Shortest-path routes
+o Avoids overlap
+o Minimum energy consumption
+o Needs global topology information
+Algorithm classes
+n Distance-vector
+Links are associated with cost, used to find the shortest
+route. Each router along the path store local next-hop
+information about its route table.
+n Link-state
+Each node acquires complete information about the
+network, typically by flooding. Each node calculated a
+shortest-path tree calculated to each destination.
+o Types of Signaling
+n Proactive
+Routing information acquired before it is needed.
+n Reactive
+Routing information discovered dynamically when needed.
+o Route metrics are an important factor
+
+\paragraph*{6LowPAN}
+Here we consider IP routing (at
+layer 3)
+o Routing in a LoWPAN
+n Single-interface routing
+n Flat address space (exact-match)
+n Stub network (no transit routing)
+Routing Over Low power and Lossy networks (ROLL)
+n Working group at the IETF
+o Standardizing a routing algorithm for embedded
+apps
+o Application specific requirements
+n Home automation
+n Commercial building automation
+n Industrial automation
+n Urban environments
+o Analyzed all existing protocols
+o Solution must work over IPv6 and 6LoWPAN
+o Protocol in-progress called RPL “Ripple”
+n Proactive distance-vector approach
+Requirements/Objectives
+o Unicast/Anycast/Multicast
+o Adaptive Routing
+n Different metrics
+o Constraint-Based Routing
+n Parallel Paths
+o Scalability
+o Goal: RPL builds up a Destination-Oriented
+Directed Acyclic Graph (DODAG)
+o What DODAG depends on the specific
+Objective Function (OF)
+Metric: scalar to capture the link/path
+performance (reliability, interference,
+throughput, etc.)
+o Constraint: criteria to eliminate links from a
+DODAG
+o Routing OF combines metric and constraints
+n Es: “find the path with the maximum reliability
+that does not traverse any non-encrypted link”
+The Most Common Routing Metric
+o Node
+n Residual Energy (node)
+n CPU, Storage, WorkLoad, Battery/Mains
+o Link
+n Throughput (local/global metric)
+n Latency (local/global metric)
+n Reliability (local/global metric)
+o Expected Transmission Count (ETX)
+o Link Quality Level (LQL)
+o Hop Count
+The ETX “The average number of packet
+transmissions to successfully transmit a
+packet”
+
+\paragraph*{RPL Messages}
+
+DODAG Information Object (DIO)
+n Link Local Messages to Advertise/Build Up DODAG
+n Contains all the information to exchange
+metrics/set constraints
+o Destination Advertisement Object (DAO)
+n Used to propagate information on destination
+(prefixes)
+n Support to ptp and ptmp traffic
+o DODAG Information Solicitation (DIS)
+n Used to solicit DIOs
+Multiple Routing OF calls for
+Multiple DODAGs
+The very same network may support different
+applications
+n Es: network with battery- and main-operated
+devices, high and low bandwidth links, and two
+applications (telemetry and alarming)
+n One “time sensitive path” for alarms (low latency,
+high reliability, no constraints on energy)
+n One “non-time-sensitive path” for telemetry
+energy optimized (do not traverse batteryoperated nodes)
