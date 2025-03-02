@@ -1,0 +1,69 @@
+\section{Fairness}
+
+To ensure realistic system behavior, fairness constraints must be introduced. 
+These constraints prevent unrealistic execution patterns by guaranteeing that processes are given a fair chance to execute. 
+Fairness is especially relevant in concurrent systems where multiple processes compete for execution.
+
+Fairness can be classified into three main types:
+\begin{itemize}
+    \item \textit{Unconditional fairness}: every process gets a chance to execute infinitely often, regardless of other conditions.
+    \item \textit{Strong fairness}: if a process is enabled infinitely often, it must eventually execute infinitely often.
+    \item \textit{Weak fairness}: if a process remains continuously enabled from a certain point onward, it must eventually execute infinitely often.
+\end{itemize}
+\noindent These fairness levels follow a logical hierarchy:
+\[\text{unconditional fairness}\implies\text{strong fairness}\implies\text{weak fairness}\]
+
+\begin{definition}[\textit{Fairness constraint}]
+    A fairness constraint defines a set of actions that must occur under a given fairness assumption (unconditional, strong, or weak).
+\end{definition}
+\noindent These constraints play a crucial role in ensuring liveness properties, which guarantee that something will eventually happen.
+Fairness constraints can be efficiently expressed using Büchi automata or Linear Temporal Logic. 
+However, incorporating fairness into transition systems requires careful handling to ensure correctness.
+
+\subsection{Fairness formalization}
+\begin{definition}[\textit{Fairness}]
+    Let $\text{TS}=\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$. 
+    The enabled actions at a state $s$ are given by $\text{Act}(s)=\left\{\alpha\in\text{Act}\mid\exists s^\prime \in s, s\overset{\alpha}{\rightarrow}s^\prime\right\}$
+    For an infinite execution fragment $\rho=s_0\overset{\alpha_0}{\rightarrow}s_1\overset{\alpha_1}{\rightarrow}\dots$ we define the fairness conditions:
+    \begin{itemize}
+        \item \textit{Unconditional fairness}: $\rho$ is unconditionally $A$-fair if there exists infinitely many $j$ for all $\alpha_i\in A$. 
+        \item \textit{Strong fairness}: $\rho$ is strongly $A$-fair if: 
+            \[\left(\exists \text{ infinitely many }j\mid\text{Act}(s_j)\cap A\neq\varnothing\right)\implies\left(\exists \text{ infinitely many }j\mid\alpha_j\in A\right)\]
+        \item \textit{Weak fairness}: $\rho$ is weakly $A$-fair if: 
+            \[\left(\forall \text{ sufficiently large }j\mid\text{Act}(s_j)\cap A\neq\varnothing\right)\implies\left(\exists \text{ infinitely many }j\mid\alpha_j\in A\right)\]
+    \end{itemize}
+\end{definition}
+\begin{definition}[\textit{Fairness assumption}]
+    A fairness assumption $\mathcal{F}$  is defined as a triple: 
+    \[\mathcal{F}=\left\langle \mathcal{F}_{\text{uncond}},\mathcal{F}_{\text{strong}},\mathcal{F}_{\text{weak}}\right\rangle\] 
+    Here, $\mathcal{F}_{\text{uncond}},\mathcal{F}_{\text{strong}},\mathcal{F}_{\text{weak}}\subseteq 2^{\text{Act}}$. 
+\end{definition}
+\noindent An execution $\rho$ is $\mathcal{F}$-fair if: 
+\begin{enumerate}
+    \item It is unconditionally $A$-fair for all $A \in \mathcal{F}_{\text{uncond}}$.
+    \item It is strongly $A$-fair for all $A \in \mathcal{F}_{\text{strong}}$.
+    \item It is weakly $A$-fair for all $A \in \mathcal{F}_{\text{weak}}$.
+\end{enumerate}
+
+\paragraph*{Fair traces}
+Traces that satisfy a fairness constraint F are called Fair-Traces.
+\begin{definition}[\textit{Fair traces}]
+    Let $P$ be a linear time property over $\text{AP}$ and $\mathcal{F}$ a fairness assumption over $\text{Act}$. 
+    A transition system $\text{TS}$ fairly satisfies $P$, denoted $\text{TS} \models_{\mathcal{F}} P$ if and only if: 
+    \[\text{fairTraces}_{\mathcal{F}}(\text{TS})\subseteq P\]
+
+\end{definition}
+\noindent This follows the hierarchy: 
+\[\text{TS} \models_{\mathcal{F}_{\text{weak}}} P \implies \text{TS} \models_{\mathcal{F}_{\text{strong}}} P \implies \text{TS} \models_{\mathcal{F}_{\text{uncond}}} P\]
+
+\subsection{Fairness and safety}
+\begin{definition}[\textit{Realizable fairness assumption}]
+    A fairness assumption $\mathcal{F}$ for a transition system $\text{TS}$ is called realizable if every reachable state $s$  satisfies:
+    \[\text{fairPaths}_\mathcal{F} (s) \neq \varnothing\]
+\end{definition}
+\begin{theorem}
+    Let $\text{TS}$ be a transition system with set of propositions $\text{AP}$, $\mathcal{F}$ a realizable fairness assumption, and $P_{\text{safe}}$ a safety property. 
+    Then:
+    \[\text{TS}\models P_{\text{safe}} \Leftrightarrow \text{TS}\models_{\mathcal{F}} P_{\text{safe}}\]
+\end{theorem}
+\noindent This theorem establishes that safety properties are independent of fairness assumptions, meaning that if a system satisfies a safety property, it does so regardless of fairness constraints.
