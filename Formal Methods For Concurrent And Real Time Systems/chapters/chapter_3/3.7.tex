@@ -1,0 +1,92 @@
+\section{Probabilistic model checking}
+
+Many systems operate in environments influenced by randomness, making it difficult to guarantee absolute correctness.
+Instead of relying solely on nondeterminism, we often seek probabilistic guarantees.
+To analyze such scenarios, we extend traditional models to include probabilities, utilizing structures like Markov chains and Markov Decision Processes. 
+This allows for verifying properties such as:
+\begin{itemize}
+    \item \textit{Qualitative properties}: ensuring that a good event happens with probability 1, or that a bad event has probability 0.
+    \item \textit{Quantitative properties}: checking if a desired event occurs with at least 95\% probability, or if an undesired event happens with less than 5\% probability.
+\end{itemize}
+
+\subsection{Markov chains}
+Markov chains are widely used to evaluate the performance and reliability of information-processing systems. 
+They extend traditional transition systems by associating probabilities with state transitions rather than relying on nondeterministic choices.
+\begin{definition}[\textit{Discrete time Markov chain}]
+    A discrete time Markov chain $\mathcal{M}$ is defined as a tuple $\mathcal{M}=\left\langle S,\Pr,\ell_{\text{init}},\text{AP},L\right\rangle$ where: 
+    \begin{itemize}
+        \item $S$ is a countable, nonempty set of states.
+        \item $\Pr : S \times S \rightarrow [0, 1]$ defines transition probabilities, ensuring that for every state $s$: $\sum_{s^\prime\in S}\Pr(s,s^\prime)=1$. 
+        \item $\ell_{\text{init}}:S\rightarrow [0,1]$ is the initial probability distribution, such that $\sum_{s\in S}\ell_{\text{init}}(s)=1$.
+        \item $\text{AP}$ is a set of atomic propositions.
+        \item $L : S \rightarrow 2^{\text{AP}}$ labels each state with relevant propositions.
+    \end{itemize}
+\end{definition}
+\noindent Since discrete time Markov chains lack nondeterminism, they cannot model interleaving behavior in concurrent systems.
+
+\subsubsection{Probabilistic logic for Markov chains}
+Unlike traditional model-checking techniques, where infinite paths might lead to unrealistic behaviors, probability-based logics help us analyze realistic system behaviors.
+
+Given a linear time logic formula $\phi$, the probability of $\phi$ holding in state $s$ is:
+\[\Pr(s\models\phi)=\Pr_s\left\{\pi\in\text{paths}(s)\mid\pi\models\phi\right\}\]
+Here, $\Pr_s$ is the total probability of all paths starting at $s$ where $\phi$ holds.
+
+\subsection{Probabilistic Computation Tree Logic}
+Probabilistic Computation Tree Logic extends Computation Tree Logic by incorporating probability bounds, allowing for the formal verification of probabilistic systems.
+
+\subsubsection{Syntax}
+The syntax of Probabilistic Computation Tree Logic consists of state and path formulae. 
+State formulae describe properties of individual states:
+\[\Phi::=\text{true}\mid a\mid \Phi_1\land\Phi_2\mid\lnot\Phi\mid\mathbb{P}_J(\phi)\]
+\noindent Here, $a \in AP$ is an atomic proposition, $\phi$ is a path formula, and $J \subseteq [0, 1]$ is a probability interval.
+
+Path formulae define properties over execution paths:
+\[\phi::=\bigcirc\Phi\mid\Phi_1\cup\Phi_2\mid\Phi_1\cup^{\leq n}\Phi_2\]
+\noindent Here, $\bigcirc$ represents the next operator, $\cup$ denotes the until operator, and $\cup^{\leq n}$ expresses bounded until with a maximum of $n$ steps.
+
+\subsubsection{Semantic}
+Probabilistic Computation Tree Logic is interpreted over a Markov chain, where the semantics of the non-probabilistic fragment follow those of Computation Tree Logic. 
+The probability operator is defined as:
+\[s\models\mathbb{P}_j(\phi)\Leftrightarrow\Pr(s\models\phi)\in J\]
+Here, $\Pr(s\models\phi)$ represents the probability that paths originating from state $s$ satisfy $\phi$. 
+The following rules define how Probabilistic Computation Tree Logic formulas are evaluated:
+\begin{itemize}
+    \item $s \models a \Leftrightarrow a \in L(s)$
+    \item $s \models \lnot\Phi \Leftrightarrow s \not\models \Phi$
+    \item $s \models \Phi \land \psi \Leftrightarrow s \models \Phi \land s \models \psi$
+    \item $\pi \models \bigcirc \Phi \Leftrightarrow \pi[1] \models \Phi$
+    \item $\pi \models \Phi \cup \psi \Leftrightarrow \exists j \geq 0 \quad(\pi[j] \models \psi \land (\forall 0 \leq k < j. \pi[k] \models \Phi))$
+    \item $\pi \models \Phi \cup^{\leq n} \psi \Leftrightarrow \exists 0 \leq j \leq n \quad(\pi[j] \models \psi \land (\forall 0 \leq k < j. \pi[k] \models \Phi))$
+\end{itemize}
+Here, for a path $\pi = s_0 s_1 s_2 \dots$ and $\pi[i]$ denotes the $(i+1)$-th state of $\pi$.
+
+\subsubsection{Model checking}
+The Probabilistic Computation Tree Logic model checking problem involves determining if a given state in a Markov chain satisfies a Probabilistic Computation Tree Logic formula. 
+Given a finite Markov chain $\mathcal{M}$, a state $s$ in $\mathcal{M}$, and a Probabilistic Computation Tree Logic state formula $\Phi$, the problem is to determine whether $s \models \Phi$.
+This is achieved by computing the satisfaction set $\text{sat}(\Phi)$ using a bottom-up traversal of the formula's parse tree
+\begin{theorem}
+    For finite Markov chain $\mathcal{M}$ and Probabilistic Computation Tree Logic formula $\Phi$, the model checking problem $\mathcal{M} \models \Phi$ can be solved in time: 
+    \[\mathcal{O}\left(\text{poly}\left(\text{size}\left(\mathcal{M}\right)\cdot n_{\max}\cdot\left\lvert \Phi\right\rvert\right)\right)\]
+    Here, $n_{\max}$ is the maximal step bound appearing in a bounded until subformula $\Psi_1\cup^{\leq n}\Psi_2$ of $\Phi$, and $n_{\max}=1$ if $\Phi$ contains no bounded until operators.
+\end{theorem}
+Restricting probability bounds to greater than zero, equal to one, equal to zero or less than one results in a qualitative fragment of Probabilistic Computation Tree Logic, which allows reasoning without explicit probability values and improves model checking efficiency.
+\begin{property}
+    There is no Computation Tree Logic formula that is equivalent to $\mathbb{P}_{=1}(\Diamond a)$.
+\end{property}
+\begin{property}
+    There is no Computation Tree Logic formula that is equivalent to $\mathbb{P}_{>0}(\square a)$.
+\end{property}
+\begin{property}
+    There is no qualitative Probabilistic Computation Tree Logic formula that is equivalent to $\forall\Diamond a$. 
+\end{property}
+\begin{property}
+    There is no qualitative Probabilistic Computation Tree Logic formula that is equivalent to $\exists\square a$.
+\end{property}
+
+\subsection{Markov decision processes}
+A Markov Decision Process extends Markov chains by introducing nondeterminism, making them useful for modeling concurrent systems.
+\begin{theorem}
+    For a finite A Markov Decision Process $\mathcal{M}$ and a Probabilistic Computation Tree Logic formula $\Phi$, the model checking problem $\mathcal{M} \models \Phi$ can be solved in time:
+       \[\mathcal{O}\left(\text{poly}\left(\text{size}\left(\mathcal{M}\right)\cdot n_{\max}\cdot\left\lvert \Phi\right\rvert\right)\right)\]
+    Here, $n_{\max}$ is the maximal step bound appearing in a bounded until subformula $\Psi_1\cup^{\leq n}\Psi_2$ of $\Phi$, and $n_{\max}=1$ if $\Phi$ contains no bounded until operators.
+\end{theorem}

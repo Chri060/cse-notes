@@ -1,0 +1,116 @@
+\section{Equivalence}
+
+Trace equivalence and bisimulation
+Transitions systems TS and TS' are trace equivalent wrt to a set AP if
+TracesAP(TS)=TracesAP(TS’)
+\begin{theorem}
+    Let P be a linear-time property (over AP). If TracesAP(TS)ÍTracesAP(TS') then TS ⊨ P ® TS'⊨ P
+\end{theorem}
+\begin{corollary}
+    Trace-equivalents transition systems satisfy the same LT
+property
+\end{corollary}
+Trace-equivalence can be inadequate for reactive (interactive, concurrent)
+systems, as shown by the example.
+• Reason: it totally ignores the internal branching structure
+– This is what we want for parsers and compilers, where we only care for language
+(i.e., trace) equivalence
+• Idea of simulation among machines: a transition system TS' can simulate
+transition system TS if every step of TS can be matched by one (or more)
+steps in TS.
+• Bisimulation equivalence denotes the possibility of mutual, stepwise
+simulation. 
+Let Post(s) be the set of states reachable in one step from s
+\begin{definition}[\textit{Bisimulation equivalent}]
+    Let $\text{TS}_i=\left\langle S_i,\text{Act}_i,\rightarrow_i,I_i,\text{AP},L_i\right\rangle$ with $i=1,2$ be transition systems over $\text{AP}$. 
+    A bisimulation for $(\text{TS}_1,\text{TS}_2)$ is a binary relation $\mathcal{R}\subseteq S_1\times S_2$ such that: 
+    \begin{enumerate}
+        \item $\forall s_1\in I_1 (\exists s_2\in I_2 (s_1,s_2)\in \mathcal{R})$ and $\forall s_2\in I_2 (\exists s_1\in I_1 (s_1,s_2)\in \mathcal{R})$. 
+        \item For all $(s_1,s_2)\in \mathcal{R}$ it holds: 
+            \begin{enumerate}
+                \item $L_1(s_1)=L_2(s_2)$
+                \item If $s_1^\prime\in\text{post}(s_1)$ then there exists $s_2^\prime\in\text{post}(s_2)$ with $(s_1^\prime,s_2\prime)\in\mathcal{R}$. 
+                \item If $s_2^\prime\in\text{post}(s_2)$ then there exists $s_1^\prime\in\text{post}(s_1)$ with $(s_1^\prime,s_2\prime)\in\mathcal{R}$. 
+            \end{enumerate}
+    \end{enumerate}
+    \text{TS}_1 and \text{TS}_2 are bisimulation equivalent (bisimilar) denoted \text{TS}_1\sim \text{TS}_2 if there exists a bisimulation $\mathcal{R}$ for $(\text{TS}_1,\text{TS}_2)$. 
+\end{definition}
+Condition (1) asserts that every initial state of TS1 is
+related to an initial state of TS2, and vice versa. 
+(s1 and s2 are equally labeled, ensuring their “local” equivalence)
+(every outgoing transition of s1 is matched by an outgoing transition of s2, and viceversa)
+
+\paragraph*{Properties}
+Bisimulation equivalence implies trace-equivalence
+– As a consequence, LTL formulae cannot distinguish two bisimulation-equivalent TS
+• Reflexivity, Transitivity, and Symmetry of ∼:
+– For a fixed set AP of atomic propositions, the relation ∼ is an equivalence
+relation.
+• Advantage of bisimulation: given a TS, if we can find a TS', much smaller
+than TS, such that TS ∼ TS', then we can verify a property on TS' rather
+than on TS.
+– For instance, TS can be infinite-state and TS' can be finite-state
+– We need some additional definition
+
+Bisimulation equivalence as relation on states
+• Bisimulation can be considered as a relation between states of a single
+transition system.
+• The goal is «minimization» of the number of states relevant to prove a
+certain property
+\begin{definition}[\textit{Bisimulation equivalent}]
+    Let $\text{TS}=\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$ be a transition system. 
+    A bisimulation for TS is a binary relation on $\mathcal{R}$ such that for all $(\text{TS}_1,\text{TS}_2)\in\mathcal{R}$: 
+    \begin{enumerate}
+        \item $L_1(s_1)=L_2(s_2)$
+        \item If $s_1^\prime\in\text{post}(s_1)$ then there exists $s_2^\prime\in\text{post}(s_2)$ with $(s_1^\prime,s_2\prime)\in\mathcal{R}$. 
+        \item If $s_2^\prime\in\text{post}(s_2)$ then there exists $s_1^\prime\in\text{post}(s_1)$ with $(s_1^\prime,s_2\prime)\in\mathcal{R}$. 
+    \end{enumerate}
+    States $s_1$ amd $s_2$ are bisimulation equivalent or bisimilar denoted $s_1\sim_{\text{TS}}s_2$ if there exists a bisimulation $\mathcal{R}$ for TS with $(\text{TS}_1,\text{TS}_2)\in\mathcal{R}$. 
+\end{definition}
+\noindent For transition system $\text{TS}=\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$ it holds that: 
+\begin{enumerate}
+    \item $\sim_{\text{TS}}$ is an equivalence relation on $S$.
+    \item $\sim_{\text{TS}}$ is a bisimulation for TS. 
+    \item $\sim_{\text{TS}}$ is the coarsest bisimulation for TS. 
+\end{enumerate}
+
+\subsection{Quotient transition system}
+An equivalence relation can be used to define the quotient of a given set S (the set of
+equivalence classes of elements of S. We can then define the quotient TS
+\begin{definition}[\textit{Quotient transition}]
+    For transition system $\text{TS}=\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$ amd bisimulation $\sim_{\text{TS}}$, the quotien transition system $\text{TS}\setminus\sim_{\text{TS}}$ is defined by: 
+    \[\text{TS}\setminus\sim_{\text{TS}}=\left\langle S\setminus\sim_{\text{TS}},\left\{\tau\right\},\rightarrow^\prime,I^\prime,\text{AP},L^\prime\right\rangle\]
+    Here, $I^\prime=\left\{[s]_{\sim}\mid s \in I\right\}$, $\rightarrow^\prime$ is defined by $\frac{s\overset{\alpha}{\rightarrow}s^\prime}{[s]_{\sim}\overset{\tau}{\rightarrow}[s^\prime]_{\sim}}$, and $L^\prime([s]_{\sim})=L(s)$.
+\end{definition}
+\begin{theorem}
+    For any transition system TS it holds that $\text{TS}\sim\text{TS}\setminus\sim$. 
+\end{theorem}
+\noindent Therefore, we can prove LTL properties on the quotient TS rather than on the original one.
+
+\subsection{CTL equivalence}
+We need to define CTL equivalence and compare it with bisimulation
+equivalence
+In general, states in a transition system are equivalent with respect to a logic
+whenever these states cannot be distinguished by the truth value of any formulae of
+the logic.
+• Let TS, TS1, and TS2 be transition systems over AP without terminal states (infinite
+paths only): 
+\begin{itemize}
+    \item States s1, s2 in TS are CTL-equivalent, denoted s1 \equiv CTL s2, if s1 \models \phi iff s2 \models \phi for all CTL formulae over AP.
+    \item TS1 and TS2 are CTL-equivalent, denoted TS1 \equiv CTL TS2, if TS1 \models \phi iff TS2 \models \phi for all CTL formulae over AP.
+\end{itemize}
+\noindent For a finite transition system TS without terminal states: 
+\[\sim_{\text{TS}}=\equiv_{\text{CTL}}\]
+Similarly for finite transition systems TS1, TS2 (over AP) without terminal states, the
+following two statements are equivalent:
+\begin{itemize}
+    \item TS1 ∼ TS2
+    \item TS1 ≡CTL TS2 , i.e., TS1 and TS2 satisfy the same CTL formulae.
+    
+\end{itemize}
+NB: finiteness assumption is necessary. However, for an infinite-state TS, bisimulation
+equivalence implies CTL equivalence (so we can still prove CTL formulae on the quotient TS).
+
+\begin{theorem}
+    Theorem: The bisimulation quotient of a finite transition system TS = (S, Act, →, I, AP, L) can be computed in time O (|S|·|AP| + M · log |S|)---where M denotes the number of edges in the state graph
+\end{theorem}
