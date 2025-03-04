@@ -1,0 +1,128 @@
+\section{Text clustering}
+
+Text clustering is the process of grouping documents into coherent subgroups based on similarities in their content. 
+These subgroups can be based on various criteria.
+
+The key challenge in text clustering is to accurately measure the similarity between documents. 
+This similarity is typically determined by analyzing the content of the documents.
+Traditionally, documents are represented as tf-idf vectors, which are scaled bag-of-words representations.
+In this approach:
+\begin{itemize}
+    \item \textit{Sparse representation}: most of the values in the vector are zero, meaning that each document is represented by a vector with many empty or zero entries.
+    \item \textit{Similarity measure}: the similarity between documents is usually based on the number of shared words, with the importance of each word being scaled by its rarity.
+\end{itemize}
+
+\subsection{Clustering algorithms}
+There are several popular clustering algorithms used for grouping documents based on similarity.
+
+\subsubsection{k-means}
+$k$-means searches for exactly $k$ clusters, each represented by a centroid, in the following way: 
+\begin{enumerate}
+    \item Randomly initialize $k$ centroids.
+    \item Assign each data point to the nearest centroid.
+    \item Recompute the centroids by averaging the data points in each cluster.
+    \item epeat steps 2 and 3 until convergence.
+\end{enumerate}
+\noindent It scales well to large datasets and does not need pairwise distance calculations needed, which makes it faster.
+However, it assumes clusters are globular, which may not be ideal for text data, relies on the Euclidean distance metric, which might not be the best choice for all types of data.
+
+The number of clusters must be specified in advance.
+Choosing the right value of $k$ can be tricky, though the elbow method can help.
+The algorithm can converge on a local minimum; running it multiple times can help mitigate this issue.
+Scaling of the data affects clustering results, especially for text, where tf-idf weighting and document length normalization are important.
+
+\subsubsection{k-metoids}
+$k$-medoids is similar to $k$-means, but it uses medoids instead of centroids.
+A medoid is a point from the dataset itself that is closest to all other points in the cluster.
+In each iteration, the algorithm reassigns data points to the cluster with the closest medoid and then recomputes the medoids.
+
+It is flexible because it works with various distance metrics. 
+Since a medoid is an actual data point (not a mean), it provides a more realistic representation of the cluster.
+However, it has higher computational complexity compared to $k$-means because it requires calculating distances between pairs of points, which is an $\mathcal{O}(n^2)$ operations.
+
+\subsubsection{Agglomerative hierarchical clustering}
+Agglomerative hierarchical clustering is a hierarchical clustering builds a hierarchy of clusters, known as a dendrogram.
+Agglomerative hierarchical clustering works by merging smaller clusters bottom-up in the following way: 
+\begin{enumerate}
+    \item Assign each document to its own group.
+    \item Merge the two most similar groups.
+    \item Repeat until only one group remains.
+\end{enumerate}
+\noindent To merge clusters, hierarchical clustering computes distances between them using various linkage criteria:
+\begin{itemize}
+    \item \textit{Complete-linkage}: maximum distance between points in two groups.
+    \item \textit{Single-linkage}: minimum distance across groups.
+    \item \textit{Average-linkage}: average distance across groups.
+\end{itemize}
+\noindent The choice of linkage criteria affects the shape and tightness of the clusters. 
+Complete or Average-linkage tends to create tight, globular clusters.
+Single-linkage can lead to long, thin clusters.
+
+One advantage is that it works with any distance metric or similarity function.
+Thus, the dendrogram provides useful insight into the structure of the data.
+However, it has an high time complexity makes it unsuitable for large datasets.
+
+\subsubsection{Density-Based Spatial Clustering of Applications with Noise}
+DBScan is a density-based clustering algorithm that does not require the number of clusters to be specified in advance.
+It has two key parameters, namely $\varepsilon$ (adius of the neighborhood around each point) and $\text{minPoints}$ (minimum number of points required to form a cluster). 
+The algorithm classifies points as: 
+\begin{itemize}
+    \item \textit{Core points}: points with at least $\text{minPoints}$ within their $\varepsilon$-neighborhood.
+    \item \textit{Border points}: points that are not core points but lie within the $\varepsilon$-neighborhood of a core point.
+    \item \textit{Noise points}: points that are neither core nor border points.
+\end{itemize}
+\noindent In this algorithm we do not need need to specify the number of clusters upfront, it is robust to noise and outliers, and can find arbitrary-shaped clusters, making it highly flexible.
+However, the performance depends on the chosen parameters and may not work well when clusters have different densities.
+
+\subsection{Topic modelling}
+Topic modeling is a soft clustering technique for documents, meaning that each document can belong to multiple clusters (or topics) to varying degrees. 
+It is a way to extract the underlying themes or topics from a collection of documents.
+
+Topic modeling reduces the dimensionality of documents by representing them in a lower-dimensional space compared to the high-dimensional vocabulary space.
+Each topic is described by a probability distribution over words, where the terms should ideally reflect a single theme. 
+Similarly, documents are represented as probability distributions over topics.
+
+\paragraph*{Matrix decomposition}
+Topic modeling is often approached as a form of matrix decomposition. 
+The general idea is to decompose a term-document matrix (which represents word counts or tf-idf scores for each term in each document) into smaller matrices representing $\text{terms}\cdot\text{topics}$ and $\text{topics}\cdot\text{documents}$.
+Instead of dealing with a large $V\times D$ matrix (where $V$ is the vocabulary size and $D$ is the number of documents), we decompose it into two much smaller matrices: 
+\[V\times T\quad  (\text{terms}\cdot\text{topics}) \qquad T\times D\quad (\text{topics}\cdot\text{documents})\]
+Here, $V$ is the vocabulary size, $T$ the number of topics, and $D$ the documents count. 
+This decomposition reduces the number of parameters that need to be estimated, making the topic modeling process more efficient.
+The most used modeling techniques are: 
+\begin{itemize}
+    \item \textit{Latent Dirichlet Allocation}: LDA is the most famous technique in topic modeling. 
+        It uses a Dirichlet prior to estimate the parameters.
+        In LDA, each document is assumed to be a mixture of topics, and each topic is a mixture of words.
+    \item \textit{Non-negative Matrix Factorization}: a related technique to LDA, which factorizes the document-term matrix into two non-negative matrices representing term-to-topic and topic-to-document relations.
+    \item \textit{Latent Semantic Indexing}: LSI applies Singular Value Decomposition to a TF-IDF matrix to uncover latent semantic structure.
+\end{itemize}
+
+\paragraph*{Applications}
+Topic modeling helps address several challenges:
+\begin{itemize}
+    \item \textit{Polysemy}: it can disambiguate words with multiple meanings.
+    \item \textit{Synonymy}: it identifies synonyms that might be used interchangeably.
+    \item \textit{Short documents}: it improves the representation of documents that may have limited vocabulary due to their short length.
+\end{itemize}
+\noindent In addition to its utility in improving document representation, topic modeling is also useful for dimensionality reduction. 
+After modeling topics, further dimensionality reduction techniques can help visualize collections of documents in a more interpretable way.
+
+\subsubsection{Generative model}
+The Generative Model for Latent Dirichlet Allocation is a probabilistic process that describes how the words in a document are generated from topics. 
+Here's how it works:
+\begin{enumerate}
+    \item \textit{Choose word proportions for each topic}: each topic is associated with a probability distribution over words.
+    \item \textit{Choose topic proportions for each document}: each document is modeled as a distribution over topics.
+    \item \textit{For each word in a document}: choose a topic based on the document's topic proportions and choose a word based on the topic's word distribution.
+\end{enumerate}
+\noindent Estimating the parameters of the topic model involves updating the topic and word distributions iteratively.
+This is typically done using Bayesian priors to avoid overfitting, ensuring that the model doesn't just memorize the data but rather generalizes well.
+Gibbs sampling or other sampling techniques are used to avoid local maxima during parameter optimization.
+
+The hyperparameters of this method are: 
+\begin{itemize}
+    \item $\alpha$: the prior on the topic distribution for each document (controls how concentrated the topic distribution is).
+    \item $\beta$: the prior on the word distribution for each topic (controls how concentrated the word distribution is).
+\end{itemize}
+By iteratively updating these parameters and sampling from the distribution, the model learns the underlying structure of topics in a collection of documents.

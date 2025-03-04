@@ -1,0 +1,53 @@
+\section{Term weighting}
+
+In information retrieval, term weighting plays a crucial role in determining the relevance of documents to a query. 
+The idea is to identify a subset of query terms that are most likely to return the most relevant documents.
+Generally, the smaller the subset of terms, the more specific and on-topic the resulting document set is likely to be. 
+Thus, we rank documents based on how small the set of relevant documents is for a given query term subset.
+
+One way to estimate how many documents a query term subset would return is by calculating the probability that a random document contains those terms. 
+Documents can then be ranked based on how unlikely it is to see so many query terms in them.
+
+Assuming the terms in the query are independent, we can express the probability of a document containing all the terms in the query as:
+\[\Pr(q\subseteq d^\prime)=\prod_{t\in q}\Pr(t\in d^\prime)=\prod_{t \in q}\dfrac{\text{df}_t}{N}\]
+\noindent Here, $\text{df}_t$ is the document frequency, or the number of documents containing term $t$ and $N$ is the total number of documents in the corpus.
+
+\subsection{Inverse Document Frequency}
+To rank documents, we can score them based on how unlikely it is for them to contain all the query terms. 
+This gives rise to the inverse document frequency weighting:
+\[\text{score}(d)=-\log\prod_{t\in q\cap d}\Pr(t\in d^\prime)=\sum_{t \in q\cap d}\log\dfrac{N}{\text{df}_t}\]
+\noindent IDF is a measure that assigns weights to terms based on how rare they are across the entire document collection. 
+This is a standard measure from information theory that quantifies the information gained from observing a term. 
+Essentially, the IDF measures the surprise or information content of encountering a term in a document. 
+This same concept is used in text compression algorithms to determine how many bits should be used to represent a word.
+
+A common variation of IDF uses the odds of observing a term rather than the probability, which results in the following document score:
+\[\text{score}(d)=\sum_{t\in q}\dfrac{N-\text{df}_t+0.5}{\text{df}_t+0.5}\]
+Here, a smoothing factor of 0.5 is added to all counts to prevent terms with very low frequencies from disproportionately affecting the ranking. 
+This smoothing helps to handle rare terms without letting them dominate the results.
+
+\subsection{Term Frequence Inverse Document Frequency}
+While IDF helps to weight terms by their rarity, there's more to a document than just its vocabulary. 
+Some documents may contain the same query term multiple times, making them more likely to be relevant to the query. 
+To account for this, we introduce term frequency (the number of times a term appears in a document). 
+The simplest way to include term frequency is to multiply the IDF score by the term frequency:
+\[\text{score}(q,d)=\sum_{t \in q}\text{tf}_{t,d}\log\dfrac{N}{\text{df}_t}\]
+Here, $\text{tf}_{t,d}$ is the number of occurrences of term $t$ in document $d$.
+
+This can be motivated as follows: instead of calculating the probability that a random document contains the term, we calculate the probability that a document contains the term exactly $k$ times:
+\[\Pr(t,k) \cong  \Pr(\text{next token}=t)^k\]
+\noindent The next token probability is estimated using the term occurrences across the entire collection:
+\[\Pr(\text{next token} = t) = \frac{\text{ctf}_t}{\sum_{t^\prime}\text{ctf}_{t^{\prime}}}\]
+Here, $\text{ctf}_t$ is the collection term frequency for term $t$ and $\sum_{t^\prime}\text{ctf}_{t^{\prime}}$ is the total term frequency across all terms. 
+The score can then be expressed as:
+\[\text{score}(q,d) = - \sum_{t\in q} \text{tf}_{t,d} \log\frac{\text{ctf}_t}{\sum_{t^\prime}\text{ctf}_{t^\prime}}\] 
+\noindent Although this formulation is slightly different, it's conceptually similar to TF-IDF. 
+Using document frequency instead of collection frequency doesn't drastically change the outcome, and in some cases, may even make the formula more robust.
+
+\paragraph*{Variations}
+In practice, TF-IDF has been found to perform well, but it assumes a linear relationship between term frequency and document relevance. 
+In most cases doubling the occurrences of a term in a document should not double the document's score. 
+The score should improve with more occurrences of the term, but not linearly.
+
+As a result, common alternatives include using a logarithmic scale for term frequency:
+\[\log(1+\text{tf}_{t,d}) \qquad \max(0.1+\log(\text{tf}_{t,d}))\]

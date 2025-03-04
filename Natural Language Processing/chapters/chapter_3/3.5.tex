@@ -1,0 +1,45 @@
+\section{Ranking}
+
+In web search, search engines rely on a variety of indicative features to determine the most relevant results for a user query.
+Search engines combine hundreds of signals to generate the most relevant search results. 
+To do this efficiently, rank learning offers an automated and coherent method of combining diverse signals into a single retrieval score. 
+It optimizes this score based on metrics that are important to users.
+
+\subsection{Reranking}
+The reranking process follows these steps: 
+\begin{enumerate}
+    \item \textit{Start with a query}: the user enters a search query.
+    \item \textit{Generate initial ranking}: use keyword-based ranking to retrieve an initial set of results.
+    \item \textit{Truncate ranking}: limit the ranking to a manageable number of candidates for further evaluation.
+    \item \textit{Calculate feature values}: compute relevant features for each candidate document.
+    \item \textit{Normalize features}: normalize each feature at the query level to make the comparison between documents more consistent.
+    \item \textit{Training}: use ground truth relevance labels to train the model.
+\end{enumerate}
+
+\subsection{Ranking metrics}
+There are several metrics used to evaluate the performance of search engine rankings. 
+Here's a breakdown:
+\begin{itemize}
+    \item \textit{Precision at depth $k$}: the percentage of relevant documents in the top $k$ results: 
+        \[\text{precision}=\dfrac{\text{number of relevant documents in top }k}{k}\]
+    \item \textit{Recall at depth $k$}: the percentage of all relevant documents that are found in the top k results.
+        \[\text{recall}=\dfrac{\text{number of relevant documents in top }k}{\text{total relevant documents}}\]
+    \item \textit{F-measure at depth $k$}: a combination of precision and recall, providing a single score that balances both: 
+        \[\text{F1}=2\dfrac{\text{precision}\cdot\text{recall}}{\text{precision}+\text{recall}}\]
+    \item \textit{Mean Average Precision}: this is the average of the precision values at each rank position where a relevant document appears. 
+        It estimates the area under the precision-recall curve: 
+        \[\text{MAP}=\dfrac{\sum_{k=1}^n(\text{precision}(k)\cdot\text{rel}(k))}{\text{total number of relevant documents}}\]
+    \item \textit{Normalized Discounted Cumulative Gain}: this metric is more faithful to the user experience, as it gives lower ranks less importance, aligning with the natural way users interact with search results. 
+        It's normalized at the query level:
+        \[\text{NDCG}(Q,k)=\dfrac{1}{\left\lvert Q \right\rvert}\sum_{j=1}^{\left\lvert Q \right\rvert}Z_{kj}\sum_{m=1}^k\dfrac{2^{R(j,m)}-1}{\log_2(1+m)}\]
+\end{itemize}
+
+\subsection{Regression reranking}
+Reranking can be treated as a regression problem, where the goal is to predict the relevance of a document based on various features. 
+The model can then use standard regression techniques to combine these features and predict relevance scores.
+During training, the loss function can be defined in three different ways:
+\begin{itemize}
+    \item \textit{Pointwise}: this approach calculates the loss based on individual query-document pairs (Mean Squared Error).
+    \item \textit{Pairwise}: this method considers the relative ordering of document pairs (number of incorrectly ordered pairs).
+    \item \textit{Listwise}: this considers the entire ranking list (optimizing NDCG at the query level).
+\end{itemize}

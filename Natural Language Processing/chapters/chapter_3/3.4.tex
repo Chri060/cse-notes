@@ -1,0 +1,39 @@
+\section{Indices}
+Search engines are designed to deliver results as quickly as possible, since any delay can impact user experience and attention. 
+Responses must be returned within tenths of a second, so search engines are optimized for speed.
+
+At the heart of this efficiency is the inverted index, which is the core data structure used by search engines to retrieve documents.
+
+\subsection{Inverted indices}
+An inverted index consists of posting lists, which map term IDs to document IDs. 
+The basic idea is to create a mapping between terms and the documents that contain them, so that when a user searches for a term, the system can quickly find all the relevant documents.
+
+To optimize for speed and reduce storage space, inverted indices often use integer compression algorithms, allowing for quick decompression and reducing the overall size of the index.
+
+When calculating a retrieval function, the process typically involves joining posting lists. 
+The documents within these lists are sorted by term frequency. 
+This sorting allows for early termination of the results list computation, so irrelevant documents are discarded quickly.
+
+\subsection{Positional indices}
+In many cases, it's not just about whether a term appears in a document, but where it appears. 
+To capture this, some indices maintain positional information, recording the exact locations of terms within documents. 
+This allows for the calculation of proximity between query terms, which can be a useful indicator of relevance.
+
+Moreover, the location of words within a webpage can influence their importance. 
+In addition, certain statistically significant bigrams and trigrams are often identified and indexed separately. 
+These are usually discovered using a technique like pointwise mutual information, which measures the association between terms. 
+These bigrams or trigrams often have their own posting lists, as they can provide more context to queries.
+
+\subsubsection{Crawlers}
+To populate the index, web crawlers scour the web, following hyperlinks to discover and add new pages to the search engine's database. 
+Effective crawling involves two main challenges:
+\begin{itemize}
+    \item \textit{Prioritizing URLs}: the crawler must decide which URLs to visit first based on factors like relevance and likelihood of finding fresh content.
+    \item \textit{Re-visiting websites}: determining how often to revisit a website to check for updates is critical to ensuring that the index remains fresh and up to date.
+\end{itemize}
+\noindent At the scale of the web, crawlers must also be robust enough to handle different types of content, including dynamically generated pages.
+Additionally, web crawlers must detect and manage duplicate content. Many different URLs may lead to the same content, and the crawler needs to ensure that it doesn't index the same page multiple times.
+
+To manage these challenges, a distributed crawler architecture is typically used, with a centralized URL list to keep track of the pages the crawler needs to visit. 
+Crawlers also respect robots.txt files, which are placed in the root directory of websites. 
+These files tell crawlers which pages or sections of the site they are allowed to crawl and index, helping website owners manage how their content is indexed.
