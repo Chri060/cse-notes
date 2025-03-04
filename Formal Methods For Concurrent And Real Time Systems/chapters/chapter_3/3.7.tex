@@ -1,92 +1,96 @@
-\section{Probabilistic model checking}
+\section{Bounded model checking}
 
-Many systems operate in environments influenced by randomness, making it difficult to guarantee absolute correctness.
-Instead of relying solely on nondeterminism, we often seek probabilistic guarantees.
-To analyze such scenarios, we extend traditional models to include probabilities, utilizing structures like Markov chains and Markov Decision Processes. 
-This allows for verifying properties such as:
+Bounded Model Checking is a technique used to verify properties of transition systems by checking the satisfiability of Boolean formulae. 
+SAT solvers, which work on Boolean formulae in Conjunctive Normal Form (CNF), play a crucial role in this approach. 
+Although SAT is an $\mathcal{NP}$-complete problem with no known sub-exponential worst-case algorithm, recent advancements in SAT solvers have led to efficient solutions for many practical cases. 
+These solvers use the standard DIMACS-CNF format and can routinely handle formulae with tens of thousands of variables and millions of constraints. 
+
+Most modern solvers implement sophisticated variations of the Davis-Putnam-Logemann-Loveland (DPLL) algorithm, which is based on backtracking.
+The DPLL algorithm is the foundation of many SAT solvers.
+Given a formula $F$ in conjunctive normal form a set of true literals $T$ (initially empty), the procedure is as follows:
+\begin{algorithm}[H]
+    \caption{Davis-Putnam-Logemann-Loveland}
+        \begin{algorithmic}[1]
+            \Function{DPLL}{$F$, $T$}
+                \If{$F$ evaluted over $T$ is $\text{true}$}
+                    \State \Return $\text{true}$
+                \ElsIf{$F$ evaluted over $T$ is $\text{false}$}
+                    \State \Return $\text{false}$
+                \ElsIf{a clause of $F$ has only one literal $L$}
+                    \State \Return \Call{DPLL}{$F(L=\text{true})$, $T \cup \{L\}$}
+                \ElsIf{a literal $L$ appears only as $L=x$ or $L=\lnot x$ but not both}
+                    \State \Return \Call{DPLL}{$F(L=\text{true})$, $T$}
+                \EndIf 
+                \State Choose a literal $L$
+                \State \Return \Call{DPLL}{$F(L=\text{true})$, $T \cup \{L\}$} \textbf{or} \Call{DPLL}{$F(L=\text{false})$, $T \cup \{\lnot L\}}$
+            \EndFunction
+        \end{algorithmic}
+\end{algorithm}
+
+\paragraph*{Counterexamples}
+A fundamental aspect of Bounded Model Checking is the concept of counterexamples for Linear Temporal Logic properties in a transition system. 
+Since the number of states in a system is finite, any counterexample must have a finite length.
+If a cycle occurs within a path, it must do so within a bounded length of at most the number of states plus one. 
+This bound, referred to as the diameter or completeness threshold, allows us to encode the unfolding of the transition relation up to $k$ steps into a Boolean formula. 
+By adding constraints based on the property being verified and cycle detection, we construct a formula $\phi_k$ such that $\phi_k$ is satisfiable if and only if there exists a counterexample to the property of length at most $k$.
+
+\subsection{Back loops amd transition relation}
+A finite prefix of length k can represent an infinite path if a back loop exists from the last state of the prefix to any of the previous states. 
+If no such back loop is found, the prefix does not provide information about the infinite behavior of the path. 
+The $k$-times unfolding of a transition system's transition relation is represented as a propositional formula ${\left\lvert [M]\right\rvert}_k$, where states are encoded as bit vectors.
+This unfolding captures all finite paths of length $k$: 
+\[{\left\lvert [M_S]\right\rvert}_k\leftrightarrow I(S_0)\bigwedge_{0\leq i \leq k1}T(S_i,S_{i+1}) \]
+New loop selector variables are introduced to identify possible loops, ensuring that at most one loop exists and that if a loop occurs at position $h$, then the state at$S_{h-1}$ must be identical to $S_k$. 
+Additional Boolean variables indicate whether a state is within a loop and whether a loop exists in the structure.
+
+\subsection{Temporal logic properties}
+The semantics of a LTL formula $\Phi$ in positive normal form is expressed through Boolean constraints over new formula variables.
+Each subformula of $\Phi$  is associated with a propositional variable at every time step.
+
+\paragraph*{Propositional constraint}
+Propositional constraints define how these variables interact with system states.
+Given a formula $\phi$ and a index $0\leq i\leq k$, we have the following: 
 \begin{itemize}
-    \item \textit{Qualitative properties}: ensuring that a good event happens with probability 1, or that a bad event has probability 0.
-    \item \textit{Quantitative properties}: checking if a desired event occurs with at least 95\% probability, or if an undesired event happens with less than 5\% probability.
+    \item $p\rightarrow{\left\lvert [p]\right\rvert}_i\leftrightarrow p\in S_i$
+    \item $\lnot p\rightarrow{\left\lvert [\lnot p]\right\rvert}_i\leftrightarrow p\notin S_i$
+    \item $\phi_1\land\phi_2\rightarrow{\left\lvert [\phi_1\land\phi_2]\right\rvert}_i\leftrightarrow{\left\lvert [\phi_1]\right\rvert}_i\land {\left\lvert [\phi_2]\right\rvert}_i$
+    \item $\phi_1\lor\phi_2\rightarrow{\left\lvert [\phi_1\lor\phi_2]\right\rvert}_i\leftrightarrow{\left\lvert [\phi_1]\right\rvert}_i\lor {\left\lvert [\phi_2]\right\rvert}_i$
 \end{itemize}
 
-\subsection{Markov chains}
-Markov chains are widely used to evaluate the performance and reliability of information-processing systems. 
-They extend traditional transition systems by associating probabilities with state transitions rather than relying on nondeterministic choices.
-\begin{definition}[\textit{Discrete time Markov chain}]
-    A discrete time Markov chain $\mathcal{M}$ is defined as a tuple $\mathcal{M}=\left\langle S,\Pr,\ell_{\text{init}},\text{AP},L\right\rangle$ where: 
-    \begin{itemize}
-        \item $S$ is a countable, nonempty set of states.
-        \item $\Pr : S \times S \rightarrow [0, 1]$ defines transition probabilities, ensuring that for every state $s$: $\sum_{s^\prime\in S}\Pr(s,s^\prime)=1$. 
-        \item $\ell_{\text{init}}:S\rightarrow [0,1]$ is the initial probability distribution, such that $\sum_{s\in S}\ell_{\text{init}}(s)=1$.
-        \item $\text{AP}$ is a set of atomic propositions.
-        \item $L : S \rightarrow 2^{\text{AP}}$ labels each state with relevant propositions.
-    \end{itemize}
-\end{definition}
-\noindent Since discrete time Markov chains lack nondeterminism, they cannot model interleaving behavior in concurrent systems.
-
-\subsubsection{Probabilistic logic for Markov chains}
-Unlike traditional model-checking techniques, where infinite paths might lead to unrealistic behaviors, probability-based logics help us analyze realistic system behaviors.
-
-Given a linear time logic formula $\phi$, the probability of $\phi$ holding in state $s$ is:
-\[\Pr(s\models\phi)=\Pr_s\left\{\pi\in\text{paths}(s)\mid\pi\models\phi\right\}\]
-Here, $\Pr_s$ is the total probability of all paths starting at $s$ where $\phi$ holds.
-
-\subsection{Probabilistic Computation Tree Logic}
-Probabilistic Computation Tree Logic extends Computation Tree Logic by incorporating probability bounds, allowing for the formal verification of probabilistic systems.
-
-\subsubsection{Syntax}
-The syntax of Probabilistic Computation Tree Logic consists of state and path formulae. 
-State formulae describe properties of individual states:
-\[\Phi::=\text{true}\mid a\mid \Phi_1\land\Phi_2\mid\lnot\Phi\mid\mathbb{P}_J(\phi)\]
-\noindent Here, $a \in AP$ is an atomic proposition, $\phi$ is a path formula, and $J \subseteq [0, 1]$ is a probability interval.
-
-Path formulae define properties over execution paths:
-\[\phi::=\bigcirc\Phi\mid\Phi_1\cup\Phi_2\mid\Phi_1\cup^{\leq n}\Phi_2\]
-\noindent Here, $\bigcirc$ represents the next operator, $\cup$ denotes the until operator, and $\cup^{\leq n}$ expresses bounded until with a maximum of $n$ steps.
-
-\subsubsection{Semantic}
-Probabilistic Computation Tree Logic is interpreted over a Markov chain, where the semantics of the non-probabilistic fragment follow those of Computation Tree Logic. 
-The probability operator is defined as:
-\[s\models\mathbb{P}_j(\phi)\Leftrightarrow\Pr(s\models\phi)\in J\]
-Here, $\Pr(s\models\phi)$ represents the probability that paths originating from state $s$ satisfy $\phi$. 
-The following rules define how Probabilistic Computation Tree Logic formulas are evaluated:
+\paragraph*{Temporal Operators}
+Temporal operators such as weak until ($\mathcal{W}$) and strong until ($\mathcal{U}$) require additional handling, particularly when eventualities appear inside loops.
+Special propositional variables track eventualities to ensure that strong properties are correctly encoded.
+Given a formula $\phi$ and a index $0\leq i\leq k$, we have the following: 
 \begin{itemize}
-    \item $s \models a \Leftrightarrow a \in L(s)$
-    \item $s \models \lnot\Phi \Leftrightarrow s \not\models \Phi$
-    \item $s \models \Phi \land \psi \Leftrightarrow s \models \Phi \land s \models \psi$
-    \item $\pi \models \bigcirc \Phi \Leftrightarrow \pi[1] \models \Phi$
-    \item $\pi \models \Phi \cup \psi \Leftrightarrow \exists j \geq 0 \quad(\pi[j] \models \psi \land (\forall 0 \leq k < j. \pi[k] \models \Phi))$
-    \item $\pi \models \Phi \cup^{\leq n} \psi \Leftrightarrow \exists 0 \leq j \leq n \quad(\pi[j] \models \psi \land (\forall 0 \leq k < j. \pi[k] \models \Phi))$
+    \item $\circ\phi_1\rightarrow{\left\lvert [\circ\phi_1]\right\rvert}_i\leftrightarrow{\left\lvert [\phi_1]\right\rvert}_{i+1}$
+    \item $\phi_1\mathcal{U}\phi_2\rightarrow{\left\lvert [\phi_1\mathcal{U}\phi_2]\right\rvert}_i\leftrightarrow{\left\lvert [\phi_2]\right\rvert}_i\lor\left({\left\lvert [\phi_1]\right\rvert}_i\land {\left\lvert [\phi_1\mathcal{U}\phi_2]\right\rvert}_{i+1}\right)$
+    \item $\phi_1\mathcal{R}\phi_2\rightarrow{\left\lvert [\phi_1\mathcal{R}\phi_2]\right\rvert}_i\leftrightarrow{\left\lvert [\phi_2]\right\rvert}_i\land\left({\left\lvert [\phi_1]\right\rvert}_i\lor {\left\lvert [\phi_1\mathcal{R}\phi_2]\right\rvert}_{i+1}\right)$
 \end{itemize}
-Here, for a path $\pi = s_0 s_1 s_2 \dots$ and $\pi[i]$ denotes the $(i+1)$-th state of $\pi$.
 
-\subsubsection{Model checking}
-The Probabilistic Computation Tree Logic model checking problem involves determining if a given state in a Markov chain satisfies a Probabilistic Computation Tree Logic formula. 
-Given a finite Markov chain $\mathcal{M}$, a state $s$ in $\mathcal{M}$, and a Probabilistic Computation Tree Logic state formula $\Phi$, the problem is to determine whether $s \models \Phi$.
-This is achieved by computing the satisfaction set $\text{sat}(\Phi)$ using a bottom-up traversal of the formula's parse tree
-\begin{theorem}
-    For finite Markov chain $\mathcal{M}$ and Probabilistic Computation Tree Logic formula $\Phi$, the model checking problem $\mathcal{M} \models \Phi$ can be solved in time: 
-    \[\mathcal{O}\left(\text{poly}\left(\text{size}\left(\mathcal{M}\right)\cdot n_{\max}\cdot\left\lvert \Phi\right\rvert\right)\right)\]
-    Here, $n_{\max}$ is the maximal step bound appearing in a bounded until subformula $\Psi_1\cup^{\leq n}\Psi_2$ of $\Phi$, and $n_{\max}=1$ if $\Phi$ contains no bounded until operators.
-\end{theorem}
-Restricting probability bounds to greater than zero, equal to one, equal to zero or less than one results in a qualitative fragment of Probabilistic Computation Tree Logic, which allows reasoning without explicit probability values and improves model checking efficiency.
-\begin{property}
-    There is no Computation Tree Logic formula that is equivalent to $\mathbb{P}_{=1}(\Diamond a)$.
-\end{property}
-\begin{property}
-    There is no Computation Tree Logic formula that is equivalent to $\mathbb{P}_{>0}(\square a)$.
-\end{property}
-\begin{property}
-    There is no qualitative Probabilistic Computation Tree Logic formula that is equivalent to $\forall\Diamond a$. 
-\end{property}
-\begin{property}
-    There is no qualitative Probabilistic Computation Tree Logic formula that is equivalent to $\exists\square a$.
-\end{property}
+\paragraph*{Complete encoding}
+The complete encoding $\Phi_k$ results in a Boolean formula that logically conjoins all components, including loops, propositional connectives, temporal operators, and eventualities.
+The formula is evaluated at instant 0, ensuring that the verification process correctly captures the required behaviors.
 
-\subsection{Markov decision processes}
-A Markov Decision Process extends Markov chains by introducing nondeterminism, making them useful for modeling concurrent systems.
-\begin{theorem}
-    For a finite A Markov Decision Process $\mathcal{M}$ and a Probabilistic Computation Tree Logic formula $\Phi$, the model checking problem $\mathcal{M} \models \Phi$ can be solved in time:
-       \[\mathcal{O}\left(\text{poly}\left(\text{size}\left(\mathcal{M}\right)\cdot n_{\max}\cdot\left\lvert \Phi\right\rvert\right)\right)\]
-    Here, $n_{\max}$ is the maximal step bound appearing in a bounded until subformula $\Psi_1\cup^{\leq n}\Psi_2$ of $\Phi$, and $n_{\max}=1$ if $\Phi$ contains no bounded until operators.
-\end{theorem}
+\subsection{Model checking}
+Bounded Model Checking translates the verification problem into a propositional satisfiability (SAT) problem, leveraging SAT solvers for efficiency.
+The transformation procedure is as follows: 
+\begin{enumerate}
+    \item Unfolding the transition relation: the system's transition relation is unfolded $k$ times, producing a propositional formula ${\left\lvert [M]\right\rvert }_k$. 
+    \item Loop constraints: additional variables and constraints define the presence and position of loops (if any). 
+    \item Encoding LTL semantics: a Linear Temporal Logic formula $F$, in release-positive normal form, is translated into Boolean constraints over newly introduced formula variables.
+    \item For each subformula and each instant $0\leq i \leq k+1$, a propositional variable ${\left\lvert [j]\right\rvert }_i$ is introduced.
+\end{enumerate}
+\noindent Then, we follow this procedure: 
+\begin{enumerate}
+    \item Choose a $k$ value that is large enough but not excessive.
+    \item Construct the formula $\Phi_k$.
+    \item Use a SAT solver to check $\Phi_k$. 
+    \item If $\Phi_k$ is satisfiable: the solver returns a valid counterexample of length less or equal than $k$.
+    \item If $\Phi_k$ is unsatisfiable: the property may hold, but longer counterexamples may still exist. 
+        Increment $k$ and repeat the process.
+    \item Completeness threshold: if $k\geq\text{CT}$ and $\Phi_k$ remains unsatisfiable, the property $P$ holds. 
+        However, $\text{CT}$ is often unknown and computationally challenging to determine.
+\end{enumerate}
+\noindent Bounded Model Checking is significantly faster than traditional model checking in finding counterexamples due to its reliance on SAT solvers.
+It is particularly useful for debugging models early in development.
+However, an unsatisfiable result for $k<\text{CT}$ does not rule out violations at larger $k$, necessitating further exploration.
