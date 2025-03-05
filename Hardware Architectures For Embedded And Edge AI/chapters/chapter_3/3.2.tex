@@ -1,0 +1,91 @@
+\section{Data preprocessing and feature extraction}
+
+The goal of data preprocessing and feature extraction  is to convert raw signals into structured data that can be processed by Machine Learning and Deep Learning algorithms.
+This process involves three key steps:
+\begin{enumerate}
+    \item \textit{Segmenting the raw signals}: breaking the continuous signal into smaller, manageable chunks of data.
+    \item \textit{Processing the data}: applying digital signal processing techniques to reduce noise and enhance the most relevant parts of the signal.
+    \item \textit{Feature extraction}: identifying and extracting meaningful patterns or characteristics from the processed signal chunks to be used in model training.
+\end{enumerate}
+
+\subsection{Data segmentation}
+Sensors generate continuous streams of data, which must be divided into smaller segments (windows) for processing. 
+Each window represents a chunk of data that is analyzed by an algorithm to produce meaningful results.
+\begin{definition}[\textit{Latency}]
+    Latency refers to the time required to process a single chunk of data.
+\end{definition}
+\noindent Latency plays a crucial role in determining how efficiently an embedded system can process data. 
+Lower latency allows for a higher number of processed chunks per unit of time. However, there is a trade-off:
+\begin{itemize}
+    \item Larger windows increase latency but provide more information, often leading to improved accuracy.
+    \item Smaller windows reduce latency but may capture less useful data, potentially affecting performance.
+\end{itemize}
+\noindent Windows can be:
+\begin{itemize}
+    \item Overlapping, ensuring no information is lost from the signal.
+    \item Non-overlapping, which may be more computationally efficient but risks missing important details.
+\end{itemize}
+\noindent The choice of algorithm significantly impacts both computational requirements (latency) and memory usage, making it a key design consideration.
+
+\paragraph*{Frame rate}
+The frame rate defines how frequently the system can acquire and process data, similar to how frame rate applies to image and video streaming.
+
+High latency can hinder real-time analysis by preventing the system from processing new incoming data while still handling previous chunks, potentially leading to data loss. 
+Optimizing both latency and frame rate is essential for effective data segmentation and real-time performance.
+
+\subsection{Data processing}
+Data preprocessing using digital processing algorithms typically involves three key steps:
+\begin{enumerate}
+    \item \textit{Reconstruction of missing data}:
+        \begin{itemize}
+            \item \textit{Global filling methods}: filling in missing data based on patterns and trends observed across the entire dataset.
+            \item \textit{Local filling methods}: estimating missing values using nearby data points. Examples include forward fill, moving averages, and local interpolation techniques.
+            \item \textit{Deletion of affected time periods}: in some cases, time periods with missing data are removed entirely to avoid inaccuracies in analysis.
+        \end{itemize}
+    \item \textit{Resampling}:
+        \begin{itemize}
+            \item \textit{Time series resampling}: Handling time series data with varying sampling frequencies.
+                In upsambpling we increase the sampling rate by replicating or interpolating between timestamps.
+                In downsampling we reduce the sampling rate through subsampling.
+                Be cautious of aliasing when changing the sampling frequency.
+            \item \textit{Image resampling}: adjusting the spatial resolution (pixels per image).
+                In downsampling we reduce the image resolution by decreasing the number of pixels.
+                In interpolation we increase the image resolution by adding pixels based on existing data.
+            \item \textit{Shape modification for images}:
+                In cropping we trim parts of the image.
+                In resizing we adjust the image dimensions while maintaining or altering aspect ratios.
+        \end{itemize}
+    \item \textit{Filtering}: we can use different types of filter: 
+        \begin{itemize}
+            \item \textit{Low-pass filter}: retains low frequencies, removing high-frequency noise. Pay attention to the cutoff frequency and frequency response.
+            \item \textit{High-pass filter}: retains high frequencies, removing low-frequency components. The cutoff frequency and response are important here as well.
+            \item \textit{Band-pass filter}: keeps a specific range of frequencies, removing those outside the band.
+        \end{itemize}
+\end{enumerate}
+
+\subsection{Feature extraction} 
+Feature extraction can be applied across various domains and types of data:
+\begin{itemize}
+    \item \textit{Time domain}: features like mean, PCA eigenvalues, amplitude, signal-to-noise ratio (SNR), peak decay, and energy can be extracted.
+    \item \textit{Frequency domain}: features such as maximum amplitude, dominant frequency, and peak variance are commonly extracted.
+    \item \textit{Images}: features like edges, corners, blobs, and ridges (curves) are often detected
+    In embedded systems, tools for feature detection include OpenCV, a widely used library for image processing and feature detection, especially in System on Chips, and OpenMV, a library optimized for high-end microcontroller units, which focuses on efficient image processing and feature extraction.
+\end{itemize}
+
+\paragraph*{Sensor fusion}
+In sensor fusion, the goal is to combine data from multiple sensors rather than relying on a single sensor. 
+Each sensor provides unique perspectives and data, and by combining these diverse inputs, we create a more comprehensive and accurate representation of the environment or system.
+
+The features extracted from each sensor are merged to enhance the robustness, accuracy, and reliability of the analysis. 
+These fused features are then used in machine learning or deep learning models for further processing, ultimately enabling more precise and informed decision-making.
+
+\paragraph*{Normalization and standardization}
+For more efficient training, data should be normalized or standardized. 
+Features with different scales can negatively impact the performance of machine learning models, potentially leading to underfitting.
+\begin{itemize}
+    \item \textit{Minmax normalization}: scales data to a range of $[0,1]$:
+        \[x^\prime=\dfrac{x-x_{\min}}{x_{\max}-x_{\min}}\]
+    \item \textit{Standardization}: centers data around zero (mean), but does not limit it to a specific range:
+        \[x^\prime=\dfrac{x-\mu}{\sigma}\]
+        Here, $\mu$ is the mean and $\sigma$ is the standard deviation. 
+\end{itemize}
