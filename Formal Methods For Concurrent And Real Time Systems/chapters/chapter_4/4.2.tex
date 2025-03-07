@@ -1,183 +1,129 @@
-\section{Simulation and abstraction}
+\section{Transition systems refinement}
 
-Abstraction and Refinement
-• Transition systems can model software or hardware at various abstraction levels.
-– The lower the abstraction level, the more implementation details are present; at high
-abstraction levels, such details are deliberately left unspecified.
-• As in the Bakery example, we may start from a «detailed» TS and want to define
-a suitable more abstract TS
-– possibily preserving properties of interest, but easier to manage.
-– This process is called abstraction
-• We may instead start from a more abstract model and want to add more
-implementation details
-– possibily preserving properties of interest, but closer to real system
-– This process is called refinement
+Transition systems can represent software or hardware at various levels of abstraction, where the level of detail included in the model depends on the purpose of the analysis. 
+At lower levels of abstraction, more implementation details are included, while higher levels intentionally omit those details, focusing on the core behaviors of the system. 
+This section discusses the processes of abstraction and refinement in transition systems and their role in preserving certain properties while simplifying or detailing the model.
+
+The process of abstraction involves starting with a detailed transition system and creating a more abstract version, which may be easier to manage or reason about, while still preserving key properties of interest. 
+This is often necessary for high-level analysis or verification tasks. On the other hand, refinement is the opposite process, where a more abstract model is made more detailed to reflect implementation specifics, without losing the essential properties.
+
+Both abstraction and refinement are concerned with maintaining the correctness of a system while adjusting the level of detail, and this can be formally described using implementation relations.
+These relations connect two transition systems at different levels of abstraction.
 \begin{definition}[\textit{Implementation relation}]
-    An implementation relation is a binary relation between two TS at different
-abstraction levels. 
+    An implementation relation is a binary relation between two transition systems at different abstraction levels.
 \end{definition}
-\noindent When two TS,TS’ are related by an implementation relation, one model is said to
-be refined by the other; the second is said to be an abstraction of the first.
-• If the implementation relation is an equivalence, then the two TS cannot be
-distinguished (same observable properties at the relevant abstraction level).
-• Since it is possible to define many different implementation relations, there are
-different concepts of abstraction and refinement
+\noindent When two transition systems, $\text{TS}_1$ and $\text{TS}_2$, are related by an implementation relation, one system is said to be refined by the other. 
+The system that is more abstract is seen as an abstraction of the more detailed system. 
+If the implementation relation is an equivalence, then the two systems are indistinguishable at the relevant level of abstraction, as they exhibit the same observable properties.
 
-The fixed set AP plays a crucial role in comparing transition systems using
-bisimulation for checking the implementation relation.
-• The set AP used in a bisimulation stands for the set of all “relevant” atomic
-propositions.
-– All other atomic propositions are understood as negligible and are ignored in the comparison.
-• If TS is a refinement of TS' (e.g., it incorporates some implementation details),
-then usually the set AP of TS is a proper superset of the set AP' of TS' .
-– To compare TS and TS’, the set of common atomic propositions, AP’, is a reasonable choice.
-– In this way, it is possible to check whether the branching structure of TS agrees with that of
-TS’ when considering all observable information in AP’ .
-• For checking the equivalence of TS and TS' wrt the satisfaction of a temporal
-logic formula \phi, it suffices to consider as AP the atomic propositions of \phi.
-Bisimulation relations are equivalences requiring two bisimilar states to exhibit
-identical stepwise behavior.
-• Simulation relations only require that whenever a state s’ simulates state s, then
-s’ can mimic all stepwise behavior of s, but the reverse is not guaranteed
-– s’ may perform transitions that cannot be matched by s.
-– hence, every successor of s has a corresponding successor of s’, but the reverse does
-not necessarily hold.
-• Simulation relations often used for:
-– showing that one system correctly implements another, more abstract system.
-– finding a smaller abstract model preserving at least some properties of interest
+The set of atomic propositions plays a critical role in comparing transition systems. 
+In bisimulation, $\text{AP}$ represents the relevant atomic propositions. 
+Other propositions can be ignored if they do not affect the properties being studied.
+
+When verifying the satisfaction of a temporal logic formula $\phi$, we can restrict the AP to those propositions that are relevant to the formula. 
+This reduces the scope of the comparison and allows the verification of the formula in a more manageable way.
+
+\subsection{Simulation}
+While bisimulation relations require that two states exhibit identical stepwise behavior, simulation relations relax this requirement. 
+A simulation relation only mandates that if a state $s^\prime$ simulates state $s$, then $s^\prime$ must mimic all transitions of $s$, but not necessarily vice versa. 
+In other words, for each successor of $s$, there must be a corresponding successor of $s^\prime$, but not all successors of $s^\prime$ need to correspond to those of $s$.
+
+Simulation relations are useful when we want to show that one system correctly implements another, more abstract system, or when we want to find a smaller abstract model that still preserves important properties.
 
 \begin{definition}[\textit{Simulation}]
-    Let $\text{TS}_i=\left\langle S_i,\text{Act}_i,\rightarrow_i,I_i,\text{AP},L_i\right\rangle$ with $i=1,2$ be transition systems over $\text{AP}$. 
+    Let $\text{TS}_1=\left\langle S_1,\text{Act}_1,\rightarrow_1,I_1,\text{AP},L_1\right\rangle$ and \\ $\text{TS}_2=\left\langle S_2,\text{Act}_2,\rightarrow_2,I_2,\text{AP},L_2\right\rangle$ be transition systems over $\text{AP}$. 
     A simulation for $(\text{TS}_1,\text{TS}_2)$ is a binary relation $\mathcal{R}\subseteq S_1\times S_2$ such that: 
     \begin{enumerate}
-        \item $\forall s_1\in I_1 (\exists s_2\in I_2 (s_1,s_2)\in \mathcal{R})$. 
-        \item For all $(s_1,s_2)\in \mathcal{R}$ it holds: 
+        \item For every initial state $\forall s_1\in I_1$, $s_2\in I_2$ such that $(s_1,s_2)\in \mathcal{R}$. 
+        \item For all $(s_1,s_2)\in \mathcal{R}$, the following hold:
             \begin{enumerate}
                 \item $L_1(s_1)=L_2(s_2)$
-                \item If $s_1^\prime\in\text{post}(s_1)$ then there exists $s_2^\prime\in\text{post}(s_2)$ with $(s_1^\prime,s_2\prime)\in\mathcal{R}$. 
+                \item If $s_1^\prime\in\text{post}(s_1)$, then there exists $s_2^\prime\in\text{post}(s_2)$ such that $(s_1^\prime,s_2\prime)\in\mathcal{R}$. 
             \end{enumerate}
     \end{enumerate}
-    \text{TS}_1 si simulated by \text{TS}_2 denoted \text{TS}_1 \preceq \text{TS}_2 if there exists a bisimulation $\mathcal{R}$ for $(\text{TS}_1,\text{TS}_2)$. 
+    We say that $\text{TS}_1$ is simulated by $\text{TS}_2,$ denoted $\text{TS}_1 \preceq \text{TS}_2$, if there exists a bisimulation $\mathcal{R}$ for $(\text{TS}_1,\text{TS}_2)$. 
 \end{definition}
-The first condition requires that all initial states in TS1 are related to an initial state of TS2 (but, there might be initial states
-of TS2 that are not matched by an initial state of TS1 ).
-The secobd that are as for bisimulations, but the symmetric counterpart of (B.2) is not required.
+\noindent The first condition ensures that every initial state in $\text{TS}_1$ is related to an initial state in $\text{TS}_2$, although there might be initial states in $\text{TS}_2$ that are not related to any initial state in $\text{TS}_1$. 
+The second condition is similar to that of bisimulation, but the symmetric counterpart of the condition is not required.
+In other words, while $\text{TS}_1$ may have some successors not matched by $\text{TS}_2$, every successor of $\text{TS}_1$ must have a corresponding successor in $\text{TS}_2$.
+
+
+
+
+
 
 \subsection{Abstraction}
-Refinement and abstraction vs. simulations
-1. If TS1 is obtained from TS2 by deleting transitions of TS2 (e.g., replacing nondeterministic
-choices in TS2 with only one alternative) then TS1 is simulated by TS2
-– TS1 is thus a refinement of TS2, since TS1 resolves some nondeterminism in TS2.
-2. If TS2 is obtained from TS1 with some “abstraction” then TS1 is simulated by TS2.
-• Need to define that T2 is an abstraction of TS1 if:
-– There is a common set AP of atomic propositions.
-– States of TS2 are a set of “abstract states”.
-– There is an abstraction function f associating each (concrete) state s of TS1 with the “abstract state” f(s) of
-TS2 (and respecting the label in AP)
-• Abstractions differ in the choice of the abstract states, the abstraction function f, and the
-relevant propositions AP. 
-TS2 is an abstraction of TS1 if:
-– There is a common set AP of atomic propositions.
-– States of TS2 are a set of “abstract states”.
-– There is an abstraction function f associating each (concrete) state s of TS1 with the
-“abstract state” f(s) of TS2 (and respecting the label in AP)
-• Abstractions differ in the choice of the abstract states, the abstraction
-function f, and the relevant propositions AP. 
+\begin{definition}[\textit{Refinement}]
+    If $\text{TS}_1$ is obtained from $\text{TS}_2$ by deleting transitions, then $\text{TS}_1$ is simulated by $\text{TS}_2$. 
+    This makes $\text{TS}_1$ a refinement of $\text{TS}_2$, as the nondeterminism in $\text{TS}_2$ is resolved in $\text{TS}_1$.
+\end{definition}
+
+
+\begin{definition}[\textit{Abstraction}]
+    Conversely, if $\text{TS}_2$ is obtained from $\text{TS}_1$ by some form of abstraction, then $\text{TS}_1$ is simulated by $\text{TS}_2$.
+    In this case, $\text{TS}_2$ abstracts away some of the details of $\text{TS}_1$.
+\end{definition}
+\noindent An abstraction of $\text{TS}_1$ to $\text{TS}_2$ requires:
+\begin{itemize}
+    \item A common set of atomic propositions (AP).
+    \item The states of $\text{TS}_2$ are "abstract states".
+    \item An abstraction function $f$ that associates each concrete state $s$ of $\text{TS}_1$ with the abstract state $f(s)$ of $\text{TS}_2$, respecting the labels in $\text{AP}$.
+\end{itemize}
+\noindent Abstractions may vary in terms of the choice of abstract states, the abstraction function $f$, and the relevant propositions in $\text{AP}$.
+
+
+
 
 \subsection{Safety property}
-Simulation Preserves Safety Properties
+A safety property is one that asserts that something bad will never happen. 
+A key property of simulation relations is that they preserve safety properties.
 \begin{property}
-    Let $P_{\text{safe}}$ be a safety LT property and $\text{TS}_1$ and $\text{TS}_2$ transition systems (all over AP), then: 
+    Let $P_{\text{safe}}$ be a safety linear-time property, and let $\text{TS}_1$ and $\text{TS}_2$ be transition systems.
+    Then:
     \[\text{TS}_1\preceq \text{TS}_2\land\text{TS}_2\models P_{\text{safe}}\implies\text{TS}_1\models P_{\text{safe}} \]
 \end{property}
-Simulation is not an equivalence, so if TS2 is not «safe» then still TS1 might be.
-• Safety properties are preserved because finite paths fragments are preserved.
+\noindent This means that if $\text{TS}_2$ satisfies a safety property and $\text{TS}_1$ is simulated by $\text{TS}_2$, then $\text{TS}_1$ will also satisfy the safety property.
 
-\paragraph*{Path fragments}
-A finite path fragment p1 from s1 is simulated by a path fragment p2 from s2;
-However, if p1 ends in a terminal state and p2 does not, then p1 is a path from s2 but p2 is NOT a path from s2.
-• Simulation preserves the set of all finite path fragments (from initial states), but not the set of paths ending in a
-terminal state
-• Finite traces are defined as the traces corresponding to finite paths fragments: finite traces are preserved as well
+\subsection{Path fragments}
+\begin{definition}
+    A path fragment is a finite part of a path in the transition system.
+\end{definition}
+\noindent The simulation relation preserves the set of finite path fragments, but it does not preserve entire paths that end in terminal states.
+If a path fragment $p_1$ from state $s_1$ is simulated by a path fragment $p_2$ from state $s_2$, and $p_1$ ends in a terminal state, but $p_2$ does not, then: $p_1$ is a valid path in $\text{TS}_1$, but $p_2$ is not a valid path in  $\text{TS}_2$.
 
-\paragraph*{No terminal states}
-Terminal states in the simulated program TS1 are the problem. If TS1 has no
-terminal states trace inclusion is preserved for all traces
-As a corollary, for transition systems without terminal states, simulation
-preserves all LT properties and not just the safety properties.
-
-Many abstraction techniques (e.g. SLAM, CBMC) based on building a P2
-simulating P1, and then only verifying P2
-• Refinement approaches build and verify P2 (i.e., a model), before implementing
-an actual program P1
-• For sequential, non-reactive, programs we are only interested in safety properties
-– If implementation P1 is simulated by a more abstract P2 then safety properties proved on
-P2 («for the same AP») are preserved in P1
-• For concurrent, reactive program we are also interested in liveness property (e.g.,
-no deadlock, no starvation)
-– Typically we can consider the program P1 as nonterminating
-– Liveness properties proved on P2 are then preserved in P1 (trace inclusion!) 
-
-Simulation relation is transitive and reflexive but not symmetric
-– if TS1 simulated by TS2, TS1\leq TS2, then it may not be the case that TS2\leq TS1 the
-vice versa)
-• It may however happen then TS2 can actually be simulated by TS1, so
-TS2\leq TS1.
-• TS1 and TS2 are simulation equivalent, TS1\cong TS2, if both TS1\leq TS2 and
-TS2\leq TS1.
-– Advantage: TS1 and TS2 verify the same safety properties
-
-As it is the case for bisimulation, a simulation relation R can be defined on the
-states a single transition system TS.
-– Details are obivious
-• State s1 of TS is simulated by s2, s1\leq_{\text{TS}}s2, if there is a simulation R for a TS
-such (s1,s2) \in R.
-• States s1 and s2 are simulation-equivalent, s1\cong TS s2, if s1\leq_{\text{TS}}s2 and s2\leq_{\text{TS}}s1
-– NB: The simulation relation may be different in the two cases
+Simulation preserves the finite traces of the system, which correspond to the finite path fragments, but it does not preserve traces that involve terminal states.
+If there are no terminal states in the transition system, simulation preserves all traces (including infinite traces) and not just the safety properties.
 
 \subsection{Simulation quotient}
-As we did for bisimulation, given a transition system TS and a simulation
-equivalence \cong_{\text{TS}} on states we can define a «quotient» transition system TS_{\setminus\cong}
-• For any transition system TS it holds that TS \cong_{\text{TS}} TS_{\setminus\cong}
-• We can then reduce the size of a system using this quotient.
-• But what is the relation with bisimulation equivalence?
+A simulation quotient is a reduced version of a transition system where simulation equivalence is used to merge equivalent states.
+Given a transition system $\text{TS}$ and a simulation equivalence $\cong_{\text{TS}}$, we can define a quotient transition system $TS_{\setminus\cong}$, where equivalent states are merged.
+The quotient system will have the same behavior as $\text{TS}$ with reduced state space.
 
-Bisimulation is Strictly Finer than Simulation
-
-AP-determinismè simulation equiv. = bisim. equiv.
-\begin{definition}[\textit{AP determinism}]
-    A transition system $\text{TS}=\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$ is AP-deterministic uf: 
+\subsection{Atomic proposition determinism}
+\begin{definition}[\textit{Atomic proposition determinism}]
+    An Atomic proposition deterministic transition system $\text{TS}=\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$ has the following properties: 
     \begin{enumerate}
-        \item for $A\subseteq\text{AP}$ we have that $\left\lvert I\cap\left\{s\mid L(s)=A\right\}\right\rvert\leq 1$
-        \item For $s\in S$ we have that if $s\overset{\alpha}{\rightarrow}s^\prime$ and $s\overset{\alpha}{\rightarrow}s^{\prime\prime}$ and $L(s^\prime)=L(s^{\prime\prime})$, then$s^\prime=s^{\prime\prime}$.
+        \item For any set $A\subseteq\text{AP}$, there is at most one initial state in $\text{TS}$ with label $A$.
+        \item If a state $s$ can transition to two distinct states $s^\prime$ and $s^{\prime\prime}$ via the same action and with the same label, then $s^\prime=s^{\prime\prime}$.
     \end{enumerate}
 \end{definition}
 \begin{theorem}
-    IF TS1 amd TS2 are AP-determinstic, Then TS1\sim TS2 if and only if TS1\simeq  TS2
+    IF $\text{TS}_1$ and $\text{TS}_2$ are AP-determinstic, then $\text{TS}_1\sim\text{TS}_2$ if and only if $\text{TS}_1\simeq\text{TS}_2$. 
 \end{theorem}
+\noindent This means that for AP-deterministic systems, simulation equivalence implies bisimulation equivalence, and vice versa.
 
 \subsection{Action based bisimulation}
-Our definition considered only state labels and ignored actions!
-• This is consistent with our interest in model checking, where labels of transition are
-irrelevant.
-– For instance, in a temporal logic formula we only talk of set AP.
-– An external event triggering a transition can be «stored» in the state as part of the state label.
-– Actions are used mainly for communicating processes
-• It is possible to define an «action-based» bisimulation.
-• The two notions are of course strictly related.
-• Action-based bsimulations are studied extensively in concurrency theory («process
-algebras» such as CSP, labeled transition systems).
+While traditional bisimulation focuses on state labels, action-based bisimulation also takes into account the actions triggering transitions between states.
 \begin{definition}[\textit{Action based bisimulation equivalence}]
-    
+    Let $\text{TS}_1=\left\langle S_1,\text{Act}_1,\rightarrow_1,I_1,\text{AP},L_1\right\rangle$ and $\text{TS}_2=\left\langle S_2,\text{Act}_2,\rightarrow_2,I_2,\text{AP},L_2\right\rangle$ be transition systems over a set of actions $\text{Act}$.
+    An action-based bisimulation for $(\text{TS}_1,\text{TS}_2)$ is a binary relation $\mathcal{R}\subseteq S_1\times S_2$ such that: 
+    \begin{enumerate}
+        \item For each $s_1\in I_1$, there exists $s_2\in I_2$ such that $(s_1,s_2)\in\mathcal{R}$, and viceversa.
+        \item For each pair $(s_1,s_2)$, the following hold:
+            \begin{enumerate}
+                \item If $s_1\overset{\alpha}{\rightarrow}s_1^\prime$, then $s_2\overset{\alpha}{\rightarrow}s_2^\prime$ with $(s_1^\prime,s_2^\prime)\in\mathcal{R}$ for some $s_2^\prime\in S_2$.
+                \item If $s_2\overset{\alpha}{\rightarrow}s_2^\prime$, then $s_1\overset{\alpha}{\rightarrow}s_1^\prime$ with $(s_1^\prime,s_2^\prime)\in\mathcal{R}$ for some $s_1^\prime\in S_1$.
+            \end{enumerate}
+    \end{enumerate}
+    $\text{TS}_1$ and $\text{TS}_2$ are action-based bisimulation equivalent, denoted $\text{TS}_1\sim^{\text{Act}}\text{TS}_2$, if there exists an action-based bisimulation $\mathcal{R}$ for $(\text{TS}_1,\text{TS}_2)$.
 \end{definition}
-All results and concepts presented for ∼ can be adapted for ∼Act in a straightforward manner. For instance,
-∼Act is an equivalence and can be adapted to an equivalence ∼Act
-TS also for the states of a single transition
-system TS.
-Definition can be used also for defining bisim. for NFA (adding condition that final states are not equivalent
-to nonfinal states).
-
-
-
-
-TABLE to be put Here
