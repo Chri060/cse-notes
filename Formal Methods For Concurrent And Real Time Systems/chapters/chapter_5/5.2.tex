@@ -1,0 +1,166 @@
+\section{Timed Automata}
+
+Timed Automata are a type of Program Graph where real-valued variables, called clocks, are added to track time. 
+The state of a Timed Automaton is defined by a combination of its current location (the logical state of the automaton) and the values of the clocks.
+The set of locations in a Timed Automata is finite, but the clocks take values in non-negative real numbers, making the state space infinite.
+Timed Automatas often do not use atomic propositions but rely on the names of the locations to define the states.
+
+A Timed Automaton can evolve in two main ways:
+\begin{itemize}
+    \item \textit{Location jumps}: the automaton can change its location without the passage of time. 
+        This happens when a transition occurs, but time does not elapse.
+    \item \textit{Time elapsing}: time progresses while the automaton remains in the same location. 
+        This means that the location remains unchanged, but the values of the clocks are updated.
+\end{itemize}
+
+The clocks in a Timed Automaton measure the passage of time according to the differential equation $\dot{x}=1$, meaning that the value of each clock increases at a constant rate.
+
+\subsection{Clocks}
+In Timed Automata, clocks play a crucial role in tracking the passage of time. 
+However, access to clocks is limited: they can only be inspected (checked) or reset to zero during transitions.
+
+Unless explicitly reset, each clock continuously increments as time progresses, at a rate of $1$. 
+After $d$ time units have passed, all clocks advance by $d$.
+The value of a clock represents the amount of time that has elapsed since its last reset. Clocks can be thought of as independent stopwatches, which can be started and checked independently of one another.
+
+\paragraph*{Clock constraints}
+Clock constraints (conditions on the values of the clocks) are used to define enabling conditions, or guards, for transitions. 
+A transition will only be enabled and capable of occurring if the clock constraint is satisfied. 
+If the condition is not met, the transition (and its associated action) is disabled.
+\begin{definition}[\textit{Clock constraint}]
+    A clock constraint over a set $C$ of clocks is formed according to the following grammar:
+    \[g::=x<c\mid x\leq c\mid x>c \mid x\geq c\mid g\land g\]   
+    Here, $x\in C$ represents a clock, and  $c\in\mathcal{N}$ represents a constant.
+    Let $\text{cc}(C)$ denote the set of clock constraints over $C$.  
+\end{definition}
+\noindent A Timed Automaton is a Program Graph with a finite set $C$ of clocks.
+The edges of this graph are labeled with the tuples $\left\langle g, \alpha, D\right\rangle$, where:
+\begin{itemize}
+    \item $g$ is the clock constraint (the guard).
+    \item $\alpha$ is an action performed during the transition.
+    \item $D\subseteq C$ is the set of clocks that will be reset to zero during the transition.
+\end{itemize} 
+\noindent The intuitive interpretation of the transition:
+\[\ell\overset{g:\alpha,D}{\hookrightarrow}\ell^\prime\]
+\noindent is that the automaton can move from location $\ell$ to location $\ell^\prime$ if the clock constraint $g$ holds. 
+During this transition, the clocks in $D$ are reset to zero, and the action $\alpha$ is executed.
+\begin{definition}[\textit{Invariant}]
+    A location invariant is a clock constraint associated with a location $\ell$. 
+\end{definition}
+\noindent he invariant specifies the maximum amount of time that can be spent in location $\ell$ before the system must transition to another location.
+
+\subsection{Transition systems as Timed Automata}
+\begin{definition}
+    A Timed Automaton $\text{TA}$ can be formally defined as a tuple \\ $\text{TA} = \left\langle \text{Loc}, \text{Act}, C, \rightarrow, \text{Loc}_0, \text{Inv}, \text{AP},L\right\rangle$, where:
+    \begin{itemize}
+        \item $\text{Loc}$: a finite set of locations (states).
+        \item $\text{Loc}_0\subseteq\text{Loc}$: a set of initial locations.
+        \item $\text{Act}$: a finite set of actions.
+        \item $C$: a finite set of clocks.
+        \item $\rightarrow\subseteq\text{Loc}\times\text{cc}(C)\times\text{Act}\times 2^C\times\text{Loc}$: the transition relation, specifying allowed state changes.
+        \item $\text{Inv}:\text{Loc}\rightarrow\text{cc}(C)$: a function assigning clock constraints (invariants) to locations.
+        \item $\text{AP}$: a finite set of atomic propositions.
+        \item $L:\text{Loc}\rightarrow 2^{\text{AP}}$: a labeling function that maps each location to a set of atomic propositions.
+    \end{itemize}
+\end{definition}
+Given two timed automata $\text{TA}_1 = \left\langle \text{Loc}_1, \text{Act}_1, C_1, \rightarrow_1, \text{Loc}_{0,1}, \text{Inv}_1, \text{AP}_1,L_1\right\rangle$ and $\text{TA}_2 = \left\langle \text{Loc}_2, \text{Act}_2, C_2, \rightarrow_2, \text{Loc}_{0,2}, \text{Inv}_2, \text{AP}_2,L_2\right\rangle$ where $H\subseteq\text{Act}_1\cap\text{Act}_2$, $C_1\cap C_2=\varnothing$ and $\text{AP}_1\cap\text{AP}_2=\varnothing$. 
+The parallel composition $\text{TA}_1\parallel_H\text{TA}_2$ is defined as:
+\[\left\langle \text{Loc}_1\times\text{Loc}_2, \text{Act}_1\cup\text{Act}_2, C_1\cup C_2, \hookrightarrow, \text{Loc}_{0,1}\times\text{Loc}_{0,2}, \text{Inv}, \text{AP}_1\cup\text{AP}_2,L\right\rangle\]
+Here, $L(\left\langle \ell_1,\ell_2\right\rangle )=L(\ell_1)\cup L(\ell_2)$ and $\text{Inv}(\left\langle \ell_1,\ell_2\right\rangle )=\text{Inv}(\ell_1)\land \text{Inv}(\ell_2)$. 
+The transition relation $\hookrightarrow$ is defined based on synchronization conditions:
+\begin{itemize}
+    \item For $\alpha \in H$ (synchronized transition): 
+        \[\dfrac{\ell_1\overset{g_1:\alpha,D_1}{\hookrightarrow}_1\ell_1^\prime\land\ell_2\overset{g_2:\alpha,D_2}{\hookrightarrow}_2\ell_2^\prime}{\left\langle \ell_1,\ell_2\right\rangle\overset{g_1\land g_2:\alpha,D_1\cup D_2}{\hookrightarrow}\left\langle \ell_1^\prime,\ell_2^\prime\right\rangle}\]
+        \item For $\alpha \notin H$: 
+        \[\dfrac{\ell_1\overset{g:\alpha,D}{\hookrightarrow}_1\ell_1^\prime}{\left\langle \ell_1,\ell_2\right\rangle\overset{g:\alpha,D}{\hookrightarrow}\left\langle \ell_1^\prime,\ell_2^\prime\right\rangle} \qquad \text{and}\qquad\dfrac{\ell_2\overset{g:\alpha,D}{\hookrightarrow}_2\ell_2^\prime}{\left\langle \ell_1,\ell_2\right\rangle\overset{g:\alpha,D}{\hookrightarrow}\left\langle \ell_1^\prime,\ell_2^\prime\right\rangle}\]
+\end{itemize}
+
+\subsection{Clock valuation}
+A clock valuation is a function:
+\[\eta:C\rightarrow\mathcal{R}_{\geq 0}\]
+hat assigns a nonnegative real value to each clock $x\in C$. 
+This function represents the amount of time elapsed since the last reset of each clock.
+The set of all possible clock valuations over $C$ is denoted as $\text{eval}(C)$.
+A clock valuation $\eta$ satisfies a clock constraint $g\in\text{cc}$  if and only if the constraint evaluates to true when the clocks take values according to $\eta$.
+\begin{definition}[\textit{Satisfaction relation for clock constraints}]
+    For set $C$ of clocks, $x\in C$, $\eta\in\text{eval}(C)$, $c\in\mathbb{N}$, and $g,g^\prime\in\text{cc}(C)$, let $\models\subseteq\text{eval}(C)\times\text{cc}(C)$ be defined by: 
+    \begin{itemize}
+        \item $\eta\models\text{true}$
+        \item $\eta\models x<c$ if and only if $\eta(x)< c$
+        \item $\eta\models x\leq c$ if and only if $\eta(x)\leq c$
+        \item $\eta\models \lnot g$ if and only if $\eta\not\models g$
+        \item $\eta\models g\land g^\prime$ if and only if $\eta\models g\land \eta\models g^\prime$
+    \end{itemize}
+\end{definition}
+\noindent For any positive real number $d$, the notation $\eta+d$ represents a new clock valuation where all clocks in $\eta$ have their values increased by $d$.
+\begin{definition}[\textit{Reset}] 
+    A reset operation on a clock $x$ in a clock valuation $\eta$ results in a new clock valuation where all clocks remain unchanged except for $x$, which is reset to zero.
+\end{definition}
+
+\subsection{Transitions}
+The behavior of a timed automaton is defined in terms of an underlying Transition System. 
+In this model, a system can evolve in two fundamental ways:
+\begin{itemize}
+    \item Taking a discrete transition: moving from one location to another based on clock constraints and reset conditions.
+    \item Letting time progress: remaining in the same location while clocks continue to increase.
+\end{itemize}
+\noindent Discrete transitions correspond to instantaneous events, meaning they occur with zero duration.
+Time progression occurs only while staying in a location.
+Multiple actions can take place at the same time instant since transitions are instantaneous.
+\begin{definition}[\textit{Timed automaton transition}]
+    A Timed Automaton is defined as \\ $\text{TA} = \left\langle \text{Loc}, \text{Act}, C, \rightarrow, \text{Loc}_0, \text{Inv}, \text{AP},L\right\rangle$, where: 
+    \begin{itemize}
+        \item $\text{Loc}$ is the set of locations (states).
+        \item $\text{Act}$ is the set of possible actions.
+        \item $C$ is the set of clocks.
+        \item $\rightarrow$ is the transition relation.
+        \item $\text{Loc}_0$ is the set of initial locations.
+        \item $\text{Inv}$ assigns invariants to locations.
+        \item $\text{AP}$ is the set of atomic propositions.
+        \item $L$ is a labeling function.
+    \end{itemize}
+\end{definition}
+\noindent The transition relation defines two types of transitions.
+
+\paragraph*{Discrete transition}
+A discrete transition:
+\[\left\langle \ell,\eta\right\rangle\overset{\alpha}{\hookrightarrow}\left\langle \ell^\prime,\eta^\prime\right\rangle\] 
+Occurs if the following conditions hold:
+\begin{enumerate}
+    \item There exists a transition $\ell\overset{g:\alpha,D}{\hookrightarrow}\ell^\prime$ in $\text{TA}$. 
+    \item The current clock valuation satisfies the guard: $\eta\models g$. 
+    \item The new clock valuation $\eta^\prime$ is obtained by resetting all clocks in $D$
+        \[\eta^\prime=\text{reset }D \in \eta\]
+    \item The new clock valuation satisfies the invariant of the destination location: 
+        \[\eta^\prime\models\text{inv}(\ell^\prime)\]
+\end{enumerate}
+
+\paragraph*{Delay transition}
+A delay transition:
+\[\left\langle \ell,\eta\right\rangle\overset{d}{\hookrightarrow}\left\langle \ell,\eta+d\right\rangle\] 
+For any $d\in\mathbb{R}_{\geq 0}$ is valid if and only if $\eta+d\models\text{inv}(\ell)$, which ensures that time can progress while remaining in $\ell$.
+
+\subsection{Definitions and diagonal constraints}
+\begin{definition}[\textit{Time converfet path}]
+    A time-convergent path is a sequence of transitions where time does not progress beyond a certain bound.
+\end{definition}
+\noindent A time-divergent path ensures that time progresses indefinitely toward infinity.
+\begin{definition}[\textit{Timelock}]
+    A timelock occurs when a state $s$ in $\text{TS}(\text{TA})$ has no time-divergent path starting from it.
+\end{definition}
+\noindent This means time cannot progress indefinitely from $s$, making it unrealistic in real-world systems.
+Avoiding timelocks is essential when designing time-critical systems, ensuring that time always has a way to progress.
+
+\begin{definition}[\textit{Zeno path}]
+    A path $\pi$ in $\text{TS}(\text{TA})$ is called Zeno if:
+    \begin{itemize}
+        \item It is time-convergent (time does not diverge to infinity).
+        \item It contains infinitely many discrete transitions.
+    \end{itemize}
+\end{definition}
+\noindent Zeno paths are problematic because they imply that an infinite number of actions happen in finite time, which would require infinitely fast processors, making such behavior unrealizable in practice.
+
+\paragraph*{Diagonal constraints}
+Diagonal constraints extend standard clock constraints by allowing direct comparisons between two clocks. 
+These constraints require tracking relationships between clocks rather than absolute values.
+To model these constraints without changing the fundamental structure of timed automata by storing extra information in states about the last reset time of each clock and using this information to encode constraints. 

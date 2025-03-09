@@ -1,0 +1,75 @@
+\section{Timed Automata analysis}
+
+To verify properties of a system modeled as a timed automaton, we need to explore all possible states of the automaton.
+
+A state in a Timed Automata is represented as $\left\langle \text{location},\text{clock evaluation}\right\rangle$.
+The set of possible clock evaluations, denoted $\text{eval}(C)$, consists of real-valued clock assignments.
+Since clock values come from $\mathbb{R}_{\geq 0}$, this results in an infinite state space.
+
+\subsection{Clock regions}
+To make exhaustive exploration feasible, we construct a finite abstraction of the state space: clock regions provide a way to group equivalent clock valuations into a finite number of equivalence classes.
+Two clock valuations $\eta_1$ and $\eta_2$ belong to the same region if and only if:
+\begin{enumerate}
+    \item They agree on the integer parts of all clock values.
+        For each  $x\in C$, the integer parts of $\eta_1(x)$ and $\eta_2(x)$ must be identical.
+    \item They agree on the ordering of fractional parts of all clock values.
+        If two clocks $x$ and $y$ in $\eta_1$ will reach their next integer values in a specific order, they must reach them in the same order in $\eta_2$.
+\end{enumerate}
+\noindent For each clock $x\in C$, define $x_c$ as the largest integer appearing in constraints: if a constraint $x \leq c$ or $c\leq x$ appears in the system, set $c_x=\max(c)$.
+
+\begin{definition}[\textit{Clock valuation equivalence}]
+    Clock valuations $\eta$ and $\eta^\prime$  are equivalent (i.e., belong to the same clock region) if and only if:
+    \begin{itemize}
+        \item If $\eta(x)>c_x$ and $\eta^\prime(x)>c_x$ for every clock $x$, then they are considered equivalent.
+        \item Otherwise, for all $x,y\in C$ with $\eta(x), \eta^\prime(x)\leq c_x$ and $\eta(y), \eta^\prime(y)\leq c_y$: 
+            \begin{itemize}
+                \item They have the same integer part: 
+                    \[\left\lfloor \eta(x)\right\rfloor=\left\lfloor \eta^\prime(x)\right\rfloor\]
+                \item Their fractional parts agree in ordering: 
+                    \[\text{frac}(\eta(x))\leq\text{frac}(\eta(y))\Leftrightarrow\text{frac}(\eta^\prime(x))\leq\text{frac}(\eta^\prime(y))\]
+                \item $\text{frac}(\eta(x))=0$ if and only if $\text{frac}(\eta^\prime(x))=0$
+            \end{itemize}
+    \end{itemize}
+\end{definition}
+\begin{definition}[\textit{Clock region}]
+    A clock region is defined as an equivalence class of clock evaluations under the relation $\cong$. 
+\end{definition}
+\noindent Since there are only finitely many ways to assign integer values and compare fractional parts, the number of regions is finite.
+The region abstraction enables efficient verification of properties in timed automata by ensuring a finite number of explored states.
+
+\subsection{Region based automata}
+By using clock regions, we can construct a finite representation of all possible states in the timed Transition System $\text{TS}(\text{TA})$.
+state in $\text{TS}(\text{TA})$ is represented as $\left\langle \ell_i,\right\rangle$ where $\ll_i$ is a location and $\eta_i$ is a clock valuation.
+The key idea is to group clock valuations into equivalence classes (regions) to define a finite region-based Transition System.
+Since there is a maximum constant in the clock constraints, the number of clock regions is finite.
+
+Thus, for a given timed automaton, we build a region-based Transition System where states are pairs:
+\[\left\langle \ell_i,\right\rangle\]
+
+To define transitions in the region-based Transition System, we need to determine time successors of clock regions.
+\begin{definition}[\textit{Time successor}]
+    A clock region $\alpha^\prime$ is a time-successor of a clock region $\alpha$ if:
+    \[\forall\eta\in\alpha\qquad \exists t\in\mathbb{R}_{\geq 0}\mid \eta+t\in\alpha^\prime\]
+\end{definition}
+\noindent This means that every reachable clock region along a diagonal transition is a time-successor.
+If two clock valuations are in the same region, the automaton can take the same transitions.
+However, the exact delays might need to be adjusted to ensure they reach corresponding successor regions.
+
+\subsection{Time abstracted bisimulation}
+Clock equivalence can be seen as a special case of time-abstracted bisimulation.
+\begin{definition}[\textit{Time abstracted bisimulation}]
+    A relation $R$ on the states of a timed automata is a time based bisimulation if $(\ell_1,\upsilon_1)R(\ell_2,\upsilon_2)$ and $(\ell_1,\upsilon_1)\xrightarrow{d_1,a}(\ell_1^\prime,\upsilon_1^\prime)$ for some $d_1 \in\mathbb{R}_{\geq 0}$ and $a\in\Sigma$ imply $(\ell_2,\upsilon_2)\xrightarrow{d_2,a}(\ell_2^\prime,\upsilon_2^\prime)$ for some $d_2 \in\mathbb{R}_{\geq 0}$ with $(\ell_1^\prime,\upsilon_1\prime)R(\ell_2\prime,\upsilon_2\prime)$ and viceversa. 
+\end{definition}
+\begin{theorem}
+    Clock equivalence is a bisimulation equivalence.
+\end{theorem}
+\noindent Clock equivalence defines a bisimulation over atomic propositions. 
+Since clock equivalence is a finite-index relation, we obtain a finite quotient Transition System:
+\[\text{RTS}(\text{TA})\] 
+\noindent From this, we can derive that: 
+\begin{enumerate}
+    \item Every path in the infinite $\text{TS}(\text{TA})$ has a corresponding path in the finite $\text{RTS}(\text{TA})$.
+    \item Every path in $\text{RTS}(\text{TA})$ corresponds to an infinite set of paths in $\text{TS}(\text{TA})$.
+    \item Computation Tree Logic-style logical properties (used in model checking) are preserved in $\text{RTS}(\text{TA})$.
+\end{enumerate}
+\noindent Thus, region-based automata allow efficient analysis of timed systems while maintaining correctness guarantees.

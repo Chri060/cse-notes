@@ -11,7 +11,7 @@ This allows for verifying properties such as:
 
 \subsection{Markov chains}
 Markov chains are widely used to evaluate the performance and reliability of information-processing systems. 
-They extend traditional transition systems by associating probabilities with state transitions rather than relying on nondeterministic choices.
+They extend traditional Transition Systems by associating probabilities with state transitions rather than relying on nondeterministic choices.
 \begin{definition}[\textit{Discrete time Markov chain}]
     A discrete time Markov chain $\mathcal{M}$ is defined as a tuple $\mathcal{M}=\left\langle S,\Pr,\ell_{\text{init}},\text{AP},L\right\rangle$ where: 
     \begin{itemize}
@@ -35,14 +35,14 @@ Here, $\Pr_s$ is the total probability of all paths starting at $s$ where $\phi$
 Probabilistic Computation Tree Logic extends Computation Tree Logic by incorporating probability bounds, allowing for the formal verification of probabilistic systems.
 
 \subsubsection{Syntax}
-The syntax of Probabilistic Computation Tree Logic consists of state and path formulae. 
-State formulae describe properties of individual states:
+The syntax of Probabilistic Computation Tree Logic consists of state and path formulas. 
+State formulas describe properties of individual states:
 \[\Phi::=\text{true}\mid a\mid \Phi_1\land\Phi_2\mid\lnot\Phi\mid\mathbb{P}_J(\phi)\]
-\noindent Here, $a \in AP$ is an atomic proposition, $\phi$ is a path formula, and $J \subseteq [0, 1]$ is a probability interval.
+\noindent Here, $a \in atomic proposition$ is an atomic proposition, $\phi$ is a path formula, and $J \subseteq [0, 1]$ is a probability interval.
 
-Path formulae define properties over execution paths:
-\[\phi::=\bigcirc\Phi\mid\Phi_1\cup\Phi_2\mid\Phi_1\cup^{\leq n}\Phi_2\]
-\noindent Here, $\bigcirc$ represents the next operator, $\cup$ denotes the until operator, and $\cup^{\leq n}$ expresses bounded until with a maximum of $n$ steps.
+Path formulas define properties over execution paths:
+\[\phi::=\circ\Phi\mid\Phi_1\cup\Phi_2\mid\Phi_1\cup^{\leq n}\Phi_2\]
+\noindent Here, $\circ$ represents the next operator, $\cup$ denotes the until operator, and $\cup^{\leq n}$ expresses bounded until with a maximum of $n$ steps.
 
 \subsubsection{Semantic}
 Probabilistic Computation Tree Logic is interpreted over a Markov chain, where the semantics of the non-probabilistic fragment follow those of Computation Tree Logic. 
@@ -54,7 +54,7 @@ The following rules define how Probabilistic Computation Tree Logic formulas are
     \item $s \models a \Leftrightarrow a \in L(s)$
     \item $s \models \lnot\Phi \Leftrightarrow s \not\models \Phi$
     \item $s \models \Phi \land \psi \Leftrightarrow s \models \Phi \land s \models \psi$
-    \item $\pi \models \bigcirc \Phi \Leftrightarrow \pi[1] \models \Phi$
+    \item $\pi \models \circ \Phi \Leftrightarrow \pi[1] \models \Phi$
     \item $\pi \models \Phi \cup \psi \Leftrightarrow \exists j \geq 0 \quad(\pi[j] \models \psi \land (\forall 0 \leq k < j. \pi[k] \models \Phi))$
     \item $\pi \models \Phi \cup^{\leq n} \psi \Leftrightarrow \exists 0 \leq j \leq n \quad(\pi[j] \models \psi \land (\forall 0 \leq k < j. \pi[k] \models \Phi))$
 \end{itemize}
@@ -63,7 +63,7 @@ Here, for a path $\pi = s_0 s_1 s_2 \dots$ and $\pi[i]$ denotes the $(i+1)$-th s
 \subsubsection{Model checking}
 The Probabilistic Computation Tree Logic model checking problem involves determining if a given state in a Markov chain satisfies a Probabilistic Computation Tree Logic formula. 
 Given a finite Markov chain $\mathcal{M}$, a state $s$ in $\mathcal{M}$, and a Probabilistic Computation Tree Logic state formula $\Phi$, the problem is to determine whether $s \models \Phi$.
-This is achieved by computing the satisfaction set $\text{sat}(\Phi)$ using a bottom-up traversal of the formula's parse tree
+This is achieved by computing the satisfaction set $\text{sat}(\Phi)$ using a bottom-up traversal of the formula's parse tree.
 \begin{theorem}
     For finite Markov chain $\mathcal{M}$ and Probabilistic Computation Tree Logic formula $\Phi$, the model checking problem $\mathcal{M} \models \Phi$ can be solved in time: 
     \[\mathcal{O}\left(\text{poly}\left(\text{size}\left(\mathcal{M}\right)\cdot n_{\max}\cdot\left\lvert \Phi\right\rvert\right)\right)\]
@@ -86,7 +86,7 @@ Restricting probability bounds to greater than zero, equal to one, equal to zero
 \subsection{Markov decision processes}
 A Markov Decision Process extends Markov chains by introducing nondeterminism, making them useful for modeling concurrent systems.
 \begin{theorem}
-    For a finite A Markov Decision Process $\mathcal{M}$ and a Probabilistic Computation Tree Logic formula $\Phi$, the model checking problem $\mathcal{M} \models \Phi$ can be solved in time:
+    For a finite Markov Decision Process $\mathcal{M}$ and a Probabilistic Computation Tree Logic formula $\Phi$, the model checking problem $\mathcal{M} \models \Phi$ can be solved in time:
        \[\mathcal{O}\left(\text{poly}\left(\text{size}\left(\mathcal{M}\right)\cdot n_{\max}\cdot\left\lvert \Phi\right\rvert\right)\right)\]
     Here, $n_{\max}$ is the maximal step bound appearing in a bounded until subformula $\Psi_1\cup^{\leq n}\Psi_2$ of $\Phi$, and $n_{\max}=1$ if $\Phi$ contains no bounded until operators.
 \end{theorem}

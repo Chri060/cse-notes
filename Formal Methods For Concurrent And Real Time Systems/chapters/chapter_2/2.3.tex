@@ -1,32 +1,32 @@
 \section{Concurrency}
 
-Given two transition systems: 
+Given two Transition Systems: 
 \[\text{TS}_1=\left\langle S_1, \text{Act}_1, \rightarrow_1, I_1,\text{AP}_1, L_1\right\rangle \qquad \text{TS}_2=\left\langle S_2, \text{Act}_2, \rightarrow_2, I_2,\text{AP}_2, L_2\right\rangle\]    
 Their interliving is defined as: 
 \[\text{TS}_1\:|||\:\text{TS}_2=\left\langle S_1\times S_2, \text{Act}_1 \cup \text{Act}_2, \rightarrow_1, I_1\times I_2,\text{AP}_1\cup \text{AP}_2, L\right\rangle\]
 Here,  $L(\left\langle s_1,s_2\right\rangle )= L(s_1) \cup L(s_2)$ and the transition relation $\rightarrow$ is:
-\[\dfrac{s_1\overset{\alpha}{\rightarrow}s_1^\prime}{\left\langle s_1,s_2\right\rangle \overset{\alpha}{\rightarrow}\left\langle s_1^\prime,s_2\right\rangle} \land \dfrac{s_2\overset{\alpha}{\rightarrow}s_2^\prime}{\left\langle s_1,s_2\right\rangle \overset{\alpha}{\rightarrow}\left\langle s_1,s_2^\prime\right\rangle}\]
-In practice, the two TS proceed independently (alternating nondeterministically), but only one at a time is considered to be “active”. 
+\[\dfrac{s_1\xrightarrow{\alpha}s_1^\prime}{\left\langle s_1,s_2\right\rangle \xrightarrow{\alpha}\left\langle s_1^\prime,s_2\right\rangle} \land \dfrac{s_2\xrightarrow{\alpha}s_2^\prime}{\left\langle s_1,s_2\right\rangle \xrightarrow{\alpha}\left\langle s_1,s_2^\prime\right\rangle}\]
+In practice, the two Transition System proceed independently (alternating nondeterministically), but only one at a time is considered to be “active”. 
 Similar to non-synchronizing threads: all possible interleavings are allowed.
 
 \paragraph*{No shared variables}
-When two program graphs, $\text{PG}_1$ and $\text{PG}_2$, do not share variables, their interleaving can be naturally defined as:
+When two Program Graphs, $\text{PG}_1$ and $\text{PG}_2$, do not share variables, their interleaving can be naturally defined as:
 \[\text{TS}_1(\text{PG}_1)\:|||\: \text{TS}_2(\text{PG}_2)\] 
-This straightforward composition allows both transition systems to operate independently.
+This straightforward composition allows both Transition Systems to operate independently.
 
 \paragraph*{Shared variables} 
 If $\text{PG}_1$ and $\text{PG}_2$ share variables, the simple interleaving:
 \[\text{TS}_1(\text{PG}_1)\:|||\:\text{TS}_2(\text{PG}_2)\] 
 May not be valid, as some locations might become inconsistent. 
-This happens because both program graphs access shared critical variables, leading to potential conflicts.
+This happens because both Program Graphs access shared critical variables, leading to potential conflicts.
 
 \paragraph*{Constraint synchronization}
 To ensure consistency, components must coordinate by imposing constraints on shared variables.
-Execution progresses only when the conditions are satisfied in both transition systems. 
+Execution progresses only when the conditions are satisfied in both Transition Systems. 
 This synchronization mechanism ensures that shared variables remain valid across all transitions.
 
 \subsection{Handshaking}
-In parallel composition with handshaking, two transition systems synchronize on a set of shared actions $H$, which is a subset of their common actions:
+In parallel composition with handshaking, two Transition Systems synchronize on a set of shared actions $H$, which is a subset of their common actions:
 \[\text{TS}_1 \parallel_H \text{TS}_2\]    
 They evolve independently (interleaving) for actions outside $H$.
 This is similar to firing a transition in Petri nets.
@@ -38,17 +38,17 @@ If there are no shared actions $\text{Act}_1\cap \text{Act}_2$, handshaking redu
 If $H$ includes all common actions, we simply write:
 \[\text{TS}_1\parallel\text{TS}_2\]
 
-Given two transition systems:
+Given two Transition Systems:
 \[\text{TS}_1=\left\langle S_1, \text{Act}_1, \rightarrow_1, I_1,\text{AP}_1, L_1\right\rangle \qquad \text{TS}_2=\left\langle S_2, \text{Act}_2, \rightarrow_2, I_2,\text{AP}_2, L_2\right\rangle\]    
 Their handshaking synchronization is defined as: 
-\[\dfrac{s_1\overset{\alpha}{\rightarrow}_1s_1^\prime\land s_2\overset{\alpha}{\rightarrow}_2s_2^\prime}{\left\langle s_1,s_2\right\rangle \overset{\alpha}{\rightarrow}\left\langle s_1^\prime,s_2^\prime\right\rangle}\]
+\[\dfrac{s_1\xrightarrow{\alpha}_1s_1^\prime\land s_2\xrightarrow{\alpha}_2s_2^\prime}{\left\langle s_1,s_2\right\rangle \xrightarrow{\alpha}\left\langle s_1^\prime,s_2^\prime\right\rangle}\]
 This means that both systems must simultaneously perform the shared action $\alpha$ to transition together.
 
 \paragraph*{Broadcasting}
 If a fixed set of handshake actions $H$ exists such that: 
 \[\text{Act}_1\cap \text{Act}_2 \dots \cap \text{Act}_n\]
 Then all processes can synchronize on these actions.
-In this case, the handshaking operator $\parallel_H$ is associative, meaning we can compose multiple transition systems as:
+In this case, the handshaking operator $\parallel_H$ is associative, meaning we can compose multiple Transition Systems as:
 \[\text{TS}=\text{TS}_1\parallel_H\text{TS}_2\parallel_H\dots \parallel_H\text{TS}_n\]
 This allows for synchronized execution across multiple processes.
 
@@ -56,14 +56,14 @@ This allows for synchronized execution across multiple processes.
 Handshaking synchronization does not inherently introduce a direction for message exchange. 
 In other words, it lacks a cause-effect relationship between components during synchronization.
 
-However, in many real-world scenarios, directionality is natural—one component sends a message, and another receives it. 
-To model this, we use FIFO channels, which explicitly define the direction of communication.
+However, in many real-world scenarios, directionality is natural (one component sends a message, and another receives it). 
+To model this, we use first in first out channels, which explicitly define the direction of communication.
 Now, transitions in a system include:
 \[\rightarrow\subseteq S \times (\text{Act}\cup C! \cup C?) \times S\]
 Here, $C!$ represents sending operations, with messages of the form $c!x$ (sending $x$ through channel $c$) and $C?$ represents receiving operations, with messages of the form $c?x$ (receiving $x$ from channel $c$).
 
 \paragraph*{Channel capacity}
-The capacity of a FIFO channel determines how many events (messages) can be stored in its buffer at a time: 
+The capacity of a first in first out channel determines how many events (messages) can be stored in its buffer at a time: 
 \begin{itemize}
     \item If $\text{capacity}(c) = 0$, the sender and receiver must synchronize instantly (just like standard handshaking), but with a different syntax.
     \item If $\text{capacity}(c) > 0$, the sender can execute $c!x$ without waiting for a receiver, as long as the buffer isn't full.

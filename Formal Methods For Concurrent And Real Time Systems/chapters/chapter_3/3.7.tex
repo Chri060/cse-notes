@@ -1,12 +1,12 @@
 \section{Bounded model checking}
 
-Bounded Model Checking is a technique used to verify properties of transition systems by checking the satisfiability of Boolean formulae. 
-SAT solvers, which work on Boolean formulae in Conjunctive Normal Form (CNF), play a crucial role in this approach. 
+Bounded Model Checking is a technique used to verify properties of Transition Systems by checking the satisfiability of Boolean formulas. 
+SAT solvers, which work on Boolean formulas in Conjunctive Normal Form, play a crucial role in this approach. 
 Although SAT is an $\mathcal{NP}$-complete problem with no known sub-exponential worst-case algorithm, recent advancements in SAT solvers have led to efficient solutions for many practical cases. 
-These solvers use the standard DIMACS-CNF format and can routinely handle formulae with tens of thousands of variables and millions of constraints. 
+These solvers use the standard Dimacs Conjunctive Normal Form format and can routinely handle formulas with tens of thousands of variables and millions of constraints. 
 
-Most modern solvers implement sophisticated variations of the Davis-Putnam-Logemann-Loveland (DPLL) algorithm, which is based on backtracking.
-The DPLL algorithm is the foundation of many SAT solvers.
+Most modern solvers implement sophisticated variations of the Davis-Putnam-Logemann-Loveland algorithm, which is based on backtracking.
+The Davis-Putnam-Logemann-Loveland algorithm is the foundation of many SAT solvers.
 Given a formula $F$ in conjunctive normal form a set of true literals $T$ (initially empty), the procedure is as follows:
 \begin{algorithm}[H]
     \caption{Davis-Putnam-Logemann-Loveland}
@@ -28,23 +28,23 @@ Given a formula $F$ in conjunctive normal form a set of true literals $T$ (initi
 \end{algorithm}
 
 \paragraph*{Counterexamples}
-A fundamental aspect of Bounded Model Checking is the concept of counterexamples for Linear Temporal Logic properties in a transition system. 
+A fundamental aspect of Bounded Model Checking is the concept of counterexamples for Linear Temporal Logic properties in a Transition System. 
 Since the number of states in a system is finite, any counterexample must have a finite length.
 If a cycle occurs within a path, it must do so within a bounded length of at most the number of states plus one. 
 This bound, referred to as the diameter or completeness threshold, allows us to encode the unfolding of the transition relation up to $k$ steps into a Boolean formula. 
 By adding constraints based on the property being verified and cycle detection, we construct a formula $\phi_k$ such that $\phi_k$ is satisfiable if and only if there exists a counterexample to the property of length at most $k$.
 
-\subsection{Back loops amd transition relation}
+\subsection{Back loops and transition relation}
 A finite prefix of length k can represent an infinite path if a back loop exists from the last state of the prefix to any of the previous states. 
 If no such back loop is found, the prefix does not provide information about the infinite behavior of the path. 
-The $k$-times unfolding of a transition system's transition relation is represented as a propositional formula ${\left\lvert [M]\right\rvert}_k$, where states are encoded as bit vectors.
+The $k$-times unfolding of a Transition System's transition relation is represented as a propositional formula ${\left\lvert [M]\right\rvert}_k$, where states are encoded as bit vectors.
 This unfolding captures all finite paths of length $k$: 
 \[{\left\lvert [M_S]\right\rvert}_k\leftrightarrow I(S_0)\bigwedge_{0\leq i \leq k1}T(S_i,S_{i+1}) \]
 New loop selector variables are introduced to identify possible loops, ensuring that at most one loop exists and that if a loop occurs at position $h$, then the state at$S_{h-1}$ must be identical to $S_k$. 
 Additional Boolean variables indicate whether a state is within a loop and whether a loop exists in the structure.
 
 \subsection{Temporal logic properties}
-The semantics of a LTL formula $\Phi$ in positive normal form is expressed through Boolean constraints over new formula variables.
+The semantics of a Linear Temporal Logic formula $\Phi$ in positive normal form is expressed through Boolean constraints over new formula variables.
 Each subformula of $\Phi$  is associated with a propositional variable at every time step.
 
 \paragraph*{Propositional constraint}
@@ -72,12 +72,12 @@ The complete encoding $\Phi_k$ results in a Boolean formula that logically conjo
 The formula is evaluated at instant 0, ensuring that the verification process correctly captures the required behaviors.
 
 \subsection{Model checking}
-Bounded Model Checking translates the verification problem into a propositional satisfiability (SAT) problem, leveraging SAT solvers for efficiency.
+Bounded Model Checking translates the verification problem into a propositional SAT problem, leveraging SAT solvers for efficiency.
 The transformation procedure is as follows: 
 \begin{enumerate}
     \item Unfolding the transition relation: the system's transition relation is unfolded $k$ times, producing a propositional formula ${\left\lvert [M]\right\rvert }_k$. 
     \item Loop constraints: additional variables and constraints define the presence and position of loops (if any). 
-    \item Encoding LTL semantics: a Linear Temporal Logic formula $F$, in release-positive normal form, is translated into Boolean constraints over newly introduced formula variables.
+    \item Encoding Linear Temporal Logic semantics: a Linear Temporal Logic formula $F$, in release-positive normal form, is translated into Boolean constraints over newly introduced formula variables.
     \item For each subformula and each instant $0\leq i \leq k+1$, a propositional variable ${\left\lvert [j]\right\rvert }_i$ is introduced.
 \end{enumerate}
 \noindent Then, we follow this procedure: 

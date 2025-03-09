@@ -1,0 +1,103 @@
+\section{Timed languages}
+
+A timed $\omega$-word (or simply timed word) is an infinite sequence of states, where each state is associated with a real-valued timestamp.
+Formally, a timed word is a sequence:
+\[(\sigma_1,\tau_1),(\sigma_2,\tau_2),(\sigma_3,\tau_3),\dots\]
+Here, each symbol $\sigma_i$ is a symbol from a finite alphabet, and $\tau_i$ is a real-valued timestamp indicating when $\sigma_i$ occurs.
+\begin{definition}[\textit{Timed sequence}]
+    A timed sequence is an infinite sequence of time values:
+    \[\tau=\tau_1,\tau_2,\tau_3,\dots\]
+    Here, each $\tau_i$ satisfies: 
+    \begin{itemize}
+        \item \textit{Monotonicity}: $\tau_i\leq\tau_{i+1}$ for all $i\geq 1$. 
+            If $\tau_i<\tau_{i+1}$ for all $i\geq 1$ the sequence is strictly monotonic.
+        \item \textit{Progress}: for every real number $t\in\mathbb{R}_{\geq 0}$, there exists some $i\geq 1$ such that $\tau_i> t$. 
+    \end{itemize}
+\end{definition}
+\begin{definition}[\textit{Timed word}]
+    A timed word over an alphabet $\mathcal{A}$ (a finite set of symbols) is a pair:
+    \[\sigma,\tau\]
+    Here, $\sigma=\sigma_1\sigma_2\sigma_3\dots$ is an $\omega$-word (an infinite sequence of symbols from $\mathcal{A}$), and $\tau$ is a timed sequence providing the timestamps associated with each symbol.
+\end{definition}
+\begin{definition}[\textit{Timed language}]
+    A timed language over an alphabet $\mathcal{A}$ is a set of timed words over $\mathcal{A}$.
+\end{definition}
+
+\paragraph*{Untime operation}
+The untime operation on a timed language discards the time values associated with symbols.
+
+\begin{definition}
+    For a timed language $\mathcal{L}$ over $\mathcal{A}$:
+    \[\text{untime}(\mathcal{L}) = \{ \sigma \in \mathcal{A}^\omega \mid \text{there exists a } \tau \text{ such that } (\sigma, \tau) \in \mathcal{L} \}\]
+\end{definition}
+\noindent $\text{untime}(\mathcal{L})$ is a set of $\omega$-words.
+
+\subsection{Timed Automata}
+A timed automato is defined over an alphabet of actions, called the input alphabet. 
+It is represented as a tuple:
+\[\mathcal{A} = \langle L, \Sigma, C, E, l_0, J, F \rangle\]
+\noindent Here:
+\begin{itemize}
+    \item $L$ is a finite set of locations.
+    \item $\Sigma$ is a finite set of input symbols.
+    \item $C$ is a finite set of clocks.
+    \item $l_0 \in L$ is the initial location.
+    \item $E \subseteq L \times B(C) \times \Sigma \times 2^C \times L$ is a set of edges, where $B(C)$ denotes the set of clock constraints.
+    \item $J: L \to B(C)$ assigns invariants to locations.
+    \item $F \subseteq L$ is the set of final locations.
+\end{itemize}
+\noindent A timed word is accepted if there exists a path leading infinitely often to a final location.
+
+\begin{definition}[\textit{Run}]
+    A run $r_{(\sigma, \tau)}$ over a timed word $(\sigma, \tau)$, where $\sigma = \sigma_1 \sigma_2 \dots$ and $\tau = \tau_1 \tau_2 \dots$ is an infinite sequence:
+    \[r_{(\sigma, \tau)} = \langle l_0, \eta_0 \rangle \xrightarrow{\sigma_1, \tau_1} \langle l_1, \eta_1 \rangle \xrightarrow{\sigma_2, \tau_2} \langle l_2, \eta_2 \rangle \dots\]
+\end{definition}
+
+Here, $l_i \in L$ and $\eta_i$ are clock valuations satisfying:
+\begin{itemize}
+    \item \textit{Initialization}: $\eta_0(x) = 0$ for all $x \in C$.
+    \item \textit{Transition condition}: for all $i \geq 1$, there exists an edge $e \in E$ such that:
+        \[e = \langle l_{i-1}, \gamma_i, \sigma_i, \hat{C}_i, l_i \rangle\]
+        Here, $(\eta_{i-1} + (\tau_i - \tau_{i-1}))$ satisfies both $\gamma_i$ and $J(l_{i-1})$, and the clock update is given by:
+        \[\eta_i = [\hat{C}_i \mapsto  0](\eta_{i-1} + (\tau_i - \tau_{i-1}))\]
+    \item $\eta_i$ satisfies the invariant $J(l_i)$.
+\end{itemize}
+\noindent The set of locations visited infinitely often in the run is denoted by $\inf(r_{(\sigma, \tau)})$.
+A timed word $(\sigma, \tau)$ is accepted by a timed automaton $\mathcal{A}$ if:
+\[\inf(r(\sigma, \tau)) \cap F \neq \emptyset\]
+
+\subsection{Timed regular languages}
+\begin{definition}[\textit{Timed regular language}]
+    A timed regular language is a language accepted by some timed automaton.
+\end{definition}
+\noindent If $\mathcal{L} \subseteq \mathcal{A}^\omega$ is an $\omega$-regular language, then $\mathcal{L}_t = \{ (\sigma, \tau) \mid \sigma \in \mathcal{L} \}$ is a timed regular language.
+
+\paragraph*{Untimed languages}
+Given a Timed Automata that accepts a language $\mathcal{L}$, there exists a Büchi automaton (BA) that accepts $\text{untime}(\mathcal{L})$.
+That is, for any timed regular language $\mathcal{L}$, its untimed version $\text{untime}(\mathcal{L})$ is $\omega$-regular.
+However, simply removing timing constraints is insufficient. 
+
+
+\subsection{Timed Automata properties}
+Timed Automata are closed under union and intersection but not under complementation.
+Timed Automata cannot be determinized.
+Non-closure under complement limits automata-based model checking.
+Language inclusion and equivalence are undecidable.
+Emptiness is decidable by verifying the emptiness of the Region Automaton (similar to the Region Transition System).
+
+\paragraph*{Continuous time semantics}
+Timed Automata semantics can be defined over signals instead of timed words.
+The standard Transition System semantics is based on timed words.
+Linear Temporal Logics are more naturally interpreted over signals.
+Decision problems become harder in continuous-time semantics.
+
+\subsection{Model Checking Timed Automata for Linear Temporal Logic}
+Model checking Timed Automata for Linear Temporal Logic (both pointwise and continuous semantics) is PSPACE-complete.
+The steps are: 
+\begin{enumerate}
+    \item Construct a Büchi automaton equivalent to the negation of a formula.
+    \item Build the product of this Büchi automaton with the Timed Automata.
+    \item Verify the emptiness of the resulting automaton.
+\end{enumerate}
+\noindent Since Timed Automata are closed under intersection, the result is still a Timed Automata.
+However, most metric extensions of Linear Temporal Logic are undecidable.
