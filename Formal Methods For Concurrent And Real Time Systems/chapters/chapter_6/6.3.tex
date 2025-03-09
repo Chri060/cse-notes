@@ -1,0 +1,29 @@
+\section{Axioms}
+
+Hoare logic operates in a backward reasoning manner, working from the desired postconditions toward the preconditions. 
+The fundamental axioms of Hoare logic include:
+\begin{enumerate}
+    \item \textit{Assignment rule}: assignments update the program state by substituting values into variables. 
+        If $y:=t$ assigns the value of $t$ to $y$, then the precondition must hold for the state after substitution:
+        \[\{\phi[t/y]\} y:=t \{\phi\}\]
+    \item \textit{Composition rule}: if executing $P_1$ transforms a state satisfying $\phi$ into a state satisfying $\phi^\prime$, and $P_2$ transforms $\phi^\prime$ into $\phi^{\prime\prime}$, then executing $P_1$ followed by $P_2$ ensures $\phi^{\prime\prime}$ holds:
+        \[\dfrac{\{\phi\} P_1 \{\phi^\prime\},\{\phi^\prime\} P_2 \{\phi^{\prime\prime}\}}{\{\phi\} P_1;P_2 \{\phi^{\prime\prime}\}}\]
+    \item \textit{Conditional rule}: the correctness of an if-else statement depends on verifying both branches separately:
+         \[\dfrac{\{\phi \land c\} P_1 \{\phi^\prime\}, \{\phi\land\lnot c\} P_2 \{\phi^\prime\}}{\{\phi\} \text{ if }c\text{ then }P_1\text{ else }\{\phi^\prime\}\text{ if }c\text{ then }P_2}\]
+    \item \textit{Consequence rule}: if a weaker precondition $\phi$ implies a stronger one $\sigma$, and $\sigma$ guarantees $\sigma^\prime$, which in turn implies the desired postcondition $\phi^\prime$, then the Hoare triple remains valid:
+        \[\dfrac{\phi\rightarrow \sigma, \{\sigma\} P \{\sigma^\prime\}, \sigma^\prime\rightarrow \phi^\prime}{\{\phi\} P \{\phi^\prime\}}\]
+    \item \textit{While rule}: for a loop while $c$ do $P$, if executing $P$ preserves $\phi$ as long as $c$ holds, then when the loop terminates, $\phi$ must still be true while $c$ is false:
+        \[\dfrac{\{\phi \land c\} P \{\phi\}}{\{\phi\}\text{ while }c\text{ do }P\text{ then }\{\phi \land¬c\}}\]
+\end{enumerate}
+
+\subsection{Loop correctness}
+To prove the correctness of a loop, we introduce an invariant (a property that remains true throughout execution): 
+\begin{enumerate}
+    \item \textit{Initialization}: the invariant must hold before the loop starts:
+        \[\phi\implies\text{Inv}\]
+    \item \textit{Partial correctness}: each iteration preserves the invariant:
+        \[\{ \text{Inv} \land c \} P \{ \text{Inv} \}\]
+    \item \textit{Total correctness}: when the loop terminates, the invariant and the negation of the loop condition together must imply the desired postcondition:
+        \[\{ \text{Inv} \land \lnot c \} \implies \{ \phi\land\lnot c \}\]
+\end{enumerate}
+\noindent By proving these properties, we ensure that the loop behaves as expected, either partially (if termination is not guaranteed) or totally (if termination is ensured).
