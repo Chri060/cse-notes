@@ -1,0 +1,100 @@
+\section{Word embeddings}
+
+Word embeddings, which emerged around 2013, significantly improved performance on nearly every natural language processing task.
+They are dense vector representations of words in a high-dimensional space, typically with between 100 and 1000 dimensions. 
+These embeddings are much more compact compared to the sparse one-hot encoding of terms, which typically requires a vector the size of the entire vocabulary.
+Given that document collections often have vocabularies ranging from 100,000 to 1 million tokens, word embeddings provide a much more efficient way to represent words.
+
+Similar to one-hot encodings, word embeddings can also be aggregated to represent larger units of text. 
+This aggregation allows for the capture of semantic meaning in a more computationally efficient manner.
+
+\subsection{Training}
+Word embeddings are produced using supervised machine learning models, specifically models that are trained to predict a missing word based on the surrounding context.
+The context can either include only previous words (causal models) or both previous and future words (non-causal models).
+In this setup, the training process can be described as follows:
+\begin{itemize}
+    \item \textit{Features}: the words in the current context.
+    \item \textit{Target}: the missing word that we aim to predict from the sequence.
+\end{itemize}
+\noindent This is essentially a multi-class classification problem, where the model needs to estimate the probability for every word in the vocabulary being the missing word.
+
+\paragraph*{Challenges}
+A key challenge is that even a simple linear classifier for this task requires a large number of parameters.
+For example, if we use a multi-class linear classifier to predict the missing word, with a bag-of-words feature vector (ignoring word order), the model will require a parameter vector of the size of the vocabulary for each vocabulary term. 
+Therefore, the total number of parameters will scale quadratically with the size of the vocabulary.
+
+This quadratic growth in parameters was a significant issue before deep learning techniques emerged, as the vocabulary size in traditional NLP tasks was often very large. 
+However, with modern deep learning techniques, we can overcome this limitation more efficiently.
+
+\subsection{Properties}
+Word embeddings possess several intriguing and sometimes surprising properties that make them powerful tools for natural language processing tasks:
+\begin{itemize}
+    \item \textit{Semantic clustering}: neighbors in the embedding space are often semantically related. 
+        Words that share similar meanings or appear in similar contexts are typically located near each other in the embedding space.
+    \item \textit{Dense and distributed representation}: word embeddings use multiple dimensions to capture semantic relationships. 
+        However, individual dimensions of the embedding vector are generally not directly interpretable.
+    \item \textit{Meaningful translations}: despite the individual dimensions being hard to interpret, translations in the embedding space have meaningful semantic implications. 
+    \item \textit{Additive semantics}: certain semantic relationships can be represented as additive vectors. 
+    \item \textit{Analogies}: word embeddings can encode analogies between words. 
+    \item \textit{Discovering relationships}: embeddings can uncover various relationships between words, such as synonyms, antonyms, and other semantic connections, purely based on how words co-occur in text. 
+        These relationships are often encoded in the geometry of the embedding space.
+\end{itemize}
+\noindent The low-dimensional nature of word embeddings means that semantically similar terms tend to have similar representations in the vector space. 
+This allows the model to generalize better from semantically related examples, improving its ability to handle unseen data. 
+Moreover, embeddings place similar concepts close together in the vector space, making them useful for discovering implied (but unknown) properties of concepts. 
+
+\subsection{Word2Vec}
+ord2Vec, developed in 2013 by Mikolov et al., is one of the most popular and influential word embedding models. 
+It builds on early work by Bengio et al. in 2003 and was later followed by GloVe (2014) by Pennington et al. Word2Vec solved the problem of the large parameter space in traditional models by using a bag-of-words representation.
+
+There are two main versions of Word2Vec:
+\begin{itemize}
+    \item \textit{Continuous Bag Of Words}: this version is trained to predict an observed word based on the surrounding context words. 
+        The context consists of all terms occurring within a symmetric window around the target word. 
+        The model predicts the target word $c$ given the observed words $w$ by applying a softmax function over the dot product of the word embeddings. 
+        Directly optimizing this model is computationally expensive because it requires summing over all possible target words.
+        To address this, Mikolov et al. introduced negative sampling, where they sample some negative examples (words that were not observed) and turn the problem into a binary classification task. 
+        This greatly reduces the computational load. Although on modern GPUs, optimizing softmax directly is no longer a problem.
+    \item \textit{Skip-gram}: in this version, the model is trained to predict the observed words given a single context word.
+        It works in exactly the same way as CBOW, but here the context is the sum of the word vectors around the target word.
+\end{itemize}
+\noindent In summary, Skip-gram is a 1-to-1 prediction model, while CBOW is a many-to-1 prediction model.
+
+Word embeddings from Word2Vec can be viewed as a form of matrix decomposition.
+The model uses a square co-occurrence matrix, where each cell in the matrix represents the co-occurrence of a pair of words within a fixed-size context window. 
+By factorizing this matrix, Word2Vec generalizes the information from these co-occurrence windows to produce the word embeddings.
+
+\paragraph*{GloVe}
+GloVe (Global Vectors for Word Representation) is another model for generating word embeddings. 
+It offers a probabilistic interpretation for the translation of words in the embedding space. 
+The training objective of GloVe is formulated as fitting an objective function that is approximated by minimizing a weighted least squares objective, with several tricks required to ensure convergence.
+GloVe improves upon Word2Vec by focusing on global co-occurrence information, rather than just local context windows, making it a more globally-informed method for generating word embeddings.
+
+\paragraph*{Word2Vec and GloVe}
+Word2Vec is typically faster to train, has lower memory requirements, and produces more accurate models, especially with the skip-gram approach.
+GloVe focuses more on capturing global word co-occurrences, making it different from the local context modeling of Word2Vec.
+According to Levy et al., skip-gram tends to outperform CBOW, except for when using FastText (a variant of Word2Vec). 
+
+\subsection{FastText}
+Word embeddings work well when the vocabulary is fixed, but they face challenges when dealing with new or unseen words in the test set.
+If a word is not present in the trained model's vocabulary, we don't have an embedding for it and, traditionally, would have to ignore it. 
+This is problematic, especially since we can often infer the meaning of the word from the letters or characters contained within it.
+
+FastText, introduced by Bojanowski et al. in 2016, provides an elegant solution to this problem. 
+Instead of learning embeddings for entire words directly, FastText splits words into smaller fixed-length character sequences (subword units), specifically character $n$-grams. 
+This allows FastText to learn embeddings for these subword units, and then combine these embeddings to form the representation of the entire word.
+FastText, therefore, is a powerful extension of traditional word embeddings, as it can deal with the dynamic nature of language and is particularly well-suited to languages with rich morphology.
+
+\subsection{Usage}
+In causal models, the context words are restricted to those that occur before the missing word, which makes these models suitable for language modeling. 
+In this setup, the model predicts the next word in a sequence based on the preceding words, allowing it to capture longer dependencies than traditional $n$-gram models. 
+This capability enables a more sophisticated understanding of word sequences and improves the quality of text generation and prediction tasks.
+
+In non-causal models, the context can include both previous and future words. 
+These models are often used to generate word embeddings that can serve as additional feature vectors to represent words.
+The embeddings can significantly improve performance across a wide range of tasks, such as:
+\begin{itemize}
+    \item Training classifiers for sentiment analysis or other classification tasks.
+    \item Machine translation, where embeddings are used to translate text from one language to another by leveraging the semantic meaning of words.
+\end{itemize}
+\noindent By incorporating semantic knowledge from the context, these models benefit from the rich relationships between words, improving the quality of predictions and translations.

@@ -1,0 +1,84 @@
+\section{Introduction}
+
+\begin{definition}[\textit{Statistical language model}]
+    A statistical language model is a probability distribution over sequences of words.
+\end{definition}
+\noindent Given this distribution over sequences, we can condition the next word based on previous words and generate new sequences by sampling from it. 
+In essence, language models serve as general-purpose text generators.
+
+Language models identify statistical patterns in text and leverage these patterns to predict the next word in a sequence. 
+By predicting each subsequent word with increasing accuracy, language models can generate entire sentences or even longer passages.
+
+\subsection{Markov models}
+Natural language utterances can be of arbitrary length, but we only have a finite set of parameters to model them. 
+One way to define a probability distribution over such variable-length sequences is to predict the next word based on a fixed number of previous words.
+
+The simplest models for this are $n$-gram models, which count sequences of $n$ words in a large corpus. 
+Using longer $n$-grams provides better predictions, though the model can become more sparse and complex as $n$ increases.
+
+\noindent Several techniques improve the performance of Markov models:
+\begin{itemize}
+    \item \textit{Smoothing} (regularization): this technique adds a small constant to all counts before estimating probabilities, which helps avoid assigning zero probability to unseen $n$-grams. 
+        The smoothed probability can be computed as:
+        \[\Pr(w_n\mid w_{n-1},w_{n-2})=\dfrac{\text{count}(w_{n-2}w_{n-1}w_n)+\alpha}{\text{count}(w_{n-2}w_{n-1})+V\alpha}\]
+        Here, $\alpha$ is a pseudocount (often set to $\alpha = 1$), and $V$ is the size of the vocabulary. 
+        This ensures that all possible $n$-grams have a non-zero probability, even if they haven't been seen in the training data.
+    \item \textit{Backoff}: instead of inventing values for unseen $n$-grams, the backoff technique uses lower-order models when an $n$-gram is not found in the training data. 
+        This helps maintain the flow of predictions while keeping the model manageable.
+    \item \textit{Interpolation}: this technique combines higher-order and lower-order models by blending their probabilities. 
+        To determine the weight of each model, interpolation parameters (lambdas) are chosen to maximize the likelihood on a held-out development set.
+\end{itemize}
+
+\paragraph*{Generative Markov model}
+A generative Markov model can be used to estimate the probability of the next word and generate text in various ways:
+\begin{itemize}
+    \item \textit{Greedy}: this approach chooses the most probable term:
+        \[w^\ast = \argmax_t \Pr(w_n=t \mid w_{n-k} ,\dots,w_{n-1})\]
+    \item \textit{Random sampling}: in this method, a term is sampled according to its probability:
+        \[w^\ast\sim \Pr(w_n\mid  w_{n-k} ,\dots,w_{n-1})\]
+    \item \textit{Top-$k$ sampling}: sampling is restricted to the top $k$ most likely terms:
+        \[w^\ast\sim\Pr(w_n\mid w_{n-k} ,\dots,w_{n-1})\mathbf{1}(w_n \in \text{top-}k)\]
+    \item \textit{Temperature sampling}: sampling is limited to likely terms by raising the probabilities to a power:
+        \[w^\ast\sim \Pr(w_n\mid w_{n-k} ,\dots,w_{n-1})^{\frac{1}{T}}\]
+        Here, $T$ is the temperature (higher temperature means a more uniform sampling).
+    \item \textit{Beam search}: this technique searches forward one step at a time for the most likely sequence $(w_n, w_{n+1}, w_{n+2}, \dots)$ while limiting the search space to a maximum set of $k$ candidate sequences.
+\end{itemize}
+\noindent Greedy techniques always produce the same text, while sampling generates different text each time. 
+Output from lower-order $n$-gram language models may produce text that is non-sensical but potentially grammatical.
+
+\subsection{Language model evaluation}
+To determine if one language model is better than another, we use two main evaluation approaches:
+\begin{itemize}
+    \item \textit{Extrinsic}: the model is used in a downstream task, and the performance is evaluated based on the task's outcomes.
+    \item \textit{Intrinsic}: the model's parameters are trained on a dataset, and its performance is evaluated on a held-out dataset. 
+        The likelihood of the model producing the observed data is used to assess how well it is performing.
+\end{itemize}
+
+\begin{definition}[\textit{Perplexity}]
+    Perplexity is a measure of how well a language model predicts new text.
+\end{definition}
+\noindent  It quantifies the level of surprise or confusion when encountering new data and reflects how unlikely the observed data is under the model.
+The perplexity is computed through the following steps:
+\begin{enumerate}
+    \item Compute the probability of the observed sequence under the model.
+    \item Normalize the probability for the length of the text sequence.
+    \item Invert the probability to calculate uncertainty. 
+        Minimizing perplexity is equivalent to maximizing probability, so a lower perplexity indicates a better model.
+\end{enumerate}
+Perplexity is closely related to other metrics used in training and evaluating predictive models:
+\begin{itemize}
+    \item \textit{Negative Log Likelihood} (nLL): the negative logarithm of the probability of the sequence. 
+        When divided by the sequence length, this gives the per-word nLL. 
+        Perplexity can be derived as:
+        \[\text{perplexity}=2^{nLL}\]
+    \item \textit{Crossentropy}: the expected log surprise under the model. 
+        It represents the number of bits needed to quantify the surprise or uncertainty of a sequence.
+\end{itemize}
+
+\subsection{N-gram limitations}
+As the value of $n$ increases in $n$-gram models, the probability of encountering a specific sequence in the training corpus decreases exponentially. 
+This results in sparse data, where many possible $n$-grams are never seen during training. 
+When the model backs off to shorter $n$-grams, this significantly limits its ability to make accurate predictions.
+
+Moreover, to generate reasonable and coherent language, we need to model long-distance dependencies, where the relationship between words may span across many tokens.
+Unfortunately, as $n$ grows, both memory and data requirements scale exponentially with the length of these dependencies, making traditional Markov models impractical for capturing such long-range relationships.
