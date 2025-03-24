@@ -1,0 +1,93 @@
+\section{Transformer}
+The original Transformer model, introduced in the seminal 2017 paper Attention Is All You Need, marked a revolutionary shift in the field of NLP. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/nlp6.png}
+    \caption{Transformer}
+\end{figure}
+At its core, the Transformer relies on a self-attention mechanism as its primary building block. 
+This mechanism allows the model to dynamically focus on different parts of the input sequence when processing each token. 
+The basic self-attention module consists of the following components:
+\begin{enumerate}
+    \item \textit{Multiple attention heads}: instead of relying on a single attention mechanism, the Transformer employs multiple attention heads that operate in parallel. 
+        Each head computes attention independently, capturing different types of relationships between tokens. 
+        These outputs are then concatenated and linearly transformed to produce the final result.
+    \item \textit{Feed Forward Neural Network}: after the multi-head attention step, the output is passed through a Feed Forward neural network. 
+        This network applies a non-linear transformation to the data, allowing the model to learn more complex patterns.
+    \item \textit{Residual connections and layer normalization}: to facilitate training and improve gradient flow, the Transformer uses residual connections and layer normalization after each sub-layer. 
+    \item \textit{Positional encoding}: this encoding provides information about the position of each token in the sequence, enabling the model to understand the sequential nature of language.
+        Simplest way to do that would be to use a binary encoding of the position
+        Since the embedding vector is made of floating point values, makes more sense to encode positions using sinusoids.
+\end{enumerate}
+\noindent The basic self-attention module is stacked multiple times to form the full Transformer architecture. This stacking allows the semantics of each token to build up progressively over multiple layers.
+Each layer refines the representation of the input tokens by incorporating information from other parts of the sequence, resulting in rich, context-aware embeddings.
+
+\paragraph*{Self-attention}
+Self-attention is so valuable for language models. 
+Words often have multiple meanings, and their interpretation depends heavily on the surrounding context.
+Self-attention solves this problem by allowing a word's representation to adapt based on its context. 
+It does this by learning a weighting function that prioritizes the most relevant parts of the input sequence when constructing a word's meaning. 
+Essentially, it enables the model to focus on different words or phrases in the sentence, assigning more importance to those that matter most for understanding the current word.
+This mechanism becomes even more powerful when stacked across multiple layers. 
+With each layer, the model refines its understanding of relationships between words, enabling it to tackle complex linguistic tasks like co-reference resolution.
+
+\subsection{Architecture}
+The Transformer architecture is composed of three main components:
+\begin{itemize}
+    \item \textit{Input module}: this module generates the initial embedding for each token in the input sequence.
+    \item \textit{Transformer blocks}: multiple transformer blocks are stacked on top of each other. Each block refines the embeddings by incorporating information from the surrounding context.
+        Specifically, a transformer block modifies the embeddings through two key sub-components:
+        \begin{enumerate}
+            \item \textit{Self-attention block}: captures relationships between tokens by allowing each token to attend to others in the sequence.
+            Contains multiple self-attention heads, each operating independently on a reduced embedding size of $\frac{d}{h}$, where $d$ is the original embedding dimension and $h$ is the number of attention heads.
+            The self-attention mechanism relies on three key components:
+            \begin{itemize}
+                \item \textit{Query} ($Q$): represents the current token whose representation we are updating.
+                \item \textit{Key} ($K$): encodes other tokens in the sequence, helping determine their relevance to the query.
+                \item \textit{Value} ($V$): provides the actual content used to update the query's representation.
+            \end{itemize}
+            These components $(Q,K,V)$ are produced by applying linear transformations (matrices) to the original embeddings: 
+            \[\text{attention}(Q,K,V)=\text{softmax}\left(\dfrac{QK^T}{\sqrt{d_k}}\right)V\]
+            Here, $d_k=\frac{d}{\text{number of parallel attention heads}}$
+            \item \textit{Feed-Forward Neural Network}: a simple, position-wise neural network that further processes the updated embeddings.
+                Typically has a fan-out factor of 4, meaning the hidden layer is four times the size of the input embedding.
+        \end{enumerate}
+    \item \textit{Output module}: after the embeddings have been refined through multiple transformer blocks, this module decodes them to predict the next word or perform other downstream tasks.
+\end{itemize}
+
+\subsection{Transformer input}
+Choosing between word-level and character-level representations involves balancing expressivity, sequence length, and the model's ability to generalize.
+We have the following possibilities: 
+\begin{itemize}
+    \item \textit{Word-level tokens}: semantically rich and result in shorter sequences, reducing computational complexity. 
+        However, they lead to larger vocabularies, struggle with out-of-vocabulary words, and ignore morphological details like prefixes or suffixes.
+    \item \textit{Character-level tokens}: more flexible and capable of handling any word form, produce much longer sequences, increasing inference time.
+        They also place the burden on the model to learn word structures from scratch, often leading to less interpretable embeddings.
+    \item \textit{Sub-word tokens}: uses data-driven methods like Byte-Pair Encoding to identify frequent character sequences. 
+    This approach captures common prefixes, suffixes, and word fragments, balancing vocabulary size and the model's ability to handle diverse linguistic patterns effectively.
+\end{itemize}
+
+\subsection{Bidirectional Encoder Representations from Transformers}
+Bidirectional Encoder Representations from Transformers (BERT) revolutionizes text representation by learning deep contextualized embeddings through a masked language modeling approach.
+During pre-training, BERT randomly masks words in the input using a special token and trains the model to predict these masked words.
+This process helps BERT understand the relationships between words in a sentence, capturing rich linguistic patterns. 
+Pre-trained on large corpora like Wikipedia and books, BERT provides powerful text representations without requiring manual feature engineering
+The advantages of this model are: 
+\begin{itemize}
+    \item \textit{Eliminates feature engineering}: unlike traditional methods that rely on handcrafted features, BERT automatically learns meaningful representations.
+    \item \textit{Preserves word order}: by leveraging bidirectional context, BERT retains word order and contextual relationships, outperforming count-based approaches.
+    \item \textit{Unsupervised pre-training}: BERT benefits from unsupervised learning on vast amounts of text, enabling it to generalize well even with limited task-specific data.
+\end{itemize}
+
+\paragraph*{Fine tuning}
+During pre-training, a special token is added at the start of every input sequence, but it is unused in the loss function. 
+However, during fine-tuning, this token becomes crucial because the model is trained to produce a class label in place of the token.
+Fine tuning works because BERT is pre-trained on massive datasets, it requires small data and has multilingual support. 
+
+\subsection{Generative Pretrained Transformer}
+Generative Pretrained Transformer (GPT) is an autoregressive language model designed to predict the next token in a sequence. 
+It achieves this by masking future tokens during training, ensuring the model only uses past and present context to make predictions.
+This approach makes GPT particularly effective for text generation , as it learns to produce coherent and contextually relevant sequences by predicting one word at a time.
+
+Unlike BERT, which uses bidirectional context, GPT predicts the next word based solely on preceding tokens, making it ideal for generating fluent and natural-sounding text.
