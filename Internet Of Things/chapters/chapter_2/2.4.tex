@@ -1,169 +1,76 @@
 \section{Message Queuing Telemetry Transport}
 
-MQTT is a Client-Server, publish/subscribe messaging protocol designed for lightweight and efficient communication, especially in constrained environments like IoT. 
-It is ideal for scenarios requiring low bandwidth, simple implementation, and support for Quality of Service.
-The main features are: 
-\begin{itemize}
-    \item \textit{Lightweight and bandwidth-efficient}: MQTT is designed to be simple to implement, particularly at the sensor side, with minimal overhead.
-    \item \textit{QoS support}: MQTT supports different levels of QoS to ensure reliable message delivery, providing flexibility in network conditions.
-    \item \textit{Data-agnostic}: it can handle a variety of data types without being tied to any specific format.
-    \item \textit{Session awareness}: MQTT maintains session state to ensure continuous communication even if the client temporarily disconnects.
-\end{itemize}
-In MQTT, clients do not communicate directly with each other. Instead, they publish messages to topics, and other clients subscribe to those topics.
+Message Queuing Telemetry Transport (MQTT) is a client-server, publish and subscribe messaging protocol designed for lightweight and efficient communication. 
+In MQTT, clients do not communicate directly with each other. 
+Instead, they publish messages to topics, and other clients subscribe to those topics.
 A single client can publish a message, and all clients subscribed to that topic will receive the message.
-Unlike CoAP's pull-based request/response model, MQTT uses a push model where updates are automatically sent to clients when new information is available.
+Unlike CoAP's pull-based request and response model, MQTT uses a push model where updates are automatically sent to clients when new information is available.
 
-\paragraph*{Topics}
-Topics are used to categorize and direct messages. 
-Clients can publish or subscribe to these topics.
-Topics are hierarchical, with levels separated by a slash.
-
-\paragraph*{Keepalive}
-Keepalive ensures that the connection between the client and the broker remains active. 
-If the client does not send any other messages during the keepalive period, it sends a \texttt{PINGREQ} message to the broker to check the connection. 
-The broker responds with a \texttt{PINGRESP}.
-Both \texttt{PINGREQ} and \texttt{PINGRESP} messages have a null payload.
-It is the client's responsibility to maintain the keepalive, ensuring that the session stays alive and messages can be delivered even if no new data is sent.
-
-\subsection{Connection}
-In MQTT, each client establishes a single connection to the MQTT broker for communication. 
-This connection supports push capabilities, making it efficient for IoT applications where devices need to receive updates in real-time.
-
-MQTT can also work even through firewalls or NAT devices, thanks to its use of TCP and well-defined protocols, allowing messages to pass with minimal restrictions.
-When a client connects to the broker, it sends a connect message with several fields:
-\begin{itemize}
-    \item \texttt{clientId}: a unique identifier for the client.
-    \item \texttt{cleanSession}: if true, the broker will not retain any session state when the client disconnects. 
-        If false, it retains the session state for later reconnect.
-    \item \texttt{username} (optional): a username for authentication.
-    \item \texttt{password} (optional): a password for authentication
-    \item \texttt{lastWillTopic} (optional): a topic where the broker will send a last will message if the client unexpectedly disconnects.
-    \item \texttt{lastWillQoS} (optional): the QoS level for the last will message.
-    \item \texttt{lastWillMessage} (optional): the actual last will message.
-    \item \texttt{keepAlive}: the time (in seconds) the client allows the connection to remain idle before the broker expects a message to maintain the session.
-\end{itemize}
-\noindent
-When the broker responds to the connect message, it sends a connack message with the following fields:
-\begin{itemize}
-    \item \texttt{sessionPresent}: indicates whether the client's session was retained.
-    \item \texttt{returnCode}: the status code that tells the client the result of the connection attempt:
-        \begin{itemize}
-            \item 0: successful connection.
-            \item 1: unacceptable version.
-            \item 2: the client ID is invalid or already in use.
-            \item 3: the broker is not available.
-            \item 4: authentication failed.
-            \item 5: the client is not allowed to connect.
-        \end{itemize}
-\end{itemize}
+\paragraph*{Connection}
+In MQTT, each client establishes a single connection (which supports push capabilities) to the MQTT broker for communication. 
+MQTT can also work even through firewalls or NAT devices, thanks to its use of TCP and well-defined protocols.
+When a client connects to the broker, it sends a \texttt{CONNECT} message with several fields.
+When the broker responds to the connect message, it sends a \texttt{CONNACK} message which indicates wether the client's session was retained and the result of the connection attempt. 
 
 \subsection{Publisher}
-In MQTT, the publish message is used by the publisher to send data to the broker. 
-The publish message includes the following fields:
+In MQTT, the \texttt{PUBLISH} message is used by the publisher to send data to the broker. 
+The Quality of Service (QoS) of a publisher can be: 
 \begin{itemize}
-    \item \texttt{packetId}: a unique identifier for the message.
-    \item \texttt{topicName}: the topic to which the message is published.
-    \item \texttt{QoS}: the Quality of Service level indicating the delivery guarantee.
-    \item \texttt{retainFlag}: indicates whether the message should be retained by the broker.
-    \item \texttt{Payload}: the actual data being sent in the message.
-    \item \texttt{dupFlag}: indicates whether the message is a duplicate.
-\end{itemize}
-\noindent The Quality of Service of a pusblisher can be: 
-\begin{itemize}
-    \item \textit{0} (at most once): the message is delivered at most once, with no guarantee of delivery. 
-        It is a best-effort transfer based on the reliability of the underlying transport protocol.
-    \item \textit{1} (at least once): the message is guaranteed to be delivered, but it may be delivered multiple times. 
+    \item \textit{QoS 0}: the message is delivered at most once, with no guarantee of delivery. 
+    \item \textit{QoS 1}: the message is guaranteed to be delivered, but it may be delivered multiple times. 
         The client stores the message and retransmits it until the broker acknowledges receipt.
-        Once the broker receives the publish message, it sends a puback message back to the client to acknowledge receipt. 
-        This message includes the packetId of the message being acknowledged
-
-    \item \textit{2} (exactly once): ensures that the message is delivered exactly once, and involves a 4-step handshake:
+        Once the broker receives the publish message, it sends a \texttt{PUBACK} message back to the client to acknowledge receipt. 
+    \item \textit{QoS 2}: ensures that the message is delivered exactly once, and involves a 4-step handshake:
         \begin{enumerate}
-            \item \textit{Publish reception} (broker): the MQTT broker processes the packet and sends a pubrec message back. 
-                The packetId is stored locally to avoid duplicate processing.
-            \item \textit{Pubrec reception} (client): upon receiving the pubrec message, the client discards the original packet and sends a pubrel message to the broker.
-            \item \textit{Pubrel reception} (broker): the broker clears any current state and sends a pubcomp message to confirm the delivery of the message.
-            \item \textit{Pubcomp reception} (broker): the client receives the pubcomp message.
+            \item \textit{Publish reception} (broker): the MQTT broker processes the packet and sends a \texttt{PUBREC} message back. 
+            \item \textit{Reception} (client): upon receiving the \texttt{PUBREC} message, the client discards the original packet and sends a \texttt{PUBREL} message to the broker.
+            \item \textit{Acknowledgment} (broker): the broker clears any current state and sends a \texttt{PUBCOMP} message to confirm the delivery of the message.
+            \item \textit{Completion} (broker): the client receives the \texttt{PUBCOMP} message.
         \end{enumerate}
 \end{itemize}
 
 \subsection{Subscriber}
-In MQTT, the subscribe message is used by the client to subscribe to one or more topics. 
-The fields in the subscribe message include:
-\begin{itemize}
-    \item \texttt{packetId}: a unique identifier for the subscription request.   
-    \item \texttt{QoS1}: the Quality of Service level for the first topic.   
-    \item \texttt{Topic1}: the first topic the client wants to subscribe to.  
-    \item \texttt{QoS2}: the Quality of Service level for the second topic.
-    \item \texttt{Topic2}: the second topic the client wants to subscribe to.
-\end{itemize}
-\noindent Once the broker receives the subscribe message, it responds with a suback message, which contains the following fields:
-\begin{itemize}
-    \item \texttt{packetId}: the unique identifier for the subscription.
-    \item \texttt{returnCode}: the result of the subscription request, which is returned for each topic in the subscription.
-\end{itemize}
+In MQTT, the \texttt{SUBSCRIBE} message is used by the client to subscribe to one or more topics. 
+Once the broker receives the \texttt{SUBSCRIBE} message, it responds with a \texttt{SUBACK} message.
 
-\paragraph*{Unsubscribe}
-To unsubscribe from topics, the client sends an unsubscribe message with the following fields:
-\begin{itemize}
-    \item \texttt{packetId}: a unique identifier for the unsubscribe request.
-    \item \texttt{Topic1}: the first topic to unsubscribe from.
-    \item \texttt{Topic2}: the second topic to unsubscribe from.
-\end{itemize}
-\noindent When the broker processes the unsubscribe request, it sends an unsuback message with the following fields:
-\begin{itemize}
-    \item \texttt{packetId}: the unique identifier for the unsubscribe request.
-    \item \texttt{returnCode}: a return code for each topic in the unsubscribe request, indicating whether the unsubscribe action was successful.
-\end{itemize}
+To unsubscribe from topics, the client sends an \texttt{UNSUBSCRIBE} message. 
+\noindent When the broker processes the \texttt{UNSUBSCRIBE} request, it sends an \texttt{UNSUBACK} message.
 
 \subsection{Session}
-In MQTT, the session management behavior varies depending on whether the client uses a persistent session or a non-persistent session.
-
-\paragraph*{Non-persistent session}
-In non-persistent sessions, when a client disconnects, all client-related information, such as subscriptions and QoS pending messages, is cleared from the broker. 
-This means that when the client reconnects, it needs to re-subscribe to topics and will not receive messages sent during its disconnection.
-
-\paragraph*{Persistent session}
-In a persistent session, both the client and the broker maintain the session state even if the client disconnects. 
-This ensures that the client can resume its communication without losing its subscription information or missing messages. 
-The session state includes:
+In MQTT, the session management behavior depends on the type of session: 
 \begin{itemize}
-    \item \textit{Broker's responsibilities}: maintain the existence of the session, even if there are no active subscriptions, store all subscriptions associated with the client, retain messages in QoS 1 or QoS 2 that were not acknowledged by the client, store new QoS 1 or QoS 2 messages that were published while the client was offline, so the client can receive them upon reconnection, and keep track of all QoS 2 messages that were sent but not yet acknowledged by the client.
-    \item \textit{Client's responsibilities}: store any QoS 1 or QoS 2 messages that were sent by the broker but not yet acknowledged by the client and retain QoS 2 messages that were sent but not yet acknowledged by the broker.
+    \item \textit{Non-persistent session}: when a client disconnects, all client-related information is cleared from the broker. 
+        This means that when the client reconnects, it needs to re-subscribe to topics and will not receive messages sent during its disconnection.
+    \item \textit{Persistent session}: the client and the broker maintain the session state even if the client disconnects. 
+        This ensures that the client can resume its communication without losing its subscription information or missing messages. 
+        With a persistent session, even if the client is offline, the broker will hold the state and deliver any relevant messages when the client reconnects. 
 \end{itemize}
-With a persistent session, even if the client is offline, the broker will hold the state and deliver any relevant messages when the client reconnects. 
 
 \subsection{Messages}
-\paragraph*{Retained messages} 
 In MQTT, publishing and subscribing are asynchronous operations. 
-This means that a client subscribing to a topic might not receive any message until another client publishes something to that topic.
-
-Retained messages are publish messages where the retained flag is set to one. 
-These messages are stored by the broker, and whenever a new client subscribes to the topic (or a matching topic pattern), the broker immediately sends the last retained message on that topic to the subscribing client. 
+Retained messages are \texttt{PUBLISH} messages where the \texttt{retained} flag is set to one. 
+These messages are stored by the broker, and whenever a new client subscribes to the topic, the broker immediately sends the last retained message on that topic to the subscribing client. 
 This ensures that subscribers receive the latest available message, even if no new message has been published.
 
-\paragraph*{Last will messages}
-The Last Will and Testament (LWT) feature in MQTT allows a client to notify other clients about an unexpected disconnect. 
-Here's how it works:
-\begin{itemize}
-    \item \textit{Client setup}: when a client connects to the broker, it can specify a last will message, which is a message that the broker will send to other clients if the client unexpectedly disconnects.
-    \item \textit{Broker's responsibility}: the broker stores the LWT message and only sends it if it detects that the client has disconnected unexpectedly.
-    \item \textit{Message delivery}: when the client experiences a hard disconnection, the broker sends the stored LWT message to all subscribed clients on the specified topic, alerting them of the disconnect.
-    \item \textit{Graceful disconnect}: if the client disconnects gracefully (by sending a disconnect message), the broker will discard the LWT message and not deliver it.
-\end{itemize}
+\paragraph*{Last will}
+The Last Will and Testament (LWT) message in MQTT allows a client to notify other clients about an unexpected disconnect. 
+When a client connects to the broker, it can specify a LWT message.
+The broker stores the LWT message and only sends it if it detects that the client has disconnected unexpectedly.
+When the client experiences a hard disconnection, the broker sends the stored LWT message to all subscribed clients on the specified topic.
+If the client disconnects gracefully, the broker will discard the LWT message.
+
+\paragraph{Keep alive}
+It is the client's responsibility to maintain an active MQTT connection. 
+If no other interactions occur within the specified keep-alive interval, the client sends a ping request to the broker. 
+The broker, upon receiving the ping, responds with a ping response to confirm the connection is still active. 
+This mechanism ensures the connection remains stable and prevents unnecessary disconnections due to inactivity.
 
 \subsection{MQTT for Sensor Networks}
-MQTT for Sensor Networks is a variation of the standard MQTT protocol designed to better suit the constraints of sensor networks and environments with limited resources. 
+MQTT for Sensor Networks (MQTT-SN) is a variation of the standard MQTT protocol designed to better suit the constraints of sensor networks and environments with limited resources. 
 Here are the main differences compared to the standard MQTT protocol:
 \begin{itemize}
-    \item \textit{Extended architecture}: MQTT-SN introduces the concept of Gateways and Forwarders. 
-        Gateways connect the sensor network to the traditional MQTT broker, allowing for communication between sensors and other MQTT clients. 
-        Forwarders are used to help route messages across different networks.
-    \item \textit{New gateway discovery procedures}: MQTT-SN includes a new process for discovering gateways. 
-        This allows devices in a sensor network to automatically find and connect to the appropriate gateway for communication with the MQTT broker.
-            The protocol defines messages specifically for this discovery process.
-    \item \textit{Compressed messages}: some messages in MQTT-SN are more compressed than in MQTT, making them smaller and more suitable for low-bandwidth and low-power networks. 
-        This helps to optimize message transfer, particularly when dealing with resource-constrained devices.
-    \item \textit{Extended keepalive procedures}: MQTT-SN supports extended keepalive procedures to handle clients that may be in sleep mode. 
-        These procedures allow clients to remain connected and avoid disconnection during periods of inactivity, thus improving the reliability of communication in energy-constrained environments.
+    \item Extended architecture with gateways and forwarders.
+    \item New gateway discovery procedures and messages. 
+    \item Some messages are more.
+    \item Extended keep alive procedures to support sleeping clients.
 \end{itemize}
