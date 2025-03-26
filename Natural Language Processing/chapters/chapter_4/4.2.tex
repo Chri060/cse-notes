@@ -98,3 +98,20 @@ The embeddings can significantly improve performance across a wide range of task
     \item Machine translation, where embeddings are used to translate text from one language to another by leveraging the semantic meaning of words.
 \end{itemize}
 \noindent By incorporating semantic knowledge from the context, these models benefit from the rich relationships between words, improving the quality of predictions and translations.
+
+\subsection{Vector database}
+Vector databases are specialized systems designed to index and retrieve objects based on their embeddings, enabling efficient similarity searches. 
+These databases excel at performing fast nearest-neighbor searches in high-dimensional embedding spaces, which is essential for various applications.
+
+However, finding nearest neighbors in high-dimensional spaces presents significant challenges. In such spaces, vectors tend to become approximately equidistant and orthogonal, making it difficult to distinguish close neighbors from distant ones. 
+Traditional indexing methods, such as $k$-d trees, which provide $\mathcal{O}(\log(n))$ search complexity in low-dimensional spaces, degrade to $\mathcal{O}(n)$ behavior in high dimensions due to the curse of dimensionality.
+
+To address these challenges, advanced algorithms have been developed that focus on approximate nearest neighbor (ANN) search techniques. 
+One prominent approach is the use of Hierarchical Navigable Small World (HNSW) graphs. 
+HNSW leverages a multi-layered graph structure to efficiently partition and navigate the space:
+\begin{enumerate}
+    \item \textit{Navigable Small World Graphs}: nodes in the graph are connected to their nearest neighbors, allowing for rapid traversal during searches.
+    \item \textit{Hierarchical layers}: the graph consists of multiple layers, with all nodes present in the bottom layer and progressively fewer nodes in higher layers. 
+        This hierarchical structure enables efficient exploration by narrowing down candidate neighbors at each level.
+    \item \textit{Search algorithm}: the algorithm begins at the topmost layer, identifies promising candidates, and iteratively refines the search by moving to lower layers until the nearest neighbor is found in the bottom layer.
+\end{enumerate}
