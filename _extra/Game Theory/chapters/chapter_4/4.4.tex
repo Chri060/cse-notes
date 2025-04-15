@@ -1,0 +1,23 @@
+\section{Nash equilibrium search}
+
+To find the Nash equilibrium we can use a brute force algorithm: 
+\begin{enumerate}
+    \item Guess the support of the equilibria $\text{spt}(\bar{x})$ and $\text{spt}(\bar{y})$. 
+    \item Ignore the sub-optimal strategies and find $x$, $y$, $u$, $w$ by solving the linear system, of $n+m+2$ equations: 
+        \[\begin{cases}
+            \sum_{i=1}^{n}x_i=1 \\
+            \sum_{j=1}^{m}a_{ij}y_j=v\quad\forall i \in \text{spt}(\bar{x}) \\
+            x_i=0 \quad \quad\forall i \notin \text{spt}(\bar{x})
+        \end{cases} \qquad \begin{cases}
+            \sum_{i=1}^{m}x_i=1 \\
+            \sum_{j=1}^{n}b_{ij}x_i=w\quad\forall j \in \text{spt}(\bar{y}) \\
+            y_i=0 \quad \quad\forall j \notin \text{spt}(\bar{x})
+        \end{cases}\]
+    \item Check wether the ignored inequalities are satisfied. 
+        If $x_i\geq 0$, $y_j\geq 0$, $\sum_{j=1}^{m}a_{ij}y_j\leq v$ and $\sum_{i=1}^{n}b_{ij}x_i\leq w$ then stop since we have found a mixed equilibrium profile. 
+        Otherwise, go back to step 1 and try another guess of the support. 
+\end{enumerate}
+\noindent Enumerating all the possible supports in the brute force algorithm quickly becomes computationally prohibitive; there are potentially $(2^n-1)(2^m-1)$ options. 
+For $n\times n$ games the number of combinations grows very quickly. 
+
+Lemke-Howson proposed a more efficient algorithm, though still with exponential running time in the worst case. 
