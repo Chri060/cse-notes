@@ -49,7 +49,6 @@ Extreme quantization techniques push the limits of precision reduction:
         Ternary quantization incurs minimal accuracy loss ($\approx0.5\%$) and is of theoretical interest.
 \end{itemize}
 
-
 \subsubsection{Implementation}
 A schematic overview of matrix-multiply logic in NN accelerator hardware involves weights $w_{n,m}$ and input values $x_n$.
 The Multiply-Accumulate (MAC) result is computed as:The Multiply-Accumulate (MAC) result is computed as:
@@ -92,8 +91,56 @@ Increasing the scale factor $s$ expands the quantization range, reducing clippin
 \[\left[-\dfrac{1}{2}s,\dfrac{1}{2}s\right]\]
 \noindent This trade-off between clipping and rounding errors must be carefully managed to achieve optimal performance.
 
+\paragraph*{Multiply and accumulate}
+A floating-point vector $\mathbf{x}$ can be approximated as a scalar multiplied by a vector of integer values.
+By quantizing the weights and activations, the quantized version of the multiply-and-accumulate (MAC) operation is expressed as:
+\[\hat{A}_n=\hat{\textbf{b}}_n+s_{\textbf{w}}s_{\textbf{x}}\sum_m\textbf{W}_{n,m}^{\text{int}}\textbf{x}_m^{\text{int}}\]
+Here, $s_{\textbf{w}}$ and $s_{\textbf{x}}$ are scale factors for weights and activations, respectively. 
+This formulation separates the scale factors, enabling efficient computation while maintaining precision.
+
+\subsubsection{Usage}
+Quantization reduces the computational cost and memory footprint of neural networks by converting floating-point representations into fixed-point representations. 
+Two primary approaches exist: post-training quantization (PTQ) and quantization-aware training (QAT).
+
+\paragraph*{Post-Training Quantization}
+In PTQ, a pre-trained floating-point (FP32) network is directly converted into a fixed-point network without requiring retraining or access to the original training pipeline. 
+The main challenge lies in determining the appropriate quantization range settings. 
+Common methods include MinMax quantization and Mean Squared Error (MSE) optimization.
+MinMax quantization sets the range based on the minimum and maximum values of the tensor:
+\[q_{\min}=\min\mathbf{V} \qquad q_{\max}=\max\mathbf{V}\]
+MSE optimization minimizes the difference between the original and quantized tensors:
+\[\argmin_{q_{\min},q_{\max}}={\left\lVert \mathbf{V}-\hat{\mathbf{V}}(q_{\min},q_{\max})\right\rVert}_F^2 \]
+PTQ is effective and fast to implement but struggles with low-bit quantization (e.g., 4-bit or below), where large quantization errors may degrade performance.
+
+\paragraph*{Quantization-Aware Training}
+QAT integrates quantization into the training process by simulating its effects during backpropagation. 
+While this approach achieves higher accuracy, it requires longer training times and labeled data. 
+A key challenge is handling the non-differentiability introduced by quantization. 
+This is addressed using the straight-through estimator (STE), which approximates the gradient of the rounding operator as 1:
+\[\dfrac{\partial\left\lfloor y\right\rceil}{\partial y}=1\]
+During the forward pass, quantization is applied, while the backward pass uses un-quantized values for gradient computation. 
+QAT generally outperforms PTQ, especially for low-bit quantization, but at the cost of increased complexity.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/eeai10.png}
+    \caption{QAT forward and backward propagation}
+\end{figure}
+
+It is important to note that the best quantized network is not necessarily obtained by simply quantizing the best FP32 network. 
+Careful optimization is required to balance accuracy and efficiency.
+
 
 \subsection{Task dropping}
-
-
-
+Reducing the number of operations and model size improves computational efficiency and memory usage. 
+Several techniques achieve this goal, including:
+\begin{itemize}
+    \item \textit{Network pruning}: neural networks are often over-parameterized, meaning many weights are redundant and can be pruned (set to zero) without significantly affecting performance. 
+        Simple pruning removes individual weights, while structured pruning removes groups of weights, such as entire rows, columns, or filters. 
+        Aggressive pruning may require fine-tuning to recover accuracy.
+    \item \textit{Network architecture design}: efficient architectures replace large filters with smaller ones, reducing the total number of weights. 
+        Smaller filters can be concatenated before training to emulate larger ones, or tensor decomposition techniques can be applied after training to decompose filters without impacting accuracy.
+    \item \textit{Transfer learning}: transfer learning leverages pre-trained models by retaining the first few layers, which capture general features, and replacing the later layers with a simpler architecture tailored to the target task. 
+        This approach reduces the need for extensive retraining.
+    \item \textit{Knowledge distillation}: a smaller student network learns to mimic the behavior of a larger teacher network. 
+        The loss function minimizes the difference between the outputs of the two models, enabling the student to approximate the teacher's performance with fewer parameters.
+\end{itemize}
