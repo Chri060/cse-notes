@@ -1,0 +1,71 @@
+\section{Large Language Models}
+
+Language Models (LMs) are models designed to predict the next token in a sequence. As the name suggests, Large Language Models (LLMs) are simply very large versions of these models.
+After the Transformer architecture demonstrated its power for language modeling tasks, a race began to build increasingly larger models. 
+Although the ultimate limits of scaling are not fully understood, empirical results show that the performance of GPT-style architectures improves approximately logarithmically with both the amount of training data and the total training time.
+
+\subsection{Chatbot}
+While large language models (LLMs) and chatbots are closely related, they are not the same. 
+LLMs are primarily trained to predict the next token in a sequence of text, while chatbots are fine-tuned specifically for conversational interaction with users.
+
+One major technique for turning an LLM into a chatbot is Reinforcement Learning from Human Feedback (RLHF). 
+In this process, the model is exposed to many conversations with real users, receiving feedback on which responses were most appropriate, helpful, or satisfying. 
+Over time, the model adjusts its behavior, learning to generate answers that better align with human preferences. 
+Rather than simply continuing text, chatbots are designed to produce responses that are more engaging, polite, and useful.
+
+Another important concept is instruction tuning, where a model is trained to perform a variety of tasks by following natural language instructions. 
+Instead of optimizing only for token prediction, the model learns to interpret prompts framed as explicit commands or questions. 
+This approach makes the model more versatile and better able to generalize across a wide range of user requests.
+
+\subsection{Prompting}
+During fine-tuning, language models are trained to engage in structured conversations with users. 
+This involves recognizing special tokens that delineate different parts of the dialogue. 
+Conversations are typically made up of three types of messages: 
+\begin{itemize}
+    \item System messages, which define how the chatbot should behave. 
+    \item User messages, which contain the user's input or requests
+    \item Assistant messages, which represent the chatbot's responses.
+\end{itemize}
+\noindent Although LLMs fundamentally operate as text-in/text-out systems, all parts of the conversation—past and present—must be serialized into a single text sequence. 
+This is done by concatenating messages with the appropriate formatting, often using chat templates that define the structure of the conversation at the token level.
+
+A key component in this setup is the system prompt, which sets the rules for how the chatbot should respond. 
+It guides the model on what behaviors to adopt and which topics or tones to avoid. This prompt plays a crucial role in ensuring safe and aligned responses, helping prevent the model from producing offensive or harmful content. 
+System prompts are often proprietary and not publicly disclosed, though users have had varying success inferring them by querying models directly.
+
+\subsubsection{Chain-of-Thought reasoning}
+Introduced in 2022, chain-of-thought (CoT) prompting helps models perform better on tasks that require step-by-step reasoning. 
+By encouraging the model to explain its reasoning as it answers, CoT prompting often leads to more accurate and interpretable results.
+
+Even without providing examples, a simple phrase can trigger this behavior (an approach known as zero-shot CoT prompting). 
+Taking it further, users have found that slightly extending this prompt or adding analogies can yield even better performance.
+
+To improve answer quality, some methods involve generating multiple responses and selecting the most common one. 
+Alternatively, the model can critique its own responses, regenerating them if it deems its previous answer incorrect. 
+This form of self-reflection enhances both performance and trustworthiness.
+
+\subsubsection{Test-Time compute scaling}
+Recent models, such as Deepseek-R1, take a more structured approach to reasoning by separating the thinking and answering phases. 
+Their outputs are formatted with dedicated tags, allowing the model to explicitly allocate time to reasoning before producing a final response.
+This technique, known as test-time compute scaling, encourages the model to spend more computational effort. 
+
+The training process involves exposing the model to difficult questions paired with answers, but without showing the steps needed to solve them. 
+Over time, the model learns to generate increasingly detailed reasoning as part of its response, effectively training itself to think when necessary.
+
+In some setups, a second model (possibly larger or more specialized) can be used to verify the final answer or evaluate the quality of the reasoning. 
+This additional layer of oversight helps ensure that responses are not only accurate but also well justified—especially useful when ground-truth answers aren't available.
+
+\subsection{Limitations}
+The major limitations of LLMs are: 
+\begin{itemize}
+    \item \textit{Hallucinations}: LLMs are known to sometimes produce fabricated or inaccurate information. 
+        These models are primarily optimized to generate content that is engaging and human-like, which can sometimes conflict with the objective of delivering strictly factual and truthful information.
+        Hallucinations can manifest in many forms, including content that is not faithful to known facts, incoherent with provided data, or not logically derivable from available information.
+    \item \textit{Limited reasoning}: earlier versions of LLMs exhibited significant reasoning limitations. 
+        These issues sometimes arose from tokenization errors, or from inherent limitations related to the model's architecture. 
+        As a result, the models could struggle with multi-step logical reasoning or fail to maintain consistency across complex tasks.
+    \item \textit{Lack of robustness}: prompt sensitivity remains an active area of research. 
+        Small variations in prompt wording can lead to disproportionately large differences in model performance, making the behavior of LLMs sometimes unpredictable and frustrating for users.
+        Generally, the clearer, more structured, and less ambiguous the prompt, the more reliable the model's output. 
+        However, ensuring consistent performance across a wide range of tasks is still a major challenge.
+\end{itemize}
