@@ -1,14 +1,14 @@
-\section{Linear Time Logic}
+\section{Linear Temporal Logic}
 
-Linear Temporal Logic is a formalism used to describe temporal properties of systems. 
+Linear Temporal Logic (LTL) is a formalism used to describe temporal properties of systems. 
 It is widely used in model checking, verification, and automated reasoning. 
-Linear Temporal Logic operates over sequences of states, allowing the specification of temporal constraints using logical operators.
+LTL operates over sequences of states, allowing the specification of temporal constraints using logical operators.
 
 \subsection{Syntax}
-Linear Time Logic formulas are constructed using the following grammar:
+LTL formulas are constructed using the following grammar:
 \[\phi::=\text{true}\mid a \mid \phi_1\land\phi_2\mid\lnot\phi\mid\circ \phi\mid\phi_1\cup\phi_2\]
 \noindent Here, $a$ is an atomic proposition, $\circ\phi$ (next) asserts that $\phi$ holds in the next state, $\phi_1\cup\phi_2$ (until) states that $\phi_2$ will eventually hold, and until then, $\phi_1$ must hold.
-From this, we can derive the eventually ($\Diamond\phi=\text{true}\cup\phi$) and always ($\square\phi=\lnot\Diamond\lnot\phi$) operators.
+From this, we can derive the eventually ($\Diamond\phi=\text{true}\cup\phi$) and always ($\Box\phi=\lnot\Diamond\lnot\phi$) operators.
 
 \subsection{Semantics}
 TL formulas are interpreted over infinite sequences of states $\sigma=A_0A_1\dots$, where $A_i \subseteq 2^{\text{AP}}$.
@@ -21,17 +21,17 @@ The satisfaction relation $\sigma\models\phi$ is defined as:
     \item $\sigma\models \circ \phi \Leftrightarrow \sigma[1\dots]=A_1A_2A_3\dots\models\phi$
     \item $\sigma\models \phi_1\cup\phi_2 \Leftrightarrow \exists j \geq 0\quad\sigma[j\dots]\models\phi_2 \land \sigma[1\dots]\models\phi_1\forall 0\leq i<j$
     \item $\sigma\models\Diamond\phi \Leftrightarrow \exists j\geq 0 \quad \sigma[j\dots]\models\phi$
-    \item $\sigma\models\square\phi \Leftrightarrow \forall j\geq 0 \quad \sigma[j\dots]\models\phi$
+    \item $\sigma\models\Box\phi \Leftrightarrow \forall j\geq 0 \quad \sigma[j\dots]\models\phi$
 \end{itemize}
 \noindent The timed interpretation of the operators is as follows: 
 \begin{itemize}
     \item $\circ^k\phi$ means $\phi$ holds after exactly $k$ steps. 
     \item $\Diamond^{\leq k}\phi$ means $\phi$ will hold within at most $k$ steps. 
-    \item $\square^{\leq k}\phi$ means $\phi$ holds now and for the next $k$ steps.
+    \item $\Box^{\leq k}\phi$ means $\phi$ holds now and for the next $k$ steps.
 \end{itemize}
 
 \paragraph*{Past operators}
-Although Linear Temporal Logic primarily focuses on the future, past operators can be introduced without increasing expressive power:
+Although LTL primarily focuses on the future, past operators can be introduced without increasing expressive power:
 \begin{itemize}
     \item \textit{Previous}: $\bullet\phi$ holds if $\phi$ was true in the previous state.
     \item \textit{Since}: $\phi S \psi$ means $\psi$ held at some past time, and $\phi$ was true until then.
@@ -46,21 +46,21 @@ Metric extensions allow explicit bounds on temporal operators:
     \item $\phi\mathcal{S_{\sim t}}\psi$ means $\psi$ holds within time $t$ while $\phi$ holds until then.
 \end{itemize}
 
-\subsection{Fainrness}
-Linear Temporal Logic is defined over atomic propositions, not directly over actions.
-Therefore, fairness constraints in Linear Temporal Logic are expressed in terms of states, rather than actions.
+\subsection{Fairness}
+LTL is defined over atomic propositions, not directly over actions.
+Therefore, fairness constraints in LTL are expressed in terms of states, rather than actions.
 
-Action-based fairness is more intuitive and straightforward but Linear Temporal Logic fairness is equally expressive.
-Action-based fairness assumptions can be translated into Linear Temporal Logic fairness assumptions.
+Action-based fairness is more intuitive and straightforward but LTL fairness is equally expressive.
+Action-based fairness assumptions can be translated into LTL fairness assumptions.
 One way to achieve this is by making a copy of each non-initial state $s$ and recording which action led to this state. 
 For each possible action $a$, a copy of the state is created to indicate that state $s$ was reached through action $a$. 
 This copied state, denoted $\left\langle s,a\right\rangle$, indicates that the state $s$ has been reached via action $a$.
 
-In Linear Temporal Logic, fairness can be expressed using different types of fairness constraints:
+In LTL, fairness can be expressed using different types of fairness constraints:
 \begin{enumerate}
-    \item \textit{Unconditional fairness}: $\square\blacklozenge\psi$. 
-    \item \textit{Strong fairness}: $\square\blacklozenge\phi\rightarrow\square\blacklozenge\psi$.
-    \item \textit{Weak fairness}: $\blacklozenge\square\phi\rightarrow\blacklozenge\square\psi$.
+    \item \textit{Unconditional fairness}: $\Box\blacklozenge\psi$. 
+    \item \textit{Strong fairness}: $\Box\blacklozenge\phi\rightarrow\Box\blacklozenge\psi$.
+    \item \textit{Weak fairness}: $\blacklozenge\Box\phi\rightarrow\blacklozenge\Box\psi$.
 \end{enumerate}
 
 \paragraph*{Assumptions}
@@ -72,18 +72,18 @@ To combine fairness assumptions, we use:
         \[\text{fairPaths}(s)=\{\pi\in\text{paths}(s)\mid\pi\models\text{fair}\}\]
     \item Fair satisfaction of a formula $\phi$: 
         \[s\models_{\text{fair}}\phi\Leftrightarrow\forall\pi\in\text{fairPaths}(s)\quad\pi\models\phi\]
-    \item Fair satisfaction in the Transition System: 
+    \item Fair satisfaction in the TS: 
         \[\text{TS}\models_{\text{fair}}\phi\Leftrightarrow\forall s_0\in I\quad s_0\models_{\text{fair}}\phi\]
 \end{itemize}
 \begin{theorem}
-    For a Transition System $\text{TS}$ without terminal states, an Linear Temporal Logic formula $\phi$, and fairness assumption $\text{fair}$: 
+    For a TS without terminal states, an LTL formula $\phi$, and fairness assumption $\text{fair}$: 
     \[\text{TS}\models_{\text{fair}}\Leftrightarrow\text{TS}\models(\text{fair}\rightarrow\phi)\]
 \end{theorem}
 
 \subsection{Positive Normal Form}
 Positive Normal Form is a canonical form where negations appear only adjacent to atomic propositions. 
 This is similar to disjunctive and conjunctive normal forms in propositional logic.
-Every Linear Temporal Logic formula can be transformed into Positive Normal Form, but this transformation requires new dual operators.
+Every LTL formula can be transformed into Positive Normal Form, but this transformation requires new dual operators.
 \begin{table}[H]
     \centering
     \begin{tabular}{|l|l|l|}
@@ -94,21 +94,21 @@ Every Linear Temporal Logic formula can be transformed into Positive Normal Form
     Until             & Weak until    & $\lnot(\phi\cup\psi)\rightarrow(\phi\land\lnot\psi)W(\lnot\phi\land\lnot\psi)$                \\ \hline
     \end{tabular}
 \end{table}
-The syntax of Linear Temporal Logic in weak until Positive Normal Form is:
+The syntax of LTL in weak until Positive Normal Form is:
 \[\phi::=\text{true}\mid\text{false}\mid a \mid\lnot a\mid \phi_1\land\phi_2\mid\circ\phi\mid\phi_1\cup\phi_2\mid\phi_1 W\phi_2\]
 \begin{theorem}
-    For any Linear Temporal Logic formula $\phi$, there exists an equivalent Linear Temporal Logic formula in weak until Positive Normal Form. 
+    For any LTL formula $\phi$, there exists an equivalent LTL formula in weak until Positive Normal Form. 
 \end{theorem}
 \noindent However, the size of the resulting formula may be exponential in the size of the original formula.
 
 \paragraph*{Release operator}
 The release operator $R$ is defined as: 
 \[\phi R \psi =\lnot(\lnot\phi\cup\lnot\psi)\]
-\noindent The semantycs is $\sigma\models\phi R \psi$ if $\forall j \geq 0, \sigma[j\dots]\models\psi$ or $\exists i \geq 0 \quad (\sigma[i\dots]\models\phi)\land \forall k \leq i \quad \sigma[k\dots]\models\psi$.
+\noindent The semantics is $\sigma\models\phi R \psi$ if $\forall j \geq 0, \sigma[j\dots]\models\psi$ or $\exists i \geq 0 \quad (\sigma[i\dots]\models\phi)\land \forall k \leq i \quad \sigma[k\dots]\models\psi$.
 Intuitively, the formula $\phi R \psi$ holds if $\psi$ is always true unless $\phi$ becomes true, at which point the requirement for $\psi$ is released. 
-The syntax for Linear Temporal Logic with the release operator is:
+The syntax for LTL with the release operator is:
 \[\phi::=\text{true}\mid\text{false}\mid a \mid\lnot a\mid \phi_1\land\phi_2\mid\circ\phi\mid\phi_1\cup\phi_2\mid\phi_1 R \phi_2\]
-\noindent Rewriting rules for Linear Temporal Logic formulas with the release operator:
+\noindent Rewriting rules for LTL formulas with the release operator:
 \begin{itemize}
     \item $\lnot\text{true}\rightsquigarrow \text{false}$
     \item $\lnot\lnot\phi\rightsquigarrow \phi$
@@ -116,11 +116,11 @@ The syntax for Linear Temporal Logic with the release operator is:
     \item $\lnot\circ\phi\rightsquigarrow\circ\lnot\phi$
     \item $\lnot(\phi\cup\psi)\rightsquigarrow\lnot\phi R \lnot\psi$
 \end{itemize}
-\noindent For any Linear Temporal Logic formula $\phi$, there exists an equivalent formula $\phi^\prime$ in release Positive Normal Form with the same size.
+\noindent For any LTL formula $\phi$, there exists an equivalent formula $\phi^\prime$ in release Positive Normal Form with the same size.
 
 \subsection{Automata model checking}
-An important observation is that every Linear Temporal Logic formula $\phi$ can be represented by a nondeterministic Büchi automaton
-Let $\text{words}(\phi)$ be the set of $\omega$-words satisfying an Linear Temporal Logic formula $\phi$. 
+An important observation is that every LTL formula $\phi$ can be represented by a nondeterministic Büchi automaton
+Let $\text{words}(\phi)$ be the set of $\omega$-words satisfying an LTL formula $\phi$. 
 The model checking condition states that $\text{TS}\models\phi$ if and only if: 
 \begin{itemize}
     \item $\text{traces}(\text{TS}) \subseteq \text{words}(\phi)$
@@ -131,44 +131,44 @@ The model checking condition states that $\text{TS}\models\phi$ if and only if:
 \[\text{TS}\models\phi\Leftrightarrow\text{traces}(\text{TS})\cap\mathcal{L}_{\omega}(\mathcal{A})=\varnothing\]
 Instead of building a Büchi automaton equivalent to the negation of the formula and complementing it, it's more efficient to complement the formula first and then construct the equivalent Büchi automaton.
 
-\subsubsection{Linear Time Logic to generalized Büchi automaton}
+\subsubsection{LTL to generalized Büchi automaton}
 The construction first builds a generalized Büchi automaton and then converts it to a nondeterministic Büchi automaton. 
 A generalized Büchi automaton has a set $\mathcal{F}\subseteq 2^Q$ of acceptance sets, where the accepted language consists of all $\omega$-words that have an infinite run $q_0q_1q_2\dots$ such that for each acceptance set $F \in \mathcal{F}$, there are infinitely many indices $i$ with $q_i\in F$.
 
-For any Linear Temporal Logic formula $\phi$, there exists a corresponding generalized Büchi automaton $\mathcal{G}_{\phi}$. 
-For any Linear Temporal Logic formula $\phi$, there exists a nondeterministic Büchi automaton $\mathcal{A}_\phi$ such that $\text{words}(\phi)=\mathcal{L}_{\omega}(\mathcal{G}_{\phi})$. 
+For any LTL formula $\phi$, there exists a corresponding generalized Büchi automaton $\mathcal{G}_{\phi}$. 
+For any LTL formula $\phi$, there exists a nondeterministic Büchi automaton $\mathcal{A}_\phi$ such that $\text{words}(\phi)=\mathcal{L}_{\omega}(\mathcal{G}_{\phi})$. 
 This can be constructed in time and space $2^{\mathcal{O}(\left\lvert \phi\right\rvert )}$.
 
 \paragraph*{Until operator}
-To model the semantics of the until operator ($\cup$), an acceptance set $F_\psi$  is introduced for each subformula $\psi = \phi_1 \cup \phi_2$ of $\phi$.
+To model the semantics of the until operator ($\cup$), an acceptance set $F_\psi$  is introduced for each sub-formula $\psi = \phi_1 \cup \phi_2$ of $\phi$.
 The semantics of the until operator ensures that for a word $\sigma$ to satisfy $\psi = \phi_1 \cup \phi_2$, the condition is met only if $\phi_2$ eventually becomes true, while $\phi_1$ must hold until $\phi_2$ becomes true
 This is enforced by the acceptance set $F_{\phi_1\cup\phi_2}$, defined as: 
 \[F_{\phi_1\cup\phi_2}=\left\{B \in Q\mid\phi_1\cup\phi_2\notin B \lor \phi_2\in B\right\}\]
-\noindent The complete set of acceptance sets $\mathcal{F}$ for a given Linear Temporal Logic formula is:
+\noindent The complete set of acceptance sets $\mathcal{F}$ for a given LTL formula is:
 \[\mathcal{F}=\left\{F_{\phi_1\cup\phi_2}\mid\phi_1\cup\phi_2\in\text{closure}(\phi)\right\}\]
 
 \begin{theorem}
-    For any Linear Temporal Logic formula $\phi$ (over a set of atomic propositions $\text{AP}$) there exists a nondeterministic Büchi automaton $\mathcal{A}_\phi$ such that $\text{words}(\phi)=\mathcal{L}_{\omega}(\mathcal{A}_\phi)$ which can be constructed in time and space $2^{\mathcal{O}(\left\lvert \phi\right\rvert )}$.
+    For any LTL formula $\phi$ (over a set of atomic propositions $\text{AP}$) there exists a nondeterministic Büchi automaton $\mathcal{A}_\phi$ such that $\text{words}(\phi)=\mathcal{L}_{\omega}(\mathcal{A}_\phi)$ which can be constructed in time and space $2^{\mathcal{O}(\left\lvert \phi\right\rvert )}$.
 \end{theorem}
 \begin{theorem}
-    There exists a family of Linear Temporal Logic formulas $\phi_n$ such that every nondeterministic Büchi automaton has at least $2^n$ states. 
+    There exists a family of LTL formulas $\phi_n$ such that every nondeterministic Büchi automaton has at least $2^n$ states. 
 \end{theorem}
-\noindent While the nondeterministic Büchi automaton construction can have an exponential number of states, these automata are more expressive than Linear Temporal Logic formulas themselves.
+\noindent While the nondeterministic Büchi automaton construction can have an exponential number of states, these automata are more expressive than LTL formulas themselves.
 
 \paragraph*{Complexity}
-The time and space complexity of the Linear Temporal Logic model-checking algorithm is PSPACE-complete, with the complexity of checking a formula $\phi$ against a Transition System $\text{TS}$ given by:
+The time and space complexity of the LTL model checking algorithm is PSPACE complete, with the complexity of checking a formula $\phi$ against a TS given by:
 \[\mathcal{O}(\left\lvert \text{TS}\right\rvert 2^{\left\lvert \phi\right\rvert })\]
 \noindent However, in practice, the performance can be quite good due to optimizations, such as on-the-fly model checking. 
 This approach, which constructs the nondeterministic Büchi automaton for the negation of $\phi$ during the process of checking the system, can help avoid constructing the entire automaton upfront.
 
 \subsubsection{Algorithm}
-The satisfiability and validity of Linear Temporal Logic formulas can be determined by checking the emptiness of the corresponding nondeterministic Büchi automaton. 
+The satisfiability and validity of LTL formulas can be determined by checking the emptiness of the corresponding nondeterministic Büchi automaton. 
 This check can be performed using a nested depth-first search that looks for a reachable cycle containing an accepting state. 
 Both satisfiability and validity checking are PSPACE-complete problems.
 
-Given a Linear Temporal Logic formula $\phi$ over the atomic propositions $\text{AP}$, the algorithm returns true if $\phi$ is satisfiable or false otherwise.
+Given a LTL formula $\phi$ over the atomic propositions $\text{AP}$, the algorithm returns true if $\phi$ is satisfiable or false otherwise.
 \begin{algorithm}[H]
-    \caption{Linear Time Logic model cheking}
+    \caption{LTL model checking}
         \begin{algorithmic}[1]
             \State Construct a nondeterministic Büchi automaton $\mathcal{A}=\left\langle Q,2^{\text{AP}},\delta,Q_0,F\right\rangle$ with $\mathcal{L}_{\omega}(\mathcal{A})=\text{words}(\phi)$
             \If {$\mathcal{L}_{\omega}(\mathcal{A})=\varnothing$}

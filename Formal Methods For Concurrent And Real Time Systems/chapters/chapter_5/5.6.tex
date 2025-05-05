@@ -1,11 +1,11 @@
 \section{Uppaal}
 
-Uppaal is a widely used tool for verifying Timed Automata, though it was not the first of its kind. 
+Uppaal is a widely used tool for verifying TA, though it was not the first of its kind. 
 The original tool for this purpose was Kronos.
 Uppaal was developed collaboratively by Uppsala University in Sweden and Aalborg University in Denmark, from which its name is derived. 
 
-\paragraph*{Timed Automata network}
-Uppaal enables users to construct complex models by composing networks of Timed Automata. 
+\paragraph*{TA network}
+Uppaal enables users to construct complex models by composing networks of TA. 
 These models are broken down into multiple interacting components, making them more manageable and modular.
 The interaction between components is achieved through synchronization channels. 
 One component sends a message through a channel, while another component receives it, allowing for structured communication within the system.
@@ -22,7 +22,7 @@ In Uppaal, certain locations have special timing constraints:
 \begin{itemize}
     \item \textit{Urgent locations}: time cannot pass when an automaton is in an urgent location. 
         This can be modeled as resetting a clock upon entering the location and enforcing an invariant that prevents time progression.
-    \item \textit{Committed locations}: these are even more restrictive( time cannot pass, and the only possible transition must immediately exit the committed location). 
+    \item \textit{Committed locations}: these are even more restrictive (time cannot pass, and the only possible transition must immediately exit the committed location). 
         Transitions can only interleave with other committed locations.
 \end{itemize}
 \noindent Using urgent and committed locations effectively can help reduce unnecessary interleaving and minimize the number of clocks in a model, improving efficiency.
@@ -33,14 +33,14 @@ When two automata reach corresponding locations linked by an urgent channel, syn
 To maintain efficiency, transitions involving urgent channels cannot have clock constraints.
 
 \subsection{Query language}
-Uppaal allows users to verify system properties using a subset of Timed Computation Tree Logic. 
+Uppaal allows users to verify system properties using a subset of TCTL. 
 The following are some key query types:
 \begin{itemize}
-\item \texttt{E<> P} ($P$ is reachable): there exists a path from the initial state leading to a state where $P$ holds.
-\item \texttt{A<> P} ($P$ is inevitable): on all paths from the initial state, a state where $P$ holds will eventually be reached.
-\item \texttt{A[] P} ($P$ is an invariant): in all reachable states from the initial state, $P$ always holds.
-\item \texttt{E[] P} ($P$ is potentially always true): there exists a path where $P$ holds in all states along that path.
-\item \texttt{P -> Q} ($P$ leads to $Q$): if $P$ holds in a state, then eventually $Q$ will hold in a future state. 
+    \item \texttt{E<> P} ($P$ is reachable): there exists a path from the initial state leading to a state where $P$ holds.
+    \item \texttt{A<> P} ($P$ is inevitable): on all paths from the initial state, a state where $P$ holds will eventually be reached.
+    \item \texttt{A[] P} ($P$ is an invariant): in all reachable states from the initial state, $P$ always holds.
+    \item \texttt{E[] P} ($P$ is potentially always true): there exists a path where $P$ holds in all states along that path.
+    \item \texttt{P -> Q} ($P$ leads to $Q$): if $P$ holds in a state, then eventually $Q$ will hold in a future state. 
 \end{itemize}
 \noindent Expressions within queries can describe specific locations, variable constraints, or clock constraints. 
 Special keywords, such as \texttt{deadlock}, allow checking for potential system deadlocks.

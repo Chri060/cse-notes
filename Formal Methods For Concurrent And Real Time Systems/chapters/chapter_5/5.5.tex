@@ -23,17 +23,17 @@ Here, each symbol $\sigma_i$ is a symbol from a finite alphabet, and $\tau_i$ is
     A timed language over an alphabet $\mathcal{A}$ is a set of timed words over $\mathcal{A}$.
 \end{definition}
 
-\paragraph*{Untime operation}
-The untime operation on a timed language discards the time values associated with symbols.
+\paragraph*{Un-time operation}
+The un-time operation on a timed language discards the time values associated with symbols.
 
 \begin{definition}
     For a timed language $\mathcal{L}$ over $\mathcal{A}$:
-    \[\text{untime}(\mathcal{L}) = \{ \sigma \in \mathcal{A}^\omega \mid \text{there exists a } \tau \text{ such that } (\sigma, \tau) \in \mathcal{L} \}\]
+    \[\text{un-time}(\mathcal{L}) = \{ \sigma \in \mathcal{A}^\omega \mid \text{there exists a } \tau \text{ such that } (\sigma, \tau) \in \mathcal{L} \}\]
 \end{definition}
-\noindent $\text{untime}(\mathcal{L})$ is a set of $\omega$-words.
+\noindent $\text{un-time}(\mathcal{L})$ is a set of $\omega$-words.
 
 \subsection{Timed Automata}
-A timed automato is defined over an alphabet of actions, called the input alphabet. 
+A TA is defined over an alphabet of actions, called the input alphabet. 
 It is represented as a tuple:
 \[\mathcal{A} = \langle L, \Sigma, C, E, l_0, J, F \rangle\]
 \noindent Here:
@@ -63,41 +63,40 @@ Here, $l_i \in L$ and $\eta_i$ are clock valuations satisfying:
     \item $\eta_i$ satisfies the invariant $J(l_i)$.
 \end{itemize}
 \noindent The set of locations visited infinitely often in the run is denoted by $\inf(r_{(\sigma, \tau)})$.
-A timed word $(\sigma, \tau)$ is accepted by a Timed Automaton $\mathcal{A}$ if:
+A timed word $(\sigma, \tau)$ is accepted by a TA $\mathcal{A}$ if:
 \[\inf(r(\sigma, \tau)) \cap F \neq \emptyset\]
 
 \subsection{Timed regular languages}
 \begin{definition}[\textit{Timed regular language}]
-    A timed regular language is a language accepted by some Timed Automaton.
+    A timed regular language is a language accepted by some TA.
 \end{definition}
 \noindent If $\mathcal{L} \subseteq \mathcal{A}^\omega$ is an $\omega$-regular language, then $\mathcal{L}_t = \{ (\sigma, \tau) \mid \sigma \in \mathcal{L} \}$ is a timed regular language.
 
-\paragraph*{Untimed languages}
-Given a Timed Automata that accepts a language $\mathcal{L}$, there exists a Büchi automaton (BA) that accepts $\text{untime}(\mathcal{L})$.
-That is, for any timed regular language $\mathcal{L}$, its untimed version $\text{untime}(\mathcal{L})$ is $\omega$-regular.
+\paragraph*{Un-timed languages}
+Given a TA that accepts a language $\mathcal{L}$, there exists a Büchi automaton (BA) that accepts $\text{un-time}(\mathcal{L})$.
+That is, for any timed regular language $\mathcal{L}$, its un-timed version $\text{un-time}(\mathcal{L})$ is $\omega$-regular.
 However, simply removing timing constraints is insufficient. 
 
-
-\subsection{Timed Automata properties}
-Timed Automata are closed under union and intersection but not under complementation.
-Timed Automata cannot be determinized.
+\subsection{Properties}
+TA are closed under union and intersection but not under complement.
+TA cannot be determined.
 Non-closure under complement limits automata-based model checking.
 Language inclusion and equivalence are undecidable.
-Emptiness is decidable by verifying the emptiness of the Region Automaton (similar to the Region Transition System).
+Emptiness is decidable by verifying the emptiness of the Region Automaton (similar to the Region TS).
 
 \paragraph*{Continuous time semantics}
-Timed Automata semantics can be defined over signals instead of timed words.
-The standard Transition System semantics is based on timed words.
-Linear Temporal Logics are more naturally interpreted over signals.
+TA semantics can be defined over signals instead of timed words.
+The standard TS semantics is based on timed words.
+LTLs are more naturally interpreted over signals.
 Decision problems become harder in continuous-time semantics.
 
 \subsection{Model Checking Timed Automata for Linear Temporal Logic}
-Model checking Timed Automata for Linear Temporal Logic (both pointwise and continuous semantics) is PSPACE-complete.
+Model checking TA for LTL is PSPACE-complete.
 The steps are: 
 \begin{enumerate}
     \item Construct a Büchi automaton equivalent to the negation of a formula.
-    \item Build the product of this Büchi automaton with the Timed Automata.
+    \item Build the product of this Büchi automaton with the TA.
     \item Verify the emptiness of the resulting automaton.
 \end{enumerate}
-\noindent Since Timed Automata are closed under intersection, the result is still a Timed Automata.
-However, most metric extensions of Linear Temporal Logic are undecidable.
+\noindent Since TA are closed under intersection, the result is still a TA.
+However, most metric extensions of LTL are undecidable.

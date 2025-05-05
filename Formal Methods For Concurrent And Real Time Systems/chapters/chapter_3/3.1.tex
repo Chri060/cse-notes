@@ -4,7 +4,7 @@ Safety properties ensure that a system never reaches an undesirable state.
 Regular safety properties can be characterized using a nondeterministic finite automaton that recognizes finite words over the power set of atomic propositions, denoted as $\left(2^{\text{AP}}\right)^\ast$.
 
 \begin{definition}[\textit{Safety property model checking}]
-    Given a regular safety property $P_{\text{safe}}$ over the atomic propositions $\text{AP}$ and a finite Transition System $\text{TS}$ (without terminal states), model checking verifies whether:
+    Given a regular safety property $P_{\text{safe}}$ over the atomic propositions $\text{AP}$ and a finite TS (without terminal states), model checking verifies whether:
     \[\text{TS}\models P_{\text{safe}}\]
 \end{definition}
 \noindent 
@@ -16,13 +16,13 @@ Here, $\mathcal{A}$ must not reach a final state.
 \subsection{Invariant checking}
 Verification of the safety property can be reduced to checking an invariant by following these steps:
 \begin{enumerate}
-    \item Construct the product of the Transition System and the nondeterministic finite automaton $\text{TS}\otimes \mathcal{A}$. 
+    \item Construct the product of the TS and the nondeterministic finite automaton $\text{TS}\otimes \mathcal{A}$. 
         This operation is similar to the synchronous composition of two Nondeterministic Finite Automata.
     \item The following conditions are equivalent:
         \begin{itemize}
-            \item The Transition System satisfies the safety property: 
+            \item The TS satisfies the safety property: 
                 \[\text{TS} \models P_{\text{safe}}\]
-            \item The set of finite traces of the Transition System does not intersect the language of:
+            \item The set of finite traces of the TS does not intersect the language of:
                 \[\mathcal{A}: \text{traces}_{\text{fin}}(\text{TS}) \cap L(\mathcal{A}) = \varnothing\]
             \item The product system satisfies the invariant:
                 \[\text{TS}\otimes \mathcal{A} \models P_{\text{inv}(\mathcal{A})}\]
@@ -31,12 +31,12 @@ Verification of the safety property can be reduced to checking an invariant by f
 \noindent Thus, checking a safety property reduces to verifying an invariant in the product system.
 
 \subsection{Algorithm}
-Given a finite Transition System $\text{TS}$ and a regular safety property $P_{\text{safe}}$, the algorithm returns either true ($\text{TS}\models P_{\text{safe}}$) or false ($\text{TS}\not\models P_{\text{safe}}$), with a counterexample. 
+Given a finite TS and a regular safety property $P_{\text{safe}}$, the algorithm returns either true ($\text{TS}\models P_{\text{safe}}$) or false ($\text{TS}\not\models P_{\text{safe}}$), with a counterexample. 
 \begin{algorithm}[H]
     \caption{Safety property model checking}
         \begin{algorithmic}[1]
             \State Let nondeterministic finite automaton $\mathcal{A}$ (with accept states $F$) be such that $\mathcal{L}(\mathcal{A})$ are the bad prefixes of $P_{\text{safe}}$ 
-            \State Construct the product Transition System $\text{TS}\otimes\mathcal{A}$
+            \State Construct the product TS $\text{TS}\otimes\mathcal{A}$
             \State Check the invariant $P_{\text{inv}(\mathcal{A})}$ with proposition $\lnot F=\wedge_{q \in F}\lnot q$ on $\text{TS}\otimes\mathcal{A}$
             \If{$\text{TS}\otimes\mathcal{A}$}
                 \State \Return $\text{true}$
@@ -48,4 +48,4 @@ Given a finite Transition System $\text{TS}$ and a regular safety property $P_{\
 \end{algorithm}
 \noindent The time and space complexity of this approach is:
 \[\mathcal{O}(\left\lvert\text{TS}\right\rvert\cdot\left\lvert\mathcal{A}\right\rvert)\]
-Here, $\left\lvert\text{TS}\right\rvert$ and $\left\lvert\mathcal{A}\right\rvert$ denote the number of states and transitions in the Transition System and the nondeterministic finite automaton, respectively.
+Here, $\left\lvert\text{TS}\right\rvert$ and $\left\lvert\mathcal{A}\right\rvert$ denote the number of states and transitions in the TS and the nondeterministic finite automaton, respectively.

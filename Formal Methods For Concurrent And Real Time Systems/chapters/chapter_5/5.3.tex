@@ -1,8 +1,8 @@
 \section{Timed Automata analysis}
 
-To verify properties of a system modeled as a Timed Automaton, we need to explore all possible states of the automaton.
+To verify properties of a system modeled as a TA, we need to explore all possible states of the automaton.
 
-A state in a Timed Automata is represented as $\left\langle \text{location},\text{clock evaluation}\right\rangle$.
+A state in a TA is represented as $\left\langle \text{location},\text{clock evaluation}\right\rangle$.
 The set of possible clock evaluations, denoted $\text{eval}(C)$, consists of real-valued clock assignments.
 Since clock values come from $\mathbb{R}_{\geq 0}$, this results in an infinite state space.
 
@@ -35,18 +35,18 @@ Two clock valuations $\eta_1$ and $\eta_2$ belong to the same region if and only
     A clock region is defined as an equivalence class of clock evaluations under the relation $\cong$. 
 \end{definition}
 \noindent Since there are only finitely many ways to assign integer values and compare fractional parts, the number of regions is finite.
-The region abstraction enables efficient verification of properties in timed automata by ensuring a finite number of explored states.
+The region abstraction enables efficient verification of properties in TA by ensuring a finite number of explored states.
 
 \subsection{Region based automata}
-By using clock regions, we can construct a finite representation of all possible states in the timed Transition System $\text{TS}(\text{TA})$.
+By using clock regions, we can construct a finite representation of all possible states in the $\text{TS}(\text{TA})$.
 state in $\text{TS}(\text{TA})$ is represented as $\left\langle \ell_i,\right\rangle$ where $\ll_i$ is a location and $\eta_i$ is a clock valuation.
-The key idea is to group clock valuations into equivalence classes (regions) to define a finite region-based Transition System.
+The key idea is to group clock valuations into equivalence classes (regions) to define a finite region-based TS.
 Since there is a maximum constant in the clock constraints, the number of clock regions is finite.
 
-Thus, for a given Timed Automaton, we build a region-based Transition System where states are pairs:
+Thus, for a given TA, we build a region-based TS where states are pairs:
 \[\left\langle \ell_i,\right\rangle\]
 
-To define transitions in the region-based Transition System, we need to determine time successors of clock regions.
+To define transitions in the region-based TS, we need to determine time successors of clock regions.
 \begin{definition}[\textit{Time successor}]
     A clock region $\alpha^\prime$ is a time-successor of a clock region $\alpha$ if:
     \[\forall\eta\in\alpha\qquad \exists t\in\mathbb{R}_{\geq 0}\mid \eta+t\in\alpha^\prime\]
@@ -58,18 +58,17 @@ However, the exact delays might need to be adjusted to ensure they reach corresp
 \subsection{Time abstracted bisimulation}
 Clock equivalence can be seen as a special case of time-abstracted bisimulation.
 \begin{definition}[\textit{Time abstracted bisimulation}]
-    A relation $R$ on the states of a timed automata is a time based bisimulation if $(\ell_1,\upsilon_1)R(\ell_2,\upsilon_2)$ and $(\ell_1,\upsilon_1)\xrightarrow{d_1,a}(\ell_1^\prime,\upsilon_1^\prime)$ for some $d_1 \in\mathbb{R}_{\geq 0}$ and $a\in\Sigma$ imply $(\ell_2,\upsilon_2)\xrightarrow{d_2,a}(\ell_2^\prime,\upsilon_2^\prime)$ for some $d_2 \in\mathbb{R}_{\geq 0}$ with $(\ell_1^\prime,\upsilon_1\prime)R(\ell_2\prime,\upsilon_2\prime)$ and viceversa. 
+    A relation $R$ on the states of a TA is a time based bisimulation if $(\ell_1,\upsilon_1)R(\ell_2,\upsilon_2)$ and $(\ell_1,\upsilon_1)\xrightarrow{d_1,a}(\ell_1^\prime,\upsilon_1^\prime)$ for some $d_1 \in\mathbb{R}_{\geq 0}$ and $a\in\Sigma$ imply $(\ell_2,\upsilon_2)\xrightarrow{d_2,a}(\ell_2^\prime,\upsilon_2^\prime)$ for some $d_2 \in\mathbb{R}_{\geq 0}$ with $(\ell_1^\prime,\upsilon_1\prime)R(\ell_2\prime,\upsilon_2\prime)$ and viceversa. 
 \end{definition}
 \begin{theorem}
     Clock equivalence is a bisimulation equivalence.
 \end{theorem}
 \noindent Clock equivalence defines a bisimulation over atomic propositions. 
-Since clock equivalence is a finite-index relation, we obtain a finite quotient Transition System:
-\[\text{RTS}(\text{TA})\] 
+Since clock equivalence is a finite-index relation, we obtain a finite quotient TS, named $\text{RTS}(\text{TA})$.
 \noindent From this, we can derive that: 
 \begin{enumerate}
     \item Every path in the infinite $\text{TS}(\text{TA})$ has a corresponding path in the finite $\text{RTS}(\text{TA})$.
     \item Every path in $\text{RTS}(\text{TA})$ corresponds to an infinite set of paths in $\text{TS}(\text{TA})$.
-    \item Computation Tree Logic-style logical properties (used in model checking) are preserved in $\text{RTS}(\text{TA})$.
+    \item CTL-style logical properties (used in model checking) are preserved in $\text{RTS}(\text{TA})$.
 \end{enumerate}
 \noindent Thus, region-based automata allow efficient analysis of timed systems while maintaining correctness guarantees.

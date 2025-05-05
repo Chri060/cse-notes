@@ -1,25 +1,25 @@
 \section{Verification}
 
-The Region Transition System can be leveraged to verify the reachability of specific locations in a Timed Automaton.
+The Region TS can be leveraged to verify the reachability of specific locations in a TA.
 \begin{theorem}
-    Determining whether a location is reachable in a Timed Automaton is \\ PSPACE-complete.
+    Determining whether a location is reachable in a TA is PSPACE-complete.
 \end{theorem}
-\noindent The complexity arises from the exponential growth of the region Transition System, which depends on both the number of clocks and the binary representation of the constants used for clock comparisons.
+\noindent The complexity arises from the exponential growth of the region TS, which depends on both the number of clocks and the binary representation of the constants used for clock comparisons.
 
-Since bisimulation equivalence implies Computation Tree Logic equivalence (even for systems with aninfinite number of states).
+Since bisimulation equivalence implies CTL equivalence (even for systems with an infinite number of states).
 This ensures that the verification results remain consistent.
 
-However, Computation Tree Logic has limitations when expressing precise timing constraints, as it lacks a metric for time. 
+However, CTL has limitations when expressing precise timing constraints, as it lacks a metric for time. 
 Despite this, it remains a valuable tool for verification in many cases.
 
 \subsection{Timed Computation Tree Logic}
-Timed Computation Tree Logic extends Computation Tree Logic by introducing a metric until operator that allows reasoning about time constraints.
+Timed CTL (TCTL) extends CTL by introducing a metric until operator that allows reasoning about time constraints.
 
 \subsubsection{Syntax}
-Timed Computation Tree Logic state formulas follow the usual Computation Tree Logic structure but incorporate atomic clock constraints g (typically defined over the set of clocks in a Timed Automaton):
+TCTL state formulas follow the usual CTL structure but incorporate atomic clock constraints g (typically defined over the set of clocks in a TA):
 \[\Phi:==\text{true}\mid a \mid g \mid \Phi \land \Phi \mid \lnot\phi \mid E\phi\mid \forall\phi\]
-\noindent Here, $a\in\text{AP}$ is the set of atomic propositions, and $g\in\text{acc}(C)$ are atomic clock constraints over the set of clocks $C$ in a Timed Automaton. 
-In addition, Timed Computation Tree Logic introduces path formulas:
+\noindent Here, $a\in\text{AP}$ is the set of atomic propositions, and $g\in\text{acc}(C)$ are atomic clock constraints over the set of clocks $C$ in a TA. 
+In addition, TCTL introduces path formulas:
 \[\phi:==\Phi U^J\Phi\]
 \noindent Here, $J$ is an interval with natural number bounds.
 The derived operators are: 
@@ -45,12 +45,12 @@ For a time-divergent path $\pi\in s_0\overset{d_0}{\implies}s_1\overset{d_2}{\im
 
 \paragraph*{Eventuality}
 Eventuality operator is denoted as $\pi\models\Diamond^J\Phi$. 
-It holds when there esists some index $\exists i \geq 0$ and delay $d\in[0,d_i]$ such that: 
+It holds when there exists some index $\exists i \geq 0$ and delay $d\in[0,d_i]$ such that: 
 \[s_i+d\models\Phi\qquad \sum_{k=0}^{i-1}d_k+d\in J\]
 This operator means that a $\phi$-state is reached at some time instant $t\in J$.
 
 \paragraph*{Globality}
-Globality operator is denoted as $\pi\models\square^J\Phi$. 
+Globality operator is denoted as $\pi\models\Box^J\Phi$. 
 It holds when for every index $\exists i \geq 0$ and all delay $d\in[0,d_i]$ such that: 
 \[s_i+d\models\Phi\qquad \sum_{k=0}^{i-1}d_k+d\in J\]
 This operator means that all states visited within interval $J$ satisfy $\phi$. 
@@ -58,53 +58,53 @@ This operator means that all states visited within interval $J$ satisfy $\phi$.
 \paragraph*{Bounded until}
 Bounded until operator is denoted as $\Phi\cup^J\Psi$. 
 Holds when at some point within $J$, a state satisfying $\Psi$ is reached, and at all previous time instants, $\Phi$ or $\Psi$ holds.
-In standard Linear Temporal Logic and Computation Tree Logic, $\Phi\cup\Psi$ is equivalent to $(\Phi\lor\Psi)\cup\Psi$.
+In standard LTL and CTL, $\Phi\cup\Psi$ is equivalent to $(\Phi\lor\Psi)\cup\Psi$.
 
-\subsubsection{Timed Computation Tree Logic Semantics for Timed Automata}
-Let Timed Automata be a Timed Automaton with: clocks $C$, locations $\text{Loc}$, initial states $\text{Loc}_0$, and a clock evaluation function $\text{eval}(C)$. 
-For a Timed Computation Tree Logic state formula $\Phi$, the satisfaction set is defined as:
+\subsubsection{Timed Computation Tree Logic semantics for Timed Automata}
+Let TA be a TA with: clocks $C$, locations $\text{Loc}$, initial states $\text{Loc}_0$, and a clock evaluation function $\text{eval}(C)$. 
+For a TCTL state formula $\Phi$, the satisfaction set is defined as:
 \[\text{sat}(\Phi)=\{s\in\text{Loc}\times\text{eval}(C)\mid s\models\Phi\}\]
-A Timed Automaton Timed Automata satisfies a Timed Computation Tree Logic formula $\Phi$ if and only if $\Phi$ holds in all initial states:
+A TA satisfies a TCTL formula $\Phi$ if and only if $\Phi$ holds in all initial states:
 \[\text{TA}\models\Phi\Leftrightarrow\forall\ell_0\in\text{Loc}_0\quad\left\langle \ell_0,\eta_0\right\rangle\models\Phi \]
 Here, $\eta_0(x)=0$ for all $x\in C$. 
 
 \subsection{Model checking}
-The construction of the Region Transition System for a Timed Automaton can be modified to incorporate regions introduced by a Timed Computation Tree Logic formula $\Phi$. 
+The construction of the Region TS for a TA can be modified to incorporate regions introduced by a TCTL formula $\Phi$. 
 When defining $\text{RTS}(\text{TA})$, we must also consider clock constraints in $\Phi$, specifically the maximum constant $c_x$ for each clock $x$.
 The resulting system is denoted as $\text{RTS}(\text{TA},\Phi)$. 
 
 \subsubsection{Equivalence and clock elimination}
 Unfortunately, $\text{RTS}(\text{TA},\Phi)$ is not bisimilar to $\text{TS}(\text{TA})$ because certain delay transitions are eliminated.
 However, this is still valid since $\text{RTS}(\text{TA},\Phi)$ is stutter-equivalent to $\text{TS}(\text{TA})$.
-A transformation exists to eliminate timing parameters from every Timed Computation Tree Logic subformula by introducing new clocks.
+A transformation exists to eliminate timing parameters from every TCTL sub-formula by introducing new clocks.
 
 \paragraph*{Temporal logic with clocks}
-Instead of using dense time operators, a logic called Timed Computation Tree Logic extends Computation Tree Logic by introducing a new set of formula clocks, atomic constraints, and a new in operator to reset a given clock to zero.
-A Timed Computation Tree Logic formula $\Phi$ can always be rewritten into an equivalent Timed Computation Tree Logic formula $\Phi^\prime$.
-We can then construct a Region Transition System  denoted as $\text{RTS}(\text{TA},\Phi^\prime)$, by introducing the formula clocks and their constraints into $\text{RTS}(A)$.
+Instead of using dense time operators, a logic called TCTL extends CTL by introducing a new set of formula clocks, atomic constraints, and a new in operator to reset a given clock to zero.
+A TCTL formula $\Phi$ can always be rewritten into an equivalent TCTL formula $\Phi^\prime$.
+We can then construct a Region TS  denoted as $\text{RTS}(\text{TA},\Phi^\prime)$, by introducing the formula clocks and their constraints into $\text{RTS}(A)$.
 
-Timed Computation Tree Logic can be interpreted as a Computation Tree Logic formula over R$\text{RTS}(\text{TA},\Phi^\prime)$, as long as:
+TCTL can be interpreted as a CTL formula over R$\text{RTS}(\text{TA},\Phi^\prime)$, as long as:
 \begin{itemize}
     \item Clock constraints are treated as atomic propositions.
     \item Non-Zeno behaviors (paths with infinitely many actions in a finite time) are excluded.
 \end{itemize}
 \noindent Under the non-Zeno assumption:
 \[\text{TA}\models\Phi\Leftrightarrow\text{RTS}(\text{TA},\Phi^\prime)\models\Phi^\prime\]
-\noindent Thus, standard Computation Tree Logic model-checking techniques can be applied. Various optimizations are often introduced in practice.
+\noindent Thus, standard CTL model-checking techniques can be applied. Various optimizations are often introduced in practice.
 
 \subsubsection{Complexity}
 \begin{theorem}
-    For Timed Automaton Timed Automata and Timed Computation Tree Logic formula $\Phi$, the Timed Computation Tree Logic model checking problem $\text{TA}\models\Phi$ can be determined in time: 
+    For TA and TCTL formula $\Phi$, the TCTL model checking problem $\text{TA}\models\Phi$ can be determined in time: 
     \[\mathcal{O}((N+K)\times\left\lvert \Phi\right\rvert )\] 
-    Here, $N$ and $K$ are the number of states and transitions in the region Transition System $\text{RTS}(\text{TS},\Phi)$, respectively. 
+    Here, $N$ and $K$ are the number of states and transitions in the region TS $\text{RTS}(\text{TS},\Phi)$, respectively. 
 \end{theorem}
-\noindent Since Region Transition System states grow exponentially in the number of clocks and the binary representation of constants, the complexity is significant.
+\noindent Since Region TS states grow exponentially in the number of clocks and the binary representation of constants, the complexity is significant.
 \begin{theorem}
-    The Timed Computation Tree Logic model checking problem is PSPACE-complete.
+    The TCTL model checking problem is PSPACE-complete.
 \end{theorem}
 
-In practice, most model checkers do not support full Timed Computation Tree Logic.
-Symbolic techniques, which improve verification efficiency, cannot easily extend to full Timed Computation Tree Logic.
-Model checking safety, reachability, and $\omega$-regular properties, Linear Temporal Logic, and Computation Tree Logic for Timed Automata is PSPACE-complete.
-Timed Computation Tree Logic satisfiability is undecidable.
-Model checking Timed Linear Temporal Logic is undecidable.
+In practice, most model checkers do not support full TCTL.
+Symbolic techniques, which improve verification efficiency, cannot easily extend to full TCTL.
+Model checking safety, reachability, and $\omega$-regular properties, LTL, and CTL for TA is PSPACE-complete.
+TCTL satisfiability is undecidable.
+Model checking Timed LTL is undecidable.

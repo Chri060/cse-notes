@@ -1,22 +1,22 @@
-\section{Transition systems refinement}
+\section{Transition System refinement}
 
-Transition systems can represent software or hardware at various levels of abstraction, where the level of detail included in the model depends on the purpose of the analysis. 
+TS can represent software or hardware at various levels of abstraction, where the level of detail included in the model depends on the purpose of the analysis. 
 At lower levels of abstraction, more implementation details are included, while higher levels intentionally omit those details, focusing on the core behaviors of the system. 
-This section discusses the processes of abstraction and refinement in Transition Systems and their role in preserving certain properties while simplifying or detailing the model.
+This section discusses the processes of abstraction and refinement in TS and their role in preserving certain properties while simplifying or detailing the model.
 
-The process of abstraction involves starting with a detailed Transition System and creating a more abstract version, which may be easier to manage or reason about, while still preserving key properties of interest. 
+The process of abstraction involves starting with a detailed TS and creating a more abstract version, which may be easier to manage or reason about, while still preserving key properties of interest. 
 This is often necessary for high-level analysis or verification tasks. On the other hand, refinement is the opposite process, where a more abstract model is made more detailed to reflect implementation specifics, without losing the essential properties.
 
 Both abstraction and refinement are concerned with maintaining the correctness of a system while adjusting the level of detail, and this can be formally described using implementation relations.
-These relations connect two Transition Systems at different levels of abstraction.
+These relations connect two TS at different levels of abstraction.
 \begin{definition}[\textit{Implementation relation}]
-    An implementation relation is a binary relation between two Transition Systems at different abstraction levels.
+    An implementation relation is a binary relation between two TS at different abstraction levels.
 \end{definition}
-\noindent When two Transition Systems, $\text{TS}_1$ and $\text{TS}_2$, are related by an implementation relation, one system is said to be refined by the other. 
+\noindent When two TS, $\text{TS}_1$ and $\text{TS}_2$, are related by an implementation relation, one system is said to be refined by the other. 
 The system that is more abstract is seen as an abstraction of the more detailed system. 
 If the implementation relation is an equivalence, then the two systems are indistinguishable at the relevant level of abstraction, as they exhibit the same observable properties.
 
-The set of atomic propositions plays a critical role in comparing Transition Systems. 
+The set of atomic propositions plays a critical role in comparing TS. 
 In bisimulation, $\text{AP}$ represents the relevant atomic propositions. 
 Other propositions can be ignored if they do not affect the properties being studied.
 
@@ -31,7 +31,7 @@ In other words, for each successor of $s$, there must be a corresponding success
 Simulation relations are useful when we want to show that one system correctly implements another, more abstract system, or when we want to find a smaller abstract model that still preserves important properties.
 
 \begin{definition}[\textit{Simulation}]
-    Let $\text{TS}_1=\left\langle S_1,\text{Act}_1,\rightarrow_1,I_1,\text{AP},L_1\right\rangle$ and \\ $\text{TS}_2=\left\langle S_2,\text{Act}_2,\rightarrow_2,I_2,\text{AP},L_2\right\rangle$ be Transition Systems over $\text{AP}$. 
+    Let $\text{TS}_1=\left\langle S_1,\text{Act}_1,\rightarrow_1,I_1,\text{AP},L_1\right\rangle$ and \\ $\text{TS}_2=\left\langle S_2,\text{Act}_2,\rightarrow_2,I_2,\text{AP},L_2\right\rangle$ be TS over $\text{AP}$. 
     A simulation for $(\text{TS}_1,\text{TS}_2)$ is a binary relation $\mathcal{R}\subseteq S_1\times S_2$ such that: 
     \begin{enumerate}
         \item For every initial state $\forall s_1\in I_1$, $s_2\in I_2$ such that $(s_1,s_2)\in \mathcal{R}$. 
@@ -46,11 +46,6 @@ Simulation relations are useful when we want to show that one system correctly i
 \noindent The first condition ensures that every initial state in $\text{TS}_1$ is related to an initial state in $\text{TS}_2$, although there might be initial states in $\text{TS}_2$ that are not related to any initial state in $\text{TS}_1$. 
 The second condition is similar to that of bisimulation, but the symmetric counterpart of the condition is not required.
 In other words, while $\text{TS}_1$ may have some successors not matched by $\text{TS}_2$, every successor of $\text{TS}_1$ must have a corresponding successor in $\text{TS}_2$.
-
-
-
-
-
 
 \subsection{Abstraction}
 \begin{definition}[\textit{Refinement}]
@@ -78,7 +73,7 @@ In other words, while $\text{TS}_1$ may have some successors not matched by $\te
 A safety property is one that asserts that something bad will never happen. 
 A key property of simulation relations is that they preserve safety properties.
 \begin{property}
-    Let $P_{\text{safe}}$ be a safety linear-time property, and let $\text{TS}_1$ and $\text{TS}_2$ be Transition Systems.
+    Let $P_{\text{safe}}$ be a safety linear-time property, and let $\text{TS}_1$ and $\text{TS}_2$ be TS.
     Then:
     \[\text{TS}_1\preceq \text{TS}_2\land\text{TS}_2\models P_{\text{safe}}\implies\text{TS}_1\models P_{\text{safe}} \]
 \end{property}
@@ -86,36 +81,36 @@ A key property of simulation relations is that they preserve safety properties.
 
 \subsection{Path fragments}
 \begin{definition}
-    A path fragment is a finite part of a path in the Transition System.
+    A path fragment is a finite part of a path in the TS.
 \end{definition}
 \noindent The simulation relation preserves the set of finite path fragments, but it does not preserve entire paths that end in terminal states.
 If a path fragment $p_1$ from state $s_1$ is simulated by a path fragment $p_2$ from state $s_2$, and $p_1$ ends in a terminal state, but $p_2$ does not, then: $p_1$ is a valid path in $\text{TS}_1$, but $p_2$ is not a valid path in  $\text{TS}_2$.
 
 Simulation preserves the finite traces of the system, which correspond to the finite path fragments, but it does not preserve traces that involve terminal states.
-If there are no terminal states in the Transition System, simulation preserves all traces (including infinite traces) and not just the safety properties.
+If there are no terminal states in the TS, simulation preserves all traces (including infinite traces) and not just the safety properties.
 
 \subsection{Simulation quotient}
-A simulation quotient is a reduced version of a Transition System where simulation equivalence is used to merge equivalent states.
-Given a Transition System $\text{TS}$ and a simulation equivalence $\cong_{\text{TS}}$, we can define a quotient Transition System $TS_{\setminus\cong}$, where equivalent states are merged.
+A simulation quotient is a reduced version of a TS where simulation equivalence is used to merge equivalent states.
+Given a TS and a simulation equivalence $\cong_{\text{TS}}$, we can define a quotient TS $TS_{\setminus\cong}$, where equivalent states are merged.
 The quotient system will have the same behavior as $\text{TS}$ with reduced state space.
 
 \subsection{Atomic proposition determinism}
 \begin{definition}[\textit{Atomic proposition determinism}]
-    An Atomic proposition deterministic Transition System $\text{TS}=\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$ has the following properties: 
+    An Atomic proposition deterministic $\text{TS}=\left\langle S,\text{Act},\rightarrow,I,\text{AP},L\right\rangle$ has the following properties: 
     \begin{enumerate}
         \item For any set $A\subseteq\text{AP}$, there is at most one initial state in $\text{TS}$ with label $A$.
         \item If a state $s$ can transition to two distinct states $s^\prime$ and $s^{\prime\prime}$ via the same action and with the same label, then $s^\prime=s^{\prime\prime}$.
     \end{enumerate}
 \end{definition}
 \begin{theorem}
-    IF $\text{TS}_1$ and $\text{TS}_2$ are atomic proposition-determinstic, then $\text{TS}_1\sim\text{TS}_2$ if and only if $\text{TS}_1\simeq\text{TS}_2$. 
+    IF $\text{TS}_1$ and $\text{TS}_2$ are atomic proposition-deterministic, then $\text{TS}_1\sim\text{TS}_2$ if and only if $\text{TS}_1\simeq\text{TS}_2$. 
 \end{theorem}
 \noindent This means that for atomic proposition-deterministic systems, simulation equivalence implies bisimulation equivalence, and vice versa.
 
 \subsection{Action based bisimulation}
 While traditional bisimulation focuses on state labels, action-based bisimulation also takes into account the actions triggering transitions between states.
 \begin{definition}[\textit{Action based bisimulation equivalence}]
-    Let $\text{TS}_1=\left\langle S_1,\text{Act}_1,\rightarrow_1,I_1,\text{AP},L_1\right\rangle$ and $\text{TS}_2=\left\langle S_2,\text{Act}_2,\rightarrow_2,I_2,\text{AP},L_2\right\rangle$ be Transition Systems over a set of actions $\text{Act}$.
+    Let $\text{TS}_1=\left\langle S_1,\text{Act}_1,\rightarrow_1,I_1,\text{AP},L_1\right\rangle$ and $\text{TS}_2=\left\langle S_2,\text{Act}_2,\rightarrow_2,I_2,\text{AP},L_2\right\rangle$ be TS over a set of actions $\text{Act}$.
     An action-based bisimulation for $(\text{TS}_1,\text{TS}_2)$ is a binary relation $\mathcal{R}\subseteq S_1\times S_2$ such that: 
     \begin{enumerate}
         \item For each $s_1\in I_1$, there exists $s_2\in I_2$ such that $(s_1,s_2)\in\mathcal{R}$, and viceversa.

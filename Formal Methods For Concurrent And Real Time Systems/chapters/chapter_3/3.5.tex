@@ -3,11 +3,11 @@
 In branching-time temporal logics, time is represented as a tree-like structure where each state may have multiple successor states. 
 This framework allows for reasoning about all or some possible futures, making it useful for verifying concurrent systems.
 
-Computation Tree Logic is a branching-time temporal logic used to specify properties of computation trees, which represent all possible executions of a Transition System. 
-Unlike Linear Temporal Logic, which interprets formulas in terms of single execution paths, Computation Tree Logic allows reasoning about multiple possible futures.
+Computation Tree Logic (CTL) is a branching-time temporal logic used to specify properties of computation trees, which represent all possible executions of a TS. 
+Unlike LTL, which interprets formulas in terms of single execution paths, CTL allows reasoning about multiple possible futures.
 
 \subsection{Syntax}
-The syntax of Computation Tree Logic formulas is based on two main type of formulas, based on states and paths. 
+The syntax of CTL formulas is based on two main type of formulas, based on states and paths. 
 
 \paragraph*{State formulas}
 In state formulas we have assertions about properties of individual states and their branching structure: 
@@ -31,7 +31,7 @@ In path formulas we describe temporal properties along paths:
 \[\Phi ::= X \Phi \mid F\Phi\mid G\Phi \mid\Phi_1\cup\Phi_2\]
 
 \subsection{Semantic}
-Given a Transition System $\text{TS}=\left\langle S, \text{Act}, \rightarrow, I,\text{AP}, L\right\rangle$, we have: 
+Given a TS $\left\langle S, \text{Act}, \rightarrow, I,\text{AP}, L\right\rangle$, we have: 
 \begin{itemize}
     \item $s \models a$ if and only if $a \in L(s)$. 
     \item $s \models \lnot \Phi$ if and only if $s \not\models \Phi$.
@@ -44,53 +44,53 @@ Given a Transition System $\text{TS}=\left\langle S, \text{Act}, \rightarrow, I,
     \item $\sigma \models X\Phi$ if and only if $s_1 \models \Phi$.
     \item $\sigma \models \Phi_1 \cup \Phi_2$ if and only if there exists $j\geq 0$ such that $s_j \models \Phi_2$ and for all $0 \leq i < j$, $s_i \models \Phi_1$.
 \end{itemize}
-\noindent A Computation Tree Logic formula $\Phi$ and an Linear Temporal Logic formula $\phi$ are equivalent, denoted as $\Phi\equiv\phi$, if they hold for the same Transition Systems: 
+\noindent A CTL formula $\Phi$ and an LTL formula $\phi$ are equivalent, denoted as $\Phi\equiv\phi$, if they hold for the same TS: 
 \[\text{TS} \models \Phi \Leftrightarrow \text{TS} \models \phi\]
 \begin{theorem}
-    Computation Tree Logic and Linear Temporal Logic are incomparable.
+    CTL and LTL are incomparable.
 \end{theorem}
 \begin{theorem}
-    Let $\Phi$ be a Computation Tree Logic formula, and let $\phi$ be the Linear Temporal Logic formula obtained by eliminating all path quantifiers in $\Phi$. 
+    Let $\Phi$ be a CTL formula, and let $\phi$ be the LTL formula obtained by eliminating all path quantifiers in $\Phi$. 
     Then, one of the following holds:
     \begin{itemize}
-        \item $\Phi\equiv\phi$, meaning $\Phi$ can be fully expressed in Linear Temporal Logic.
-        \item There does not exist any Linear Temporal Logic formula that is equivalent to the Computation Tree Logic formula $\Phi$.
+        \item $\Phi\equiv\phi$, meaning $\Phi$ can be fully expressed in LTL.
+        \item There does not exist any LTL formula that is equivalent to the CTL formula $\Phi$.
     \end{itemize}
 \end{theorem}
 
 \subsection{Fairness}
-airness constraints are essential for verifying concurrent systems. 
+Fairness constraints are essential for verifying concurrent systems. 
 A fair path is one where each fairness condition is satisfied infinitely often. 
-However, Computation Tree Logic alone cannot express fairness conditions directly within its path formulas.
-To address this limitation, Fair Computation Tree Logic is introduced:
+However, CTL alone cannot express fairness conditions directly within its path formulas.
+To address this limitation, Fair CTL is introduced:
 \begin{itemize}
-    \item Fair Computation Tree Logic has the same syntax as Computation Tree Logic but is interpreted over fair paths.
-    \item Fair paths are defined using a Computation Tree Logic formula, interpreted as if it were Linear Temporal Logic.
+    \item Fair CTL has the same syntax as CTL but is interpreted over fair paths.
+    \item Fair paths are defined using a CTL formula, interpreted as if it were LTL.
 \end{itemize}
 
 \subsection{Model checking}
 \paragraph*{Normal form}
-Similar to Linear Temporal Logic, normal forms can be defined for Computation Tree Logic:
+Similar to LTL, normal forms can be defined for CTL:
 \begin{itemize}
-    \item \textit{Positive normal form}: defined analogously to Linear Temporal Logic.
+    \item \textit{Positive normal form}: defined analogously to LTL.
     \item \textit{Existential normal form}: a form where only the modalities exists next, exists until, and exists globally appear.
         In this form, negation cannot be pushed to atomic propositions.
         However, model-checking algorithms can handle universal operators by duality. 
 \end{itemize}
 
 \paragraph*{Model checking}
-Given a Transition System $\text{TS}$ and a Computation Tree Logic formula $\Phi$, the problem is to determine whether $\text{TS} \models \Phi$. 
+Given a TS and a CTL formula $\Phi$, the problem is to determine whether $\text{TS} \models \Phi$. 
 The approach follows these steps:
 \begin{enumerate}
-    \item For each state subformula $\psi$ of $\Phi$, explore the state space of $\text{TS}$ to determine the set of states where $\psi$ holds.
-    \item Start from atomic propositions (temporal depth 0) and incrementally evaluate subformulas with increasing temporal depth.
-    \item The formula $\Phi$ itself has the highest nesting depth among its subformulas.
+    \item For each state sub-formula $\psi$ of $\Phi$, explore the state space of $\text{TS}$ to determine the set of states where $\psi$ holds.
+    \item Start from atomic propositions and incrementally evaluate sub-formulas with increasing temporal depth.
+    \item The formula $\Phi$ itself has the highest nesting depth among its sub-formulas.
     \item Assume formulas are given in existential normal form. 
-        The only allowed temporal subformulas are: exists until ($E(\phi_1\cup\phi_2)$), exists next ($EX\phi$), and exists globally ($EG\phi$).
+        The only allowed temporal sub-formulas are: exists until ($E(\phi_1\cup\phi_2)$), exists next ($EX\phi$), and exists globally ($EG\phi$).
 \end{enumerate}
 
 \paragraph*{Satisfaction set computation}
-Given a finite Transition System $\text{TS}$ with set state $S$ and Computation Tree Logic formula $\Phi$ in existential normal form, the algorithm computes $\text{sat}(\Phi)=\left\{s\in S\mid s\models\Phi\right\}$.
+Given a finite TS with set state $S$ and CTL formula $\Phi$ in existential normal form, the algorithm computes $\text{sat}(\Phi)=\left\{s\in S\mid s\models\Phi\right\}$.
 \begin{algorithm}[H]
     \caption{Satisfaction set computation}
         \begin{algorithmic}[1]
@@ -119,7 +119,7 @@ Given a finite Transition System $\text{TS}$ with set state $S$ and Computation 
                         \EndWhile 
                         \State \Return $T$
                     \EndCase
-                    \Case{$\exists\square\phi$}
+                    \Case{$\exists\Box\phi$}
                         \State $T=\text{sat}(\Phi)$ 
                         \While {$s\in\left\{s\in T\mid\text{post}(s)\cap T= \varnothing\right\}\neq \varnothing$}
                             \State $s= \left\{s\in T\mid\text{post}(s)\cap T= \varnothing\right\}$
@@ -131,11 +131,11 @@ Given a finite Transition System $\text{TS}$ with set state $S$ and Computation 
             \Until{all subformulas $\psi$ of $\Phi$ are evaluated}
         \end{algorithmic}
 \end{algorithm}
-\noindent For a Transition System $\text{TS}$ with $N$ states and $K$ transitions, and Computation Tree Logic formula $\Phi$, the complexity of Computation Tree Logic model checking is $\mathcal{O}((N+K)\cdot\left\lvert \Phi\right\rvert )$.
-his suggests that Computation Tree Logic model checking is computationally more efficient than Linear Temporal Logic model checking.
+\noindent For a TS with $N$ states and $K$ transitions, and CTL formula $\Phi$, the complexity of CTL model checking is $\mathcal{O}((N+K)\cdot\left\lvert \Phi\right\rvert )$.
+his suggests that CTL model checking is computationally more efficient than LTL model checking.
 However, there is an important caveat:
 \begin{itemize}
-    \item TL formulas can be exponentially more compact than their Computation Tree Logic equivalents (if they exist).
-    \item If $\mathcal{P}\neq\mathcal{NP}$, there exist Linear Temporal Logic formulas $\phi_n$ of polynomial length $n$, where any equivalent Computation Tree Logic formula must have non-polynomial length.
-    \item Additionally, for properties expressible in both Computation Tree Logic and Linear Temporal Logic, Linear Temporal Logic model checking can also be made linear in time complexity.
+    \item TL formulas can be exponentially more compact than their CTL equivalents (if they exist).
+    \item If $\mathcal{P}\neq\mathcal{NP}$, there exist LTL formulas $\phi_n$ of polynomial length $n$, where any equivalent CTL formula must have non-polynomial length.
+    \item Additionally, for properties expressible in both CTL and LTL, LTL model checking can also be made linear in time complexity.
 \end{itemize}

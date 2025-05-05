@@ -1,11 +1,11 @@
 \section{Timed Automata}
 
-Timed Automata are a type of Program Graph where real-valued variables, called clocks, are added to track time. 
-The state of a Timed Automaton is defined by a combination of its current location (the logical state of the automaton) and the values of the clocks.
-The set of locations in a Timed Automata is finite, but the clocks take values in non-negative real numbers, making the state space infinite.
-Timed Automatas often do not use atomic propositions but rely on the names of the locations to define the states.
+Timed Automata (TA) are a type of PG where real-valued variables, called clocks, are added to track time. 
+The state of a TA is defined by a combination of its current location (the logical state of the automaton) and the values of the clocks.
+The set of locations in a TA is finite, but the clocks take values in non-negative real numbers, making the state space infinite.
+TA often do not use atomic propositions but rely on the names of the locations to define the states.
 
-A Timed Automaton can evolve in two main ways:
+A TA can evolve in two main ways:
 \begin{itemize}
     \item \textit{Location jumps}: the automaton can change its location without the passage of time. 
         This happens when a transition occurs, but time does not elapse.
@@ -13,10 +13,10 @@ A Timed Automaton can evolve in two main ways:
         This means that the location remains unchanged, but the values of the clocks are updated.
 \end{itemize}
 
-The clocks in a Timed Automaton measure the passage of time according to the differential equation $\dot{x}=1$, meaning that the value of each clock increases at a constant rate.
+The clocks in a TA measure the passage of time according to the differential equation $\dot{x}=1$, meaning that the value of each clock increases at a constant rate.
 
 \subsection{Clocks}
-In Timed Automata, clocks play a crucial role in tracking the passage of time. 
+In TA, clocks play a crucial role in tracking the passage of time. 
 However, access to clocks is limited: they can only be inspected (checked) or reset to zero during transitions.
 
 Unless explicitly reset, each clock continuously increments as time progresses, at a rate of $1$. 
@@ -33,7 +33,7 @@ If the condition is not met, the transition (and its associated action) is disab
     Here, $x\in C$ represents a clock, and  $c\in\mathcal{N}$ represents a constant.
     Let $\text{cc}(C)$ denote the set of clock constraints over $C$.  
 \end{definition}
-\noindent A Timed Automaton is a Program Graph with a finite set $C$ of clocks.
+\noindent A TA is a PG with a finite set $C$ of clocks.
 The edges of this graph are labeled with the tuples $\left\langle g, \alpha, D\right\rangle$, where:
 \begin{itemize}
     \item $g$ is the clock constraint (the guard).
@@ -49,9 +49,9 @@ During this transition, the clocks in $D$ are reset to zero, and the action $\al
 \end{definition}
 \noindent he invariant specifies the maximum amount of time that can be spent in location $\ell$ before the system must transition to another location.
 
-\subsection{Transition systems as Timed Automata}
+\subsection{Transition System as Timed Automata}
 \begin{definition}
-    A Timed Automaton $\text{TA}$ can be formally defined as a tuple \\ $\text{TA} = \left\langle \text{Loc}, \text{Act}, C, \rightarrow, \text{Loc}_0, \text{Inv}, \text{AP},L\right\rangle$, where:
+    A TA can be formally defined as a tuple $\text{TA} = \left\langle \text{Loc}, \text{Act}, C, \rightarrow, \text{Loc}_0, \text{Inv}, \text{AP},L\right\rangle$, where:
     \begin{itemize}
         \item $\text{Loc}$: a finite set of locations (states).
         \item $\text{Loc}_0\subseteq\text{Loc}$: a set of initial locations.
@@ -63,7 +63,7 @@ During this transition, the clocks in $D$ are reset to zero, and the action $\al
         \item $L:\text{Loc}\rightarrow 2^{\text{AP}}$: a labeling function that maps each location to a set of atomic propositions.
     \end{itemize}
 \end{definition}
-Given two timed automata $\text{TA}_1 = \left\langle \text{Loc}_1, \text{Act}_1, C_1, \rightarrow_1, \text{Loc}_{0,1}, \text{Inv}_1, \text{AP}_1,L_1\right\rangle$ and $\text{TA}_2 = \left\langle \text{Loc}_2, \text{Act}_2, C_2, \rightarrow_2, \text{Loc}_{0,2}, \text{Inv}_2, \text{AP}_2,L_2\right\rangle$ where $H\subseteq\text{Act}_1\cap\text{Act}_2$, $C_1\cap C_2=\varnothing$ and $\text{AP}_1\cap\text{AP}_2=\varnothing$. 
+Given two $\text{TA}_1$ and $\text{TA}_2$ where $H\subseteq\text{Act}_1\cap\text{Act}_2$, $C_1\cap C_2=\varnothing$ and $\text{AP}_1\cap\text{AP}_2=\varnothing$. 
 The parallel composition $\text{TA}_1\parallel_H\text{TA}_2$ is defined as:
 \[\left\langle \text{Loc}_1\times\text{Loc}_2, \text{Act}_1\cup\text{Act}_2, C_1\cup C_2, \hookrightarrow, \text{Loc}_{0,1}\times\text{Loc}_{0,2}, \text{Inv}, \text{AP}_1\cup\text{AP}_2,L\right\rangle\]
 Here, $L(\left\langle \ell_1,\ell_2\right\rangle )=L(\ell_1)\cup L(\ell_2)$ and $\text{Inv}(\left\langle \ell_1,\ell_2\right\rangle )=\text{Inv}(\ell_1)\land \text{Inv}(\ell_2)$. 
@@ -98,7 +98,7 @@ A clock valuation $\eta$ satisfies a clock constraint $g\in\text{cc}$  if and on
 \end{definition}
 
 \subsection{Transitions}
-The behavior of a timed automaton is defined in terms of an underlying Transition System. 
+The behavior of a TA is defined in terms of an underlying TS. 
 In this model, a system can evolve in two fundamental ways:
 \begin{itemize}
     \item Taking a discrete transition: moving from one location to another based on clock constraints and reset conditions.
@@ -107,8 +107,8 @@ In this model, a system can evolve in two fundamental ways:
 \noindent Discrete transitions correspond to instantaneous events, meaning they occur with zero duration.
 Time progression occurs only while staying in a location.
 Multiple actions can take place at the same time instant since transitions are instantaneous.
-\begin{definition}[\textit{Timed automaton transition}]
-    A Timed Automaton is defined as \\ $\text{TA} = \left\langle \text{Loc}, \text{Act}, C, \rightarrow, \text{Loc}_0, \text{Inv}, \text{AP},L\right\rangle$, where: 
+\begin{definition}[\textit{TA transition}]
+    A TA is defined as $\left\langle \text{Loc}, \text{Act}, C, \rightarrow, \text{Loc}_0, \text{Inv}, \text{AP},L\right\rangle$, where: 
     \begin{itemize}
         \item $\text{Loc}$ is the set of locations (states).
         \item $\text{Act}$ is the set of possible actions.
@@ -145,11 +145,11 @@ For any $d\in\mathbb{R}_{\geq 0}$ is valid if and only if $\eta+d\models\text{in
     A time-convergent path is a sequence of transitions where time does not progress beyond a certain bound.
 \end{definition}
 \noindent A time-divergent path ensures that time progresses indefinitely toward infinity.
-\begin{definition}[\textit{Timelock}]
-    A timelock occurs when a state $s$ in $\text{TS}(\text{TA})$ has no time-divergent path starting from it.
+\begin{definition}[\textit{Time lock}]
+    A time lock occurs when a state $s$ in $\text{TS}(\text{TA})$ has no time-divergent path starting from it.
 \end{definition}
 \noindent This means time cannot progress indefinitely from $s$, making it unrealistic in real-world systems.
-Avoiding timelocks is essential when designing time-critical systems, ensuring that time always has a way to progress.
+Avoiding time locks is essential when designing time-critical systems, ensuring that time always has a way to progress.
 
 \begin{definition}[\textit{Zeno path}]
     A path $\pi$ in $\text{TS}(\text{TA})$ is called Zeno if:
@@ -163,4 +163,4 @@ Avoiding timelocks is essential when designing time-critical systems, ensuring t
 \paragraph*{Diagonal constraints}
 Diagonal constraints extend standard clock constraints by allowing direct comparisons between two clocks. 
 These constraints require tracking relationships between clocks rather than absolute values.
-To model these constraints without changing the fundamental structure of timed automata by storing extra information in states about the last reset time of each clock and using this information to encode constraints. 
+To model these constraints without changing the fundamental structure of TA by storing extra information in states about the last reset time of each clock and using this information to encode constraints. 
