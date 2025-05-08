@@ -1,0 +1,51 @@
+\section{Older techniques}
+
+The fundamental goal of speech synthesis is to convert a textual input into a corresponding audio waveform. 
+Traditionally, this process is decomposed into two primary stages: 
+\begin{enumerate}
+    \item \textit{Text analysis}: involves converting the text into a phonetic or prosodic representation, typically as a sequence of phonemes enriched with stress and intonation information.
+    \item \textit{Waveform synthesis}: generates an audio signal from that representation. 
+\end{enumerate}
+\noindent Over the years, several approaches have been developed for waveform synthesis, each with its own advantages and limitations.
+
+Formant synthesis generates speech by modeling the resonant frequencies of the vocal tract using an acoustic model and additive synthesis. 
+While computationally efficient and flexible, the resulting speech tends to sound robotic and unnatural. 
+Articulatory synthesis, by contrast, attempts to simulate the physical movements of the articulators and the acoustics of the vocal tract. 
+Though more natural in theory, this approach is computationally complex and has not seen widespread practical use. 
+The most widely adopted traditional technique is concatenative synthesis, which constructs speech by concatenating prerecorded segments of natural human speech. 
+This method offers greater naturalness but depends heavily on the quality and size of the speech database.
+
+\subsection{Text analysis}
+Text analysis in traditional systems begins with phonetic conversion—transforming words into sequences of phonemes. 
+The most straightforward method is dictionary-based conversion, which uses a lexicon containing known words and their corresponding phonetic transcriptions. 
+For out-of-vocabulary or rare words such as proper names, grapheme-to-phoneme (G2P) conversion is used, often implemented via machine learning classifiers. 
+In languages with consistent spelling-to-sound mappings, such as Italian, pronunciation rules can handle most cases, supplemented by a small dictionary for irregular forms and borrowed words.
+
+Prosody—the variation in intonation, stress, and rhythm—plays a crucial role in conveying meaning and naturalness in synthesized speech. 
+Prosodic features such as pitch ($f_0$), duration, and energy must be modeled across the utterance. 
+Sentences exhibit a hierarchical prosodic structure, often segmented into intonation phrases and intermediate phrases. 
+Classifiers can be used to detect prosodic boundaries within this structure.
+
+Prosodic prominence, or stress, marks certain words as more salient through changes in pitch, rhythm, or loudness. 
+This is known as a pitch accent, typically realized on the stressed syllable of a word. 
+Accents can vary in degree, ranging from emphatic accents used for semantic emphasis, to unaccented or reduced-accent words, which receive less prosodic prominence.
+
+Prosody also influences phoneme duration.
+Klatt (1979) proposed a set of rules for contextual duration adjustment, such as pre-pausal lengthening (where vowels before pauses are lengthened) and non-phrase-final shortening (where segments are shortened if they are not at the end of a phrase). 
+Klatt's model includes a formula for estimating phone duration based on weighted contextual factors:
+\[d=d_{\min}+\prod_{i=1}^{N}f_i\times (\bar{d}-d_{\min})\]
+\noindent Alternatively, modern systems may learn duration patterns using regression-based machine learning techniques.
+
+\subsection{Waveform synthesis}
+Two major paradigms exist in concatenative waveform synthesis: diphone synthesis and unit selection synthesis.
+
+In diphone synthesis, the basic unit is a diphone capturing the transition and co-articulation effects that occur between sounds. 
+A diphone database is created by having a speaker record each possible diphone in the language. 
+These are segmented and stored in a database. 
+To synthesize an utterance, the system selects the appropriate sequence of diphones, concatenates them, and applies signal processing to adjust prosody for natural-sounding output.
+
+Unit selection synthesis builds upon this concept by allowing the selection of larger or more variable speech units. 
+The database in this case contains a wide range of recorded speech fragments.
+Given a phoneme sequence with prosodic annotations, the system searches for the best matching units using a cost function. 
+This function typically includes a target cost, which measures how closely a candidate unit matches the desired phonetic and prosodic characteristics, and a join cost, which evaluates how well a unit acoustically blends with its neighbors. 
+The overall optimization is often performed using dynamic programming techniques like the Viterbi algorithm or beam search to efficiently select the optimal sequence of units.

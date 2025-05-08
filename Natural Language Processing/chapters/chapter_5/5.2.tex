@@ -1,0 +1,46 @@
+\section{Automatic Speech Recognition}
+
+Automatic Speech Recognition (ASR) is the task of converting spoken language into written text. 
+Traditionally, this problem was tackled using hand-engineered features and statistical models:
+\begin{itemize}
+    \item \textit{Feature extraction}: audio signals were first transformed into Mel-frequency cepstral coefficients (MFCCs) derived from Mel spectrograms.
+    \item \textit{Modeling}: these features were then fed into Hidden Markov Models (HMMs) combined with Gaussian Mixture Models (GMMs) for sequence prediction.
+\end{itemize}
+\noindent However, the advent of Deep Learning has significantly changed the landscape of ASR.
+
+A common approach using Convolutional Neural Networks (CNNs) involves classifying phonemes from raw audio or Mel spectrograms. This method, however, introduces several issues:
+\begin{itemize}
+    \item CNNs make predictions over fixed-size windows, but phonemes and words vary in duration.
+    \item There's a need to determine how many windows correspond to each linguistic unit.
+\end{itemize}
+\noindent These limitations highlight the need for sequence models that can align input and output of different lengths.
+A breakthrough in ASR came with encoder-decoder architectures, which can handle variable-length input and output sequences and learn temporal alignments without requiring fixed-size segmentation.
+
+\paragraph*{Wav2vec}
+Wav2Vec represents a significant advancement in ASR. 
+It is a transformer-based model that operates directly on raw audio waveforms.
+A convolutional frontend first extracts latent representations from the audio, which are then fed into a transformer encoder to capture temporal dependencies and contextual information. 
+Importantly, Wav2Vec is trained in a self-supervised manner, enabling the use of large, unlabeled audio datasets.
+
+\paragraph*{Whisper}
+More recently, the Whisper model has achieved state-of-the-art performance in ASR. 
+Unlike Wav2Vec, Whisper uses Mel spectrograms as its input representation and adopts an architecture inspired by Vision Transformers. 
+Its training paradigm is weakly supervised and leverages vast amounts of diverse, multilingual data. 
+This approach supports multiple languages and tasks, such as transcription, translation, and language detection, within a single unified model.
+
+\subsection{Evaluation}
+The performance of ASR systems is typically evaluated using two main metrics: Word Error Rate (WER) and Sentence Error Rate (SER).
+WER quantifies the number of word-level substitutions, deletions, and insertions needed to transform the predicted transcription into the correct one, normalized by the number of words in the reference. 
+SER, on the other hand, measures the proportion of sentences that contain at least one error, offering a complementary view of system performance at the sentence level.
+
+\subsection{Advanced Automatic Speech Recognition}
+Beyond general-purpose transcription, ASR systems can be adapted to improve accuracy for individual speakers. 
+Speaker-specific variation, such as vocal tract length and pitch, can significantly affect recognition performance. 
+Techniques such as vocal tract length normalization, which warps the frequency axis of the speech spectrum, help account for anatomical differences between speakers. 
+Similarly, pitch normalization—particularly useful for recognizing children's speech. 
+Another approach involves adapting a pre-trained acoustic model using a small amount of data from a new speaker to fine-tune the system for improved personalization.
+
+An additional challenge in ASR is handling non-verbal and non-word sounds, which frequently occur in real-world audio. 
+These include sounds like coughing, sighing, and environmental noises such as telephone rings or door slams. 
+To accommodate these, special phonetic units can be defined, and corresponding placeholder words added to the model's lexicon and language model. 
+Training data must include annotations for these special tokens to ensure the model can recognize and appropriately represent such sounds in the transcript.

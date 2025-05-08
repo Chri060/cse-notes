@@ -68,4 +68,64 @@ The major limitations of LLMs are:
         Small variations in prompt wording can lead to disproportionately large differences in model performance, making the behavior of LLMs sometimes unpredictable and frustrating for users.
         Generally, the clearer, more structured, and less ambiguous the prompt, the more reliable the model's output. 
         However, ensuring consistent performance across a wide range of tasks is still a major challenge.
+    \item\textit{Jailbreak}: some users attempt to bypass the chatbot's safeguards. 
+        Ethics researchers may do this to test whether the model can be prompted to generate harmful or inappropriate content despite its safety constraints. 
+        Security researchers, on the other hand, may try to elicit memorized training data, which poses a significant privacy and security risk. 
+        This risk is exacerbated when user-provided content is incorporated into model fine-tuning.
 \end{itemize}
+
+\subsection{Scaling laws}
+Numerous studies have explored how the performance of large language models scales with various factors. 
+A near-linear relationship has been observed between model performance and the logarithm of: computation time, training dataset size, and number of model parameters.
+One key insight comes from the Chinchilla scaling law, which provides guidance for training Transformer-based language models efficiently. 
+It suggests that, given a fixed computational budget (measured in FLOPs), optimal performance is achieved when the number of model parameters ($N$) and the number of training tokens ($D$) are scaled in roughly equal proportions.
+
+Additionally, when training large models, it is crucial to adjust the learning rate appropriately. 
+As model size increases, the learning rate should typically decrease proportionally. 
+Various techniques and heuristics exist to estimate an optimal learning rate schedule based on model size and training dynamics.
+
+\subsection{Efficiency improvements}
+Recent research has introduced several architectural and algorithmic enhancements to improve the efficiency and scalability of Transformer-based models:
+\begin{itemize}
+    \item \textit{Layer Input Normalization}: normalization is applied to the input of each sub-layer (self-attention and feed-forward blocks), rather than to the residual stream, which can improve training stability and model performance.
+    \item \textit{Positional Embeddings}: improvements form Absolute Positional Embeddings to Rotational Positional Embeddings:
+        \begin{itemize}
+            \item \textit{Absolute Positional Embeddings}: the original Transformer used sinusoidal position embeddings added to token embeddings. 
+                Learned absolute embeddings were also explored but showed limited gains.
+                Absolute encodings fix the maximum sequence length, reducing generalization to longer contexts.
+            \item \textit{Relative Positional Embeddings}: used in models like T5, a learned bias is added to the query-key similarity score, enabling better generalization to varying context lengths.
+                 However, this approach can slow down self-attention and complicate caching mechanisms.
+            \item \textit{Rotational Positional Embeddings}: RoPE encodes position by rotating token embeddings. 
+                This method combines the computational simplicity of absolute encodings with the benefits of relative positioning, as vector dot products become dependent only on relative positions.
+        \end{itemize}
+    \item \textit{Grouped Self-Attention}: a memory-efficient variant where queries are shared across subsets of attention heads, reducing the number of parameters and computational cost.
+    \item \textit{Enhanced MLP Layers}: new architectures add an additional up-projection matrix with a linear activation, creating high-dimensional hidden representations (typically $\sim4d$) that are summed before projection back to the original dimensionality. 
+        This more complex feed-forward structure improves model expressiveness.
+    \item \textit{Mixture of Experts}: techniques like the Switch Transformer use a routing mechanism to select a subset of expert FFNNs for each token. 
+        This allows the model to scale to billions of parameters without a corresponding increase in computation per token, thus improving performance while maintaining efficiency.
+    \item \textit{Sliding Window Attention for Longer Contexts}: recent methods use a sliding window approach to attention, enabling models to process much longer contexts. 
+        This allows for full-document understanding and greatly expands application domains.
+\end{itemize}
+\noindent For the efficient hardware deployment we have the following techniques:
+\begin{itemize}
+    \item \textit{Low-Bit quantization}: transformers typically require GPUs for fast inference, but GPU memory is limited. 
+        Model weights are commonly quantized to lower precisions to save memory and improve inference speed.
+        While quantization reduces accuracy slightly, it enables deployment of larger models on constrained hardware.
+    \item \textit{Low-Rank Adaptation}: fine-tuning large models is memory-intensive and often infeasible on standard hardware. 
+        LoRA addresses this by learning low-rank updates to the weight matrices. 
+        A weight matrix $W$ is adjusted via a low-rank decomposition: $W^\prime = W + AB$, where $A$ and $B$ are much smaller matrices (with $B$ initially zero). 
+        This drastically reduces the number of trainable parameters and memory required for fine-tuning, making it practical for smaller datasets and limited compute environments.
+\end{itemize}
+
+\subsection{Integration}
+\paragraph*{Retrieval-Augmented Generation (RAG)}
+Traditional LLM-based chatbots are limited by the information encoded within their model parameters during training. 
+This creates challenges when responding to: domain-specific queries requiring expert knowledge, and questions about recent events or updates unavailable at training time.
+RAG models address this limitation by augmenting LLMs with real-time retrieval capabilities. 
+They can search external knowledge sources and then generate responses grounded in the retrieved content. 
+This allows LLMs to remain up-to-date and provide more accurate, context-specific answers.
+
+\paragraph*{Agentic AI}
+Agentic AI builds on the LLM's ability to reason about tasks and goals, enabling models to make decisions and take actions in pursuit of user-defined objectives. 
+These systems plan and execute actions to achieve a goal and can modify external systems—for instance, updating a user's address in a database based on a natural language request.
+Frameworks such as \texttt{LangChain} facilitate the development of such agent-based applications by integrating LLMs with tools, memory, and actions in a programmable environment.

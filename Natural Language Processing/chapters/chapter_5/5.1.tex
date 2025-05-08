@@ -1,0 +1,51 @@
+\section{Introduction}
+
+Human speech consists of two primary categories of sounds:
+\begin{itemize}
+    \item \textit{Vowels}: produced without significant constriction in the vocal tract.
+    \item \textit{Consonants}: created by partially or fully closing parts of the vocal tract.
+\end{itemize}
+The distinct sound units that compose words are referred to as phonemes.
+
+\paragraph*{Source filter model}
+A widely used model for human phonation is the source-filter model, which separates speech production into:
+\begin{itemize}
+    \item A source component: the glottis generates a pulse train or noise-like excitation.
+    \item A filter component: the vocal tract shapes this excitation to produce different sounds.
+\end{itemize}
+\noindent While the source contributes to voice characteristics, the filter carries most of the linguistic information and is therefore more critical for speech recognition tasks.
+
+\subsection{Time series representation}
+Speech is fundamentally a time series of air pressure variations.
+Different types of speech sounds have distinct time-domain characteristics:
+\begin{itemize}
+    \item \textit{Vowels}: periodic signals.
+    \item \textit{Fricatives}: consonants formed by forcing air through a narrow channel.
+    \item \textit{Glides}: smooth transitions between sounds.
+    \item \textit{Bursts}: sudden, rapid transitions.
+\end{itemize}
+\noindent To analyze these signals effectively, it's useful to transform them into the frequency domain using the Fourier Transform.
+
+\subsection{Spectrogram}
+To capture how the content evolves over time, we compute a spectrogram, which shows the frequency spectrum of short segments of the audio.
+
+The Short-Time Fourier Transform (STFT) analyzes local frequency content by:
+\begin{itemize}
+    \item Dividing the signal into overlapping chunks.
+    \item Applying a window function to each chunk to reduce spectral leakage.
+    \item Computing the Fourier transform of each windowed segment.
+\end{itemize}
+\noindent This results in a time-frequency representation of the audio signal.
+
+\paragraph*{Pre-Emphasis Filter}
+Before performing the STFT, a pre-emphasis filter is often applied to amplify high-frequency components. 
+This helps balance the spectrum, improve the signal-to-noise ratio (SNR), and mitigate numerical instability in the Fourier transform.
+A common implementation uses a first-order filter:
+\[y[n] = x[n] - \alpha x[n - 1]\]
+\noindent Here, $\alpha$ is typically around 0.95.
+
+\subsection{Mel spectrogram}
+Human perception of pitch is non-linear: we distinguish frequencies based on their relative rather than absolute differences. 
+To better match human hearing, we use the Mel scale, which maps frequency $f$ in Hz to Mel units using:
+\[\text{Mel}(f) = 2595 \log_{10}(1 + \frac{f}{700})\]
+The Mel spectrogram enhances the traditional spectrogram by limiting the frequency range, mapping linear frequencies to the Mel scale, and representing amplitude on a logarithmic scale.

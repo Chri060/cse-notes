@@ -1,0 +1,35 @@
+\section{Speech Synthesis}
+
+Text-to-speech (TTS) systems, much like their speech-to-text counterparts, have undergone significant advancements in recent years. 
+The goal of TTS is to convert a given text string into a natural-sounding audio waveform. 
+Modern TTS systems are typically implemented as a three-stage pipeline: 
+\begin{enumerate}
+    \item Maps input text to a phoneme sequence, accounting for pronunciation rules. 
+    \item Converts the phonemes into an acoustic representation, usually a Mel spectrogram, which encodes frequency and time information.
+    \item Generates a raw audio signal from the spectrogram, effectively synthesizing speech.
+\end{enumerate}
+\noindent One of the challenges in this pipeline is the expansion of abbreviated or irregular text into a fully verbalized form—a process known as normalization. 
+This task often requires contextual understanding.
+Another related problem is homograph disambiguation. 
+English contains many homographs—words that are spelled identically but pronounced differently depending on meaning.
+Determining the correct pronunciation thus requires contextual cues, further complicating the synthesis task.
+
+\paragraph*{Tacotron 2}
+A well-known example of a modern TTS system is Tacotron 2, introduced in 2018. 
+This architecture employs an LSTM-based encoder-decoder to generate a Mel spectrogram from the input text. 
+It produces high-quality spectrograms that are then fed into a separate vocoder to synthesize the audio waveform.
+
+The vocoder used in Tacotron 2 is WaveNet, a generative model developed by DeepMind. 
+WaveNet transforms the Mel spectrogram into an audio waveform using an auto-regressive approach based on dilated convolutions. 
+These dilated convolutions enable the model to capture long-range temporal dependencies in the audio signal by expanding the receptive field without increasing the number of layers excessively. 
+WaveNet produces highly natural and expressive speech, though its auto-regressive nature makes real-time synthesis computationally intensive.
+
+\subsection{Evaluation}
+Evaluating the performance of a speech synthesis system generally requires subjective human judgment. 
+Two primary criteria are assessed: intelligibility and quality. 
+Intelligibility refers to the listener's ability to correctly understand and interpret the spoken content, including fine-grained phonetic distinctions.
+Quality refers to how natural, fluent, and clear the synthesized speech sounds.
+
+Evaluation methods include the Mean Opinion Score (MOS), where human raters score utterances on a scale from 1 to 5 based on overall quality. 
+Another approach is the AB test, in which listeners are presented with the same utterance synthesized by two different systems and asked to select the one they prefer.
+This process is repeated across a set of utterances (typically around 50) to gather comparative performance data.
