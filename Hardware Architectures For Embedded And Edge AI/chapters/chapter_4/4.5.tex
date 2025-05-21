@@ -31,7 +31,6 @@ EENNs bring several advantages:
 \end{itemize}
 \noindent Notably, earlier classifiers are not necessarily less accurate than deeper one.
 
-\subsection{Architecture}
 \paragraph*{Classifier}
 Let $f_i(x)$ denote the output of an intermediate layer $i$ in the backbone network.
 An EEC is added at that point to produce a prediction:
@@ -58,3 +57,57 @@ These thresholds $\theta_i$ are key hyperparameters that control the trade-off b
     \includegraphics[width=0.4\linewidth]{images/eeai12.png}
     \caption{Early Exit Auxiliary Classifier and Decision Function}
 \end{figure}
+
+\subsection{Training}
+The training of EENNs typically falls into three main strategies:
+\begin{enumerate}
+    \item \textit{Joint training}: in this approach, all early-exit classifiers (EECs) are trained simultaneously by optimizing a combined loss function:
+        \[\mathcal{L}_{\text{joint}}=\mathcal{L}(\hat{y},y)+\sum_{i=1}^{N}w_i\mathcal{L}(\bar{y}_i,y)\]
+        Here, $\mathcal{L}$ is the standard cross-entropy loss, $\hat{y}$ is the output of the final classifier, $\bar{y}_i$ is the output of the $i$-th EEC, $y$ is the ground truth label, $w_i$ are weighting factors, which can be uniform ($w_i=1$) or treated as tunable hyperparameters, and $N$ is the total number of EECs.
+    \item \textit{Layer-wise training}: this strategy trains the network progressively. 
+        At each stage, a new EEC and the corresponding portion of the backbone are trained while keeping the previously trained layers frozen. 
+        This approach allows the network to stabilize lower layers before deeper blocks are optimized.
+    \item \textit{Knowledge distillation}: in this two-stage method, the backbone network (acting as the teacher) is trained first.
+        Once trained, the EECs (students) are trained on top of the frozen backbone, learning from both the ground truth and optionally from the teacher's soft predictions.
+\end{enumerate}
+
+\subsection{Inference}
+Two primary inference strategies can be adopted for EENNs:
+\begin{itemize}
+    \item \textit{Full evaluation}: the input is propagated through the entire network, and predictions from all EECs are aggregated to form a final decision.
+    \item \textit{Early-exit inference}: the network sequentially evaluates each EEC and stops computation as soon as a confident prediction is made. 
+        This enables computational savings by avoiding unnecessary processing of deeper layers.
+\end{itemize}
+
+\subsection{Selection criterion}
+A critical component of EENNs inference is the mechanism used to decide whether an input should exit early. 
+This decision typically relies on a confidence estimate of the EEC's prediction. Common confidence metrics include:
+\begin{enumerate}
+    \item \textit{Maximum softmax probability}: let $S_i(x)$ be the softmax output of EEC$_i$ for input $x$. 
+        The confidence is given by:
+        \[\text{confidence}(x)=\max_jS_i^{(j)}(x)\]
+        HGere, $S_i^j(x)$ is the softmax probability for class $j$.
+    \item \textit{Score margin}: defined as the difference between the top two softmax scores:
+        \[\text{SM}_i=S_i^{(1)}(x)-S_i^{(2)}(x)\]
+        Here, $S_i^{(1)}(x)$ and $S_i^{(2)}(x)$ are the highest and second-highest probabilities, respectively. 
+        A larger margin indicates higher confidence.
+    \item \textit{Entropy}: measures uncertainty in the prediction:
+        \[H(y) = -\sum_{i=0}^N y_i\log(y_i)\]
+        Here, $C$ is the number of classes. 
+        Entropy is minimal when the output is a one-hot vector and maximal for a uniform distribution. 
+\end{enumerate}
+
+\subsection{Architectures}
+\paragraph*{BranchyNet}
+BranchyNet is one of the earliest and most influential examples of an EENN. 
+Built on top of the original AlexNet architecture, it introduces two EECs at intermediate layers of the network. 
+The model is trained using a joint training strategy, where the losses from all exit points, including the final output, are combined and optimized simultaneously. 
+During inference, computation halts immediately once a sample meets the exit condition at an EEC, avoiding unnecessary forward propagation through deeper layers. 
+The decision to exit is based on a confidence measure computed from the entropy of the softmax output—lower entropy indicates a more confident prediction and therefore a higher likelihood of early exit.
+
+\paragraph*{Gate-Classification Neural Networks}
+Gate-Classification Neural Networks, on the other hand, take a probabilistic approach to confidence estimation. 
+In these models, confidence is explicitly modeled as the posterior probability of the predicted class given the input. 
+Inference proceeds sequentially through the network, and the decision to exit is made as soon as this posterior probability exceeds a predefined threshold. 
+These thresholds are typically set automatically so as to optimize the trade-off between accuracy and computational efficiency. 
+This method provides a more theoretically grounded mechanism for early exiting, tightly integrating the exit decision with the network's probabilistic interpretation of prediction confidence.
