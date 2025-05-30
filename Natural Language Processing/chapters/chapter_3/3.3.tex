@@ -19,25 +19,12 @@ Here $\mathbf{d}_1$ represents the query vector, and $\mathbf{d}_2$ represents t
 The cosine of the angle is used because it produces a similarity value in the range $[0,1]$. 
 To calculate the cosine similarity, the vectors are normalized by their Euclidean (L2) norm, rather than the length of the document in terms of tokens (which would be an L1 norm).
 
-\subsection{Alternative length normalization}
-There have been many studies into alternative methods of length normalization. 
-
-\paragraph*{Pivoted Length Normalization}
-One notable method is Pivoted Length Normalization, which aims to retain the beneficial information from longer documents while preventing them from being unfairly favored.
-The idea behind Pivoted Length Normalization is that longer documents generally contain more information, but simple length normalization could lose valuable length information. 
-Instead, PLN adjusts the normalization to account for both the document length and the average document length in the corpus:
-\[\dfrac{\text{tf}_{t,d}}{L_d}\rightarrow\dfrac{\text{tf}_{t,d}}{bL_d+(1-b)L_{\text{avg}}}\]
-Here, $L_d=\sum_{t}\text{tf}_{t,d}$ is the length of the document, $L_{\text{avg}}=\dfrac{1}{N}\sum_dL_d$ is the average document length across the corpus, and $b$ is a parameter that controls the balance between the document length and the average length, with $0\leq b \leq 1$. 
-
-\paragraph*{Best March 25}
-Another widely used length normalization method is BM25 (Best Match 25), a ranking function that builds upon the ideas of TF-IDF and length normalization. 
-The formula for BM25 is as follows:
-\[\text{RSV}_d=\sum_{t \in q}\log\dfrac{N}{\text{df}_t}\dfrac{(k_1+1)\text{tf}_{t,d}}{k_1\left((1-b)+b\cdot\frac{L_d}{L_{\text{avg}}}\right)+\text{tf}_{t,d}}\]
-Here, $k_1$ and $b$ aare parameters that control how much weight is given to term frequency and document length, $N$ is the total number of documents in the corpus, $\text{df}_t$ is the document frequency of term, $\text{tf}_{t,d}$ is the term frequency of $t$ in document $d$, and $L_d$ is the length of the document.
-Some of the reasons for its lasting effectiveness include:
+There have been many studies into alternative methods of length normalization: 
 \begin{itemize}
-    \item \textit{Asymptotic term importance}: the influence of a term on the document's score decreases as its frequency increases. 
-        This means documents with extremely high term frequency won't always be ranked at the top.
-    \item \textit{Parameter control}: the $k_1$ and $b$ parameters allow fine-tuning based on the corpus, and default values typically work well. 
-        However, these parameters can be improved through validation on a specific dataset.
+    \item \textit{Pivoted Length Normalization} (PVL): aims to retain the beneficial information from longer documents while preventing them from being unfairly favored. 
+        The idea behind PVL is that longer documents generally contain more information, but simple length normalization could lose valuable length information. 
+        Instead, PLN adjusts the normalization to account for both the document length and the average document length in the corpus. 
+    \item \textit{Best Match 25}: builds upon the ideas of TF-IDF and length normalization. 
+        The influence of a term on the document's score decreases as its frequency increases. 
+        There are parameters which allow fine-tuning based on the corpus.
 \end{itemize}

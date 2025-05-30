@@ -1,0 +1,97 @@
+\section{Conversational agents}
+
+Conversational agents, also known as dialogue systems, chatbots, or voice interfaces, are AI-driven systems designed to interact with humans through natural language. 
+They serve diverse purposes, including voice-controlled automation, entertainment, therapeutic application and service access.
+They can be classified as: 
+\begin{itemize}
+    \item \textit{Open-domain chatbots}: designed for unstructured, human-like conversations.
+    \item \textit{Task-oriented dialogue systems}: focused on completing specific tasks. 
+\end{itemize}
+
+\subsection{Open domain chatbots}
+\subsubsection{Rule-based}
+Rule-based chatbots rely on a predefined set of pattern-action rules to generate responses. 
+Early examples include ELIZA (1966), which mimicked a Rogerian psychotherapist, and PARRY (1971), which simulated a patient with paranoid schizophrenia. 
+These systems did not require real-world knowledge but instead used linguistic and psychological cues to sustain conversations.
+
+\paragraph*{Eliza}
+ELIZA gave the impression of linguistic coherence by reflecting the user's statements back to them, simulating the behavior of a Rogerian therapist. 
+This approach required minimal understanding of the world. ELIZA's architecture was composed of simple pattern-matching rules triggered by specific keywords. 
+Each keyword was associated with a set of transformation patterns to generate responses. 
+If a user input matched multiple patterns, ELIZA would select the most specific rule. In cases where no keywords were matched, it defaulted to a generic, non-committal response. 
+Despite its simplicity, ELIZA could maintain seemingly coherent conversations and recall references made earlier in the dialogue, contributing to its perceived intelligence.
+
+\paragraph*{Parry}
+PARRY extended ELIZA's design by incorporating a rudimentary mental model to simulate paranoid behavior.
+Like ELIZA, it used pattern-action rules, but it added a richer control structure and internal state modeling. 
+PARRY tracked psychological variables such as anger, fear, and mistrust, all initially set to low levels. 
+These variables were dynamically updated based on user input. 
+The chatbot's responses were influenced by its current mental state, making its behavior appear more contextually sensitive and emotionally driven.
+
+\subsubsection{Corpus-based}
+Modern corpus-based chatbots rely heavily on large-scale conversational datasets. 
+These systems raise important concerns around privacy, particularly regarding the need to remove personally identifiable information from training data.
+
+Corpus-based approaches fall into two main categories: retrieval-based and generation-based methods: 
+\begin{itemize}
+    \item \textit{Retrieval-based systems}: in retrieval-based systems, the chatbot selects an appropriate response from a pre-existing corpus. 
+        Given a user query, the system identifies the most similar conversational context and retrieves the corresponding reply. 
+    \item \textit{Generation-based systems}: generative models, on the other hand, synthesize responses word-by-word, conditioned on the input query and, optionally, the dialogue history. 
+        These models typically use encoder-decoder or decoder-only neural architectures trained on large volumes of conversational data. 
+        Despite their flexibility, generative chatbots often suffer from producing dull, repetitive, or overly generic responses, which can prematurely end conversations.
+\end{itemize}
+\noindent A hybrid approach combines retrieval with generation: retrieving a candidate response and then refining it via a generative model. 
+This is particularly effective for task-oriented domains where responses can be more scripted and constrained.
+
+While corpus-based chatbots can give the illusion of understanding, they do not possess true comprehension.
+Their responses are shaped entirely by patterns in the training data. 
+This can lead to ethical and functional concerns—especially if users assume a deeper understanding than actually exists. 
+Rule-based systems, although interpretable, are labor-intensive and brittle. Retrieval-based systems, meanwhile, are limited to reusing information seen during training, restricting their ability to generalize.
+
+\subsection{Task-oriented dialog agents}
+Task-oriented dialog agents are designed to assist users in completing specific goals, such as booking a ticket, ordering food, or finding information. 
+These systems typically follow a goal-oriented framework and often employ a frame-based architecture, in which user intents are represented as frames consisting of slots that need to be filled with relevant information.
+
+\subsubsection{Frame-based}
+One of the earliest examples of a frame-based system is GUS (1977). 
+It introduced a modular architecture in which each frame represented a specific action or task and contained multiple slots. 
+Each slot was associated with a question the system could ask the user to elicit the required information.
+
+The dialogue proceeded by the system asking questions and populating any slots that the user explicitly filled.
+Once all required slots were completed, the system could execute a database query or perform the corresponding action. 
+GUS typically supported multiple frames, and the system had to determine which frame and which slot the user's utterance corresponded to, switching control accordingly. 
+This process relied on condition-action rules.
+
+The Natural Language Understanding (NLU) component in GUS extracted three key elements from user input:
+\begin{enumerate}
+    \item \textit{Domain classification}: identifying the topic area of the user's request.
+    \item \textit{Intent recognition}: determining the user's goal.
+    \item \textit{Slot filling}: extracting values for relevant slots.
+\end{enumerate}
+\noindent Slot-filling was rule-based, and responses were generated using predefined templates. 
+This rule-and-template paradigm remains common in many industry applications due to its interpretability and control.
+
+
+\subsubsection{Dialog state}
+Modern task-oriented systems are typically modular and consist of the following components:
+\begin{enumerate}
+    \item \textit{Natural Language Understanding} (NLU): uses machine learning techniques to extract slot values and user intent from natural language input.
+    \item \textit{Dialogue State Tracker} (DST): maintains a representation of the current dialogue state, which includes the user's latest intent, filled slots, and constraints. 
+        This component must track user goals across multiple turns, including corrections and updates.
+    \item \textit{Dialogue Policy}: determines the next system action based on the dialogue state. 
+        Early systems used fixed policies that asked questions until the frame was filled. 
+        More advanced systems incorporate heuristics or learned policies that can decide when to ask clarification questions, confirm ambiguous input, or take other context-sensitive actions.
+    \item \textit{Natural Language Generation} (NLG): converts system actions into natural-sounding utterances. 
+        While early systems relied on templates, newer approaches use neural models to produce more varied and human-like responses.
+\end{enumerate}
+To manage conversations effectively, systems map user inputs to dialogue acts—abstract representations of communicative functions.
+Dialogue act tagging helps structure conversations and track mutual understanding (or grounding).
+
+Slot filling can be approached using: classifiers and sequence labelers that label tokens in an utterance and end-to-end sequence-to-sequence models that map entire user inputs to structured representations.
+Systems must detect the domain and user intent to route the input to the appropriate frame or service.
+Dialogue state tracking is often handled by models like the Neural Belief Tracker, which updates the state based on user input in a data-driven manner. 
+Importantly, systems must handle corrections, which occur when users modify or repeat themselves after a misunderstanding. 
+Detecting and responding appropriately to these correction acts remains a challenging problem, as users may rephrase, negate previous answers, or express frustration implicitly.
+
+While frame-based systems are effective for well-defined tasks, they can be brittle, expensive to develop, and difficult to scale across domains. 
+Incorporating more flexible learning-based methods—particularly for intent recognition, slot filling, and state tracking—remains an active area of research and industrial innovation.

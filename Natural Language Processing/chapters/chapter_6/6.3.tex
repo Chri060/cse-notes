@@ -1,0 +1,33 @@
+\section{Dialog policy and generation}
+
+Effective dialogue systems must decide what to say and how to say it at each turn of interaction. 
+This involves both high-level dialogue policy (choosing the system action) and Natural Language Generation.
+
+At each turn, the system must choose the next action based on either the entire conversation history, or the current dialogue state.
+
+Dialogue systems inevitably make errors due to noise in speech recognition, ambiguous user input, or misunderstanding of intent. 
+To manage this, they use two key mechanisms confirming their understanding with the user and rejecting or flagging input they don't understand. 
+Confirmation can be: explicit (the system repeats back what it believes it understood) or implicit (the system proceeds as if the input was understood).
+Rejection is used when the system cannot interpret the input confidently
+Systems may use progressive prompting: after repeated misunderstandings, they offer more specific guidance instead of repeating the same question.
+Modern systems often base decisions on confidence scores from the ASR (Automatic Speech Recognition) or NLU (Natural Language Understanding) components. 
+Confidence scores reflect how likely the system believes its interpretation is correct.
+Based on these scores, the system decides whether to confirm, reject, or proceed.
+
+\subsection{Natural Language Generation}
+In information-state architectures, NLG is typically a two-stage process:
+\begin{itemize}
+    \item \textit{Content planning}: the dialogue policy selects the speech act and the content to convey.
+    \item \textit{Sentence realization}: the system generates fluent natural language based on the planned content—either answering a question, confirming a detail, or prompting the user.
+\end{itemize}
+
+\subsubsection{Sentence realization}
+Generating high-quality, context-sensitive language is challenging—especially given sparse training data. 
+Many domain-specific values may be rarely or never seen in training.
+To generalize better, NLG systems use delexicalization: slot values in training data are replaced with generic placeholders and then systems are trained to generate delexicalized templates from input frames.
+Then, in a post-processing step, the output is relexicalized by inserting the correct slot values.
+Modern systems often use encoder-decoder architectures to map structured frames to delexicalized sentences.
+
+\subsection{Clarification questions}
+Clarification is essential when part of the user's utterance is misunderstood.
+Methods for generating clarification questions include rule-based templates and ML classifiers. 
