@@ -1,27 +1,60 @@
-\section{Artificial Intelligence classification}
+\section{Inference and training}
 
-AI systems, particularly those deployed at the edge, function fundamentally as classification machines. 
-These systems are designed to categorize and interpret input data to perform tasks such as:
-Edge AI systems as classification machines: activity recognition, automated measurement and analysis, and generating recommendations and indications. 
+In the inference phase, we use a test set $\{x_t\}$ and a TinyML model that processes these input samples to produce outputs relevant to the task:
+\[y_t=f_{\theta}(x_t)\]
+\noindent Here, $f_{\theta}(\cdot)$ is the model parameterized by weights $\theta$, and $y_t$ is the predicted output at time $t$.
 
-At the core of these capabilities lies the act of classification—a process with deep philosophical and political implications. 
-As Bowker and Star (2000) argue, classification is not merely a technical activity but a foundational operation in scientific inquiry and social organization. 
-It involves:
-\begin{itemize}
-    \item The development of categories and kinds.
-    \item Structuring the ways we understand, predict, and explain the world.
-    \item Enabling inference, explanation, and decision-making.
-\end{itemize}
-\noindent However, classification is not a neutral or purely objective process. It carries with it the power to naturalize particular views of the world. That is:
-\begin{itemize}
-    \item Categories created by AI systems are not necessarily natural or inevitable.
-    \item To classify phenomena is to reify the categories—making them appear real and fixed.
-    \item Once institutionalized, these categories can stabilize—even when they are socially contested or politically charged.
-\end{itemize}
-This means that data and classification schemes actively shape the world rather than merely describing it. 
-They define what is seen, what is ignored, and how meaning is constructed.
+To enable on-device training, we require a labeled dataset collected on the device, referred to as the on-device training set:
+\[O_t=\{(x_M,y_M)\}\]
+We also need a learning algorithm equipped with a loss function to update the model parameters. 
+The new weights at time $t$ are learned as:
+\[\theta_t=\mathcal{L}(f_{\theta_{t-1}}(\cdot),O_t)\] 
+\noindent Here, $\mathcal{L}$ represents the learning algorithm applied to the model and the current on-device training data.
 
-Classifying people or behaviors can reinforce specific interpretations and value systems.
-These classifications include certain identities or actions while excluding others.
-Over time, they not only assign meaning to entities but also lend authority to the categories themselves.
-Thus, AI systems do not just use data; they participate in the making of social and material realities.
+Beyond standard learning, a meta-learning algorithm is needed to select the most appropriate model architecture or configuration for the task. 
+This process identifies the function $f_\theta(\cdot)$ from a class of models, based on the training data, improving adaptability across tasks or environments.
+
+We also require a monitoring algorithm, which evaluates the relevance or utility of training data and model behavior. 
+This can be described as:
+\[a_t=\text{CdT}(O_t,f_\theta(x_t))\]
+\noindent Here, $\text{CdT}$ stands for "Change detection and Triggering", a mechanism that monitors performance or data distribution shifts and determines whether model adaptation or retraining is necessary.
+
+Compared to the baseline case model inference, this setup introduces continuous on-device training, which runs in parallel with inference. 
+This enables the system to adapt over time as new data becomes available, improving robustness and personalization.
+
+\subsection{On-Device Inference}
+In the context of on-device inference, the behavior of the model $f_\theta(\cdot)$ is fixed and does not change after deployment. 
+This immutability offers several advantages, such as predictable and stable performance, simplified debugging, and the absence of risks associated with model drift due to faulty updates. 
+However, it also has notable drawbacks: the model cannot adapt to shifts in data distributions, user-specific patterns, or environmental changes, which may lead to performance degradation over time.
+
+The primary objective in this scenario is to minimize both the memory footprint and the computational demand of $f_\theta(\cdot)$. 
+Traditional solutions developed at design time include techniques such as fixed or variable quantization to reduce the precision of weights and activations, structured and unstructured pruning to eliminate redundant parameters, and knowledge distillation to transfer information from a large model to a smaller, more efficient one. 
+
+More recent approaches involve run-time adaptability. 
+These include adaptive quantization, where the precision is adjusted based on the input or system constraints, and early-exit neural networks, which can terminate computation early and provide intermediate outputs when the confidence of predictions is sufficiently high. 
+These strategies allow for dynamic optimization without compromising model correctness.
+
+\subsection{On-Device Personalization}
+On-device personalization focuses on optimizing task performance $P$, such as accuracy or relevance, for a specific user, context, or environment, while remaining within the device's memory and computation constraints. 
+This typically involves fine-tuning the model $f_{\theta^\prime}(\cdot)$ to produce a specialized version $f_{\theta^{\prime\prime}}(\cdot)$ that better fits the personalized data characteristics.
+
+A crucial requirement for this process is the availability of supervised information, as labeled data is needed to compute and optimize the performance metric $P$. 
+One of the central challenges is ensuring that the adapted model $f_{\theta^{\prime\prime}}(\cdot)$ actually improves over the original $f'_\theta(\cdot)$, especially given the limited availability of validation data on the device. 
+Without reliable validation, the risk of overfitting or negative adaptation remains significant.
+
+\subsection{On-Device Learning}
+On-device learning extends the concept of personalization by enabling continuous model adaptation over time. 
+The main bottleneck in this paradigm is the memory cost of maintaining the on-device training set $O_t$, which may quickly consume available RAM or flash storage. 
+Additionally, supervised on-device learning relies on access to ground-truth labels, which may not be consistently available in practical scenarios.
+
+The adaptation process is governed by a monitoring algorithm that determines when model updates should be triggered. 
+For example, change detection tests (CdT) can be used to identify shifts in data distribution or prediction confidence, thereby signaling the need for retraining. 
+This monitoring can be active, reacting dynamically to changes, or passive, following predefined intervals or triggers.
+
+The way in which $f_{\theta_t}(x_t)$ evolves over time is defined by a meta-learning algorithm. 
+Depending on the design, this may follow fixed rules, such as periodic updates, or more flexible schemes that adapt based on performance or uncertainty estimates. 
+Due to the constrained environment, explicit model selection is typically not feasible, and models must adapt within predefined structural bounds.
+
+Finally, the adaptation algorithm defines what part of the model should be updated, such as the last layers in a convolutional neural network. 
+The lack of a validation phase poses a challenge to ensuring that the adapted model maintains or improves performance. 
+Guaranteeing the correctness and safety of these adaptations is essential, particularly in safety-critical or user-facing applications.
