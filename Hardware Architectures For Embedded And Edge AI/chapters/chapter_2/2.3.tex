@@ -2,64 +2,33 @@
 
 Sensors are used to acquire measurements from the environment or from human interactions. 
 They generate continuous streams of data, which can be used for various AI-driven applications. 
-In addition to sensor-generated data, other sources such as digital device logs, network packets, and radio transmissions can also provide valuable information. 
+In addition to sensor data, other sources. 
 Sensors can output data in different formats depending on their purpose and design.
 
-\paragraph*{Data storage}
-Data values can be stored in various formats, depending on precision and memory constraints. 
-Boolean values (1 bit) represent binary states with two possible values. 
-An 8-bit integer can store up to 256 distinct values, while a 16-bit integer extends this range to 65,536 possible values. 
-A 32-bit floating point number can represent a wide range of values with up to seven decimal places, reaching a maximum of approximately $3.4\times 10^{38}$.
-Quantization techniques help optimize memory usage by reducing the required storage for each value while maintaining sufficient precision for AI computations.
-
 \subsection{Data}
-\paragraph*{Time series data}
-A time series is a sequence of data points recorded in chronological order:
-\[X=(x_1,x_2,\dots,x_N)\] 
-\noindent Essentially, it represents observations collected at consistent time intervals.
-Key factors to consider include:
-\begin{itemize}
-    \item \textit{Sampling period}: the time gap between consecutive data points.
-    \item \textit{Bit depth} ($n$): the number of bits used to represent each value.
-    \item \textit{Memory usage}: each sample requires $n$ bits of storage.
-\end{itemize}
+\paragraph*{Time series}
+A time series is a sequence of data points recorded in chronological order. 
+Essentially, it represents observations collected at consistent time intervals.
+Key factors to consider include the sampling period (time gap between consecutive data points) and bit depth (number of bits used to represent each value).
 
-\paragraph*{Audio data}
-Audio data is a specific type of time series, representing sound wave oscillations as they travel through air.
-Key parameters are:
-\begin{itemize}
-    \item \textit{Sampling rate} (Hz): the number of samples taken per second.
-    \item \textit{Quantization} (bit depth): the precision of each sample.
-    \item \textit{Signal duration} (s): the total length of the recording.
-    \item \textit{Number of channels}: mono (single channel) or stereo (two channels).
-\end{itemize}
-\noindent Memory consumption is calculated as:
-\[\text{length}\times\text{sampling}\times\text{bit}\times\text{channel}\]
+\paragraph*{Audio}
+Audio is a specific type of time series, representing sound wave oscillations as they travel through air.
+Key parameters are: the sampling rate (number of samples taken per second), quantization (bit depth), length (duration of the recording), and the number of channels (mono or stereo).
+Memory consumption is calculated as:
+\[\text{length}\times\text{sampling}\times n \times\text{channel}\]
 
-\paragraph*{Image data}
+\paragraph*{Image}
 Images capture visual information as a grid of pixels, where each pixel represents a specific property of the scene.
-Key characteristics are:
-\begin{itemize}
-    \item \textit{Dimensions} ($W \times H$): width and height of the image.
-    \item \textit{Bit depth} ($N$): the number of bits used to store each pixel.
-    \item \textit{Number of channels}: typically 1 (grayscale) or 3 (RGB).
-\end{itemize}
-\noindent Memory usage is given by:
-\[W \times K \times N \times \text{channels}\]
+Key characteristics are: resolution (width and height of the image), bit depth, and channels (RGB or gray-scale).
+Memory usage is given by:
+\[H \times W \times n \times \text{channels}\]
 
-\paragraph{Video data}
+\paragraph{Video}
 Videos are sequences of images displayed rapidly to create motion. 
-They share the same structure as images but add an extra dimension: time.
-Critical parameters:
-\begin{itemize}
-    \item \textit{Resolution} ($W \times H$): width and height of each frame.
-    \item \textit{Bit depth} ($N$): bits per pixel.
-    \item \textit{Number of channels}: defines color representation.
-    \item \textit{Frame rate} (fps): number of frames per second.
-    \item \textit{Duration} (s): total length of the video.
-\end{itemize}
-\noindent Memory requirements are determined by:
-\[W \times K \times N \times \text{channels} \times \text{frame rate} \times \text{length}\]
+They share the same structure as images but add the time.
+The important parameters are the same as the ones of the images with also the frame rate and duration. 
+Memory requirements are determined by:
+\[H \times W \times n \times \text{channels} \times \text{frame rate} \times \text{length}\]
 
 \subsection{Sensors}
 There are thousands of different types of sensors available, each designed to capture specific kinds of data. 
@@ -87,47 +56,19 @@ Key characteristics of image sensors: color channels, spectral response (infrare
 The output of these sensors can be 2D or 3D images or video data, depending on the application.
 
 \paragraph*{Motion and position}
-Motion and position sensors track movement and spatial positioning in various ways:
-\begin{itemize}
-    \item \textit{Tilt sensors}: simple mechanical switches that detect orientation changes.
-    \item \textit{Accelerometers}: measure acceleration along one or more axes.
-    \item \textit{Gyroscopes}: detect rotational movement.
-    \item \textit{Time-of-flight sensors}: emit light or radio waves to measure distances to objects.
-    \item \textit{Real-time locating systems}: use multiple transceivers placed around a space to track object positions.
-    \item \textit{Global Positioning System}: uses satellites to determine an object's precise location.
-\end{itemize}
-\noindent  These sensors typically generate time-series data, tracking movement and positioning over time.
+Motion and position sensors track movement and spatial positioning in various ways. 
+Examples includes: tilt, accelerometers, gyroscopes, time-of-flight and Global Navigation Satellite System (GNSS). 
+These sensors typically generate time-series data, tracking movement and positioning over time.
 
 \paragraph*{Force and tactile}
-These sensors help users interact with devices, understand fluid and gas flow, or measure mechanical strain on objects:
-\begin{itemize}
-    \item \textit{Buttons and switches}: provide a simple on/off signal.
-    \item \textit{Capacitive touch sensors}: detect how much a conductive object touches a surface.
-    \item \textit{Strain gauges}: measure how much an object is being deformed.
-    \item \textit{Load cells}: determine the amount of force or weight applied to an object.
-    \item \textit{Flow sensors}: track the movement of liquids and gases.
-    \item \textit{Pressure sensors}: measure pressure in gases or liquids, whether in the environment or within a system.
-\end{itemize}
+These sensors help users interact with devices, understand fluid and gas flow, or measure mechanical strain on objects. 
+Example includes buttons, capacitive touch sensors, strain gauges, load cells, flow and pressure sensors. 
 
 \paragraph*{Optical, electromagnetic, and radiation}
-These sensors detect electromagnetic radiation, magnetic fields, and electrical properties:
-\begin{itemize}
-    \item \textit{Photosensors}: detect light across different wavelengths, from visible to infrared and ultraviolet.
-    \item \textit{Color sensors}: measure surface colors to help recognize different materials or objects.
-    \item \textit{Spectroscopy sensors}: analyze how light interacts with materials to determine their composition, useful in AI-driven material analysis.
-    \item \textit{Magnetometers}: measure the strength and direction of magnetic fields, like a digital compass.
-    \item \textit{Inductive proximity sensors}: use electromagnetic fields to detect nearby metal objects, commonly used in vehicle detection for traffic monitoring.
-    \item \textit{Electromagnetic field meters}: measure the intensity of electromagnetic fields, useful in industrial safety assessments.
-    \item \textit{Current and voltage sensors}: monitor electrical parameters, often represented as time-series data.
-\end{itemize}
+These sensors detect electromagnetic radiation, magnetic fields, and electrical properties. 
+Examples includes: photo-sensors, color sensor, spectroscopy, magnetometers, proximity sensor, electromagnetic field meters and current sensors. 
 
 \paragraph*{Environmental, biological, and chemical}
-These sensors track environmental conditions, biological signals, and chemical presence:
-\begin{itemize}
-    \item \textit{Temperature sensors}: measure heat levels in the surroundings or specific systems.
-    \item \textit{Gas sensors}: detect gases like humidity, carbon dioxide, or air quality pollutants.
-    \item \textit{Particulate matter sensors}: monitor air pollution levels by measuring fine particles.
-    \item \textit{Biosignal sensors}: record electrical activity in the body.
-    \item \textit{Chemical sensors}: detect the presence or concentration of specific chemicals.
-\end{itemize}
-\noindent Most of these measurements are typically recorded as time-series data, allowing for trend analysis and predictive insights.
+These sensors track environmental conditions, biological signals, and chemical presence. 
+Examples includes: temperature, gas, bio signals and chemical sensors. 
+Most of these measurements are typically recorded as time-series data, allowing for trend analysis and predictive insights.

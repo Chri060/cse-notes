@@ -4,8 +4,7 @@ Early Exit Neural Networks (EENNs) are designed to provide predictions within a 
 These networks allow predictions to be made at intermediate layers, reducing the computational load and energy consumption when full-depth inference is unnecessary. 
 However, this improvement in computational efficiency comes at the cost of increased memory usage, due to the added classifier layers required at various depths of the network.
 
-Deep Neural Networks (DNNs) are widely used across diverse domains such as image classification, object recognition, and predictive analytics. 
-Traditionally, DNNs are structured as sequential stacks of layers, with predictions generated only after all layers have been processed. 
+Traditionally, NNs are structured as sequential stacks of layers, with predictions generated only after all layers have been processed. 
 While this ensures maximal feature extraction, it introduces several limitations: high computational demand, fixed and potentially long inference time, and risk of overfitting and other inefficiencies.
 
 EENNs address these issues by incrementally processing inputs and making early predictions once sufficient confidence is achieved. 
@@ -19,17 +18,8 @@ EENNs leverage the observation that:
 \end{itemize}
 \noindent By allowing some inputs to exit early, EENNs not only reduce inference time but may also improve accuracy in certain scenarios.
 
-\paragraph*{Properties}
-EENNs bring several advantages:
-\begin{itemize}
-    \item \textit{Reduced inference time}: early exits prevent unnecessary computation for easy-to-classify inputs.
-    \item \textit{Decreased overfitting}: simpler models reduce the risk of overfitting.
-    \item \textit{Mitigation of vanishing gradients and overthinking}: earlier exits alleviate issues typically associated with deep architectures.
-    \item \textit{Flexible deployment}: EENNs can be distributed across multi-tier architectures.
-    \item \textit{Dynamic trade-off}: users can adjust thresholds to balance accuracy and latency at runtime.
-    \item \textit{Improved interpretability}.
-\end{itemize}
-\noindent Notably, earlier classifiers are not necessarily less accurate than deeper one.
+EENNs bring several advantages such as reduced inference time, less overfitting, and mitigation of vanishing gradients and overthinking. 
+Notably, earlier classifiers are not necessarily less accurate than deeper one.
 
 \paragraph*{Classifier}
 Let $f_i(x)$ denote the output of an intermediate layer $i$ in the backbone network.
@@ -49,21 +39,34 @@ The decision function $D_i(x)$ compares the confidence score $C_i (x)$  against 
 \[D_i(x) = C_i (x) \geq \theta_i\]
 \noindent If the confidence score exceeds the threshold, the model halts further processing and outputs $\bar{y}_i$ as the final prediction.
 Otherwise, the input continues to propagate through the network.
-
-Here, $N$ is the total number of EECs. 
 These thresholds $\theta_i$ are key hyperparameters that control the trade-off between inference time and classification accuracy.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{images/eeai12.png}
     \caption{Early Exit Auxiliary Classifier and Decision Function}
 \end{figure}
+\noindent Common decision functions include:
+\begin{enumerate}
+    \item \textit{Maximum softmax probability}: let $S_i(x)$ be the softmax output of EEC$_i$ for input $x$. 
+        The confidence is given by:
+        \[\text{confidence}(x)=\max S_i(x)\]
+        Here, $S_i^j(x)$ is the softmax probability for class $j$.
+    \item \textit{Score margin}: defined as the difference between the top two softmax scores:
+        \[\text{SM}_i=S_i^{(1)}(x)-S_i^{(2)}(x)\]
+        Here, $S_i^{(1)}(x)$ and $S_i^{(2)}(x)$ are the highest and second-highest probabilities, respectively. 
+        A larger margin indicates higher confidence.
+    \item \textit{Entropy}: measures uncertainty in the prediction:
+        \[H(y) = -\sum_{i=0}^C y_i\log(y_i)\]
+        Here, $C$ is the number of classes. 
+        Entropy is minimal when the output is a one-hot vector and maximal for a uniform distribution. 
+\end{enumerate}
 
 \subsection{Training}
 The training of EENNs typically falls into three main strategies:
 \begin{enumerate}
-    \item \textit{Joint training}: in this approach, all early-exit classifiers (EECs) are trained simultaneously by optimizing a combined loss function:
+    \item \textit{Joint training}: in this approach, all EECs are trained simultaneously by optimizing a combined loss function:
         \[\mathcal{L}_{\text{joint}}=\mathcal{L}(\hat{y},y)+\sum_{i=1}^{N}w_i\mathcal{L}(\bar{y}_i,y)\]
-        Here, $\mathcal{L}$ is the standard cross-entropy loss, $\hat{y}$ is the output of the final classifier, $\bar{y}_i$ is the output of the $i$-th EEC, $y$ is the ground truth label, $w_i$ are weighting factors, which can be uniform ($w_i=1$) or treated as tunable hyperparameters, and $N$ is the total number of EECs.
+        Here, $\mathcal{L}$ is the standard cross-entropy loss, $\hat{y}$ is the output of the final classifier, $\bar{y}_i$ is the output of the $i$-th EEC, $y$ is the ground truth label, $w_i$ are weighting factors, which can be uniform or treated as tunable hyperparameters, and $N$ is the total number of EECs.
     \item \textit{Layer-wise training}: this strategy trains the network progressively. 
         At each stage, a new EEC and the corresponding portion of the backbone are trained while keeping the previously trained layers frozen. 
         This approach allows the network to stabilize lower layers before deeper blocks are optimized.
@@ -79,35 +82,14 @@ Two primary inference strategies can be adopted for EENNs:
         This enables computational savings by avoiding unnecessary processing of deeper layers.
 \end{itemize}
 
-\subsection{Selection criterion}
-A critical component of EENNs inference is the mechanism used to decide whether an input should exit early. 
-This decision typically relies on a confidence estimate of the EEC's prediction. Common confidence metrics include:
-\begin{enumerate}
-    \item \textit{Maximum softmax probability}: let $S_i(x)$ be the softmax output of EEC$_i$ for input $x$. 
-        The confidence is given by:
-        \[\text{confidence}(x)=\max_jS_i^{(j)}(x)\]
-        HGere, $S_i^j(x)$ is the softmax probability for class $j$.
-    \item \textit{Score margin}: defined as the difference between the top two softmax scores:
-        \[\text{SM}_i=S_i^{(1)}(x)-S_i^{(2)}(x)\]
-        Here, $S_i^{(1)}(x)$ and $S_i^{(2)}(x)$ are the highest and second-highest probabilities, respectively. 
-        A larger margin indicates higher confidence.
-    \item \textit{Entropy}: measures uncertainty in the prediction:
-        \[H(y) = -\sum_{i=0}^N y_i\log(y_i)\]
-        Here, $C$ is the number of classes. 
-        Entropy is minimal when the output is a one-hot vector and maximal for a uniform distribution. 
-\end{enumerate}
-
-\subsection{Architectures}
+\subsection{Architecture}
 \paragraph*{BranchyNet}
-BranchyNet is one of the earliest and most influential examples of an EENN. 
-Built on top of the original AlexNet architecture, it introduces two EECs at intermediate layers of the network. 
-The model is trained using a joint training strategy, where the losses from all exit points, including the final output, are combined and optimized simultaneously. 
+BranchyNet is built on top of the original AlexNet architecture, adding two EECs at intermediate layers of the network. 
+The model is trained using a joint training strategy. 
 During inference, computation halts immediately once a sample meets the exit condition at an EEC, avoiding unnecessary forward propagation through deeper layers. 
-The decision to exit is based on a confidence measure computed from the entropy of the softmax output—lower entropy indicates a more confident prediction and therefore a higher likelihood of early exit.
+The decision to exit is based on a confidence measure computed from the entropy.
 
-\paragraph*{Gate-Classification Neural Networks}
-Gate-Classification Neural Networks, on the other hand, take a probabilistic approach to confidence estimation. 
+\paragraph*{Gate-classification}
+Gate-classification, on the other hand, take a probabilistic approach to confidence estimation. 
 In these models, confidence is explicitly modeled as the posterior probability of the predicted class given the input. 
 Inference proceeds sequentially through the network, and the decision to exit is made as soon as this posterior probability exceeds a predefined threshold. 
-These thresholds are typically set automatically so as to optimize the trade-off between accuracy and computational efficiency. 
-This method provides a more theoretically grounded mechanism for early exiting, tightly integrating the exit decision with the network's probabilistic interpretation of prediction confidence.

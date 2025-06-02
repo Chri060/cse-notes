@@ -17,32 +17,30 @@ This process identifies the function $f_\theta(\cdot)$ from a class of models, b
 We also require a monitoring algorithm, which evaluates the relevance or utility of training data and model behavior. 
 This can be described as:
 \[a_t=\text{CdT}(O_t,f_\theta(x_t))\]
-\noindent Here, $\text{CdT}$ stands for "Change detection and Triggering", a mechanism that monitors performance or data distribution shifts and determines whether model adaptation or retraining is necessary.
+\noindent Here, $\text{CdT}$ stands for change detection and triggering, a mechanism that monitors performance or data distribution shifts and determines whether model adaptation or retraining is necessary.
 
 Compared to the baseline case model inference, this setup introduces continuous on-device training, which runs in parallel with inference. 
 This enables the system to adapt over time as new data becomes available, improving robustness and personalization.
 
-\subsection{On-Device Inference}
+\subsection{On-device inference}
 In the context of on-device inference, the behavior of the model $f_\theta(\cdot)$ is fixed and does not change after deployment. 
-This immutability offers several advantages, such as predictable and stable performance, simplified debugging, and the absence of risks associated with model drift due to faulty updates. 
-However, it also has notable drawbacks: the model cannot adapt to shifts in data distributions, user-specific patterns, or environmental changes, which may lead to performance degradation over time.
+The primary objective in this scenario is to minimize both the memory footprint and the computational demand. 
 
-The primary objective in this scenario is to minimize both the memory footprint and the computational demand of $f_\theta(\cdot)$. 
 Traditional solutions developed at design time include techniques such as fixed or variable quantization to reduce the precision of weights and activations, structured and unstructured pruning to eliminate redundant parameters, and knowledge distillation to transfer information from a large model to a smaller, more efficient one. 
 
 More recent approaches involve run-time adaptability. 
-These include adaptive quantization, where the precision is adjusted based on the input or system constraints, and early-exit neural networks, which can terminate computation early and provide intermediate outputs when the confidence of predictions is sufficiently high. 
+These include adaptive quantization, where the precision is adjusted based on the input or system constraints, and early-exit NNs, which can terminate computation early and provide intermediate outputs when the confidence of predictions is sufficiently high. 
 These strategies allow for dynamic optimization without compromising model correctness.
 
-\subsection{On-Device Personalization}
-On-device personalization focuses on optimizing task performance $P$, such as accuracy or relevance, for a specific user, context, or environment, while remaining within the device's memory and computation constraints. 
-This typically involves fine-tuning the model $f_{\theta^\prime}(\cdot)$ to produce a specialized version $f_{\theta^{\prime\prime}}(\cdot)$ that better fits the personalized data characteristics.
+\subsection{On-device personalization}
+On-device personalization focuses on optimizing task performance for a specific user, context, or environment, while remaining within the device's memory and computation constraints. 
+This typically involves fine-tuning the model $f_\theta(\cdot)$ to produce a specialized version that better fits the personalized data characteristics.
 
-A crucial requirement for this process is the availability of supervised information, as labeled data is needed to compute and optimize the performance metric $P$. 
-One of the central challenges is ensuring that the adapted model $f_{\theta^{\prime\prime}}(\cdot)$ actually improves over the original $f'_\theta(\cdot)$, especially given the limited availability of validation data on the device. 
+A crucial requirement for this process is the availability of supervised information. 
+One of the central challenges is ensuring that the adapted model actually improves over the original $f_\theta(\cdot)$, especially given the limited availability of validation data on the device. 
 Without reliable validation, the risk of overfitting or negative adaptation remains significant.
 
-\subsection{On-Device Learning}
+\subsection{On-device learning}
 On-device learning extends the concept of personalization by enabling continuous model adaptation over time. 
 The main bottleneck in this paradigm is the memory cost of maintaining the on-device training set $O_t$, which may quickly consume available RAM or flash storage. 
 Additionally, supervised on-device learning relies on access to ground-truth labels, which may not be consistently available in practical scenarios.
@@ -55,6 +53,6 @@ The way in which $f_{\theta_t}(x_t)$ evolves over time is defined by a meta-lear
 Depending on the design, this may follow fixed rules, such as periodic updates, or more flexible schemes that adapt based on performance or uncertainty estimates. 
 Due to the constrained environment, explicit model selection is typically not feasible, and models must adapt within predefined structural bounds.
 
-Finally, the adaptation algorithm defines what part of the model should be updated, such as the last layers in a convolutional neural network. 
+Finally, the adaptation algorithm defines what part of the model should be updated, such as the last layers in a CNN. 
 The lack of a validation phase poses a challenge to ensuring that the adapted model maintains or improves performance. 
 Guaranteeing the correctness and safety of these adaptations is essential, particularly in safety-critical or user-facing applications.

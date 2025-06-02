@@ -1,11 +1,11 @@
 \section{Tiny Deep Learning architectures}
 
-Deep learning models designed for resource-constrained devices, such as edge devices, must balance computational efficiency with accuracy.
+Deep Learning models designed for resource-constrained devices must balance computational efficiency with accuracy.
 These architectures are optimized to reduce memory usage, computation overhead, and energy consumption while maintaining competitive performance.
 In this context, three prominent families of architectures have emerged: SqueezeNet, MobileNet, and EfficientNet.
 
 \subsection{SqueezeNet}
-Introduced in 2016, SqueezeNet was the first convolutional neural network (CNN) architecture explicitly designed for deployment on edge devices.
+Introduced in 2016, SqueezeNet was the first CNN architecture explicitly designed for deployment on edge devices.
 It achieves a remarkable reduction in model size (up to 50 to 500 times fewer parameters than AlexNet) while maintaining comparable accuracy.
 This makes SqueezeNet highly suitable for distributed training environments, where communication overhead is proportional to model size.
 Additionally, its smaller footprint reduces the cost of exporting updated models to clients.
@@ -19,7 +19,6 @@ To achieve this goal, SqueezeNet employs several innovative strategies:
     \item \textit{Reduce input channels to the $3\times 3$ filters}: to further minimize the number of parameters, SqueezeNet introduces squeeze layers that reduce the number of input channels to $3\times 3$ filters. 
         This results in fewer $3\times 3$ filters overall. 
         This is done using squeeze layers. 
-        The reduction in parameters and MACs is proportional to $9\times C_{\text{removed}}$, where $C_{\text{removed}}$ is the number of removed channels.
     \item \textit{Downsample late in the network}: delaying downsampling preserves larger activation maps, which can improve accuracy despite using fewer weights.
         While this increases memory usage, it prevents the loss of critical features in early stages due to overly aggressive dimensionality reduction.
 \end{enumerate}
@@ -62,9 +61,9 @@ Several variants of SqueezeNet have been proposed to improve accuracy with minim
 \noindent Among the variants, the simple bypass architecture provides the best trade-off, offering modest accuracy improvements without adding extra weights.
 
 \subsection{MobileNet}
-MobileNet is a family of efficient neural network architectures designed specifically for mobile and embedded vision applications.
+MobileNet is a family of efficient NN architectures designed specifically for mobile and embedded vision applications.
 It achieves lightweight computation through the use of depth-wise separable convolutions, a streamlined approach that significantly reduces the number of parameters and computational cost while maintaining competitive accuracy.
-This architecture has become a cornerstone for deploying deep learning models on resource-constrained devices.
+This architecture has become a cornerstone for deploying Deep Learning models on resource-constrained devices.
 
 \paragraph*{Depth-wise scalable convolution}
 The key innovation in MobileNet is the use of depth-wise separable convolutions, which decompose a standard convolution into two simpler operations:
@@ -72,23 +71,17 @@ The key innovation in MobileNet is the use of depth-wise separable convolutions,
     \item \textit{Depth-wise convolution}: applies a single $R\times S$ filter to each input channel independently.
         Unlike a standard convolution, this step does not combine information across channels.
         The output dimensions is $H\times W\times C$, where $C$ is the number of input channels.
-        The MAC operations are: $\text{MAC}=R \times S \times C \times E \times F$.
-        The number of parameters is: $\text{weights}=R\times S \times C$.
     \item \textit{Point-wise convolution}: combines the outputs of the depth-wise convolution across channels using $M$ $1\times 1$ filters.
         This step aggregates channel-wise information, producing the final output feature map.
-        The MAC operations are: $\text{MAC}=C \times M \times  E \times F$.
-        The number of parameters is: $\text{weights}=\text{MAC}=C \times M$.
 \end{enumerate}
 
 \begin{table}[h!]
     \centering
     \begin{tabular}{|l|c|c|}
     \hline
-    \textbf{Convolution} & \textbf{MAC ops} & \textbf{\#Weights} \\
-    \hline
+    \textbf{Convolution} & \textbf{MAC operations} & \textbf{Weights} \\ \hline
     Standard & $R \times S \times C \times E \times F \times M$ & $R \times S \times C \times M$ \\
-    Depth-wise & $R \times S \times C \times E \times F + C \times M \times E \times F$ & $R \times S \times C + C \times M$ \\
-    \hline
+    Depth-wise & $R \times S \times C \times E \times F + C \times M \times E \times F$ & $R \times S \times C + C \times M$ \\ \hline
     \end{tabular}
 \end{table}
 By decoupling spatial and channel-wise computations, depth-wise separable convolutions achieve significant reductions in both MAC operations and the number of weights compared to standard convolutions.
@@ -105,35 +98,18 @@ Each block in MobileNet follows a consistent structure:
     \item \textit{ReLU activation}: applies another non-linear transformation.
 \end{enumerate}
 
-\paragraph*{Regularization and augmentation}
-MobileNet requires less regularization and data augmentation compared to larger models like VGG or GoogleNet. 
-This is because smaller models are less prone to overfitting due to their reduced capacity. 
-Despite this, MobileNet achieves comparable or better accuracy than many state-of-the-art models, including GoogleNet, while being significantly more efficient.
-
-\paragraph*{Performance}
-MobileNet's accuracy is slightly higher than GoogleNet and comparable to VGG, but with far fewer parameters and computations.
-While MobileNet has more parameters than SqueezeNet, it achieves higher accuracy, making it a better choice for applications where performance is critical.
-The use of depth-wise separable convolutions makes MobileNet highly efficient, enabling real-time inference on mobile and embedded devices.
-
 \subsection{EfficientNet}
-EfficientNet represents a breakthrough in the design of efficient convolutional neural networks (CNNs) by introducing a novel method for scaling up models. 
-Unlike traditional approaches that focus on increasing either depth, width, or resolution individually, EfficientNet employs compound scaling, which scales all three dimensions simultaneously while maintaining a balanced relationship between them.
-Scaling a CNN typically involves:
-\begin{itemize}
-    \item \textit{Increasing depth}: adding more layers to capture complex features.
-    \item \textit{Increasing width}: expanding the number of filters in each layer to improve representational capacity.
-    \item \textit{Increasing resolution}: using higher-resolution input images to capture finer details.
-\end{itemize}
+EfficientNet represents a breakthrough in the design of efficient CNNs by introducing a novel method for scaling up models. 
+Unlike traditional approaches that focus on increasing either depth (layers), width (filters), or resolution individually, EfficientNet employs compound scaling, which scales all three dimensions simultaneously while maintaining a balanced relationship between them.
 
-\subsubsection{Compound scaling}
-The key idea behind compound scaling is to scale depth ($d=\alpha^\phi$), width ($w=\beta^\phi$), and resolution ($r=\gamma^\phi$) with constant ratios: 
+The key idea behind compound scaling is to scale depth ($\alpha^\phi$), width ($\beta^\phi$), and resolution ($\gamma^\phi$) with constant ratios: 
 \[\alpha\beta^2\gamma^2\approx 2 \qquad \alpha,\beta,\gamma \geq 1\]
 Here, $\alpha$, $\beta$, and $\gamma$ are constants that control how each dimension is scaled, and $\gamma$ is a user-specified coefficient that determines the extent of scaling (how many more resources are available). 
 EfficientNet's compound scaling is implemented in two steps:
 \begin{enumerate}
-    \item \textit{Determine scaling coefficients ($\alpha, \beta, \gamma$)}: tart with a baseline network and assume twice the available computational resources (double $\phi$).
-        Perform a small grid search to find optimal values of $\alpha$, $\beta$, and $\gamma$,  subject to the constraint $\alpha\beta^2\gamma^2\approx 2$.
+    \item \textit{Determine scaling coefficients ($\alpha, \beta, \gamma$)}: start with a baseline network and assume twice the available computational resources (double $\phi$).
+        Perform a small grid search to find optimal values of $\alpha$, $\beta$, and $\gamma$, subject to the constraint $\alpha\beta^2\gamma^2\approx 2$.
         Fix these coefficients as constants for subsequent scaling.
-    \item \textit{Scale the baseline network}: Use the fixed scaling coefficients ($\alpha, \beta, \gamma$) to scale the baseline network to different sizes by varying $\phi$.
-        Each variant (B0 to B7) corresponds to progressively larger models (with larger $\phi$), achieving higher accuracy at the cost of increased computational resources.
+    \item \textit{Scale the baseline network}: use the fixed scaling coefficients to scale the baseline network to different sizes by varying $\phi$.
+        Increasing $\phi$ corresponds to enlarge the model, achieving higher accuracy at the cost of increased computational resources.
 \end{enumerate}
