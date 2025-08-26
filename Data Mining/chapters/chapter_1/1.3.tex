@@ -1,0 +1,133 @@
+\section{Data preparation and preprocessing}
+
+Data preparation account for most of the time needed to design an effective data mining pipeline. 
+It can take up to 90\% of the overall effort.
+No quality in data, no quality out!
+Quality decisions need quality in data. 
+
+Data in the real world are “dirty”
+They are usually incomplete: missing attribute values and missing attributes of interest, or containing only aggregate data.
+They are usually noisy, containing errors or outliers.
+They are usually inconsistent and contain discrepancies.
+
+Why Is Data Dirty
+ncomplete data may come from
+– “Not applicable” data value when collected
+– Different considerations between the time when the data was collected and when it is analyzed.
+– Human/hardware/software problems
+• Noisy data (incorrect values) may come from
+– Faulty data collection instruments
+– Human or computer error at data entry
+– Errors in data transmission
+• Inconsistent data may come from
+– Different data sources
+– Functional dependency violation (e.g., modify some linked data)
+• Duplicate records also need data cleaning
+
+Major Tasks in Data Preprocessing: 
+\begin{itemize}
+    \item Data cleaning: fill in missing values, smooth noisy data, identify or remove outliers, and remove duplicates and resolve inconsistencies.
+    \item Data integration: integration of multiple databases, data cubes, or files.
+    \item Data reduction: dimensionality reduction, numerosity reduction, and data compression.
+    \item Feature engineering, data transformation, and data discretization: normalization and creation of new features. 
+\end{itemize}
+
+\paragraph*{Missing values}
+
+
+\paragraph*{Data selection}
+Sampling is the main technique employed for data selection
+Often used for both the preliminary investigation of the data and the final data analysis
+We also sample because working on the entire data too expensive or time consuming
+A sample is representative if it has the same property (of interest) as the original set of data
+If the sample is representative, it will work almost as well as using the entire data sets
+The types are: 
+\begin{itemize}
+    \item Sampling without replacement: as each item is selected, it is removed from the population
+    \item Sampling with replacement (Bootstrap): objects are not removed from the population as they are selected for the sample.
+        In sampling with replacement, the same object can be picked up more than once.
+        Sample a dataset of n instances n times with replacement to form a new dataset of n instances
+        An instance has a probability of $1-\frac{1}{n}$ of not being picked
+        Thus, its probability of ending up in the test data is:
+        \[\left(1-\dfrac{1}{n}\right)\approx e^{-1}=0.368\]
+        This means the training data will contain approximately 63.2\% of the instances. 
+    \item Stratified sampling: split the data into several partitions and then draw random samples from each partition. 
+\end{itemize}
+
+
+\subsection{Missing values}
+Reasons for missing values includes: information is not collected or attributes may not be applicable to all cases
+Handling missing values
+–Eliminate Data Objects
+–Estimate Missing Values
+–Ignore the Missing Value During Analysis
+– Replace with all possible values (weighted by their probabilities)
+Missing value may have a meaning in itself: They are usually indicated by out-of-range entries
+Does absence of value have some significance?
+–If it does, “missing” is a separate value
+–If it does not, “missing” must be treated in a special way
+The missing data can be: 
+\begin{itemize}
+    \item \textit{Missing not at random} (MNAR): distribution of missing values depends on missing value.
+    \item \textit{Missing at random} (MAR): distribution of missing values depends on observed attributes, but not missing value. 
+    \item \textit{Missing completely at random} (MCAR): distribution of missing values does not depend on observed attributes or missing value.
+\end{itemize}
+\noindent Identifying MNAR and MAR can be difficult often requires domain knowledge 
+
+Dealing with Missing Values
+Use what you know like Why data is missing? Distribution of missing data
+Decide on the best strategy to yield the least biased estimates
+\paragraph*{Do not impute methods}
+The do not imput methods comprises: 
+\begin{itemize}
+    \item Deletion Methods: The handling of missing data depends on the type
+• Discarding all the examples with a missing values
+–Simplest approach
+– Allows the use of unmodified data mining methods
+– Only practical if there are few examples with missing values.
+– Otherwise, it can introduce bias.
+        \begin{itemize}
+            \item List-wise Deletion: Only analyze cases with available data on each variable
+• Simple, but reduces the data
+• Comparability across analyses
+• Does not use all the information
+• Estimates may be biased if data not MCAR
+            \item Pairwise deletion: Delete cases with missing values that affect only the
+variables of interest Advantage
+–Keeps as many cases as possible for each analysis
+– Uses all information possible with each analysis
+• Disadvantage
+– Comparison of results is more difficult because samples
+are different each time
+        \end{itemize}
+    \item Imputation: Convert the missing values into a new value
+– Use a special value for it
+– Add an attribute that indicates if value is missing or not
+– Greatly increases the difficulty of the data mining process
+• Imputation methods
+– Assign a value to the missing one, based on the rest of the dataset
+– Use the unmodified data mining methods
+        \begin{itemize}
+            \item Single Imputation: Mean/mode substitution (most common value)
+– Replace missing value with sample mean or mode
+– Run analyses as if all complete cases
+– Advantages: Can use complete case analysis methods
+– Disadvantages: Reduces variability
+• Dummy variable control
+– Create an indicator for missing value (1=value is missing for observation; 0=value is
+observed for observation)
+–Impute missing values to a constant (such as the mean)
+–Include missing indicator in the algorithm
+– Advantage: uses all available information about missing observation
+– Disadvantage: results in biased estimates, not theoretically driven
+            \item Model-based Imputation: Extract a model from the dataset to perform the imputation
+–Suitable for MCAR and, to a lesser extent, for MAR
+– Not suitable for NMAR type of missing data
+• For NMAR we need to go back to the source of the data to obtain more information
+        \end{itemize}
+\end{itemize}
+
+\paragraph*{Do not impute}
+–Simply use the default policy of the data mining method
+– Works only if the policy exists
+–Some methods can work around missing data

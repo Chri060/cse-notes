@@ -1,0 +1,233 @@
+\section{Data exploration}
+
+Preliminary exploration of the data aimed at identifying their most relevant characteristics.
+Help to select the right tool for preprocessing and data mining.
+Exploit humans' abilities to recognize patterns not captured by automatic tools.
+Related to Exploratory Data Analysis (EDA) invented by statistician John Tukey.
+\begin{definition}[\textit{Exploratory Data Analysis}]
+    An approach of analyzing data to summarize their main characteristics without using a statistical model or having formulated a prior hypothesis. 
+\end{definition}
+\noindent Exploratory Data Analysis (as originally defined by Tukey), was mainly focused on visualization and clustering and anomaly detection.
+Note that, in data mining, clustering and anomaly detection are major areas of interest, and not thought of as just exploration.
+
+\subsection{Summary statistics}
+\begin{definition}[\textit{Summary statistics}]
+    Summary statistics are Numbers that summarize properties of the data
+\end{definition}
+\noindent Most summary statistics can be calculated in a single pass
+
+\begin{definition}[\textit{Frequency}]
+    The frequency of an attribute value is the percentage of time the value occurs in the data set. 
+\end{definition}
+\begin{definition}[\textit{Mode}]
+    The mode of an attribute is the most frequent attribute value. 
+\end{definition}
+\noindent The notions of frequency and mode are typically used with categorical data. 
+
+\begin{definition}[\textit{Mean}]
+    The mean is the most common measure of the location of a set of points
+\end{definition}
+\noindent However, the mean is very sensitive to outliers: 
+\[\text{mean}(x)=\bar{x}=\dfrac{1}{m}\sum_{i=1}^mx_i\]
+• Thus, the median or a trimmed mean is also commonly used: 
+\[\text{median}(x)=\begin{cases} x_{r+1} \qquad\qquad\quad \text{if } m=2r+1 \text{ (odd)} \\ \dfrac{1}{2}(x_{r}+x_{r+1})\quad \text{if } m=2r \text{ (even)} \end{cases}\]
+
+For continuous data, the notion of a percentile is very useful
+\begin{definition}[\textit{$p$-th percentile}]
+    Given an ordinal or continuous attribute $x$ and a number $p$, the $p$-th percentile is a value $x_p$ of $x$ such that $p_\%$ of the observed values of $x$ are less than $x_p$. 
+\end{definition}
+
+\begin{definition}[\textit{Trimean}]
+    Trimean is the weighted mean of the first, second and third quartile
+\end{definition}
+\noindent Mathematically: 
+\[\text{TM}=\dfrac{x_{25}+2x_{50}+x_{75}}{4}\]
+\begin{definition}[\textit{Truncated mean}]
+    The truncated Mean discards data above and below a certain percentile. 
+\end{definition}
+\begin{definition}[\textit{Interquartile Mean}]
+    – Truncate data at 25th and 75th percentile. 
+\end{definition}
+\noindent If the data (x1, ..., xn) is sorted by value we have:
+\[X_{\text{IQM}}=\dfrac{2}{n}\sum_{i=0.25n+1}^{0.75n}x_i\]
+\begin{definition}[\textit{Range}]
+    Range is the difference between the max and min
+\end{definition}
+\begin{definition}[\textit{Variance}]
+    The variance is the most common measure of the spread of a set of points 
+\end{definition}
+\noindent Mathematically> 
+\[\text{variance}(x)=s_x^2=\dfrac{1}{m-1}\sum_{i=1}^{m}(x_i-\bar{x})^2\]
+\noindent However, this is also sensitive to outliers, so that other measures are often used such as AAD, MAD or interquantile range. 
+
+\paragraph*{Correlation analysis} Given two attributes, measure how strongly
+one attribute implies the other, based on
+the available data
+• Use correlation measures to estimate how
+predictive one attribute is of another
+• Linear correlation
+– We often look for linear relationship between variables
+– Linear correlation measures are symmetric
+– They can be positive (high values of one attribute are likely given high values of the other)
+– Or negative (high values are predictive of low values of the other variable)
+– Latter usually referred to as anti-correlation
+Numerical Variables
+–For two numerical variables, we can compute Pearson’s product moment coefficient
+• Ordinal Variables
+– We can compute Spearman’s rank correlation coefficient
+• Categorical Variables
+– We can compute $\chi^2$ statistic test which tests the hypothesis that A and B are independent
+• Binary Variables
+– Compute Point-biserial correlation
+
+Correlation does not imply causation
+– Just because value of one attribute is highly predictive of value of other doesn’t mean that forcing the
+first variable to take on a particular value will cause the second to change
+• Causality has a direction, while correlation typically doesn’t
+– Correlation between high income and owning a Ferrari
+– Giving a person a Ferrari doesn’t affect their income
+– But increasing their income may make them more likely to buy a Ferrari
+• Confounding variables can cause attributes to be correlated:
+– High heart rate and sweating are correlated with each other since they tend to both happen during
+exercise (confounder)
+– Causing somebody to sweat by putting them in sauna won’t necessarily raise their heart rate (it does
+a little, but not as much as exercise)
+– And giving them beta-blockers to lower their heart rate might not prevent sweating (it might a little,
+but again not like stopping exercising)
+
+\paragraph*{Outliers}
+What are outliers?
+– Data objects that do not comply with the general behavior or model of the data, that is, values that
+appear as anomalous
+– Most data mining methods consider outliers noise or exceptions.
+• Outliers may be detected using
+– Manual inspection and knowledge of reasonable values.
+– Statistical tests that assume a distribution or probability model for the data
+– Distance measures where objects that are a substantial distance from any other cluster are considered
+outliers
+– Deviation-based methods identify outliers by examining differences in the main characteristics of
+objects in a group
+• How do we manage outliers?
+– Outliers are typically filtered out by eliminating the data points containing them
+
+\subsection{Normalization}
+We might need to normalize attributes that have very different scales: 
+\begin{itemize}
+    \item Range normalization converts all values to the range [0,1]: 
+        \[x_i^\prime=\dfrac{x_i-\min_ix_i}{\max_ix_i-\min_ix_i}\]
+    \item Standard Score Normalization forces variables to have mean of 0 and standard deviation of 1.
+        \[x_i^\prime=\dfrac{x_i-\mu}{\sigma}\]
+    \item RobustScaler: removes the median and scales the data according to a quantile range. 
+    The scikit-learn implementation uses the Interquartile Range IQR as default (that is, the range between the 1st quartile and the 3rd quartile).
+    \item Normalizer: each row with at least one non-zero value is rescaled independently of other samples so that its norm equals one.
+        The scikit-learn implementation uses the l2 norm as default
+    \item MaxAbsScaler: it scales each variable individually so that the maximal absolute value of each variable in the training set will be 1.0; like MinMaxScaler but normalizes to [-1,1]
+\end{itemize}
+
+\subsection{Visualization}
+Visualization is the conversion of data into a visual or tabular format so that the characteristics of
+the data and the relationships among data items or attributes can be analyzed or reported
+• Data visualization is one of the most powerful and appealing techniques for data exploration
+– Humans have a well-developed ability to analyze large amounts of information that is
+presented visually
+– Can detect general patterns and trends
+– Can detect outliers and unusual patterns 
+The main visualization techniques includes: 
+\begin{itemize}
+    \item \textit{Bar plots}: They use horizontal or vertical bars to compare categories.
+        One axis shows the compared categories, the other axis represents a numerical value.
+        Some bar graphs present bars clustered in groups of more than one (grouped bar graphs), and others show the bars divided into subparts to show cumulate effect (stacked bar graphs).
+    \item \textit{Histograms}: They are a graphical representation of the distribution of data.
+• They are representations of tabulated frequencies depicted as adjacent rectangles, erected over discrete intervals (bins).
+• Their areas are proportional to the frequency of the observations in the interval.
+• The height of each bar indicates the number of objects
+• Shape of histogram depends on the number of bins
+The lines on the connecting the bars are smoothed line calculated using kernel-density estimation: Place small kernel function (e.g., density function of Gaussian distribution) at each observed datapoint.
+Curves are simply the summation over the individual. 
+The bandwidth h of the kernel determines how smooth the estimate is
+• Large h generates a smooth function with a possible loss of information
+• Small h generates a bumpy function with possible overfitting
+• Bandwidth can be determined by cross-validation
+(hold out some data and estimate the probability) 
+    \item \textot{Box plots}: describe
+\end{itemize}
+In case of multidimensional data we have three main approaches: 
+\begin{itemize}
+    \item Visualize several combinations of two-dimension plots
+    \item Visualize all the dimensions at once. Spider plots, Radar Plots, and Star Plots Information radiates outward from central point
+        • The line connecting the values of an object is a polygon
+        Chernoff Faces
+        • Approach created by Herman Chernoff
+        • Associates each attribute with
+        a characteristic of a face
+        • The values of each attribute
+        determine the appearance
+        of the corresponding facial
+        characteristic
+        • Each example becomes a separate face
+        • Relies on human’s ability to distinguish faces
+    \item Project the data into a smaller space and visualize the the projected data. When projecting high-dimensional data
+into fewer dimensions we can either
+Find a linear projection
+e.g., use Principle Component Analysis
+Find a non-linear projection
+e.g., use t-distributed Stochastic Neighbor Embeddings (t-SNE)
+\end{itemize}
+
+\paragraph*{Principal Component Analysis}
+Typically applied to reduce the number of dimensions of data (feature selection)
+• The goal of PCA is to find a projection that captures the largest amount of variation in data
+• Given N data vectors from n-dimensions, find k<n orthogonal vectors (the principal
+components) that can be used to represent data
+• Works for numeric data only and it is affected by scale, so data usually need to be rescaled
+before applying PCA. 
+Steps to apply PCA
+– Normalize input data
+– Compute k orthonormal (unit) vectors, i.e., principal components
+–Each input data point can be written as a linear combination
+of the k principal component vectors
+• The principal components are sorted in order of decreasing “significance” or strength
+• Data size can be reduced by eliminating the weak components, i.e., those with low variance.
+• Using the strongest principal components, it is possible to reconstruct
+a good approximation of the original data
+
+\paragraph*{t Distributed Stochastic Neighbor Embedding}
+Data in high dimensions never fills
+the entire space and always lives
+within some lower-dimensional manifold
+• t-SNE is a non-linear dimensionality
+reduction technique used to map
+high-dimensional data into
+2 or 3 dimensions
+• Points from original space mapped onto “map points” in 2D/3D
+• Unlike PCA, the mapped points are not linear combination of original attribute values, and the axes of
+mapped space are not linear combination (rotation) of original axes
+t-SNE tries hard to preserve local distances to nearby points
+• Unlike PCA which tries to preserve global (long range) distances between points as much as
+possible
+• t-SNE converts distances between data points to joint probabilities then models original points
+by mapping them to low dimensional map points such that position of map points conserves
+the structure of the data
+• i.e. similar data points are modelled by nearby map points while dissimilar data points are
+modelled by distant map points
+Steps: 1. Define a probability distribution over pairs of high-dimensional data points so that:
+–Similar data points have a high probability of being picked
+– Dissimilar points have an extremely small probability of being picked
+2. Define a similar distribution over the points in the map space
+– Minimize the Kullback–Leibler divergence between the two distributions with respect to the
+locations of the map points
+– To minimize the score, it applies gradient descent
+The parameter perplexity says (loosely) how to balance local and global aspects of the data
+• Different initializations will lead to different results
+• Should be applied to data with a “reasonable” number of dimensions (e.g. 30-50)
+• If the data have more dimensions, another dimensionality reduction algorithm should be applied
+
+\paragraph*{Force-directed Layout}
+Idea of mapping complicated data into 2D is not limited to high dimensional data ….
+• We can map any graph of data points into 2D provided we have some (dis)similarity
+value between pairs of nodes
+– Such as the Euclidean distance between them in higher dimensional space
+– Or their joint probability under a Gaussian kernel (in case of t-SNE)
+– Or Pearson’s correlation, Spearman’s Rank correlation, chi-squared, etc.
+• It works by moving points around in the mapped 2D space until convergence
+• Technique is called force-directed layout. 
