@@ -1,6 +1,5 @@
 # Computer Science And Engineering Notes
 <div align="center"> 
-    <img src="https://img.shields.io/badge/Version-1.0-4CAF50?style=for-the-badge"> 
     <img src="https://img.shields.io/badge/LaTeX-000000?logo=latex&logoColor=white&style=for-the-badge"> 
 </div>
 
